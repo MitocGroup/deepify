@@ -103,13 +103,3 @@ node_modules
 
 # Debug log from npm
 npm-debug.log
-
-
-#####=== Proprietary ===#####
-lib/*.pack/*
-src/*.pack/*
-lib/*/*.compiled
-src/*/*.compiled
-lib.compiled/*
-/tests/*
-coverage/*

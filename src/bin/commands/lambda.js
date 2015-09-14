@@ -1,0 +1,84 @@
+#!/usr/bin/env node
+/**
+ * Created by AlexanderC on 6/19/15.
+ */
+
+'use strict';
+
+module.exports = function(lambdaPath) {
+  var Runtime = require('../../lib.compiled/Lambda/Runtime.js').Runtime;
+  var path = require('path');
+  var fs = require('fs');
+  var exec = require('sync-exec');
+  var os = require('os');
+
+  if (lambdaPath.indexOf('/') !== 0) {
+    lambdaPath = path.join(process.cwd(), lambdaPath);
+  }
+
+  if (fs.statSync(lambdaPath).isDirectory()) {
+    lambdaPath = path.join(lambdaPath, 'bootstrap.js');
+  }
+
+  if (!fs.existsSync(lambdaPath)) {
+    console.error('Missing lambda in ' + lambdaPath);
+    this.exit(1);
+  }
+
+  var event = this.opts.locate('event').value;
+
+  if (event) {
+    if (fs.existsSync(path.normalize(event))) {
+      event = require(event);
+    } else {
+      event = JSON.parse(event);
+    }
+  } else {
+    event = {};
+  }
+
+  var awsConfigFile = path.join(path.dirname(lambdaPath), '.aws.json');
+
+  if (!fs.existsSync(awsConfigFile)) {
+    awsConfigFile = false;
+  } else {
+    console.log('AWS configuration found in ' + awsConfigFile);
+  }
+
+  var mainPath = path.dirname(lambdaPath);
+
+  console.log('Linking aws-sdk library');
+
+  var awsSdkResult = exec('cd ' + mainPath + ' && npm link aws-sdk');
+
+  if (awsSdkResult.status !== 0) {
+    console.error('Failed to link aws-sdk library. Trying to install it...');
+
+    awsSdkResult = exec('cd ' + mainPath + ' && npm install aws-sdk');
+
+    if (awsSdkResult.status !== 0) {
+      console.error('Failed to link or install aws-sdk locally (' + awsSdkResult.stderr + '). Skipping...');
+    }
+  }
+
+  var lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
+
+  console.log('Starting Lambda.', os.EOL);
+
+  try {
+    process.chdir(path.dirname(lambdaPath));
+
+    lambda.complete(function(error, response) {
+      if (error) {
+        console.error(error);
+        this.exit(1);
+      }
+
+      this.exit(0);
+    }.bind(this));
+    lambda.run(event, true);
+  } catch (e) {
+    console.error(e);
+    this.exit(1);
+  }
+};
