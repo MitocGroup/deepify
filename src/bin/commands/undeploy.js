@@ -73,7 +73,7 @@ module.exports = function(mainPath) {
       console.log(os.EOL, 'Dirty mode on!!!', os.EOL);
     } else {
       var deployConfigFile = path.join(mainPath, '.cfg.deeploy.json');
-      var deployProvisioning = rawDeployConfig.provisioning;
+      var deployProvisioning = rawDeployConfig.provisioning || {};
 
       var objectValues = function(obj) {
         var keys = Object.keys(obj);
