@@ -103,3 +103,13 @@ node_modules
 
 # Debug log from npm
 npm-debug.log
+
+# ignore symlinks
+lib/Compilation
+lib/Dependencies
+lib/Exception
+lib/Helpers
+lib/Microservice
+lib/Parameters
+lib/Property
+lib/Provisioning
