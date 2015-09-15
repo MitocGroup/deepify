@@ -35,7 +35,7 @@
   },
   "main": "lib.compiled/bootstrap.js",
   "dependencies": {
-    "@mitocgroup/deep-package-manager": "*",
+    "@mitocgroup/deep-package-manager": "file:../../deep-package-manager/src",
     "@mitocgroup/deep-db": "*",
     "@mitocgroup/deep-core": "*",
     "joi": "6.4.*",
