@@ -7,8 +7,8 @@
 
 module.exports = function(mainPath) {
   var path = require('path');
-  var Server = require('../../lib.compiled/Server/Instance.js').Instance;
-  var WaitFor = require('../../lib.compiled/Helpers/WaitFor.js').WaitFor;
+  var Server = require('../../lib.compiled/Server/Instance').Instance;
+  var WaitFor = require('../../lib.compiled/Helpers/WaitFor').WaitFor;
   var Config = require('../../lib.compiled/Property/Config').Config;
   var exec = require('child_process').exec;
   var os = require('os');

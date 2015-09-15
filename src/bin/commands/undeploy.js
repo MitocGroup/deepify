@@ -12,8 +12,8 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var fse = require('fs-extra');
   var Core = require('@mitocgroup/deep-core');
-  var Config = require('../../lib.compiled/Property/Config.js').Config;
-  var AwsRequestSyncStack = require('../../lib.compiled/Helpers/AwsRequestSyncStack.js').AwsRequestSyncStack;
+  var Config = require('../../lib.compiled/Property/Config').Config;
+  var AwsRequestSyncStack = require('../../lib.compiled/Helpers/AwsRequestSyncStack').AwsRequestSyncStack;
   var exec = require('child_process').exec;
 
   // @todo: hook to avoid TypeError: Super expression must either be null or a function, not undefined

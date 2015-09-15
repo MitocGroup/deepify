@@ -1,6 +1,6 @@
 {
   "name": "@mitocgroup/deepify",
-  "version": "0.1.27",
+  "version": "0.1.31",
   "description": "Deep development tools",
   "author": {
     "name": "Mitoc Group",
@@ -72,7 +72,7 @@
     "test": "mocha --ui tdd --compilers js:mocha-babel --recursive --reporter spec",
     "compile": "if [ -d 'lib/' ]; then BABEL_ENV=production babel lib/ --out-dir lib.compiled/; fi",
     "prepublish": "npm run compile",
-    "link-deep-package-manager": "if [ -d 'lib/' ]; then ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/lib.compiled/* `pwd`/lib/ || true; fi"
+    "link-deep-package-manager": "ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/lib.compiled/* `pwd`/lib.compiled/ || true"
   },
   "preferGlobal": true,
   "analyze": true

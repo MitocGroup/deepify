@@ -12,7 +12,7 @@ module.exports = function(mainPath) {
   var os = require('os');
   var exec = require('child_process').exec;
   var mkdirp = require('mkdirp');
-  var Property = require('../../lib.compiled/bootstrap.js').Property;
+  var Property = require('../../lib.compiled/Property/Instance').Instance;
   var Config = require('../../lib.compiled/Property/Config').Config;
   var S3Service = require('../../lib.compiled/Provisioning/Service/S3Service').S3Service;
 
