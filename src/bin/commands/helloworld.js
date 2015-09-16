@@ -9,49 +9,80 @@ module.exports = function(dumpPath) {
   var path = require('path');
   var fse = require('fs-extra');
   var exec = require('child_process').exec;
-  var tmp = require('tmp');
-  var repoUrl = 'https://github.com/MitocGroup/deep-microservices-helloworld.git';
+  var ngRootRepoUrl = 'https://github.com/MitocGroup/deep-microservices-root-angularjs.git';
+  var helloWorldRepoUrl = 'https://github.com/MitocGroup/deep-microservices-helloworld.git';
 
   if (dumpPath.indexOf('/') !== 0) {
     dumpPath = path.join(process.cwd(), dumpPath);
   }
 
-  var tmpFolder = tmp.dirSync().name;
+  var helloWorldPath = path.join(dumpPath, 'HelloWorld');
+  var ngRootPath = path.join(dumpPath, 'NgRoot');
 
-  console.log('Cloning the "Hello World" sample property into ' + tmpFolder);
-
-  exec('cd ' + tmpFolder + ' && git clone --depth=1 ' + repoUrl + ' .', function(error, stdout, stderr) {
+  gitClone(helloWorldRepoUrl, 'src', helloWorldPath, function(error) {
     if (error) {
-      console.error('Error cloning ' + repoUrl + ' repository into ' + tmpFolder + ': ' + stderr);
-      fse.removeSync(tmpFolder);
+      this.exit(1);
       return;
     }
 
-    console.log('Copy cloned "Hello World" source into ' + dumpPath);
-
-    fse.copySync(path.join(tmpFolder, 'src'), dumpPath, {clobber: true});
-    fse.removeSync(tmpFolder);
-
-    console.log('Installing Babel globally');
-
-    exec('npm install -g babel', function(error, stdout, stderr) {
+    gitClone(ngRootRepoUrl, 'src', ngRootPath, function(error) {
       if (error) {
-        console.error('Error installing Babel globally: ' + stderr);
+        this.exit(1);
         return;
       }
 
-      console.log('Running "npm install" on SayHello Lambda');
+      console.log('Installing Babel globally');
 
-      var lambdaPath = path.join(dumpPath, 'HelloWorld/Backend/src/SayHello');
-
-      exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
+      exec('npm install -g babel', function(error, stdout, stderr) {
         if (error) {
-          console.error('Error installing SayHello Lambda dependencies: ' + stderr);
+          console.error('Error installing Babel globally: ' + stderr);
           return;
         }
 
-        console.log('Sample property was successfully dumped.');
+        console.log('Running "npm install" on SayHello Lambda');
+
+        var lambdaPath = path.join(dumpPath, 'HelloWorld/Backend/src/SayHello');
+
+        exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
+          if (error) {
+            console.error('Error installing SayHello Lambda dependencies: ' + stderr);
+            return;
+          }
+
+          console.log('Sample property was successfully dumped.');
+        }.bind(this));
       }.bind(this));
     }.bind(this));
   }.bind(this));
 };
+
+function gitClone(repo, subfolder, targetDir, callback) {
+  var path = require('path');
+  var fs = require('fs');
+  var fse = require('fs-extra');
+  var exec = require('child_process').exec;
+  var tmp = require('tmp');
+
+  var tmpFolder = tmp.dirSync().name;
+
+  console.log('Cloning the ' + repo + ' into ' + tmpFolder);
+
+  exec('cd ' + tmpFolder + ' && git clone --depth=1 ' + repo + ' .', function(error, stdout, stderr) {
+    if (error) {
+      console.error('Error cloning ' + repo + ' repository into ' + tmpFolder + ': ' + stderr);
+
+      fse.removeSync(tmpFolder);
+      callback(error);
+      return;
+    }
+
+    if (fs.existsSync(targetDir)) {
+      fse.mkdirSync(targetDir);
+    }
+
+    fse.copySync(path.join(tmpFolder, subfolder), targetDir, {clobber: true});
+    fse.removeSync(tmpFolder);
+
+    callback(null);
+  });
+}
