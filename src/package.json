@@ -1,6 +1,6 @@
 {
   "name": "@mitocgroup/deepify",
-  "version": "0.1.31",
+  "version": "0.1.35",
   "description": "Deep development tools",
   "author": {
     "name": "Mitoc Group",
@@ -35,44 +35,23 @@
   },
   "main": "lib.compiled/bootstrap.js",
   "dependencies": {
-    "@mitocgroup/deep-package-manager": "file:../../deep-package-manager/src",
-    "@mitocgroup/deep-db": "*",
-    "@mitocgroup/deep-core": "*",
-    "joi": "6.4.*",
-    "jsonfile": "1.1.*",
-    "underscore.string": "2.3.*",
-    "moment": "2.10.*",
-    "aws-sdk": "2.1.*",
-    "archiver": "0.14.*",
-    "sync-exec": "0.6.*",
-    "mkdirp": "0.5.*",
-    "mime": "1.3.*",
-    "crc": "3.3.*",
-    "tar": "2.1.*",
-    "fstream": "1.0.*",
-    "fs-extra": "0.23.*",
-    "tmp": "0.0.*",
+    "@mitocgroup/deep-package-manager": "*",
     "proxyquire": "1.5.*",
     "v8-profiler": "5.2.*",
-    "crypto": "0.0.*",
-    "traceviewify": "0.4.*",
-    "ignore": "2.2.*",
-    "raml-validate": "1.0.*",
-    "raml-sanitize": "1.0.*",
-    "object-merge": "2.5.*",
-    "prompt-sync": "3.0.*",
-    "amazon-api-gateway-client": "0.1.*"
+    "traceviewify": "0.4.*"
   },
   "devDependencies": {
     "chai": "3.2.*"
   },
   "scripts": {
     "coverage": "babel-node `which istanbul` cover --report lcovonly _mocha -- --ui tdd --recursive --reporter spec",
-    "postinstall": "hooks/assure_deep_dev.js && npm run link-deep-package-manager && hooks/autocomplete_deepify.sh",
+    "postinstall": "hooks/assure_deep_dev.js && npm run link-deep-package-manager && npm run link-deep-package-manager-npm && npm run link-deep-package-manager-npm-subdirs && hooks/autocomplete_deepify.sh",
     "test": "mocha --ui tdd --compilers js:mocha-babel --recursive --reporter spec",
     "compile": "if [ -d 'lib/' ]; then BABEL_ENV=production babel lib/ --out-dir lib.compiled/; fi",
     "prepublish": "npm run compile",
-    "link-deep-package-manager": "ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/lib.compiled/* `pwd`/lib.compiled/ || true"
+    "link-deep-package-manager": "ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/lib.compiled/* `pwd`/lib.compiled || true",
+    "link-deep-package-manager-npm": "ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/node_modules/* `pwd`/node_modules || true",
+    "link-deep-package-manager-npm-subdirs": "ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/node_modules/\\@mitocgroup/* `pwd`/node_modules/\\@mitocgroup || true"
   },
   "preferGlobal": true,
   "analyze": true
