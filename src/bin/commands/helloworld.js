@@ -33,32 +33,42 @@ module.exports = function(dumpPath) {
         return;
       }
 
-      console.log('Installing Babel globally');
+      npmInstall(['babel'], function(error) {
+        if (!error) {
+          console.log('Running "npm install" on SayHello Lambda');
 
-      exec('npm install -g babel', function(error, stdout, stderr) {
-        if (error) {
-          console.error('Error installing Babel globally: ' + stderr);
-          return;
+          var lambdaPath = path.join(helloWorldPath, 'Backend/src/SayHello');
+
+          exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
+            if (error) {
+              console.error('Error installing SayHello Lambda dependencies: ' + stderr);
+              return;
+            }
+
+            console.log('Sample property was successfully dumped.');
+          }.bind(this));
         }
-
-        console.log('Running "npm install" on SayHello Lambda');
-
-        var lambdaPath = path.join(helloWorldPath, 'Backend/src/SayHello');
-
-        exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
-          if (error) {
-            console.error('Error installing SayHello Lambda dependencies: ' + stderr);
-            return;
-          }
-
-          console.log('Sample property was successfully dumped.');
-        }.bind(this));
-      }.bind(this));
+      });
     }.bind(this));
   }.bind(this));
 };
 
-function gitClone(repo, subfolder, targetDir, callback) {
+function npmInstall(repos, cb) {
+  console.log('[NPM] Installing ' + repos.join(', ') + ' globally');
+
+  exec('npm install -g ' + repos.join(' '), function(error, stdout, stderr) {
+    if (error) {
+      console.error('Error installing Babel globally: ' + stderr);
+
+      cb(error);
+      return;
+    }
+
+    cb(null);
+  }.bind(this));
+}
+
+function gitClone(repo, subfolder, targetDir, cb) {
   var path = require('path');
   var fs = require('fs');
   var fse = require('fs-extra');
@@ -74,7 +84,7 @@ function gitClone(repo, subfolder, targetDir, callback) {
       console.error('Error cloning ' + repo + ' repository into ' + tmpFolder + ': ' + stderr);
 
       fse.removeSync(tmpFolder);
-      callback(error);
+      cb(error);
       return;
     }
 
@@ -85,6 +95,6 @@ function gitClone(repo, subfolder, targetDir, callback) {
     fse.copySync(path.join(tmpFolder, subfolder), targetDir, {clobber: true});
     fse.removeSync(tmpFolder);
 
-    callback(null);
+    cb(null);
   });
 }
