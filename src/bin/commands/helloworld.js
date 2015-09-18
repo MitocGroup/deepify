@@ -54,6 +54,8 @@ module.exports = function(dumpPath) {
 };
 
 function npmInstall(repos, cb) {
+  var exec = require('child_process').exec;
+
   console.log('[NPM] Installing ' + repos.join(', ') + ' globally');
 
   exec('npm install -g ' + repos.join(' '), function(error, stdout, stderr) {
