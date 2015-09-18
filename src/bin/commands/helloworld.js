@@ -11,21 +11,23 @@ module.exports = function(dumpPath) {
   var exec = require('child_process').exec;
   var ngRootRepoUrl = 'https://github.com/MitocGroup/deep-microservices-root-angularjs.git';
   var helloWorldRepoUrl = 'https://github.com/MitocGroup/deep-microservices-helloworld.git';
+  var ngRootModule = 'DeepNgRoot';
+  var helloWorldModule = 'DeepHelloWorld';
 
   if (dumpPath.indexOf('/') !== 0) {
     dumpPath = path.join(process.cwd(), dumpPath);
   }
 
-  var helloWorldPath = path.join(dumpPath, 'HelloWorld');
-  var ngRootPath = path.join(dumpPath, 'NgRoot');
+  var helloWorldPath = path.join(dumpPath, helloWorldModule);
+  var ngRootPath = path.join(dumpPath, ngRootModule);
 
-  gitClone(helloWorldRepoUrl, 'src', helloWorldPath, function(error) {
+  gitClone(helloWorldRepoUrl, 'src/' + helloWorldModule, helloWorldPath, function(error) {
     if (error) {
       this.exit(1);
       return;
     }
 
-    gitClone(ngRootRepoUrl, 'src', ngRootPath, function(error) {
+    gitClone(ngRootRepoUrl, 'src/' + ngRootModule, ngRootPath, function(error) {
       if (error) {
         this.exit(1);
         return;
@@ -41,7 +43,7 @@ module.exports = function(dumpPath) {
 
         console.log('Running "npm install" on SayHello Lambda');
 
-        var lambdaPath = path.join(dumpPath, 'HelloWorld/Backend/src/SayHello');
+        var lambdaPath = path.join(helloWorldPath, 'Backend/src/SayHello');
 
         exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
           if (error) {
