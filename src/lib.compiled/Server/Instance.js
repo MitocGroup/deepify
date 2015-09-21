@@ -70,6 +70,8 @@ var _MicroserviceMetadataAction = require('../Microservice/Metadata/Action');
 
 var _PropertyConfig = require('../Property/Config');
 
+var _mitocgroupDeepDb = require('@mitocgroup/deep-db');
+
 var Instance = (function () {
   /**
    * @param {Property} property
@@ -275,6 +277,8 @@ var Instance = (function () {
       });
 
       this._server.listen(port, (function (error) {
+        var _this2 = this;
+
         if (error) {
           throw new _ExceptionFailedToStartServerException.FailedToStartServerException(port, error);
         }
@@ -283,7 +287,13 @@ var Instance = (function () {
 
         this._log('Server is up and running!');
 
-        callback && callback(this);
+        _mitocgroupDeepDb.DeepDB.startLocalDynamoDBServer(function (error) {
+          if (error) {
+            throw new _ExceptionFailedToStartServerException.FailedToStartServerException(port, error);
+          }
+
+          callback && callback(_this2);
+        });
       }).bind(this));
 
       // @todo: move it in destructor?
@@ -381,7 +391,7 @@ var Instance = (function () {
   }, {
     key: '_handler',
     value: function _handler(request, response) {
-      var _this2 = this;
+      var _this3 = this;
 
       var urlParts = _url2['default'].parse(request.url);
       var uri = urlParts.pathname;
@@ -406,8 +416,8 @@ var Instance = (function () {
         if (queryObject.p) {
           var _ret = (function () {
             // @todo: make it compatible with other browsers
-            if (!_this2._isTracerCompatible(request)) {
-              _this2._send(response, '<h1>Try open profiling url in Chrome/Chromium browser</h1>', 200, 'text/html', false);
+            if (!_this3._isTracerCompatible(request)) {
+              _this3._send(response, '<h1>Try open profiling url in Chrome/Chromium browser</h1>', 200, 'text/html', false);
               return {
                 v: undefined
               };
@@ -425,7 +435,7 @@ var Instance = (function () {
 
               this._log('Serving profile ' + profileFile);
               this._send(response, file, 200, 'text/html', true);
-            }).bind(_this2));
+            }).bind(_this3));
 
             return {
               v: undefined
@@ -439,7 +449,7 @@ var Instance = (function () {
         return;
       } else if (uri === Instance.LAMBDA_URI) {
         this._readRequestData(request, (function (rawData) {
-          var _this3 = this;
+          var _this4 = this;
 
           var data = JSON.parse(rawData);
 
@@ -456,11 +466,11 @@ var Instance = (function () {
 
           if (this.buildPath) {
             var _ret2 = (function () {
-              var lambdaConfig = _this3._buildConfig.lambdas[lambda];
+              var lambdaConfig = _this4._buildConfig.lambdas[lambda];
 
               if (!lambdaConfig) {
-                _this3._log('Missing Lambda ' + lambda + ' built config');
-                _this3._send404(response, 'Unknown Lambda ' + lambda);
+                _this4._log('Missing Lambda ' + lambda + ' built config');
+                _this4._send404(response, 'Unknown Lambda ' + lambda);
                 return {
                   v: undefined
                 };
@@ -475,17 +485,17 @@ var Instance = (function () {
                 //}
 
                 this._runLambda(response, lambdaConfig, payload);
-              }).bind(_this3));
+              }).bind(_this4));
             })();
 
             if (typeof _ret2 === 'object') return _ret2.v;
           } else {
             var _ret3 = (function () {
-              var lambdaConfig = _this3._defaultLambdasConfig[lambda];
+              var lambdaConfig = _this4._defaultLambdasConfig[lambda];
 
               if (!lambdaConfig) {
-                _this3._log('Missing Lambda ' + lambda + ' config');
-                _this3._send404(response, 'Unknown Lambda ' + lambda);
+                _this4._log('Missing Lambda ' + lambda + ' config');
+                _this4._send404(response, 'Unknown Lambda ' + lambda);
                 return {
                   v: undefined
                 };
@@ -510,7 +520,7 @@ var Instance = (function () {
 
                   this._runLambda(response, lambdaConfig, payload);
                 }).bind(this));
-              }).bind(_this3));
+              }).bind(_this4));
             })();
 
             if (typeof _ret3 === 'object') return _ret3.v;
