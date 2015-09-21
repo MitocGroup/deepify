@@ -285,7 +285,9 @@ var Instance = (function () {
 
         this._host = 'http://localhost:' + port;
 
-        this._log('Server is up and running!');
+        this._log('HTTP Server is up and running!');
+
+        this._log('Creating local DynamoDB instance on port ' + _mitocgroupDeepDb.DeepDB.LOCAL_DB_PORT);
 
         _mitocgroupDeepDb.DeepDB.startLocalDynamoDBServer(function (error) {
           if (error) {

@@ -255,7 +255,9 @@ export class Instance {
 
       this._host = `http://localhost:${port}`;
 
-      this._log('Server is up and running!');
+      this._log('HTTP Server is up and running!');
+
+      this._log(`Creating local DynamoDB instance on port ${DeepDB.LOCAL_DB_PORT}`);
 
       DeepDB.startLocalDynamoDBServer((error) => {
         if (error) {
