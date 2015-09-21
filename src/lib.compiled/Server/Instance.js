@@ -72,6 +72,8 @@ var _PropertyConfig = require('../Property/Config');
 
 var _mitocgroupDeepDb = require('@mitocgroup/deep-db');
 
+var _mitocgroupDeepDb2 = _interopRequireDefault(_mitocgroupDeepDb);
+
 var Instance = (function () {
   /**
    * @param {Property} property
@@ -287,9 +289,9 @@ var Instance = (function () {
 
         this._log('HTTP Server is up and running!');
 
-        this._log('Creating local DynamoDB instance on port ' + _mitocgroupDeepDb.DeepDB.LOCAL_DB_PORT);
+        this._log('Creating local DynamoDB instance on port ' + _mitocgroupDeepDb2['default'].LOCAL_DB_PORT);
 
-        _mitocgroupDeepDb.DeepDB.startLocalDynamoDBServer(function (error) {
+        _mitocgroupDeepDb2['default'].startLocalDynamoDBServer(function (error) {
           if (error) {
             throw new _ExceptionFailedToStartServerException.FailedToStartServerException(port, error);
           }

@@ -22,7 +22,7 @@ import QueryString from 'querystring';
 import {TraceBuilder} from './TraceBuilder';
 import {Action} from '../Microservice/Metadata/Action';
 import {Config} from '../Property/Config';
-import {DeepDB} from '@mitocgroup/deep-db';
+import DeepDB from '@mitocgroup/deep-db';
 
 export class Instance {
   /**
