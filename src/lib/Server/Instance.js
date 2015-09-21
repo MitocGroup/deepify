@@ -264,6 +264,8 @@ export class Instance {
           throw new FailedToStartServerException(port, error);
         }
 
+        this._log(`You can access DynamoDB Console via http://localhost:${DeepDB.LOCAL_DB_PORT}/shell`);
+
         callback && callback(this);
       });
     }.bind(this));

@@ -296,6 +296,8 @@ var Instance = (function () {
             throw new _ExceptionFailedToStartServerException.FailedToStartServerException(port, error);
           }
 
+          _this2._log('You can access DynamoDB Console via http://localhost:' + _mitocgroupDeepDb2['default'].LOCAL_DB_PORT + '/shell');
+
           callback && callback(_this2);
         });
       }).bind(this));
