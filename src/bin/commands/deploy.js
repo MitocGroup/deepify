@@ -127,16 +127,29 @@ module.exports = function(mainPath) {
 
     var deepConfigFile = path.join(mainPath, '.cfg.deeploy.json');
 
-    // @todo: is this ok?
-    process.on('uncaughtException', function(error) {
-      console.error(error);
+    // @todo: improve it!
+    // Gracefully teardown...
+    (function() {
+      process.on('uncaughtException', function(error) {
+        console.error(error);
 
-      if (propertyInstance.config.provisioning) {
-        dumpConfig.bind(this)(propertyInstance, function() {
-          this.exit(1);
-        }.bind(this));
-      }
-    }.bind(this));
+        if (propertyInstance.config.provisioning) {
+          dumpConfig.bind(this)(propertyInstance, function() {
+            this.exit(1);
+          }.bind(this));
+        }
+      }.bind(this));
+
+      process.on('SIGINT', function() {
+        console.log('Gracefully shutting down from SIGINT (Ctrl-C)...');
+
+        if (propertyInstance.config.provisioning) {
+          dumpConfig.bind(this)(propertyInstance, function() {
+            this.exit(0);
+          }.bind(this));
+        }
+      }.bind(this));
+    }.bind(this))();
 
     var updateCfg = fs.existsSync(deepConfigFile) ? JSON.parse(fs.readFileSync(deepConfigFile)) : null;
 
