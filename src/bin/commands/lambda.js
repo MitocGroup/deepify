@@ -62,7 +62,7 @@ module.exports = function(lambdaPath) {
     }
   }
 
-  this._log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
+  console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
 
   DeepDB.startLocalDynamoDBServer(function(error) {
     if (error) {
@@ -72,19 +72,21 @@ module.exports = function(lambdaPath) {
 
     var lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
 
+    lambda.complete = function(error, response) {
+      console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
+
+      if (error) {
+        console.error(error);
+        this.exit(1);
+      }
+
+      this.exit(0);
+    }.bind(this);
+
     console.log('Starting Lambda.', os.EOL);
 
     try {
       process.chdir(path.dirname(lambdaPath));
-
-      lambda.complete(function(error, response) {
-        if (error) {
-          console.error(error);
-          this.exit(1);
-        }
-
-        this.exit(0);
-      }.bind(this));
       lambda.run(event, true);
     } catch (e) {
       console.error(e);

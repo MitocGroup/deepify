@@ -24,9 +24,7 @@ export class Runtime {
 
     this._succeed = this._logCallback('SUCCEED');
     this._fail = this._logCallback('FAILED');
-    this._complete = function() {
-      // do nothing
-    };
+    this._complete = (error, response) => {};
 
     this._measureTime = false;
     this._silent = false;
@@ -236,21 +234,23 @@ export class Runtime {
         this._profiler && this._profiler.stop();
 
         this._succeed(result);
-        this._complete(null, result);
 
         if (this._measureTime) {
           console.timeEnd(this._name);
         }
+
+        this._complete(null, result);
       }.bind(this),
       fail: function(error) {
         this._profiler && this._profiler.stop();
 
         this._fail(error);
-        this._complete(error, null);
 
         if (this._measureTime) {
           console.timeEnd(this._name);
         }
+
+        this._complete(error, null);
       }.bind(this),
     };
   }
