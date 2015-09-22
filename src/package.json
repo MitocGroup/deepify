@@ -1,6 +1,6 @@
 {
   "name": "@mitocgroup/deepify",
-  "version": "0.1.51",
+  "version": "0.1.52",
   "description": "Deep development tools",
   "author": {
     "name": "Mitoc Group",
@@ -38,7 +38,8 @@
     "@mitocgroup/deep-package-manager": "*",
     "proxyquire": "1.5.*",
     "v8-profiler": "5.2.*",
-    "traceviewify": "0.4.*"
+    "traceviewify": "0.4.*",
+    "open": "0.0.*"
   },
   "devDependencies": {
     "chai": "3.2.*"

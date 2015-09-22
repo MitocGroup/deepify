@@ -13,8 +13,8 @@ module.exports = function(mainPath) {
   var exec = require('child_process').exec;
   var os = require('os');
   var fs = require('fs');
+  var open = require("open");
 
-  var isMac = os.platform() === 'darwin';
   var port = this.opts.locate('port').value || '8000';
   var buildPath = this.opts.locate('build-path').value || null;
   var serverAddress = 'http://localhost:' + port;
@@ -69,17 +69,7 @@ module.exports = function(mainPath) {
 
     server.listen(parseInt(port, 10), function(error) {
       if (openBrowser) {
-        if (isMac) {
-          console.log('Opening browser...');
-
-          exec('open -a safari ' + serverAddress, function(error, stdout, stderr) {
-            if (error) {
-              console.error('Unable to open browser: ' + stderr);
-            }
-          });
-        } else {
-          console.log('You have to open browser by yourself unless you have a Mac');
-        }
+        open(serverAddress);
       }
     });
   }
