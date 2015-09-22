@@ -33,7 +33,7 @@ module.exports = function(mainPath) {
   }
 
   var configFile = path.join(mainPath, Config.DEFAULT_FILENAME);
-  var configExists = fs.statSync(configFile).isFile();
+  var configExists = fs.existsSync(configFile);
 
   if (!configExists) {
     console.error('Missing ' + Config.DEFAULT_FILENAME + ' configuration file in ' + mainPath);
