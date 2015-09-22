@@ -7,6 +7,7 @@
 
 module.exports = function(lambdaPath) {
   var Runtime = require('../../lib.compiled/Lambda/Runtime.js').Runtime;
+  var DeepDB = require('@mitocgroup/deep-db');
   var path = require('path');
   var fs = require('fs');
   var exec = require('sync-exec');
@@ -61,24 +62,33 @@ module.exports = function(lambdaPath) {
     }
   }
 
-  var lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
+  this._log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
 
-  console.log('Starting Lambda.', os.EOL);
+  DeepDB.startLocalDynamoDBServer(function(error) {
+    if (error) {
+      console.error('Failed to start DynamoDB server: ' + error);
+      this.exit(1);
+    }
 
-  try {
-    process.chdir(path.dirname(lambdaPath));
+    var lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
 
-    lambda.complete(function(error, response) {
-      if (error) {
-        console.error(error);
-        this.exit(1);
-      }
+    console.log('Starting Lambda.', os.EOL);
 
-      this.exit(0);
-    }.bind(this));
-    lambda.run(event, true);
-  } catch (e) {
-    console.error(e);
-    this.exit(1);
-  }
+    try {
+      process.chdir(path.dirname(lambdaPath));
+
+      lambda.complete(function(error, response) {
+        if (error) {
+          console.error(error);
+          this.exit(1);
+        }
+
+        this.exit(0);
+      }.bind(this));
+      lambda.run(event, true);
+    } catch (e) {
+      console.error(e);
+      this.exit(1);
+    }
+  }.bind(this));
 };
