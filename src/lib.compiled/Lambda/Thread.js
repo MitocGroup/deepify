@@ -47,6 +47,8 @@ var Thread = (function () {
   _createClass(Thread, [{
     key: 'run',
     value: function run(event, measureTime) {
+      var _this = this;
+
       this._process = _child_process2['default'].fork(Thread.WRAPPER, [JSON.stringify(this._runtime), JSON.stringify(event), measureTime], {
         cwd: _path2['default'].dirname(this._runtime.lambdaPath),
         silent: true
@@ -60,46 +62,59 @@ var Thread = (function () {
       var noPrematureFailCheck = false;
 
       // Kills lambda if execution time exceeded
-      setTimeout((function () {
+      setTimeout(function () {
         if (contextSent) {
           return;
         }
 
         noPrematureFailCheck = true;
 
-        this._runtime.fail(new _ExceptionLambdaExecutionException.LambdaExecutionException('The Lambda timeout of ' + _PropertyLambda.Lambda.DEFAULT_TIMEOUT + 's exceeded!'));
+        _this._onError('The Lambda timeout of ' + _PropertyLambda.Lambda.DEFAULT_TIMEOUT + ' seconds exceeded!');
+      }, parseInt(_PropertyLambda.Lambda.DEFAULT_TIMEOUT) * 1000);
 
-        this._cleanup();
-      }).bind(this), parseInt(_PropertyLambda.Lambda.DEFAULT_TIMEOUT) * 1000);
-
-      this._process.on('message', (function (payload) {
+      this._process.on('message', function (payload) {
         contextSent = true;
 
-        if (this._runtime.profiler) {
-          this._runtime.profiler.profile = payload.profile;
+        if (_this._runtime.profiler) {
+          _this._runtime.profiler.profile = payload.profile;
         }
 
-        this._runtime[payload.state].apply(this._runtime, payload.args);
-        this._cleanup();
-      }).bind(this));
+        _this._runtime[payload.state].apply(_this._runtime, payload.args);
+        _this._cleanup();
+      });
 
-      this._process.on('error', (function (error) {
+      this._process.on('uncaughtException', function (error) {
         contextSent = true;
 
-        this._runtime.fail(new _ExceptionLambdaExecutionException.LambdaExecutionException(error));
-        this._cleanup();
-      }).bind(this));
+        _this._onError(error);
+      });
 
-      this._process.on('exit', (function () {
+      this._process.on('error', function (error) {
+        contextSent = true;
+
+        _this._onError(error);
+      });
+
+      this._process.on('exit', function () {
         if (!contextSent && !noPrematureFailCheck) {
           contextSent = true;
 
-          this._runtime.fail(new _ExceptionLambdaExecutionException.LambdaExecutionException('Premature exit!'));
-          this._cleanup();
+          _this._onError('Premature exit!');
         }
-      }).bind(this));
+      });
 
       return this;
+    }
+
+    /**
+     * @param {String} error
+     * @private
+     */
+  }, {
+    key: '_onError',
+    value: function _onError(error) {
+      this._runtime.fail(new _ExceptionLambdaExecutionException.LambdaExecutionException(error));
+      this._cleanup();
     }
 
     /**

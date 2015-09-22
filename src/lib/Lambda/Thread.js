@@ -45,21 +45,17 @@ export class Thread {
     let noPrematureFailCheck = false;
 
     // Kills lambda if execution time exceeded
-    setTimeout(function() {
+    setTimeout(() => {
       if (contextSent) {
         return;
       }
 
       noPrematureFailCheck = true;
 
-      this._runtime.fail(
-        new LambdaExecutionException(`The Lambda timeout of ${Lambda.DEFAULT_TIMEOUT}s exceeded!`)
-      );
+      this._onError(`The Lambda timeout of ${Lambda.DEFAULT_TIMEOUT} seconds exceeded!`);
+    }, parseInt(Lambda.DEFAULT_TIMEOUT) * 1000);
 
-      this._cleanup();
-    }.bind(this), parseInt(Lambda.DEFAULT_TIMEOUT) * 1000);
-
-    this._process.on('message', function(payload) {
+    this._process.on('message', (payload) => {
       contextSent = true;
 
       if (this._runtime.profiler) {
@@ -68,25 +64,38 @@ export class Thread {
 
       this._runtime[payload.state].apply(this._runtime, payload.args);
       this._cleanup();
-    }.bind(this));
+    });
 
-    this._process.on('error', function(error) {
+    this._process.on('uncaughtException', (error) => {
       contextSent = true;
 
-      this._runtime.fail(new LambdaExecutionException(error));
-      this._cleanup();
-    }.bind(this));
+      this._onError(error);
+    });
 
-    this._process.on('exit', function() {
+    this._process.on('error', (error) => {
+      contextSent = true;
+
+      this._onError(error);
+    });
+
+    this._process.on('exit', () => {
       if (!contextSent && !noPrematureFailCheck) {
         contextSent = true;
 
-        this._runtime.fail(new LambdaExecutionException('Premature exit!'));
-        this._cleanup();
+        this._onError('Premature exit!');
       }
-    }.bind(this));
+    });
 
     return this;
+  }
+
+  /**
+   * @param {String} error
+   * @private
+   */
+  _onError(error) {
+    this._runtime.fail(new LambdaExecutionException(error));
+    this._cleanup();
   }
 
   /**
