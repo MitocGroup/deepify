@@ -17,6 +17,7 @@ module.exports = function(mainPath) {
 
   var port = this.opts.locate('port').value || '8000';
   var buildPath = this.opts.locate('build-path').value || null;
+  var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   var serverAddress = 'http://localhost:' + port;
   var openBrowser = this.opts.locate('open-browser').exists;
   var skipAwsLinking = this.opts.locate('skip-aws-sdk').exists;
@@ -67,7 +68,7 @@ module.exports = function(mainPath) {
       server.buildPath = buildPath;
     }
 
-    server.listen(parseInt(port, 10), function(error) {
+    server.listen(parseInt(port, 10), dbServer, function(error) {
       if (openBrowser) {
         open(serverAddress);
       }

@@ -263,12 +263,14 @@ var Instance = (function () {
 
     /**
      * @param {Number} port
+     * @param {String} dbServer
      * @param {Function} callback
      * @returns {Instance}
      */
     value: function listen() {
       var port = arguments.length <= 0 || arguments[0] === undefined ? 8080 : arguments[0];
-      var callback = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+      var dbServer = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+      var callback = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
       var _this = this;
 
@@ -289,6 +291,11 @@ var Instance = (function () {
 
         this._log('HTTP Server is up and running!');
 
+        if (!dbServer) {
+          callback && callback(this);
+          return;
+        }
+
         this._log('Creating local DynamoDB instance on port ' + _mitocgroupDeepDb2['default'].LOCAL_DB_PORT);
 
         _mitocgroupDeepDb2['default'].startLocalDynamoDBServer(function (error) {
@@ -299,7 +306,7 @@ var Instance = (function () {
           _this2._log('You can access DynamoDB Console via http://localhost:' + _mitocgroupDeepDb2['default'].LOCAL_DB_PORT + '/shell');
 
           callback && callback(_this2);
-        });
+        }, dbServer);
       }).bind(this));
 
       // @todo: move it in destructor?

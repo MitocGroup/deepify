@@ -38,6 +38,11 @@ module.exports = {
           description: 'Port to listen to',
           required: false,
         },
+        'db-server': {
+          alias: 'l',
+          description: 'Local DynamoDB server implementation (ex. LocalDynamo, Dynalite)',
+          required: false,
+        },
         'open-browser': {
           alias: 'o',
           description: 'Open browser after the server starts',
@@ -58,6 +63,11 @@ module.exports = {
         event: {
           alias: 'e',
           description: 'JSON string used as the Lambda payload',
+          required: false,
+        },
+        'db-server': {
+          alias: 'l',
+          description: 'Local DynamoDB server implementation (ex. LocalDynamo, Dynalite)',
           required: false,
         },
       },

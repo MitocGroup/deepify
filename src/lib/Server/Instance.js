@@ -236,10 +236,11 @@ export class Instance {
 
   /**
    * @param {Number} port
+   * @param {String} dbServer
    * @param {Function} callback
    * @returns {Instance}
    */
-  listen(port = 8080, callback = null) {
+  listen(port = 8080, dbServer = null, callback = null) {
     let _this = this;
 
     this._log(`Creating server on port ${port}`);
@@ -257,6 +258,11 @@ export class Instance {
 
       this._log('HTTP Server is up and running!');
 
+      if (!dbServer) {
+        callback && callback(this);
+        return;
+      }
+
       this._log(`Creating local DynamoDB instance on port ${DeepDB.LOCAL_DB_PORT}`);
 
       DeepDB.startLocalDynamoDBServer((error) => {
@@ -267,7 +273,7 @@ export class Instance {
         this._log(`You can access DynamoDB Console via http://localhost:${DeepDB.LOCAL_DB_PORT}/shell`);
 
         callback && callback(this);
-      });
+      }, dbServer);
     }.bind(this));
 
     // @todo: move it in destructor?

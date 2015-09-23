@@ -12,6 +12,8 @@ module.exports = function(lambdaPath) {
   var fs = require('fs');
   var exec = require('sync-exec');
   var os = require('os');
+  var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
+  var event = this.opts.locate('event').value;
 
   if (lambdaPath.indexOf('/') !== 0) {
     lambdaPath = path.join(process.cwd(), lambdaPath);
@@ -25,8 +27,6 @@ module.exports = function(lambdaPath) {
     console.error('Missing lambda in ' + lambdaPath);
     this.exit(1);
   }
-
-  var event = this.opts.locate('event').value;
 
   if (event) {
     if (fs.existsSync(path.normalize(event))) {
@@ -92,5 +92,5 @@ module.exports = function(lambdaPath) {
       console.error(e);
       this.exit(1);
     }
-  }.bind(this));
+  }.bind(this), dbServer);
 };
