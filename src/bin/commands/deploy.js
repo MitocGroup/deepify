@@ -156,7 +156,7 @@ module.exports = function(mainPath) {
     // @todo: rewrite this section!
     if (!updateCfg) {
       if (!cfgBucket) {
-        console.log('Installing property ' + config.propertyIdentifier);
+        console.log('Installing property ' + config.appIdentifier);
 
         propertyInstance.install(function() {
           console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
@@ -171,7 +171,7 @@ module.exports = function(mainPath) {
           }
 
           if (!error) {
-            console.log('Updating property ' + config.propertyIdentifier);
+            console.log('Updating property ' + config.appIdentifier);
 
             propertyInstance.update(JSON.parse(updateCfg.Body.toString()), function() {
               console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
@@ -180,7 +180,7 @@ module.exports = function(mainPath) {
               dumpConfig.bind(this)(propertyInstance, dumpCode);
             }.bind(this));
           } else {
-            console.log('Installing property ' + config.propertyIdentifier);
+            console.log('Installing property ' + config.appIdentifier);
 
             propertyInstance.install(function() {
               console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
@@ -192,7 +192,7 @@ module.exports = function(mainPath) {
         }.bind(this));
       }
     } else {
-      console.log('Updating property ' + config.propertyIdentifier);
+      console.log('Updating property ' + config.appIdentifier);
 
       propertyInstance.update(updateCfg, function() {
         console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
