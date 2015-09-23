@@ -42,7 +42,7 @@ var Help = (function () {
      * @returns {Help}
      */
     value: function print() {
-      this._printHead()._printExample()._printArgs()._printCommands();
+      this._printHead()._printExample()._printArgs()._printOpts()._printCommands();
 
       return this;
     }

@@ -34,6 +34,7 @@ export class Help {
       ._printHead()
       ._printExample()
       ._printArgs()
+      ._printOpts()
       ._printCommands()
     ;
 
