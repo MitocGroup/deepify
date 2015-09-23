@@ -25,13 +25,13 @@ if (process.env[npmEnvKey] !== 'true') {
       if (['.', '..'].indexOf(basename) === -1 && basename.indexOf('deep-') === 0) {
         var modulePath = path.join(deepModulePath, basename);
 
-        fs.stat(modulePath, function(modulePath, error, stats) {
+        fs.lstat(modulePath, function(modulePath, error, stats) {
           if (error) {
             console.error('Error while getting stats of ' + modulePath + ': ' + error);
             process.exit(1);
           }
 
-          if (stats.isDirectory()) {
+          if (stats.isDirectory() || stats.isSymbolicLink()) {
             var packageFile = path.join(modulePath, 'package.json');
 
             fs.readFile(packageFile, function(error, data) {
