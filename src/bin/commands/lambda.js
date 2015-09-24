@@ -12,8 +12,16 @@ module.exports = function(lambdaPath) {
   var fs = require('fs');
   var exec = require('sync-exec');
   var os = require('os');
+  var Autoload = require('../../lib.compiled/Microservice/Metadata/Autoload').Autoload;
+
   var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   var event = this.opts.locate('event').value;
+  var skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
+
+  // @todo: implement it in a better way
+  if (skipFrontendBuild) {
+    Autoload._skipBuild();
+  }
 
   if (lambdaPath.indexOf('/') !== 0) {
     lambdaPath = path.join(process.cwd(), lambdaPath);

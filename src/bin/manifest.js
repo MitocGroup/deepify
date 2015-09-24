@@ -28,6 +28,11 @@ module.exports = {
           description: 'The path to the build (in order to pick up config)',
           required: false,
         },
+        'skip-frontend-build': {
+          alias: 'f',
+          description: 'Skip picking up _build path from the microservices Frontend',
+          required: false,
+        },
         'skip-aws-sdk': {
           alias: 's',
           description: 'Skip linking aws-sdk to each Lambda found',
@@ -63,6 +68,11 @@ module.exports = {
         event: {
           alias: 'e',
           description: 'JSON string used as the Lambda payload',
+          required: false,
+        },
+        'skip-frontend-build': {
+          alias: 'f',
+          description: 'Skip picking up _build path from the microservices Frontend',
           required: false,
         },
         'db-server': {

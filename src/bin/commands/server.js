@@ -10,6 +10,7 @@ module.exports = function(mainPath) {
   var Server = require('../../lib.compiled/Server/Instance').Instance;
   var WaitFor = require('../../lib.compiled/Helpers/WaitFor').WaitFor;
   var Config = require('../../lib.compiled/Property/Config').Config;
+  var Autoload = require('../../lib.compiled/Microservice/Metadata/Autoload').Autoload;
   var exec = require('child_process').exec;
   var os = require('os');
   var fs = require('fs');
@@ -22,6 +23,12 @@ module.exports = function(mainPath) {
   var openBrowser = this.opts.locate('open-browser').exists;
   var skipAwsLinking = this.opts.locate('skip-aws-sdk').exists;
   var profiling = this.opts.locate('profiling').exists;
+  var skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
+
+  // @todo: implement it in a better way
+  if (skipFrontendBuild) {
+    Autoload._skipBuild();
+  }
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
