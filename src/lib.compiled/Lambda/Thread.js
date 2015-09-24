@@ -86,7 +86,7 @@ var Thread = (function () {
 
       this._process.on('message', function (payload) {
         if (contextSent) {
-          console.error('Sending context twice from Lambda (payload: ' + payload + ')');
+          console.error('Sending context twice from Lambda (payload: ' + JSON.stringify(payload) + ')');
           return;
         }
 
