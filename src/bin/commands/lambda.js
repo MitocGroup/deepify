@@ -27,9 +27,13 @@ module.exports = function(lambdaPath) {
     lambdaPath = path.join(process.cwd(), lambdaPath);
   }
 
-  if (fs.statSync(lambdaPath).isDirectory()) {
-    lambdaPath = path.join(lambdaPath, 'bootstrap.js');
+  try {
+    if (fs.statSync(lambdaPath).isDirectory()) {
+      lambdaPath = path.join(lambdaPath, 'bootstrap.js');
+    }
+  } catch (e) {
   }
+
 
   if (!fs.existsSync(lambdaPath)) {
     console.error('Missing lambda in ' + lambdaPath);
