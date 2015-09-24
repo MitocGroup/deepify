@@ -18,7 +18,7 @@ module.exports = function(mainPath) {
 
   var port = this.opts.locate('port').value || '8000';
   var buildPath = this.opts.locate('build-path').value || null;
-  var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
+  var dbServer = this.opts.locate('db-server').value || 'LocalDynamo'; // @todo: think on switching to Dynalite by default
   var serverAddress = 'http://localhost:' + port;
   var openBrowser = this.opts.locate('open-browser').exists;
   var skipAwsLinking = this.opts.locate('skip-aws-sdk').exists;

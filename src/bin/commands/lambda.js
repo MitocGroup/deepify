@@ -14,7 +14,7 @@ module.exports = function(lambdaPath) {
   var os = require('os');
   var Autoload = require('../../lib.compiled/Microservice/Metadata/Autoload').Autoload;
 
-  var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
+  var dbServer = this.opts.locate('db-server').value || 'LocalDynamo'; // @todo: think on switching to Dynalite by default
   var event = this.opts.locate('event').value;
   var skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
 
