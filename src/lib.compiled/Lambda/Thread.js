@@ -81,16 +81,19 @@ var Thread = (function () {
       }, parseInt(_PropertyLambda.Lambda.DEFAULT_TIMEOUT) * 1000);
 
       this._process.on('message', function (payload) {
-        if (!contextSent) {
-          contextSent = true;
-
-          if (_this._runtime.profiler) {
-            _this._runtime.profiler.profile = payload.profile;
-          }
-
-          _this._runtime[payload.state].apply(_this._runtime, payload.args);
-          _this._cleanup();
+        if (contextSent) {
+          console.error('Sending context twice from Lambda (payload: ' + payload + ')');
+          return;
         }
+
+        contextSent = true;
+
+        if (_this._runtime.profiler) {
+          _this._runtime.profiler.profile = payload.profile;
+        }
+
+        _this._runtime[payload.state].apply(_this._runtime, payload.args);
+        _this._cleanup();
       });
 
       this._process.on('uncaughtException', onError);

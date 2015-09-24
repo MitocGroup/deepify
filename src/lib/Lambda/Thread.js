@@ -64,16 +64,19 @@ export class Thread {
     }, parseInt(Lambda.DEFAULT_TIMEOUT) * 1000);
 
     this._process.on('message', (payload) => {
-      if (!contextSent) {
-        contextSent = true;
-
-        if (this._runtime.profiler) {
-          this._runtime.profiler.profile = payload.profile;
-        }
-
-        this._runtime[payload.state].apply(this._runtime, payload.args);
-        this._cleanup();
+      if (contextSent) {
+        console.error(`Sending context twice from Lambda (payload: ${payload})`);
+        return;
       }
+
+      contextSent = true;
+
+      if (this._runtime.profiler) {
+        this._runtime.profiler.profile = payload.profile;
+      }
+
+      this._runtime[payload.state].apply(this._runtime, payload.args);
+      this._cleanup();
     });
 
     this._process.on('uncaughtException', onError);
