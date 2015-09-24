@@ -61,45 +61,44 @@ var Thread = (function () {
       var contextSent = false;
       var noPrematureFailCheck = false;
 
-      // Kills lambda if execution time exceeded
-      setTimeout(function () {
+      var onError = function onError(error) {
         if (contextSent) {
+          console.error('Sending context twice from Lambda (error thrown: ' + error + ')');
           return;
         }
 
+        contextSent = true;
+
+        _this._runtime.fail(new _ExceptionLambdaExecutionException.LambdaExecutionException(error));
+        _this._cleanup();
+      };
+
+      // Kills lambda if execution time exceeded
+      setTimeout(function () {
         noPrematureFailCheck = true;
 
-        _this._onError('The Lambda timeout of ' + _PropertyLambda.Lambda.DEFAULT_TIMEOUT + ' seconds exceeded!');
+        onError('The Lambda timeout of ' + _PropertyLambda.Lambda.DEFAULT_TIMEOUT + ' seconds exceeded!');
       }, parseInt(_PropertyLambda.Lambda.DEFAULT_TIMEOUT) * 1000);
 
       this._process.on('message', function (payload) {
-        contextSent = true;
-
-        if (_this._runtime.profiler) {
-          _this._runtime.profiler.profile = payload.profile;
-        }
-
-        _this._runtime[payload.state].apply(_this._runtime, payload.args);
-        _this._cleanup();
-      });
-
-      this._process.on('uncaughtException', function (error) {
-        contextSent = true;
-
-        _this._onError(error);
-      });
-
-      this._process.on('error', function (error) {
-        contextSent = true;
-
-        _this._onError(error);
-      });
-
-      this._process.on('exit', function () {
-        if (!contextSent && !noPrematureFailCheck) {
+        if (!contextSent) {
           contextSent = true;
 
-          _this._onError('Premature exit!');
+          if (_this._runtime.profiler) {
+            _this._runtime.profiler.profile = payload.profile;
+          }
+
+          _this._runtime[payload.state].apply(_this._runtime, payload.args);
+          _this._cleanup();
+        }
+      });
+
+      this._process.on('uncaughtException', onError);
+      this._process.on('error', onError);
+
+      this._process.on('exit', function () {
+        if (!noPrematureFailCheck) {
+          onError('Premature exit!');
         }
       });
 

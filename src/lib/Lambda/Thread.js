@@ -44,45 +44,44 @@ export class Thread {
     let contextSent = false;
     let noPrematureFailCheck = false;
 
-    // Kills lambda if execution time exceeded
-    setTimeout(() => {
+    let onError = (error) => {
       if (contextSent) {
+        console.error(`Sending context twice from Lambda (error thrown: ${error})`);
         return;
       }
 
+      contextSent = true;
+
+      this._runtime.fail(new LambdaExecutionException(error));
+      this._cleanup();
+    };
+
+    // Kills lambda if execution time exceeded
+    setTimeout(() => {
       noPrematureFailCheck = true;
 
-      this._onError(`The Lambda timeout of ${Lambda.DEFAULT_TIMEOUT} seconds exceeded!`);
+      onError(`The Lambda timeout of ${Lambda.DEFAULT_TIMEOUT} seconds exceeded!`);
     }, parseInt(Lambda.DEFAULT_TIMEOUT) * 1000);
 
     this._process.on('message', (payload) => {
-      contextSent = true;
-
-      if (this._runtime.profiler) {
-        this._runtime.profiler.profile = payload.profile;
-      }
-
-      this._runtime[payload.state].apply(this._runtime, payload.args);
-      this._cleanup();
-    });
-
-    this._process.on('uncaughtException', (error) => {
-      contextSent = true;
-
-      this._onError(error);
-    });
-
-    this._process.on('error', (error) => {
-      contextSent = true;
-
-      this._onError(error);
-    });
-
-    this._process.on('exit', () => {
-      if (!contextSent && !noPrematureFailCheck) {
+      if (!contextSent) {
         contextSent = true;
 
-        this._onError('Premature exit!');
+        if (this._runtime.profiler) {
+          this._runtime.profiler.profile = payload.profile;
+        }
+
+        this._runtime[payload.state].apply(this._runtime, payload.args);
+        this._cleanup();
+      }
+    });
+
+    this._process.on('uncaughtException', onError);
+    this._process.on('error', onError);
+
+    this._process.on('exit', () => {
+      if (!noPrematureFailCheck) {
+        onError('Premature exit!');
       }
     });
 
