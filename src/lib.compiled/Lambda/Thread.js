@@ -75,6 +75,10 @@ var Thread = (function () {
 
       // Kills lambda if execution time exceeded
       setTimeout(function () {
+        if (contextSent) {
+          return;
+        }
+
         noPrematureFailCheck = true;
 
         onError('The Lambda timeout of ' + _PropertyLambda.Lambda.DEFAULT_TIMEOUT + ' seconds exceeded!');
@@ -100,7 +104,7 @@ var Thread = (function () {
       this._process.on('error', onError);
 
       this._process.on('exit', function () {
-        if (!noPrematureFailCheck) {
+        if (!contextSent && !noPrematureFailCheck) {
           onError('Premature exit!');
         }
       });

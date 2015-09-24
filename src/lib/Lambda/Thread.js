@@ -58,6 +58,10 @@ export class Thread {
 
     // Kills lambda if execution time exceeded
     setTimeout(() => {
+      if (contextSent) {
+        return;
+      }
+
       noPrematureFailCheck = true;
 
       onError(`The Lambda timeout of ${Lambda.DEFAULT_TIMEOUT} seconds exceeded!`);
@@ -83,7 +87,7 @@ export class Thread {
     this._process.on('error', onError);
 
     this._process.on('exit', () => {
-      if (!noPrematureFailCheck) {
+      if (!contextSent && !noPrematureFailCheck) {
         onError('Premature exit!');
       }
     });
