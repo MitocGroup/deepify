@@ -88,7 +88,12 @@ export class Thread {
 
     this._process.on('exit', () => {
       if (!contextSent && !noPrematureFailCheck) {
-        onError('Premature exit!');
+        // hook to avoid msg sending delays...
+        setTimeout(() => {
+          if (!contextSent) {
+            onError('Premature exit!');
+          }
+        }, 200);
       }
     });
 

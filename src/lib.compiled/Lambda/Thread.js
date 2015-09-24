@@ -105,7 +105,12 @@ var Thread = (function () {
 
       this._process.on('exit', function () {
         if (!contextSent && !noPrematureFailCheck) {
-          onError('Premature exit!');
+          // hook to avoid msg sending delays...
+          setTimeout(function () {
+            if (!contextSent) {
+              onError('Premature exit!');
+            }
+          }, 200);
         }
       });
 
