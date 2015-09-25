@@ -34,20 +34,22 @@ module.exports = function(dumpPath) {
       }
 
       npmInstall(['babel'], function(error) {
-        if (!error) {
-          console.log('Running "npm install" on SayHello Lambda');
+        console.log('Sample property was successfully dumped.');
 
-          var lambdaPath = path.join(helloWorldPath, 'Backend/src/SayHello');
-
-          exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
-            if (error) {
-              console.error('Error installing SayHello Lambda dependencies: ' + stderr);
-              return;
-            }
-
-            console.log('Sample property was successfully dumped.');
-          }.bind(this));
-        }
+        //if (!error) {
+        //  console.log('Running "npm install" on SayHello Lambda');
+        //
+        //  var lambdaPath = path.join(helloWorldPath, 'Backend/src/SayHello');
+        //
+        //  exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
+        //    if (error) {
+        //      console.error('Error installing SayHello Lambda dependencies: ' + stderr);
+        //      return;
+        //    }
+        //
+        //    console.log('Sample property was successfully dumped.');
+        //  }.bind(this));
+        //}
       });
     }.bind(this));
   }.bind(this));

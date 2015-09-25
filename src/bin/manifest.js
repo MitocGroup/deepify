@@ -33,9 +33,9 @@ module.exports = {
           description: 'Skip picking up _build path from the microservices Frontend',
           required: false,
         },
-        'skip-aws-sdk': {
+        'skip-lambdas-build': {
           alias: 's',
-          description: 'Skip linking aws-sdk to each Lambda found',
+          description: 'Skip building Lambdas and linking aws-sdk',
           required: false,
         },
         port: {

@@ -21,7 +21,7 @@ module.exports = function(mainPath) {
   var dbServer = this.opts.locate('db-server').value || 'LocalDynamo'; // @todo: think on switching to Dynalite by default
   var serverAddress = 'http://localhost:' + port;
   var openBrowser = this.opts.locate('open-browser').exists;
-  var skipAwsLinking = this.opts.locate('skip-aws-sdk').exists;
+  var skipLambdasBuild = this.opts.locate('skip-lambdas-build').exists;
   var profiling = this.opts.locate('profiling').exists;
   var skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
 
@@ -46,6 +46,30 @@ module.exports = function(mainPath) {
 
   var server = Server.create(mainPath);
   server.profiling = profiling;
+
+  function npmInstall(lambdaPath, cb) {
+    console.log('Checking for NPM package in ' + lambdaPath);
+
+    var packageFile = path.join(lambdaPath, 'package.json');
+
+    if (fs.existsSync(packageFile)) {
+      var nodeModulesPath = path.join(lambdaPath, 'node_modules');
+      var cmd = fs.existsSync(nodeModulesPath) ? 'update' : 'install';
+
+      console.log('Running "npm ' + cmd + '" in ' + lambdaPath);
+
+      exec('cd ' + lambdaPath + ' && npm ' + cmd, function(error, stdout, stderr) {
+        if (error) {
+          console.error('Failed to run "npm ' + cmd + '" in ' + lambdaPath
+            + ' (' + stderr + '). Skipping...');
+        }
+
+        cb();
+      }.bind(this));
+    } else {
+      console.log('No NPM package found in ' + lambdaPath + '. Skipping...');
+    }
+  }
 
   function linkAwsSdk(lambdaPath, cb) {
     console.log('Linking aws-sdk library in ' + lambdaPath);
@@ -82,7 +106,7 @@ module.exports = function(mainPath) {
     });
   }
 
-  if (skipAwsLinking) {
+  if (skipLambdasBuild) {
     startServer();
     return;
   }
@@ -100,11 +124,11 @@ module.exports = function(mainPath) {
 
         awsLinkingLambdas++;
 
-        console.log('Linking aws-sdk at ' + lambdaPath);
-
-        linkAwsSdk(lambdaPath, function() {
-          awsLinkingLambdas--;
-        }.bind(this));
+        npmInstall(lambdaPath, function(lambdaPath) {
+          linkAwsSdk(lambdaPath, function() {
+            awsLinkingLambdas--;
+          }.bind(this));
+        }.bind(this, lambdaPath));
       }
     }
   }
