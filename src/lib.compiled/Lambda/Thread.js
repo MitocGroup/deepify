@@ -81,8 +81,8 @@ var Thread = (function () {
 
         noPrematureFailCheck = true;
 
-        onError('The Lambda timeout of ' + _PropertyLambda.Lambda.DEFAULT_TIMEOUT + ' seconds exceeded!');
-      }, parseInt(_PropertyLambda.Lambda.DEFAULT_TIMEOUT) * 1000);
+        onError('The Lambda timeout of ' + _PropertyLambda.Lambda.MAX_TIMEOUT + ' seconds exceeded!');
+      }, parseInt(_PropertyLambda.Lambda.MAX_TIMEOUT) * 1000);
 
       this._process.on('message', function (payload) {
         if (contextSent) {

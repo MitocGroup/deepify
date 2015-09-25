@@ -64,8 +64,8 @@ export class Thread {
 
       noPrematureFailCheck = true;
 
-      onError(`The Lambda timeout of ${Lambda.DEFAULT_TIMEOUT} seconds exceeded!`);
-    }, parseInt(Lambda.DEFAULT_TIMEOUT) * 1000);
+      onError(`The Lambda timeout of ${Lambda.MAX_TIMEOUT} seconds exceeded!`);
+    }, parseInt(Lambda.MAX_TIMEOUT) * 1000);
 
     this._process.on('message', (payload) => {
       if (contextSent) {
