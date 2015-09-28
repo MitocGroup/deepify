@@ -111,7 +111,58 @@ module.exports = function(mainPath) {
     return;
   }
 
-  var awsLinkingLambdas = 0;
+  function prepareBatch(lambdaPaths, cb) {
+    var remaining = lambdaPaths.length;
+
+    var wait = new WaitFor();
+
+    for (var i = 0; i < lambdaPaths.length; i++) {
+      var lambdaPath = lambdaPaths[i];
+
+      npmInstall(lambdaPath, function(lambdaPath) {
+        linkAwsSdk(lambdaPath, function() {
+          remaining--;
+        }.bind(this));
+      }.bind(this, lambdaPath));
+    }
+
+    wait.push(function() {
+      return remaining <= 0;
+    }.bind(this));
+
+    wait.ready(function() {
+      cb();
+    }.bind(this));
+  }
+
+  function chunk(arr, len) {
+    var chunks = [];
+    var i = 0;
+    var n = arr.length;
+
+    while (i < n) {
+      chunks.push(arr.slice(i, i += len));
+    }
+
+    return chunks;
+  }
+
+  function dispatchLambdaPathsChain(lambdaPathsChunks, cb) {
+    if (lambdaPathsChunks.length <= 0) {
+      cb();
+      return;
+    }
+
+    var batch = lambdaPathsChunks.pop();
+
+    console.log('Running next lambdas build batch: ' + batch.join(', '));
+
+    prepareBatch(batch, function() {
+      dispatchLambdaPathsChain(lambdaPathsChunks, cb);
+    }.bind(this));
+  }
+
+  var lambdaPaths = [];
 
   for (var i = 0; i < server.property.microservices.length; i++) {
     var microservice = server.property.microservices[i];
@@ -120,26 +171,10 @@ module.exports = function(mainPath) {
       var microserviceRoute = microservice.resources.actions[j];
 
       if (microserviceRoute.type === 'lambda') {
-        var lambdaPath = path.join(microservice.autoload.backend, microserviceRoute.source);
-
-        awsLinkingLambdas++;
-
-        npmInstall(lambdaPath, function(lambdaPath) {
-          linkAwsSdk(lambdaPath, function() {
-            awsLinkingLambdas--;
-          }.bind(this));
-        }.bind(this, lambdaPath));
+        lambdaPaths.push(path.join(microservice.autoload.backend, microserviceRoute.source));
       }
     }
   }
 
-  var wait = new WaitFor();
-
-  wait.push(function() {
-    return awsLinkingLambdas <= 0;
-  }.bind(this));
-
-  wait.ready(function() {
-    startServer();
-  }.bind(this));
+  dispatchLambdaPathsChain(chunk(lambdaPaths, 10), startServer);
 };
