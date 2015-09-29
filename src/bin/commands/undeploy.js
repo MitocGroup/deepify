@@ -400,11 +400,72 @@ module.exports = function(mainPath) {
     function removeCfDistribution(distId) {
       console.log('--> Deleting CloudFront distribution ' + distId);
 
-      cf.deleteDistribution({
+      cf.getDistributionConfig({
         Id: distId,
       }, function(error, data) {
-        console.error('Error while removing CloudFront distribution: ' + error);
-      });
+        if (error) {
+          console.error('Error while retrieving CloudFront distribution config: ' + error);
+          return;
+        }
+
+        var distConfig = data.DistributionConfig;
+        distConfig.Enabled = false;
+
+        cf.updateDistribution({
+          Id: distId,
+          IfMatch: data.ETag,
+          DistributionConfig: distConfig,
+        }, function(error, data) {
+          if (error) {
+            console.error('Error while updating CloudFront distribution: ' + error);
+            return;
+          }
+
+          // @todo: find a better way to remove a distribution without waiting such a long time
+          waitForCfDistDisabled(distId, data.ETag, function(distId, eTag) {
+            cf.deleteDistribution({
+              Id: distId,
+              IfMatch: eTag,
+            }, function(error, data) {
+              if (error) {
+                console.error('Error while removing CloudFront distribution: ' + error);
+              }
+            }.bind(this));
+          }.bind(this));
+        }.bind(this));
+      }.bind(this));
+    }
+
+    function waitForCfDistDisabled(distId, eTag, cb, estTime) {
+      if (typeof estTime === 'undefined') {
+        estTime = 15 * 60; // 15 minutes
+      }
+
+      cf.getDistribution({
+        Id: distId,
+      }, function(error, data) {
+        if (error) {
+          console.error('Error while retrieving CloudFront distribution status: ' + error);
+          return;
+        }
+
+        var status = data.Distribution.Status;
+
+        if (status !== 'Deployed') {
+          console.log(
+            'Waiting for distribution ' +
+            distId + ' to be disabled (currently ' + status + ', ETC ' + (estTime / 60) + ' min.)'
+          );
+
+          setTimeout(function() {
+            waitForCfDistDisabled(distId, eTag, cb, estTime - 30);
+          }.bind(this), 1000 * 30);
+
+          return;
+        }
+
+        cb(distId, eTag);
+      }.bind(this));
     }
 
     cf.listDistributions({
@@ -423,7 +484,7 @@ module.exports = function(mainPath) {
           pushQueue(removeCfDistribution, [distId]);
         }
       }
-    });
+    }.bind(this));
 
     console.log('=== DynamoDB ===');
 
