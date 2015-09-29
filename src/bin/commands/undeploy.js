@@ -453,7 +453,7 @@ module.exports = function(mainPath) {
 
         if (status !== 'Deployed') {
           console.log(
-            'Waiting for distribution ' +
+            'Waiting for CloudFront distribution ' +
             distId + ' to be disabled (currently ' + status + ', ETC ' + (estTime / 60) + ' min.)'
           );
 
