@@ -21,7 +21,8 @@ module.exports = function(mainPath) {
   var dbServer = this.opts.locate('db-server').value || 'Dynalite';
   var serverAddress = 'http://localhost:' + port;
   var openBrowser = this.opts.locate('open-browser').exists;
-  var skipLambdasBuild = this.opts.locate('skip-lambdas-build').exists;
+  var skipBuildHook = this.opts.locate('skip-build-hook').exists;
+  var skipBackendBuild = this.opts.locate('skip-backend-build').exists;
   var profiling = this.opts.locate('profiling').exists;
   var skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
 
@@ -46,6 +47,28 @@ module.exports = function(mainPath) {
 
   var server = Server.create(mainPath);
   server.profiling = profiling;
+
+  function runInstallHook(cb) {
+    if (skipBuildHook) {
+      cb();
+      return;
+    }
+
+    var hookPath = path.join(mainPath, 'hook.server.js');
+
+    console.log('Checking for build hook in ' + hookPath);
+
+    if (!fs.existsSync(hookPath)) {
+      cb();
+      return;
+    }
+
+    console.log('Running build hook from ' + hookPath);
+
+    var hook = require(hookPath);
+
+    hook.bind(server)(cb);
+  }
 
   function npmInstall(lambdaPath, cb) {
     console.log('Checking for NPM package in ' + lambdaPath);
@@ -106,7 +129,7 @@ module.exports = function(mainPath) {
     });
   }
 
-  if (skipLambdasBuild) {
+  if (skipBackendBuild) {
     startServer();
     return;
   }
@@ -176,5 +199,7 @@ module.exports = function(mainPath) {
     }
   }
 
-  dispatchLambdaPathsChain(chunk(lambdaPaths, 10), startServer);
+  runInstallHook(function() {
+    dispatchLambdaPathsChain(chunk(lambdaPaths, 10), startServer);
+  }.bind(this));
 };
