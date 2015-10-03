@@ -2,18 +2,18 @@ language: node_js
 sudo: false
 node_js:
 - '0.12'
-
 cache:
   directories:
   - "$(npm root -g)"
-
+notifications:
+  email:
+  - devs-deep@mitocgroup.com
 branches:
   only:
   - master
   - stage
   - test
   - dev
-
 before_install:
 - npm install -g babel
 - npm install -g browserify
@@ -25,7 +25,6 @@ before_install:
 - npm install -g istanbul-combine
 - cp test/package.json .
 - test/bin/setup_npm.sh
-
 after_success:
 - npm run coverage
 
