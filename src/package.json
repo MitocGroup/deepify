@@ -1,48 +1,50 @@
 {
   "name": "@mitocgroup/deepify",
   "version": "0.1.79",
-  "description": "Deep development tools",
-  "author": {
-    "name": "Mitoc Group",
-    "email": "hello@mitocgroup.com",
-    "website": "www.mitocgroup.com"
-  },
-  "contributors": [
-    {
-      "name": "DEEP Dev Team",
-      "email": "hello@deep.mg",
-      "website": "www.deep.mg"
-    }
+  "description": "DEEP Development Tools",
+  "keywords": [
+    "Digital Enterprise End-To-End Platform",
+    "Amazon Web Services",
+    "Platform-as-a-Service",
+    "DEEP",
+    "AWS",
+    "PaaS",
+    "Cloud",
+    "Computing",
+    "Microservices",
+    "Architecture",
+    "Serverless",
+    "Abstracted",
+    "Development",
+    "Tools"
   ],
+  "homepage": "https://github.com/MitocGroup/deepify",
   "bugs": {
     "url": "https://github.com/MitocGroup/deepify/issues"
   },
-  "keywords": [
-    "DEEP",
-    "Digital Enterprise End-To-End Platform",
-    "Deep Core Services",
-    "Package Manager"
+  "license": "MIT",
+  "author": {
+    "name": "Mitoc Group",
+    "email": "hello@mitocgroup.com",
+    "url": "http://www.mitocgroup.com"
+  },
+  "contributors": [
+    {
+      "name": "AlexanderC",
+      "email": "alexanderc@mitocgroup.com"
+    },
+    {
+      "name": "Marcel Goria",
+      "email": "mgoria@mitocgroup.com"
+    }
   ],
   "bin": {
     "deepify": "./bin/deepify.js"
   },
-  "os": [
-    "!win32"
-  ],
-  "engines": {
-    "node": ">=0.12",
-    "npm": ">=2.10"
-  },
   "main": "lib.compiled/bootstrap.js",
-  "dependencies": {
-    "@mitocgroup/deep-package-manager": "*",
-    "proxyquire": "1.5.*",
-    "v8-profiler": "5.2.*",
-    "traceviewify": "0.4.*",
-    "open": "0.0.*"
-  },
-  "devDependencies": {
-    "chai": "3.2.*"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MitocGroup/deepify.git"
   },
   "scripts": {
     "coverage": "babel-node `which istanbul` cover --report lcovonly _mocha -- --ui tdd --recursive --reporter spec",
@@ -54,6 +56,23 @@
     "link-deep-package-manager-npm": "ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/node_modules/* `pwd`/node_modules || true",
     "link-deep-package-manager-npm-subdirs": "ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/node_modules/\\@mitocgroup/* `pwd`/node_modules/\\@mitocgroup || true"
   },
+  "dependencies": {
+    "@mitocgroup/deep-package-manager": "*",
+    "proxyquire": "1.5.*",
+    "v8-profiler": "5.2.*",
+    "traceviewify": "0.4.*",
+    "open": "0.0.*"
+  },
+  "devDependencies": {
+    "chai": "3.2.*"
+  },
+  "engines": {
+    "node": ">=0.12",
+    "npm": ">=2.10"
+  },
+  "os": [
+    "!win32"
+  ],
   "preferGlobal": true,
   "analyze": true
 }
