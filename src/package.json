@@ -1,6 +1,6 @@
 {
-  "name": "@mitocgroup/deepify",
-  "version": "0.1.80",
+  "name": "deepify",
+  "version": "0.1.82",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -48,16 +48,15 @@
   },
   "scripts": {
     "coverage": "babel-node `which istanbul` cover --report lcovonly _mocha -- --ui tdd --recursive --reporter spec",
-    "postinstall": "npm run link-deep-package-manager && npm run link-deep-package-manager-npm && npm run link-deep-package-manager-npm-subdirs && hooks/assure_deep_dev.js && hooks/autocomplete_deepify.sh",
+    "postinstall": "npm run link-deep-package-manager && npm run link-deep-package-manager-npm && hooks/assure_deep_dev.js && hooks/autocomplete_deepify.sh",
     "test": "mocha --ui tdd --compilers js:mocha-babel --recursive --reporter spec",
     "compile": "if [ -d 'lib/' ]; then BABEL_ENV=production babel lib/ --out-dir lib.compiled/; fi",
     "prepublish": "npm run compile",
-    "link-deep-package-manager": "ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/lib.compiled/* `pwd`/lib.compiled || true",
-    "link-deep-package-manager-npm": "ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/node_modules/* `pwd`/node_modules || true",
-    "link-deep-package-manager-npm-subdirs": "ln -s `pwd`/node_modules/\\@mitocgroup/deep-package-manager/node_modules/\\@mitocgroup/* `pwd`/node_modules/\\@mitocgroup || true"
+    "link-deep-package-manager": "ln -s `pwd`/node_modules/deep-package-manager/lib.compiled/* `pwd`/lib.compiled || true",
+    "link-deep-package-manager-npm": "ln -s `pwd`/node_modules/deep-package-manager/node_modules/* `pwd`/node_modules || true"
   },
   "dependencies": {
-    "@mitocgroup/deep-package-manager": "*",
+    "deep-package-manager": "*",
     "proxyquire": "1.5.*",
     "v8-profiler": "5.2.*",
     "traceviewify": "0.4.*",

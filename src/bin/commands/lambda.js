@@ -7,7 +7,7 @@
 
 module.exports = function(lambdaPath) {
   var Runtime = require('../../lib.compiled/Lambda/Runtime.js').Runtime;
-  var DeepDB = require('@mitocgroup/deep-db');
+  var DeepDB = require('deep-db');
   var path = require('path');
   var fs = require('fs');
   var exec = require('sync-exec');

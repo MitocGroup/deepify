@@ -11,7 +11,7 @@ if (process.env[npmEnvKey] !== 'true') {
   var fs = require('fs');
   var exec = require('child_process').exec;
 
-  var deepModulePath = path.join(__dirname, '../node_modules/@mitocgroup');
+  var deepModulePath = path.join(__dirname, '../node_modules');
 
   fs.readdir(deepModulePath, function(error, files) {
     if (error) {
