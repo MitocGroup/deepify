@@ -131,7 +131,7 @@ module.exports = function(mainPath) {
     // Gracefully teardown...
     (function() {
       process.on('uncaughtException', function(error) {
-        console.error(error);
+        console.error(error.toString(), os.EOL, error.stack);
 
         if (propertyInstance.config.provisioning) {
           dumpConfig.bind(this)(propertyInstance, function() {
