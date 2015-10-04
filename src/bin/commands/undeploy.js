@@ -14,7 +14,9 @@ module.exports = function(mainPath) {
   var Core = require('deep-core');
   var Config = require('../../lib.compiled/Property/Config').Config;
   var AwsRequestSyncStack = require('../../lib.compiled/Helpers/AwsRequestSyncStack').AwsRequestSyncStack;
+  var WaitFor = require('../../lib.compiled/Helpers/WaitFor').WaitFor;
   var exec = require('child_process').exec;
+  var AwsApiGatewayClient = require('aws-api-gw-client').Client;
 
   // @todo: hook to avoid TypeError: Super expression must either be null or a function, not undefined
   require('../../lib.compiled/Provisioning/Instance.js');
@@ -96,8 +98,13 @@ module.exports = function(mainPath) {
         CognitoIdentity: [],
         IAM: [],
         Lambda: [],
-        CloudFront: []
+        CloudFront: [],
+        APIGateway: [],
       };
+
+      if (deployProvisioning.apigateway && deployProvisioning.apigateway.api) {
+        deployConfig.APIGateway.push(deployProvisioning.apigateway.api.id);
+      }
 
       if (deployProvisioning.dynamodb && deployProvisioning.dynamodb.tablesNames) {
         deployConfig.DynamoDB = objectValues(deployProvisioning.dynamodb.tablesNames);
@@ -197,10 +204,51 @@ module.exports = function(mainPath) {
         service.AVAILABLE_REGIONS
       );
 
+      // @todo: replace with native API when ready
+      if (name === 'APIGateway') {
+        return new AwsApiGatewayClient({
+          accessKeyId: config.aws.accessKeyId,
+          secretAccessKey: config.aws.secretAccessKey,
+          region: appropriateRegion,
+        });
+      }
+
       return new aws[name]({
         region: appropriateRegion,
       });
     }
+
+    console.log('=== API Gateway ===');
+
+    var apiGateway = deepAwsService('APIGateway');
+
+    var deleteApiChain = function(apiId) {
+      console.log('--> Removing API Gateway ' + apiId);
+
+      apiGateway.deleteRestapi({restapiId: apiId})
+        .catch(function(error) {
+          console.error('Error while removing API Gateway ' + apiId + ': ' + error);
+        }.bind(this));
+    };
+
+    apiGateway.listRestapis()
+      .then(function(data) {
+        for (var i in data) {
+          if (!data.hasOwnProperty(i)) {
+            continue;
+          }
+
+          var source = data[i].source;
+          var apiId = source.id;
+
+          if (matchAwsResource('APIGateway', apiId)) {
+            pushQueue(deleteApiChain, [apiId]);
+          }
+        }
+      }.bind(this))
+      .catch(function(error) {
+        console.error('Error while listing API Gateway: ' + error);
+      }.bind(this));
 
     console.log('=== IAM ===');
 
