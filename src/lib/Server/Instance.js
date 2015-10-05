@@ -340,7 +340,7 @@ export class Instance {
       lambdaConfig.buildPath ? Path.join(lambdaConfig.buildPath, '.aws.json') : null
     );
 
-    lambda.name = `${lambdaConfig.arn}-${this.localId}`;
+    lambda.name = `${lambdaConfig.name}-${this.localId}`;
     lambda.profiler = this._profiling ? new Profiler(lambda.name) : null;
 
     lambda.runForked(payload);
@@ -350,14 +350,14 @@ export class Instance {
 
       let plainResult = JSON.stringify(result);
 
-      this._log(`Serving result for Lambda ${lambdaConfig.arn}: ${plainResult}`);
+      this._log(`Serving result for Lambda ${lambdaConfig.name}: ${plainResult}`);
       this._send(response, plainResult, 200, 'application/json', false);
     }.bind(this);
 
     lambda.fail = function(error) {
       this._trySaveProfile(lambda);
 
-      this._log(`Lambda ${lambdaConfig.arn} execution fail: ${error.message}`);
+      this._log(`Lambda ${lambdaConfig.name} execution fail: ${error.message}`);
       this._send500(response, error);
     }.bind(this);
   }
