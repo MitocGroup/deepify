@@ -7,7 +7,7 @@ deepify
 [![Codacy Badge](https://api.codacy.com/project/badge/5c6487913e4d4b7bacbf0c78200fdda0)](https://www.codacy.com/app/deep/deepify)
 [![API Docs](http://docs.deep.mg/badge.svg)](http://docs.deep.mg)
 
-[deepify](https://www.npmjs.com/package/deepify) is a node.js library, part of [DEEP Framework](https://github.com/MitocGroup/deep).
+[deepify](https://www.npmjs.com/package/deepify) is a node.js library, part of [DEEP Framework](https://github.com/MitocGroup/deep-framework).
 
 ![Digital Enterprise End-to-end Platform, aka DEEP](https://github.com/MitocGroup/deep-framework/blob/master/docs/deep-ecosystem.png)
 
