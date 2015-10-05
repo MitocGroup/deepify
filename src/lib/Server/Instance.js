@@ -119,7 +119,7 @@ export class Instance {
           let resourceAction = resourceActions[actionName];
 
           if (resourceAction.type === Action.LAMBDA) {
-            this._buildConfig.lambdas[resourceAction.source] = {
+            this._buildConfig.lambdas[resourceAction.source.original] = {
               identifier: resourceIdentifier,
               methods: resourceAction.methods,
               name: resourceAction.source.original,
