@@ -200,6 +200,6 @@ module.exports = function(mainPath) {
   }
 
   runInstallHook(function() {
-    dispatchLambdaPathsChain(chunk(lambdaPaths, 10), startServer);
+    dispatchLambdaPathsChain(chunk(lambdaPaths, 5), startServer);
   }.bind(this));
 };
