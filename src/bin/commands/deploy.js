@@ -45,6 +45,8 @@ module.exports = function(mainPath) {
   var tmpPropertyPath = path.join(tmpDir, path.basename(mainPath));
   tmpPropertyPath += '_' + (new Date()).getTime();
 
+  var propertyInstance;
+
   if (localOnly) {
     console.log('Local mode on!');
   }
@@ -56,7 +58,15 @@ module.exports = function(mainPath) {
         this.exit(1);
       }
 
-      hasToPullDeps ? pullDeps.bind(this)(doDeploy) : doDeploy.bind(this)();
+      propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
+
+      propertyInstance.assureFrontendEngine(function(error) {
+        if (error) {
+          console.error('Error while assuring frontend engine: ' + error);
+        }
+
+        hasToPullDeps ? pullDeps.bind(this)(doDeploy) : doDeploy.bind(this)();
+      }.bind(this));
     }.bind(this)
   );
 
@@ -121,8 +131,6 @@ module.exports = function(mainPath) {
   }
 
   function doDeploy() {
-    var propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
-
     propertyInstance.localDeploy = localOnly;
 
     var deepConfigFile = path.join(mainPath, '.cfg.deeploy.json');

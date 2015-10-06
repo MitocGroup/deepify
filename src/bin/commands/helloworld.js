@@ -9,9 +9,7 @@ module.exports = function(dumpPath) {
   var path = require('path');
   var fse = require('fs-extra');
   var exec = require('child_process').exec;
-  var ngRootRepoUrl = 'https://github.com/MitocGroup/deep-microservices-root-angularjs.git';
   var helloWorldRepoUrl = 'https://github.com/MitocGroup/deep-microservices-helloworld.git';
-  var ngRootModule = 'DeepNgRoot';
   var helloWorldModule = 'DeepHelloWorld';
 
   if (dumpPath.indexOf('/') !== 0) {
@@ -19,7 +17,6 @@ module.exports = function(dumpPath) {
   }
 
   var helloWorldPath = path.join(dumpPath, helloWorldModule);
-  var ngRootPath = path.join(dumpPath, ngRootModule);
 
   gitClone(helloWorldRepoUrl, 'src/' + helloWorldModule, helloWorldPath, function(error) {
     if (error) {
@@ -27,31 +24,24 @@ module.exports = function(dumpPath) {
       return;
     }
 
-    gitClone(ngRootRepoUrl, 'src/' + ngRootModule, ngRootPath, function(error) {
-      if (error) {
-        this.exit(1);
-        return;
-      }
+    npmInstall(['babel'], function(error) {
+      console.log('Sample property was successfully dumped.');
 
-      npmInstall(['babel'], function(error) {
-        console.log('Sample property was successfully dumped.');
-
-        //if (!error) {
-        //  console.log('Running "npm install" on SayHello Lambda');
-        //
-        //  var lambdaPath = path.join(helloWorldPath, 'Backend/src/SayHello');
-        //
-        //  exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
-        //    if (error) {
-        //      console.error('Error installing SayHello Lambda dependencies: ' + stderr);
-        //      return;
-        //    }
-        //
-        //    console.log('Sample property was successfully dumped.');
-        //  }.bind(this));
-        //}
-      });
-    }.bind(this));
+      //if (!error) {
+      //  console.log('Running "npm install" on SayHello Lambda');
+      //
+      //  var lambdaPath = path.join(helloWorldPath, 'Backend/src/SayHello');
+      //
+      //  exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
+      //    if (error) {
+      //      console.error('Error installing SayHello Lambda dependencies: ' + stderr);
+      //      return;
+      //    }
+      //
+      //    console.log('Sample property was successfully dumped.');
+      //  }.bind(this));
+      //}
+    });
   }.bind(this));
 };
 
