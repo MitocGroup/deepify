@@ -189,21 +189,23 @@ module.exports = function(mainPath) {
     }.bind(this));
   }
 
-  var lambdaPaths = [];
+  server.property.runInitMsHooks(function() {
+    var lambdaPaths = [];
 
-  for (var i = 0; i < server.property.microservices.length; i++) {
-    var microservice = server.property.microservices[i];
+    for (var i = 0; i < server.property.microservices.length; i++) {
+      var microservice = server.property.microservices[i];
 
-    for (var j = 0; j < microservice.resources.actions.length; j++) {
-      var microserviceRoute = microservice.resources.actions[j];
+      for (var j = 0; j < microservice.resources.actions.length; j++) {
+        var microserviceRoute = microservice.resources.actions[j];
 
-      if (microserviceRoute.type === 'lambda') {
-        lambdaPaths.push(path.join(microservice.autoload.backend, microserviceRoute.source));
+        if (microserviceRoute.type === 'lambda') {
+          lambdaPaths.push(path.join(microservice.autoload.backend, microserviceRoute.source));
+        }
       }
     }
-  }
 
-  runInstallHook(function() {
-    dispatchLambdaPathsChain(chunk(lambdaPaths, 5), startServer);
+    runInstallHook(function() {
+      dispatchLambdaPathsChain(chunk(lambdaPaths, 3), startServer);
+    }.bind(this));
   }.bind(this));
 };

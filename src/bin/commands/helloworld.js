@@ -51,9 +51,7 @@ module.exports = function(dumpPath) {
         //  }.bind(this));
         //}
       });
-    }.bind(this), {
-      'src/hook.server.js': path.join(dumpPath, 'hook.server.js'),
-    });
+    }.bind(this));
   }.bind(this));
 };
 
