@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "0.1.94",
+  "version": "0.1.96",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -51,7 +51,8 @@
     "postinstall": "npm run link-deep-package-manager && npm run link-deep-package-manager-npm && hooks/assure_deep_dev.js && hooks/autocomplete_deepify.sh",
     "test": "mocha --ui tdd --compilers js:mocha-babel --recursive --reporter spec",
     "compile": "if [ -d 'lib/' ]; then BABEL_ENV=production babel lib/ --out-dir lib.compiled/; fi",
-    "prepublish": "npm run compile",
+    "obfuscate-compiled": "if [ -d 'lib/' ]; then npm info -g uglify --loglevel silent > /dev/null || npm install uglify -g; for f in $(find lib.compiled -type f -name *.js); do uglify -s ${f} -o ${f}; done; fi",
+    "prepublish": "npm run compile && npm run obfuscate-compiled",
     "link-deep-package-manager": "ln -s `pwd`/node_modules/deep-package-manager/lib.compiled/* `pwd`/lib.compiled || true",
     "link-deep-package-manager-npm": "ln -s `pwd`/node_modules/deep-package-manager/node_modules/* `pwd`/node_modules || true"
   },
