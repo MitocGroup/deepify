@@ -51,7 +51,9 @@ module.exports = function(dumpPath) {
         //  }.bind(this));
         //}
       });
-    }.bind(this));
+    }.bind(this), {
+      'src/hook.server.js': path.join(dumpPath, 'hook.server.js'),
+    });
   }.bind(this));
 };
 
@@ -72,12 +74,14 @@ function npmInstall(repos, cb) {
   }.bind(this));
 }
 
-function gitClone(repo, subfolder, targetDir, cb) {
+function gitClone(repo, subfolder, targetDir, cb, copyFiles) {
   var path = require('path');
   var fs = require('fs');
   var fse = require('fs-extra');
   var exec = require('child_process').exec;
   var tmp = require('tmp');
+
+  copyFiles = copyFiles || {};
 
   var tmpFolder = tmp.dirSync().name;
 
@@ -97,6 +101,20 @@ function gitClone(repo, subfolder, targetDir, cb) {
     }
 
     fse.copySync(path.join(tmpFolder, subfolder), targetDir, {clobber: true});
+
+    var copyFilesKeys = Object.keys(copyFiles);
+
+    for (var i in copyFilesKeys) {
+      if (!copyFilesKeys.hasOwnProperty(i)) {
+        continue;
+      }
+
+      var fSrc = copyFilesKeys[i];
+      var fDes = copyFiles[fSrc];
+
+      fse.copySync(path.join(tmpFolder, fSrc), fDes, {clobber: true});
+    }
+
     fse.removeSync(tmpFolder);
 
     cb(null);

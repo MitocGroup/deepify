@@ -67,7 +67,11 @@ module.exports = function(mainPath) {
 
     var hook = require(hookPath);
 
-    hook.bind(server)(cb);
+    if (typeof hook === 'function') {
+      hook.bind(server)(cb);
+    } else {
+      cb();
+    }
   }
 
   function npmInstall(lambdaPath, cb) {
