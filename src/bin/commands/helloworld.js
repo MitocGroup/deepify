@@ -24,7 +24,7 @@ module.exports = function(dumpPath) {
       return;
     }
 
-    npmInstall(['babel'], function(error) {
+    npmInstall('babel', function(error) {
       console.log('Sample property was successfully dumped.');
 
       //if (!error) {
@@ -45,14 +45,14 @@ module.exports = function(dumpPath) {
   }.bind(this));
 };
 
-function npmInstall(repos, cb) {
+function npmInstall(repo, cb) {
   var exec = require('child_process').exec;
 
-  console.log('[NPM] Installing ' + repos.join(', ') + ' globally');
+  console.log('[NPM] Installing ' + repo + ' globally');
 
-  exec('npm install -g ' + repos.join(' '), function(error, stdout, stderr) {
+  exec('npm info -g ' + repo + ' --loglevel silent > /dev/null || npm install -g ' + repo, function(error, stdout, stderr) {
     if (error) {
-      console.error('Error installing Babel globally: ' + stderr);
+      console.error('Error installing ' + repo + ' globally: ' + stderr);
 
       cb(error);
       return;
