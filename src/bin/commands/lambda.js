@@ -36,7 +36,7 @@ module.exports = function(lambdaPath) {
 
 
   if (!fs.existsSync(lambdaPath)) {
-    console.error('Missing lambda in ' + lambdaPath);
+    console.error((new Date().toTimeString()) + ' Missing lambda in ' + lambdaPath);
     this.exit(1);
   }
 
@@ -55,37 +55,37 @@ module.exports = function(lambdaPath) {
   if (!fs.existsSync(awsConfigFile)) {
     awsConfigFile = false;
   } else {
-    console.log('AWS configuration found in ' + awsConfigFile);
+    console.log((new Date().toTimeString()) + ' AWS configuration found in ' + awsConfigFile);
   }
 
   var mainPath = path.dirname(lambdaPath);
 
-  console.log('Linking aws-sdk library');
+  console.log((new Date().toTimeString()) + ' Linking aws-sdk library');
 
   var awsSdkResult = exec('cd ' + mainPath + ' && npm link aws-sdk');
 
   if (awsSdkResult.status !== 0) {
-    console.error('Failed to link aws-sdk library. Trying to install it...');
+    console.error((new Date().toTimeString()) + ' Failed to link aws-sdk library. Trying to install it...');
 
     awsSdkResult = exec('cd ' + mainPath + ' && npm install aws-sdk');
 
     if (awsSdkResult.status !== 0) {
-      console.error('Failed to link or install aws-sdk locally (' + awsSdkResult.stderr + '). Skipping...');
+      console.error((new Date().toTimeString()) + ' Failed to link or install aws-sdk locally (' + awsSdkResult.stderr + '). Skipping...');
     }
   }
 
-  console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
+  console.log((new Date().toTimeString()) + ' Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
 
   DeepDB.startLocalDynamoDBServer(function(error) {
     if (error) {
-      console.error('Failed to start DynamoDB server: ' + error);
+      console.error((new Date().toTimeString()) + ' Failed to start DynamoDB server: ' + error);
       this.exit(1);
     }
 
     var lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
 
     lambda.complete = function(error, response) {
-      console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
+      console.log((new Date().toTimeString()) + ' Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
 
       if (error) {
         console.error(error);
@@ -95,13 +95,13 @@ module.exports = function(lambdaPath) {
       this.exit(0);
     }.bind(this);
 
-    console.log('Starting Lambda.', os.EOL);
+    console.log((new Date().toTimeString()) + ' Starting Lambda.', os.EOL);
 
     try {
       process.chdir(path.dirname(lambdaPath));
       lambda.run(event, true);
     } catch (e) {
-      console.error(e);
+      console.error((new Date().toTimeString()), e);
       this.exit(1);
     }
   }.bind(this), dbServer);

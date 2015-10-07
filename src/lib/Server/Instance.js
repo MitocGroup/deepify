@@ -33,7 +33,9 @@ export class Instance {
       throw new PropertyObjectRequiredException();
     }
 
-    this._logger = console.log;
+    this._logger = (...args) => {
+      console.log(new Date().toTimeString(), ...args);
+    };
     this._property = property;
     this._server = null;
     this._host = null;

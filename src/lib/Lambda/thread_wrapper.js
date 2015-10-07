@@ -41,7 +41,7 @@ if (rawRuntime._profiler) {
       return true;
     }
 
-    console.error(`- Trying to send ${runtime.name} Lambda context more times!`, thing);
+    console.error(`${new Date().toTimeString()} Trying to send ${runtime.name} Lambda context more times!`, thing);
 
     return false;
   };
