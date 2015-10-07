@@ -50,7 +50,7 @@ function npmInstall(repo, cb) {
 
   console.log('[NPM] Installing ' + repo + ' globally');
 
-  exec('npm info -g ' + repo + ' --loglevel silent > /dev/null || npm install -g ' + repo, function(error, stdout, stderr) {
+  exec('npm list -g --depth 1 ' + repo + ' > /dev/null 2>&1 || npm install -g ' + repo, function(error, stdout, stderr) {
     if (error) {
       console.error('Error installing ' + repo + ' globally: ' + stderr);
 
