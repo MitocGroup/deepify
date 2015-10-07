@@ -10,6 +10,7 @@ module.exports = function(mainPath) {
   var Server = require('../../lib.compiled/Server/Instance').Instance;
   var WaitFor = require('../../lib.compiled/Helpers/WaitFor').WaitFor;
   var Config = require('../../lib.compiled/Property/Config').Config;
+  var Property = require('../../lib.compiled/Property/Instance').Instance;
   var Autoload = require('../../lib.compiled/Microservice/Metadata/Autoload').Autoload;
   var exec = require('child_process').exec;
   var os = require('os');
@@ -45,8 +46,45 @@ module.exports = function(mainPath) {
     fs.writeFileSync(propertyConfigFile, JSON.stringify(Config.generate()));
   }
 
-  var server = Server.create(mainPath);
-  server.profiling = profiling;
+  var server;
+  var property = new Property(mainPath);
+
+  if (skipBackendBuild) {
+    server = new Server(property);
+    server.profiling = profiling;
+
+    startServer();
+    return;
+  }
+
+  property.assureFrontendEngine(function(error) {
+    if (error) {
+      console.error('Error while assuring frontend engine: ' + error);
+    }
+
+    property.runInitMsHooks(function() {
+      server = new Server(property);
+      server.profiling = profiling;
+
+      var lambdaPaths = [];
+
+      for (var i = 0; i < server.property.microservices.length; i++) {
+        var microservice = server.property.microservices[i];
+
+        for (var j = 0; j < microservice.resources.actions.length; j++) {
+          var microserviceRoute = microservice.resources.actions[j];
+
+          if (microserviceRoute.type === 'lambda') {
+            lambdaPaths.push(path.join(microservice.autoload.backend, microserviceRoute.source));
+          }
+        }
+      }
+
+      runInstallHook(function() {
+        dispatchLambdaPathsChain(chunk(lambdaPaths, 3), startServer);
+      }.bind(this));
+    }.bind(this));
+  }.bind(this));
 
   function runInstallHook(cb) {
     if (skipBuildHook) {
@@ -67,7 +105,11 @@ module.exports = function(mainPath) {
 
     var hook = require(hookPath);
 
-    hook.bind(server)(cb);
+    if (typeof hook === 'function') {
+      hook.bind(server)(cb);
+    } else {
+      cb();
+    }
   }
 
   function npmInstall(lambdaPath, cb) {
@@ -129,11 +171,6 @@ module.exports = function(mainPath) {
     });
   }
 
-  if (skipBackendBuild) {
-    startServer();
-    return;
-  }
-
   function prepareBatch(lambdaPaths, cb) {
     var remaining = lambdaPaths.length;
 
@@ -184,22 +221,4 @@ module.exports = function(mainPath) {
       dispatchLambdaPathsChain(lambdaPathsChunks, cb);
     }.bind(this));
   }
-
-  var lambdaPaths = [];
-
-  for (var i = 0; i < server.property.microservices.length; i++) {
-    var microservice = server.property.microservices[i];
-
-    for (var j = 0; j < microservice.resources.actions.length; j++) {
-      var microserviceRoute = microservice.resources.actions[j];
-
-      if (microserviceRoute.type === 'lambda') {
-        lambdaPaths.push(path.join(microservice.autoload.backend, microserviceRoute.source));
-      }
-    }
-  }
-
-  runInstallHook(function() {
-    dispatchLambdaPathsChain(chunk(lambdaPaths, 5), startServer);
-  }.bind(this));
 };
