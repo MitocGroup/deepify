@@ -145,6 +145,8 @@ module.exports = function(mainPath) {
           dumpConfig.bind(this)(propertyInstance, function() {
             this.exit(1);
           }.bind(this));
+        } else {
+          this.exit(1);
         }
       }.bind(this));
 
@@ -155,6 +157,8 @@ module.exports = function(mainPath) {
           dumpConfig.bind(this)(propertyInstance, function() {
             this.exit(0);
           }.bind(this));
+        } else {
+          this.exit(0);
         }
       }.bind(this));
     }.bind(this))();
