@@ -42,12 +42,26 @@ export class Help {
   }
 
   /**
+   * @param {Boolean} sortByKeys
    * @returns {Help}
    * @private
    */
-  _printCommands() {
+  _printCommands(sortByKeys = false) {
     if (this._program.hasCommands) {
       let commands = this._program.commands;
+
+      if (sortByKeys) {
+        commands.sort((a, b) => {
+          if (a.name > b.name) {
+            return 1;
+          }
+          if (a.name < b.name) {
+            return -1;
+          }
+
+          return 0;
+        });
+      }
 
       console.log('Available commands: ');
 
