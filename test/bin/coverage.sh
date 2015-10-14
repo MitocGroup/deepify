@@ -2,8 +2,12 @@
 
 source $(dirname $0)/_head.sh
 
-### Run Coverage ###
+### Undo Traspile to have valid coverage###
+__CMD='npm run compile'
 
+subpath_run_cmd ${__SRC_PATH} "$__CMD"
+
+### Run Coverage ###
 __CMD='npm run coverage'
 
 subpath_run_cmd ${__SRC_PATH} "$__CMD"
@@ -17,11 +21,11 @@ istanbul-combine -d ${COVERAGE_PATH} -r lcovonly -p none \
 
 ### Upload Coverage info to Codacy ###
 
-cat ${COVERAGE_PATH}"/lcov.info" | codacy-coverage
-cat ${COVERAGE_PATH}"/lcov.info" | coveralls
-
-### Cleanup! ###
-
-__CMD='rm -rf ./coverage'
-
-subpath_run_cmd ${__SRC_PATH} "$__CMD"
+#cat ${COVERAGE_PATH}"/lcov.info" | codacy-coverage
+#cat ${COVERAGE_PATH}"/lcov.info" | coveralls
+#
+#### Cleanup! ###
+#
+#__CMD='rm -rf ./coverage'
+#
+#subpath_run_cmd ${__SRC_PATH} "$__CMD"
