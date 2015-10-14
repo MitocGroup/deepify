@@ -21,11 +21,11 @@ istanbul-combine -d ${COVERAGE_PATH} -r lcovonly -p none \
 
 ### Upload Coverage info to Codacy ###
 
-#cat ${COVERAGE_PATH}"/lcov.info" | codacy-coverage
-#cat ${COVERAGE_PATH}"/lcov.info" | coveralls
-#
-#### Cleanup! ###
-#
-#__CMD='rm -rf ./coverage'
-#
-#subpath_run_cmd ${__SRC_PATH} "$__CMD"
+cat ${COVERAGE_PATH}"/lcov.info" | codacy-coverage
+cat ${COVERAGE_PATH}"/lcov.info" | coveralls
+
+### Cleanup! ###
+
+__CMD='rm -rf ./coverage'
+
+subpath_run_cmd ${__SRC_PATH} "$__CMD"
