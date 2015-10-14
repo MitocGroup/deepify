@@ -15,7 +15,7 @@ if (process.env[npmEnvKey] !== 'true') {
 
   fs.readdir(deepModulePath, function(error, files) {
     if (error) {
-      console.error('Error while listing deep modules: ' + error);
+      console.error((new Date().toTimeString()) + ' Error while listing deep modules: ' + error);
       process.exit(1);
     }
 
@@ -27,7 +27,7 @@ if (process.env[npmEnvKey] !== 'true') {
 
         fs.lstat(modulePath, function(modulePath, error, stats) {
           if (error) {
-            console.error('Error while getting stats of ' + modulePath + ': ' + error);
+            console.error((new Date().toTimeString()) + ' Error while getting stats of ' + modulePath + ': ' + error);
             process.exit(1);
           }
 
@@ -36,14 +36,14 @@ if (process.env[npmEnvKey] !== 'true') {
 
             fs.readFile(packageFile, function(error, data) {
               if (error) {
-                console.error('Error while reading ' + packageFile + ': ' + error);
+                console.error((new Date().toTimeString()) + ' Error while reading ' + packageFile + ': ' + error);
                 process.exit(1);
               }
 
               var packageConfig = JSON.parse(data.toString());
 
               if (!packageConfig) {
-                console.error('Broken JSON string in ' + packageFile + ': ' + error);
+                console.error((new Date().toTimeString()) + ' Broken JSON string in ' + packageFile + ': ' + error);
                 process.exit(1);
               }
 
@@ -57,16 +57,16 @@ if (process.env[npmEnvKey] !== 'true') {
                 var depVersion = devDependencies[depName];
                 var depString = depName + '@' + depVersion;
 
-                console.log('Installing ' + depString);
+                console.log((new Date().toTimeString()) + ' Installing ' + depString);
 
                 exec(
                   'cd ' + modulePath + ' && npm install ' + depString,
                   function(depString, error, stdout, stderr) {
                     if (error) {
-                      console.error('Error while installing ' + depString + ': ' + stderr);
+                      console.error((new Date().toTimeString()) + ' Error while installing ' + depString + ': ' + stderr);
                     }
 
-                    console.log('Dependency ' + depString + ' installed!');
+                    console.log((new Date().toTimeString()) + ' Dependency ' + depString + ' installed!');
                   }.bind(this, depString)
                 );
               }

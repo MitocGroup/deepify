@@ -15,7 +15,7 @@ module.exports = {
   commandsPath: './commands',
   commands: {
     server: {
-      example: 'deepify server path/to/property -o',
+      example: 'deepify server path/to/web_app -o',
       description: 'Run local development server',
       opts: {
         profiling: {
@@ -94,8 +94,8 @@ module.exports = {
       },
     },
     deploy: {
-      example: 'deepify deploy path/to/property',
-      description: 'Deploy a property',
+      example: 'deepify deploy path/to/web_app',
+      description: 'Deploy an web app',
       opts: {
         'cfg-bucket': {
           alias: 'b',
@@ -109,7 +109,7 @@ module.exports = {
         },
         'dump-local': {
           alias: 'l',
-          description: 'Dump built property locally into the specified directory',
+          description: 'Dump built web app locally into the specified directory',
           required: false,
         },
         'pull-deps': {
@@ -120,26 +120,26 @@ module.exports = {
       },
       args: {
         path: {
-          description: 'The path to the property',
+          description: 'The path to the web app',
           required: true,
         },
       },
     },
     helloworld: {
-      example: 'deepify helloworld path/to/property',
-      description: 'Dump the "Hello World" sample property',
+      example: 'deepify helloworld path/to/web_app',
+      description: 'Dump the "Hello World" sample web app',
       opts: {
       },
       args: {
         path: {
-          description: 'The path to dump the sample property to',
+          description: 'The path to dump the sample web app to',
           required: true,
         },
       },
     },
     'pull-deps': {
-      example: 'deepify pull-deps path/to/property',
-      description: 'Pull property microservices\' dependencies',
+      example: 'deepify pull-deps path/to/web_app',
+      description: 'Pull web app microservices\' dependencies',
       opts: {
         'dry-run': {
           alias: 'd',
@@ -149,14 +149,14 @@ module.exports = {
       },
       args: {
         path: {
-          description: 'The path to the property',
+          description: 'The path to the web app',
           required: true,
         },
       },
     },
     'push-deps': {
-      example: 'deepify push-deps path/to/property',
-      description: 'Publish microservices from within the given property',
+      example: 'deepify push-deps path/to/web_app',
+      description: 'Publish microservices from within the given web app',
       opts: {
         'dry-run': {
           alias: 'd',
@@ -166,14 +166,14 @@ module.exports = {
       },
       args: {
         path: {
-          description: 'The path to the property',
+          description: 'The path to the web app',
           required: true,
         },
       },
     },
     undeploy: {
-      example: 'deepify undeploy path/to/property',
-      description: 'Remove property provisioning and uploaded data',
+      example: 'deepify undeploy path/to/web_app',
+      description: 'Remove web app provisioning and uploaded data',
       opts: {
         'cfg-bucket': {
           alias: 'b',
@@ -188,7 +188,7 @@ module.exports = {
       },
       args: {
         path: {
-          description: 'The path to the property',
+          description: 'The path to the web app',
           required: true,
         },
       },
