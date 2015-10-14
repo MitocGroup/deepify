@@ -3,8 +3,8 @@ deepify
 
 [![NPM Version](https://img.shields.io/npm/v/deepify.svg)](https://npmjs.org/package/deepify)
 [![Build Status](https://magnum.travis-ci.com/MitocGroup/deepify.svg?token=K6deyi9kwkfxRyXwcv6c)](https://magnum.travis-ci.com/MitocGroup/deepify)
-[![Coverage Status](https://coveralls.io/repos/MitocGroup/deepify/badge.svg?service=github)](https://coveralls.io/github/MitocGroup/deepify)
 [![Codacy Badge](https://api.codacy.com/project/badge/5c6487913e4d4b7bacbf0c78200fdda0)](https://www.codacy.com/app/deep/deepify)
+[![Coverage Status](https://coveralls.io/repos/MitocGroup/deepify/badge.svg?service=github)](https://coveralls.io/github/MitocGroup/deepify)
 [![API Docs](http://docs.deep.mg/badge.svg)](http://docs.deep.mg)
 
 [deepify](https://www.npmjs.com/package/deepify) is a node.js library, part of [DEEP Framework](https://github.com/MitocGroup/deep-framework).
