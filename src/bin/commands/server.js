@@ -81,7 +81,7 @@ module.exports = function(mainPath) {
       }
 
       runInstallHook(function() {
-        dispatchLambdaPathsChain(chunk(lambdaPaths, 3), startServer);
+        dispatchLambdaPathsChain(chunk(lambdaPaths, 2), startServer);
       }.bind(this));
     }.bind(this));
   }.bind(this));
