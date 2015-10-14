@@ -19,7 +19,7 @@ module.exports = function(mainPath) {
 
   var port = this.opts.locate('port').value || '8000';
   var buildPath = this.opts.locate('build-path').value || null;
-  var dbServer = this.opts.locate('db-server').value || 'Dynalite';
+  var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   var serverAddress = 'http://localhost:' + port;
   var openBrowser = this.opts.locate('open-browser').exists;
   var skipBuildHook = this.opts.locate('skip-build-hook').exists;
