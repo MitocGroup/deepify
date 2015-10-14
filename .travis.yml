@@ -4,7 +4,7 @@ node_js:
 - '0.12'
 cache:
   directories:
-  - "$(npm root -g)"
+  - $(npm root -g)
 branches:
   only:
   - master
@@ -12,6 +12,12 @@ branches:
   - test
   - dev
   - unit-testing
+env:
+  global:
+  #COVERALLS_SERVICE_NAME =[secured]
+  - secure: f5SwsQSuOCc2mP/U3TzmM6X8un+0o92qpIVl/bwVaps/NvazQsiZuhHN2uQcCRk0t8J0UoaBGH8xgPsrhsVHcyxZzjGyDIN8cMFP0JxzL6Qb+lfifSScNd1pZ6Okuj3zf1EkjkoghfpcIQmrZNrLFQiZ8O/tQjd4WWpL8OtFf47HXbmtnFkc5hFXFGC8gQvD6XUtZlyWPOl9YkX4SwP4FPttJ/0aTaNs+EussVCEjc9IkHzhFJVsVVdFXJs7EICMhacVdabSW+7GiLqQvuVAx2sJUE3bgDXMuNkNw05TF4F6Nl9UVt+/utxf4mvgXQKgk8qmKbAsqhpCpnVmZK+aefz/WFX2l7G9HDkfWKYKhc2M7ypwGE3jmBJpFZD6EiLyRzhE8Ra1R/iTl3ViaOKGlQACIJrsNjT9lf4vreYYDCFsOf7KtU5Vzz8VZ/QRhIr6Yda0RsnNjDd6OTgk6t67ZJ6BUtzST8qwH2OguygWtMztyzD+MsQoP/CfRLesGcUOtaXuvoOIRHa4VShKT4OPNlgbJHKZUAEDG/r21UrFXMuh3HghXlV0zjzKME3T9bWKsY5g2Gm9DmTcgPzM7eboG9z929AMKBFXWWlErKHlKd4hIPmEDWeVLn0wuoMooMAHPw04g9O7wy2t6r5NUBN4mMu9MFbAxW5EwNPxhOWjOKE=
+  #COVERALLS_REPO_TOKEN =[secured]
+  - secure: O3rS01dayBYP1iUAJZKG3t0o3q0jO1ixYmrzfJM74W5FznzM5ohOHe0NkLkukDytPqotr18iq0QElROpSw5cGQRz7rANuTmGasoIDe30YL0l5x6SQVBU/JLLZz/kFMe8dxdKN1FGWeYPaxHpxCFaykE1sXTee28Zamgd+Z48gMJHBnah4z5pBybhY6Fj8Tx6RtTacjvpLtiKTlAzlvnOryJ/L1RdIfLI20h49nMhIrWf7qCu+KIX5tBLJlVF3xxZbCBlJCiRQYN0q0m0jSGafd25FQRDrE+COgyDkdkL+PrjR8+jMB4cCV2ATmvN+W+2EFnTFESm6/XpfwNSOfs+bUO8Fxf5p98FgJPMXXkSLwot6y9tMlyCx4rOOnBtNxqx1x9k+q6D+3aLwj6JRU+fkM/YBU5iclTq/3vJPUApfBSXgvz9rSk5ABZbYi+QNNhuqNjQ0paJuuoLDPZOOtW1xtlh/A3fmAUOKj7aWf7a0hXhygaf5DN3Tga8W2XFTA/RsauLdzNf1woJxnWdvKWK0pqt/c/2AssNV5f4AXupLKR12QTJEowy0jERP9w6FFbGjB7c8feczGTiIA+mtbYZcYr5xcHhLSBMMDWC0Jq72RjHAAp5WEc8+8LjM3kvhcbQGAy2Tpw8O9PwuyZaDG9K94kpkwbsLJsy57SotpqWCMk=
 before_install:
 - npm install -g babel
 - npm install -g browserify
@@ -25,4 +31,3 @@ before_install:
 - test/bin/setup_npm.sh
 after_success:
 - npm run coverage
-
