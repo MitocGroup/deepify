@@ -242,16 +242,16 @@ export class Instance {
    * @param {Function} callback
    * @returns {Instance}
    */
-  listen(port = 8080, dbServer = null, callback = null) {
-    let _this = this;
-
+  listen(port = 8080, dbServer = null, callback = () => {}) {
     this._log(`Creating server on port ${port}`);
 
-    this._server = Http.createServer(function(...args) {
-      _this._handler(...args);
+    this._server = Http.createServer((...args) => {
+      this._handler(...args);
     });
 
-    this._server.listen(port, function(error) {
+    var localDbInstance = null;
+
+    this._server.listen(port, (error) => {
       if (error) {
         throw new FailedToStartServerException(port, error);
       }
@@ -261,29 +261,35 @@ export class Instance {
       this._log('HTTP Server is up and running!');
 
       if (!dbServer) {
-        callback && callback(this);
+        callback(this);
         return;
       }
 
       this._log(`Creating local DynamoDB instance on port ${DeepDB.LOCAL_DB_PORT}`);
 
-      DeepDB.startLocalDynamoDBServer((error) => {
+      localDbInstance = DeepDB.startLocalDynamoDBServer((error) => {
         if (error) {
           throw new FailedToStartServerException(port, error);
         }
 
         this._log(`You can access DynamoDB Console via http://localhost:${DeepDB.LOCAL_DB_PORT}/shell`);
 
-        callback && callback(this);
+        callback(this);
       }, dbServer);
-    }.bind(this));
+    });
 
     // @todo: move it in destructor?
-    process.on('exit', function() {
-      this.stop(function() {
-        process.exit(0);
-      }.bind(this));
-    }.bind(this));
+    process.on('exit', () => {
+      this.stop(() => {
+        if (localDbInstance) {
+          localDbInstance.stop(() => {
+            process.exit(0);
+          });
+        } else {
+          process.exit(0);
+        }
+      });
+    });
 
     return this;
   }
@@ -292,10 +298,7 @@ export class Instance {
    * @param {Function} callback
    * @returns {Instance}
    */
-  stop(callback = null) {
-    callback = callback || function() {
-    };
-
+  stop(callback = () => {}) {
     this.running ? this._server.close(callback) : callback();
 
     return this;
