@@ -14,7 +14,10 @@ __deepify_comp() {
 
     case "$CUR_WORD" in
         '')
-            COMPREPLY+=('server' 'helloworld' 'lambda' 'deploy' 'undeploy' 'pull-deps' 'push-deps')
+            COMPREPLY+=('server' 'helloworld' 'lambda' 'deploy' 'undeploy' 'pull-deps' 'push-deps' 'build-frontend')
+            ;;
+        b*)
+            COMPREPLY+=('build-frontend')
             ;;
         s*)
             COMPREPLY+=('server')
@@ -31,7 +34,7 @@ __deepify_comp() {
         u*)
             COMPREPLY+=('undeploy')
             ;;
-        p|pu)
+        p*)
             COMPREPLY+=('pull-deps')
             COMPREPLY+=('push-deps')
             ;;
