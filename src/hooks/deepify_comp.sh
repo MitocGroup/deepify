@@ -34,14 +34,14 @@ __deepify_comp() {
         u*)
             COMPREPLY+=('undeploy')
             ;;
-        p*)
-            COMPREPLY+=('pull-deps')
-            COMPREPLY+=('push-deps')
-            ;;
         pul*)
             COMPREPLY+=('pull-deps')
             ;;
         pus*)
+            COMPREPLY+=('push-deps')
+            ;;
+        p*)
+            COMPREPLY+=('pull-deps')
             COMPREPLY+=('push-deps')
             ;;
     esac
