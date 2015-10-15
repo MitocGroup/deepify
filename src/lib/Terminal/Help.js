@@ -6,6 +6,7 @@
 
 import {Program} from './Program';
 import {ProgramInstanceRequiredException} from './Exception/ProgramInstanceRequiredException';
+import OS from 'os';
 
 export class Help {
   /**
@@ -24,6 +25,188 @@ export class Help {
    */
   get program() {
     return this._program;
+  }
+
+  /**
+   * @param {String} matchCommand
+   * @param {Boolean} sortByKeys
+   * @returns {Help}
+   *
+   * @todo: split this functionality into a separate class
+   */
+  printAutoCompletion(matchCommand, sortByKeys = false) {
+    let commandNames = [];
+    let commands = this._program.commands;
+
+    if (sortByKeys) {
+      commands.sort((a, b) => {
+        if (a.name > b.name) {
+          return 1;
+        }
+        if (a.name < b.name) {
+          return -1;
+        }
+
+        return 0;
+      });
+    }
+
+    for (let i in commands) {
+      if (!commands.hasOwnProperty(i)) {
+        continue;
+      }
+
+      let cmd = commands[i];
+
+      commandNames.push(cmd.name);
+    }
+
+    console.log(Help._findSuitableCommand(matchCommand, commandNames).join(OS.EOL));
+
+    return this;
+  }
+
+  /**
+   * @param {String} search
+   * @param {String[]} cmdVector
+   * @returns {String[]}
+   * @private
+   */
+  static _findSuitableCommand(search, cmdVector) {
+    if (!search) {
+      return cmdVector;
+    }
+
+    let scores = {};
+
+    for (let cmdName of cmdVector) {
+      let score = Help._numRound2(Help._scoreSimilarWord(cmdName, search));
+
+      if (!scores.hasOwnProperty(score)) {
+        scores[score] = [];
+      }
+
+      scores[score].push(cmdName);
+    }
+
+    let scoreKeys = Object.keys(scores);
+    let minScoreKey = Math.max(...scoreKeys);
+
+    return scores[`${minScoreKey}`];
+  }
+
+  /**
+   * @param {Number} num
+   * @returns {Number}
+   * @private
+   */
+  static _numRound2(num) {
+    return +(Math.round(num + "e+2")  + "e-2");
+  }
+
+  /**
+   * @param {String} string
+   * @param {String} word
+   * @param {Number} fuzziness
+   * @returns {Number}
+   * @private
+   */
+  static _scoreSimilarWord(string, word, fuzziness = null) {
+    // If the string is equal to the word, perfect match.
+    if (string === word) {
+      return 1;
+    }
+
+    //if it's not a perfect match and is empty return 0
+    if (!word) {
+      return 0;
+    }
+
+    let runningScore = 0;
+    let charScore = null;
+    let finalScore = null;
+    let lString = string.toLowerCase();
+    let strLength = string.length;
+    let lWord = word.toLowerCase();
+    let wordLength = word.length;
+    let idxOf =  null;
+    let startAt = 0;
+    let fuzzies = 1;
+    let fuzzyFactor;
+
+    // Cache fuzzyFactor for speed increase
+    if (fuzziness) {
+      fuzzyFactor = 1 - fuzziness;
+    }
+
+    // Walk through word and add up scores.
+    // Code duplication occurs to prevent checking fuzziness inside for loop
+    if (fuzziness) {
+      for (let i = 0; i < wordLength; i += 1) {
+
+        // Find next first case-insensitive match of a character.
+        idxOf = lString.indexOf(lWord[i], startAt);
+
+        if (idxOf === -1) {
+          fuzzies += fuzzyFactor;
+        } else {
+          if (startAt === idxOf) {
+            // Consecutive letter & start-of-string Bonus
+            charScore = 0.7;
+          } else {
+            charScore = 0.1;
+
+            // Acronym Bonus
+            // Weighing Logic: Typing the first character of an acronym is as if you
+            // preceded it with two perfect character matches.
+            if (string[idxOf - 1] === ' ') {
+              charScore += 0.8;
+            }
+          }
+
+          // Same case bonus.
+          if (string[idxOf] === word[i]) {
+            charScore += 0.1;
+          }
+
+          // Update scores and startAt position for next round of indexOf
+          runningScore += charScore;
+          startAt = idxOf + 1;
+        }
+      }
+    } else {
+      for (let i = 0; i < wordLength; i += 1) {
+        idxOf = lString.indexOf(lWord[i], startAt);
+
+        if (-1 === idxOf) {
+          return 0;
+        }
+
+        if (startAt === idxOf) {
+          charScore = 0.7;
+        } else {
+          charScore = 0.1;
+          if (string[idxOf - 1] === ' ') {
+            charScore += 0.8;
+          }
+        }
+        if (string[idxOf] === word[i]) {
+          charScore += 0.1;
+        }
+
+        runningScore += charScore;
+        startAt = idxOf + 1;
+      }
+    }
+
+    // Reduce penalty for longer strings.
+    finalScore = 0.5 * (runningScore / strLength + runningScore / wordLength) / fuzzies;
+
+    if ((lWord[0] === lString[0]) && (finalScore < 0.85)) {
+      finalScore += 0.15;
+    }
+
+    return finalScore;
   }
 
   /**

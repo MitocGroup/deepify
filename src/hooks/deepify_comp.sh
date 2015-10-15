@@ -1,6 +1,9 @@
 __deepify_comp() {
     local PREV_WORD
     local CUR_WORD
+    local SCRIPT_PATH
+
+    SCRIPT_PATH=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
 
     PREV_WORD="${COMP_WORDS[COMP_CWORD-1]}"
     CUR_WORD="${COMP_WORDS[COMP_CWORD]}"
@@ -10,41 +13,7 @@ __deepify_comp() {
         return 0
     fi
 
-    COMPREPLY=()
-
-    case "$CUR_WORD" in
-        '')
-            COMPREPLY+=('server' 'helloworld' 'lambda' 'deploy' 'undeploy' 'pull-deps' 'push-deps' 'build-frontend')
-            ;;
-        b*)
-            COMPREPLY+=('build-frontend')
-            ;;
-        s*)
-            COMPREPLY+=('server')
-            ;;
-        h*)
-            COMPREPLY+=('helloworld')
-            ;;
-        l*)
-            COMPREPLY+=('lambda')
-            ;;
-        d*)
-            COMPREPLY+=('deploy')
-            ;;
-        u*)
-            COMPREPLY+=('undeploy')
-            ;;
-        pul*)
-            COMPREPLY+=('pull-deps')
-            ;;
-        pus*)
-            COMPREPLY+=('push-deps')
-            ;;
-        p*)
-            COMPREPLY+=('pull-deps')
-            COMPREPLY+=('push-deps')
-            ;;
-    esac
+    COMPREPLY=($(${SCRIPT_PATH}/../bin/deepify.js --cmd-auto-complete "$CUR_WORD"))
 
     return 0
 }

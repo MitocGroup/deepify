@@ -81,6 +81,7 @@ export class Program {
    * @returns {Program}
    */
   defaults() {
+    this._opts.create('cmd-auto-complete', null, 'Used by bash auto completion');
     this._opts.create('version', 'v', 'Prints command version');
     this._opts.create('help', 'h', 'Prints command help');
 
@@ -140,9 +141,19 @@ export class Program {
       this.input(args);
     }
 
+    let showAutoCompletion = this._opts.locate('cmd-auto-complete');
     let version = this._opts.locate('version');
     let help = this._opts.locate('help');
     let command = this._args.locate('command');
+
+    // @todo: add it for commands as well
+    if (showAutoCompletion) {
+      this.help.printAutoCompletion(
+        (this.hasCommands && command) ? command.value : ''
+      );
+
+      this.exit(0);
+    }
 
     if (this.hasCommands && command && command.exists) {
       let subProgram = this.getCommand(command.value);
