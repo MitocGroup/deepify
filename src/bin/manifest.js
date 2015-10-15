@@ -105,6 +105,23 @@ module.exports = {
         },
       },
     },
+    'build-frontend': {
+      example: 'deepify build-frontend path/to/web_app',
+      description: 'Build frontend of a web app an web app',
+      opts: {
+        'output-path': {
+          alias: 'o',
+          description: 'Path to output built frontend of the web app',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
     deploy: {
       example: 'deepify deploy path/to/web_app',
       description: 'Deploy an web app',
