@@ -147,7 +147,7 @@ export class Program {
     let command = this._args.locate('command');
 
     // @todo: add it for commands as well
-    if (showAutoCompletion) {
+    if (showAutoCompletion && showAutoCompletion.exists) {
       this.help.printAutoCompletion(
         (this.hasCommands && command) ? command.value : ''
       );
