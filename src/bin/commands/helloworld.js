@@ -84,10 +84,6 @@ function gitClone(repo, subfolder, targetDir, cb, copyFiles) {
       return;
     }
 
-    if (!fs.existsSync(targetDir)) {
-      fse.mkdirSync(targetDir);
-    }
-
     fse.copySync(path.join(tmpFolder, subfolder), targetDir, {clobber: true});
 
     var copyFilesKeys = Object.keys(copyFiles);
