@@ -9,7 +9,7 @@ __deepify_comp() {
     CUR_WORD="${COMP_WORDS[COMP_CWORD]}"
 
     if [ "$PREV_WORD" != "deepify" ]; then
-        COMPREPLY=($(compgen -f -o plusdirs -- ${CUR_WORD}))
+        COMPREPLY=($(compgen -f ${CUR_WORD}))
         return 0
     fi
 
