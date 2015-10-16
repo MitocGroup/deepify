@@ -20,12 +20,6 @@ module.exports = function(mainPath) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
-  if (dumpPath && dumpPath.indexOf('/') !== 0) {
-    dumpPath = path.join(process.cwd(), dumpPath);
-  } else {
-    dumpPath = path.join(mainPath, '_www');
-  }
-
   var configFile = path.join(mainPath, Config.DEFAULT_FILENAME);
   var configExists = fs.existsSync(configFile);
   var config = null;
@@ -65,7 +59,7 @@ module.exports = function(mainPath) {
 
         var frontendDumpPath = path.join(tmpPropertyPath, '_public');
 
-        exec('cp -R ' + frontendDumpPath + ' ' + dumpPath, function(error, stdout, stderr) {
+        exec('mkdir -p ' + dumpPath + '; cp -R ' + frontendDumpPath + '/ ' + dumpPath, function(error, stdout, stderr) {
           if (error) {
             console.error((new Date().toTimeString()) + ' Error while copying '
               + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
