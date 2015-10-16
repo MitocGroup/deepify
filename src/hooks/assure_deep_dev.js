@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 /**
  * Created by AlexanderC on 8/13/15.
+ *
+ * @todo: reuse this script from deep-framework
  */
 
 // hook to make jscs tests pass!
 var npmEnvKey = 'npm_config_production';
+
+// @todo: populate ignores this dynamically
 var skipModules = ['mocha', 'chai', 'sinon', 'sinon-chai'];
 
 if (process.env[npmEnvKey] !== 'true') {
@@ -14,7 +18,7 @@ if (process.env[npmEnvKey] !== 'true') {
 
   var deepModulePath = path.join(__dirname, '../node_modules');
 
-  fs.readdir(deepModulePath, function(error, files) {
+  fs.readdir(deepModulePath, function (error, files) {
     if (error) {
       console.error((new Date().toTimeString()) + ' Error while listing deep modules: ' + error);
       process.exit(1);
@@ -26,16 +30,16 @@ if (process.env[npmEnvKey] !== 'true') {
       if (['.', '..'].indexOf(basename) === -1 && basename.indexOf('deep-') === 0) {
         var modulePath = path.join(deepModulePath, basename);
 
-        fs.lstat(modulePath, function(modulePath, error, stats) {
+        fs.stat(modulePath, function (modulePath, error, stats) {
           if (error) {
             console.error((new Date().toTimeString()) + ' Error while getting stats of ' + modulePath + ': ' + error);
             process.exit(1);
           }
 
-          if (stats.isDirectory() || stats.isSymbolicLink()) {
+          if (stats.isDirectory()) {
             var packageFile = path.join(modulePath, 'package.json');
 
-            fs.readFile(packageFile, function(error, data) {
+            fs.readFile(packageFile, function (error, data) {
               if (error) {
                 console.error((new Date().toTimeString()) + ' Error while reading ' + packageFile + ': ' + error);
                 process.exit(1);
@@ -47,6 +51,8 @@ if (process.env[npmEnvKey] !== 'true') {
                 console.error((new Date().toTimeString()) + ' Broken JSON string in ' + packageFile + ': ' + error);
                 process.exit(1);
               }
+
+              var pckgsToInstall = [];
 
               var devDependencies = packageConfig.devDependencies || {};
 
@@ -62,18 +68,24 @@ if (process.env[npmEnvKey] !== 'true') {
                 var depVersion = devDependencies[depName];
                 var depString = depName + '@' + depVersion;
 
-                console.log((new Date().toTimeString()) + ' Installing ' + depString);
+                console.log((new Date().toTimeString()) + ' Adding NPM package ' + depString + ' to installation queue');
 
-                exec(
-                  'cd ' + modulePath + ' && npm install ' + depString,
-                  function(depString, error, stdout, stderr) {
-                    if (error) {
-                      console.error((new Date().toTimeString()) + ' Error while installing ' + depString + ': ' + stderr);
-                    }
+                pckgsToInstall.push(depString);
+              }
 
-                    console.log((new Date().toTimeString()) + ' Dependency ' + depString + ' installed!');
-                  }.bind(this, depString)
-                );
+              if (pckgsToInstall.length > 0) {
+                var installCmd = 'cd ' + modulePath + ' && npm install ' + pckgsToInstall.join(' ');
+
+                console.log((new Date().toTimeString()) + ' Running: ' + installCmd);
+
+                exec(installCmd, function (error, stdout, stderr) {
+                  if (error) {
+                    console.error((new Date().toTimeString()) + ' Error while installing npm packages ' + pckgsToInstall.join(', ') + ': ' + stderr);
+                    return;
+                  }
+
+                  console.log((new Date().toTimeString()) + ' The following NPM packages have been installed ' + pckgsToInstall.join(', '));
+                }.bind(this));
               }
             }.bind(this));
           }
