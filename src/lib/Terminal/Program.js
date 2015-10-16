@@ -81,7 +81,7 @@ export class Program {
    * @returns {Program}
    */
   defaults() {
-    this._opts.create('cmd-auto-complete', null, 'Used by bash auto completion');
+    this._opts.create('cmd-auto-complete', null, 'Used by bash auto completion', false, true);
     this._opts.create('version', 'v', 'Prints command version');
     this._opts.create('help', 'h', 'Prints command help');
 

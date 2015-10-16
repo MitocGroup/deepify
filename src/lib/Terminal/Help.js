@@ -281,6 +281,10 @@ export class Help {
 
         let opt = opts[i];
 
+        if (opt.hidden) {
+          continue;
+        }
+
         let add = '';
 
         if (opt.alias) {
@@ -312,6 +316,10 @@ export class Help {
         }
 
         let arg = args[i];
+
+        if (arg.hidden) {
+          continue;
+        }
 
         console.log(`   ${Help._stringify(arg.name)}: ${Help._stringify(arg.description)}`);
       }

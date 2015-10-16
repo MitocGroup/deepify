@@ -10,14 +10,17 @@ export class Option {
    * @param {String} alias
    * @param {String} description
    * @param {Boolean} required
+   * @param {Boolean} hidden
    */
-  constructor(name, alias = null, description = null, required = false) {
+  constructor(name, alias = null, description = null, required = false, hidden = false) {
     this._name = name;
     this._description = description;
     this._alias = alias;
+    this._required = required;
+    this._hidden = hidden;
+
     this._value = undefined;
     this._exists = false;
-    this._required = required;
   }
 
   /**
@@ -73,6 +76,20 @@ export class Option {
     }
 
     return null;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  get hidden() {
+    return this._hidden;
+  }
+
+  /**
+   * @param {Boolean} state
+   */
+  set hidden(state) {
+    this._hidden = state;
   }
 
   /**

@@ -130,15 +130,10 @@ export class Arguments {
   }
 
   /**
-   * @param {String} name
-   * @param {String} description
-   * @param {Boolean} required
    * @returns {Arguments}
    */
-  create(name, description = null, required = false) {
-    let argument = new Argument(name, description, required);
-
-    return this.add(argument);
+  create(...args) {
+    return this.add(new Argument(...args));
   }
 
   /**

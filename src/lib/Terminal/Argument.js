@@ -9,13 +9,16 @@ export class Argument {
    * @param {String} name
    * @param {String} description
    * @param {Boolean} required
+   * @param {Boolean} hidden
    */
-  constructor(name, description = null, required = false) {
+  constructor(name, description = null, required = false, hidden = false) {
     this._name = name;
     this._description = description;
+    this._required = required;
+    this._hidden = hidden;
+
     this._value = undefined;
     this._exists = false;
-    this._required = required;
   }
 
   /**
@@ -49,6 +52,20 @@ export class Argument {
     }
 
     return this;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  get hidden() {
+    return this._hidden;
+  }
+
+  /**
+   * @param {Boolean} state
+   */
+  set hidden(state) {
+    this._hidden = state;
   }
 
   /**

@@ -108,16 +108,10 @@ export class Options {
   }
 
   /**
-   * @param {String} name
-   * @param {String} alias
-   * @param {String} description
-   * @param {Boolean} required
    * @returns {Options}
    */
-  create(name, alias = null, description = null, required = false) {
-    let option = new Option(name, alias, description, required);
-
-    return this.add(option);
+  create(...args) {
+    return this.add(new Option(...args));
   }
 
   /**
