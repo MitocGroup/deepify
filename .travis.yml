@@ -1,7 +1,7 @@
 language: node_js
 sudo: false
 node_js:
-- '0.12'
+  - '0.12'
 cache:
   directories:
   - $(npm root -g)
@@ -23,15 +23,14 @@ env:
   #CODACY_PROJECT_TOKEN =[secured]
   - secure: FwXnAYWmzrHaCxpXZWD3XjOpwXmW8+Yq5r7//A7LsYSCSYiok6N6BUNgUfzAj5+As0MC9Cyweohc4H9wqgq8To+wbp0Cai0LlrTQUZ08I8vPkEkD4yv6N+3K2vElwyUGx772SRR+p/SkqX7O5B2ScRedhGOMx4FhdjZY6hHQfNjIh72poIAJ7qQ7vP/rPQCBWK5ts/jTGINBycQYV+t3THVrxYVTx+BiGgzC5jGIlchsOQyAGQa+GR5QDw27wU2WirCjpRsq/86snQw48UeN6J+8FXkbgQXp5CZc5R4pjybQpSQDv5mxDJV7HirxlK/DbVB1GuFDV6upA4TX5WNyPqUYUMAvAXAcSExj3FmJUk99rGPJ9Euzks+9wgR/OOGlO5F/kPRM3BebT+tqDVHffp07mKJ2Sq3FqOoQQDAjp1wyqY0N5uE2JPQ6GJQ0PIkm26jOzWaQllC7Ib6j03iBG4hKFJK8wYZn1nkk+tFUVWdT4uG6tGIIdkZjlMRngnCoi0FfKV6Vd89HMdnpzygRLwITizhfZ+EHljuphGbMIWLBhIei+GndVLysL+tpI+tBVgHcHT2F2XJTwvSZqWrWqkDQVzZEqjF4P03pKmdt5c4P2zSN8UL4eFqRYids9FsKG18qjmj74BujHa+tL2+dLrWWpOH2SXNRt0vy+rHdvss=
 before_install:
-- npm install -g babel
-- npm install -g browserify
-- npm install -g mocha
-- npm install -g mocha-babel
-- npm install -g istanbul
-- npm install -g coveralls
-- npm install -g codacy-coverage
-- npm install -g istanbul-combine
-- cp test/package.json .
-- test/bin/setup_npm.sh
+  - npm install -g babel
+  - npm install -g browserify
+  - npm install -g mocha
+  - npm install -g mocha-babel
+  - npm install -g istanbul
+  - npm install -g coveralls
+  - npm install -g codacy-coverage
+  - npm install -g istanbul-combine
+  - cp test/package.json .
 after_success:
-- npm run coverage
+  - npm run coverage
