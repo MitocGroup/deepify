@@ -163,6 +163,11 @@ module.exports = {
           description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',
           required: false,
         },
+        'resource': {
+          alias: 'r',
+          description: 'An generated AWS resource name from given deploy (ex. deep.prod.system.db0c09cc)',
+          required: false,
+        },
         dirty: {
           alias: 'd',
           description: 'Force cleaning up all resources if .cfg.deeploy.json file missing',

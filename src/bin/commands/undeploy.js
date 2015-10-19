@@ -13,6 +13,7 @@ module.exports = function(mainPath) {
   var fse = require('fs-extra');
   var Core = require('deep-core');
   var Config = require('../../lib.compiled/Property/Config').Config;
+  var AbstractService = require('../../lib.compiled/Provisioning/Service/AbstractService').AbstractService;
   var AwsRequestSyncStack = require('../../lib.compiled/Helpers/AwsRequestSyncStack').AwsRequestSyncStack;
   var WaitFor = require('../../lib.compiled/Helpers/WaitFor').WaitFor;
   var exec = require('child_process').exec;
@@ -23,6 +24,18 @@ module.exports = function(mainPath) {
 
   var dirtyMode = this.opts.locate('dirty').exists;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
+  var rawResource = this.opts.locate('resource').value;
+  var resource = null;
+
+  if (rawResource) {
+    resource = AbstractService.extractBaseHashFromResourceName(rawResource);
+    dirtyMode = true; // @todo: set it explicit?
+
+    if (!resource) {
+      console.error((new Date().toTimeString()) + ' Unable to extract base hash from ' + rawResource);
+      this.exit(1);
+    }
+  }
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
@@ -178,6 +191,18 @@ module.exports = function(mainPath) {
       }
     }
 
+    function matchResourceName(resourceName) {
+      if (deployConfig) {
+        return true;
+      }
+
+      if (!resource) {
+        return false;
+      }
+
+      return AbstractService.extractBaseHashFromResourceName(resourceName) === resource;
+    }
+
     function matchAwsResource(serviceName, item) {
       if (!deployConfig) {
         return true;
@@ -240,8 +265,9 @@ module.exports = function(mainPath) {
 
           var source = data[i].source;
           var apiId = source.id;
+          var apiName = source.name;
 
-          if (matchAwsResource('APIGateway', apiId)) {
+          if (matchAwsResource('APIGateway', apiId) && matchResourceName(apiName)) {
             pushQueue(deleteApiChain, [apiId]);
           }
         }
@@ -367,7 +393,7 @@ module.exports = function(mainPath) {
         var roleData = data.Roles[i];
         var roleName = roleData.RoleName;
 
-        if (matchAwsResource('IAM', roleName)) {
+        if (matchAwsResource('IAM', roleName) && matchResourceName(roleName)) {
           pushQueue(removeRoleChain, [roleName]);
         }
       }
@@ -400,8 +426,9 @@ module.exports = function(mainPath) {
       for (var i = 0; i < data.IdentityPools.length; i++) {
         var identityPoolData = data.IdentityPools[i];
         var identityPoolId = identityPoolData.IdentityPoolId;
+        var identityPoolName = identityPoolData.IdentityPoolName;
 
-        if (matchAwsResource('CognitoIdentity', identityPoolId)) {
+        if (matchAwsResource('CognitoIdentity', identityPoolId) && matchResourceName(identityPoolName)) {
           pushQueue(removeIdentityPoolChain, [identityPoolId]);
         }
       }
@@ -435,7 +462,7 @@ module.exports = function(mainPath) {
         var lambdaData = data.Functions[i];
         var functionName = lambdaData.FunctionName;
 
-        if (matchAwsResource('Lambda', functionName)) {
+        if (matchAwsResource('Lambda', functionName) && matchResourceName(functionName)) {
           pushQueue(removeLambdaChain, [functionName]);
         }
       }
@@ -527,8 +554,9 @@ module.exports = function(mainPath) {
       for (var i = 0; i < data.DistributionList.Items.length; i++) {
         var cfData = data.DistributionList.Items[i];
         var distId = cfData.Id;
+        var comment = cfData.Comment;
 
-        if (matchAwsResource('CloudFront', distId)) {
+        if (matchAwsResource('CloudFront', distId) && matchResourceName(comment)) {
           pushQueue(removeCfDistribution, [distId]);
         }
       }
@@ -561,7 +589,7 @@ module.exports = function(mainPath) {
       for (var i = 0; i < data.TableNames.length; i++) {
         var tableName = data.TableNames[i];
 
-        if (matchAwsResource('DynamoDB', tableName)) {
+        if (matchAwsResource('DynamoDB', tableName) && matchResourceName(tableName)) {
           pushQueue(removeDynamoDbTableChain, [tableName]);
         }
       }
@@ -633,7 +661,7 @@ module.exports = function(mainPath) {
         var bucketData = data.Buckets[i];
         var bucketName = bucketData.Name;
 
-        if (matchAwsResource('S3', bucketName)) {
+        if (matchAwsResource('S3', bucketName) && matchResourceName(bucketName)) {
           pushQueue(removeS3BucketChain, [bucketName]);
         }
       }
