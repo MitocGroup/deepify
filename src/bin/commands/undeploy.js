@@ -488,6 +488,43 @@ module.exports = function(mainPath) {
         }
 
         var distConfig = data.DistributionConfig;
+
+        if (!distConfig.Enabled) {
+          var isDeployed = data.DistributionConfig.Status === 'Deployed';
+          var addMsg = '...';
+
+          if (!isDeployed) {
+            addMsg = ' but not yet deployed. Waiting...';
+          }
+
+          console.error((new Date().toTimeString()) + ' The CloudFront distribution '
+            + distId + ' is already disabled' + addMsg);
+
+          if (!isDeployed) {
+            waitForCfDistDisabled(distId, data.ETag, function(distId, eTag) {
+              cf.deleteDistribution({
+                Id: distId,
+                IfMatch: eTag,
+              }, function(error, data) {
+                if (error) {
+                  console.error((new Date().toTimeString()) + ' Error while removing CloudFront distribution: ' + error);
+                }
+              }.bind(this));
+            }.bind(this));
+          } else {
+            cf.deleteDistribution({
+              Id: distId,
+              IfMatch: data.ETag,
+            }, function(error, data) {
+              if (error) {
+                console.error((new Date().toTimeString()) + ' Error while removing CloudFront distribution: ' + error);
+              }
+            }.bind(this));
+          }
+
+          return;
+        }
+
         distConfig.Enabled = false;
 
         cf.updateDistribution({
@@ -500,7 +537,6 @@ module.exports = function(mainPath) {
             return;
           }
 
-          // @todo: find a better way to remove a distribution without waiting such a long time
           waitForCfDistDisabled(distId, data.ETag, function(distId, eTag) {
             cf.deleteDistribution({
               Id: distId,
