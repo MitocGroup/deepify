@@ -25,11 +25,13 @@ module.exports = function(mainPath) {
   var dirtyMode = this.opts.locate('dirty').exists;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
   var rawResource = this.opts.locate('resource').value;
+
   var resource = null;
+  var skipDirtyCheck = false;
 
   if (rawResource) {
     resource = AbstractService.extractBaseHashFromResourceName(rawResource);
-    dirtyMode = true; // @todo: set it explicit?
+    skipDirtyCheck = true;
 
     if (!resource) {
       console.error((new Date().toTimeString()) + ' Unable to extract base hash from ' + rawResource);
@@ -78,14 +80,16 @@ module.exports = function(mainPath) {
     var deployConfig = null;
 
     if (!rawDeployConfig) {
-      if (!dirtyMode) {
-        console.log('If \'.cfg.deeploy.json\' is missing you have to specify enable mode explicitly (add \'--dirty\' flag)');
-        console.log(os.EOL, 'BE AWARE! THIS DELETES ALL THE THINGS FOUND! RECOVERAGE IMPOSSIBLE!', os.EOL);
+      if (!skipDirtyCheck) {
+        if (!dirtyMode) {
+          console.log('If \'.cfg.deeploy.json\' is missing you have to specify enable mode explicitly (add \'--dirty\' flag)');
+          console.log(os.EOL, 'BE AWARE! THIS DELETES ALL THE THINGS FOUND! RECOVERAGE IMPOSSIBLE!', os.EOL);
 
-        this.exit(1);
+          this.exit(1);
+        }
+
+        console.log(os.EOL, (new Date().toTimeString()) + ' Dirty mode on!!!', os.EOL);
       }
-
-      console.log(os.EOL, (new Date().toTimeString()) + ' Dirty mode on!!!', os.EOL);
     } else {
       var deployConfigFile = path.join(mainPath, '.cfg.deeploy.json');
       var deployProvisioning = rawDeployConfig.provisioning || {};
