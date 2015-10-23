@@ -196,19 +196,17 @@ module.exports = function(mainPath) {
     }
 
     function matchResourceName(resourceName) {
-      if (deployConfig) {
+      if (dirtyMode || deployConfig) {
         return true;
       }
 
-      if (!resource) {
-        return false;
-      }
-
-      return AbstractService.extractBaseHashFromResourceName(resourceName) === resource;
+      return resource
+        ? AbstractService.extractBaseHashFromResourceName(resourceName) === resource
+        : false;
     }
 
     function matchAwsResource(serviceName, item) {
-      if (!deployConfig) {
+      if (dirtyMode || resource) {
         return true;
       }
 
