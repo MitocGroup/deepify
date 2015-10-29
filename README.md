@@ -88,14 +88,14 @@ Our short-to-medium-term roadmap items, in order of descending priority:
 
 Feature | Details | Owner
 --------|---------|------
-Implement provisioning update | To be updated | [@alexanderc](https://github.com/alexanderc)
-Implement single microservice update | To be updated | [@alexanderc](https://github.com/alexanderc)
-Prepare frontend by adding deploy ID to the assets (html, css) | To be updated | [@alexanderc](https://github.com/alexanderc)
-Implement deployment rollbacks | To be updated | [@alexanderc](https://github.com/alexanderc)
-Optimize frontend code (browserify, minimize, reduce nr of calls, etc) | To be updated | [@alexanderc](https://github.com/alexanderc)
-Consolidate all logs / outputs / debugging info into deep-log | To be updated | [@alexanderc](https://github.com/alexanderc)
-Add caching option to the resource actions (via api gateway) | To be updated | [@alexanderc](https://github.com/alexanderc)
-Add choice of AWS credentials when generating them (server/deploy cmds) | To be updated | [@alexanderc](https://github.com/alexanderc)
+Implement provisioning update | Ready: DynamoDB. Remaining: Lambda, ApiGateway, IAM | @alexanderc
+Implement single microservice update | To be updated | @alexanderc
+Prepare frontend by adding deploy ID to the assets (html, css) | To be updated | @alexanderc
+Implement deployment rollbacks | To be updated | @alexanderc
+Optimize frontend code (browserify, minimize, reduce nr of calls, etc) | To be updated | @alexanderc
+Consolidate all logs / outputs / debugging info into deep-log | To be updated | @alexanderc
+Add caching option to the resource actions (via api gateway) | To be updated | @alexanderc
+Add choice of AWS credentials when generating them (server/deploy cmds) | To be updated | @alexanderc
 
 ### License
 
