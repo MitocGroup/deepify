@@ -22,7 +22,6 @@ istanbul-combine -d ${COVERAGE_PATH} -r lcovonly -p none \
 ### Upload Coverage info to Codacy ###
 
 cat ${COVERAGE_PATH}"/lcov.info" | codacy-coverage
-cat ${COVERAGE_PATH}"/lcov.info" | coveralls
 
 ### Cleanup! ###
 
