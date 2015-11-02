@@ -14,19 +14,12 @@ branches:
   - stage
   - test
   - dev
+  - codacy-update
 env:
   global:
   #CODACY_PROJECT_TOKEN =[secured]
   - secure: XkXoUfGvUcl+UwoqhEZ/2JO4s2oHCBDcBg8k1sxNvqzLj6M6Fa/cd0JFWkyzGaT1aB14A1O9S2Aa6F0z4nExp3USUC9HJew6WjH3Mwzf0o4fvoL1GNcL0+Ybp1ZBJauSepNhsNeEUNyZGEnaoxqERl091XcEA7gqStG1jPWZ5SmJo8F3u7M3HyKiNYRlNltctR9WM30qV8pvoKvq89trTTT/XhWXjV8Y2VuDzri6GYKLcf6F4KtHhFWiRsw0Mzke/OVv1pVfpBYul4sut0gdTYOOdtY4FG+qfBDNP1NNTRVPpnybxuB1H8fudNFq4kmyggfef3rRUk/Q17Y9AQzUOg76HwiUGWCpwadE9yxgTkwii1uGfKq1CF9G9+riGszyMninR6VTespjwd1Ayq9AvW3iERu0ywVqAMdne2HRuHYcWpiadUt0rJfAScGhIh7L+NIM3hagxX4CL8MB8pplKM/6Ty+/4NVJ8Ybc2UQz/f27RKgTBYdSY+QrRPbcekyIgNnVceY/JwCuPF1bRgBnICLjFACjBasjeqbCavB0M8NCqqHjT86cSLMDEONjtXoH4Yd/S0BDwJ6Wgn0Z+LA03+VVJKTBGwqmdUropWChIhRTmnpWbw5fNg+jFq5bb/Qr21iEEEhGFG7DgDqfP4upDMimuXKUztHM0uscAinoDTw=
 before_install:
-- npm install -g babel
-- npm install -g browserify
-- npm install -g mocha
-- npm install -g mocha-babel
-- npm install -g istanbul
-- npm install -g coveralls
-- npm install -g codacy-coverage
-- npm install -g istanbul-combine
 - cp test/package.json .
 after_success:
 - npm run coverage
