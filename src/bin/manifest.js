@@ -122,6 +122,18 @@ module.exports = {
         },
       },
     },
+    'prepare-prod': {
+      example: 'deepify prepare-prod path/to/web_app',
+      description: 'Prepare web app for production',
+      opts: {
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
     deploy: {
       example: 'deepify deploy path/to/web_app',
       description: 'Deploy an web app',

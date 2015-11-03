@@ -32,6 +32,23 @@ export class Program {
 
     this._opts = new Options();
     this._args = new Arguments();
+
+    this._nodeBinary = Program.NODE_BINARY;
+    this._scriptPath = null;
+  }
+
+  /**
+   * @returns {String}
+   */
+  get nodeBinary() {
+    return this._nodeBinary;
+  }
+
+  /**
+   * @returns {String|null}
+   */
+  get scriptPath() {
+    return this._scriptPath;
   }
 
   /**
@@ -45,6 +62,9 @@ export class Program {
     if (!this.hasCommands) {
       this._args.remove('command');
     }
+
+    this._nodeBinary = program.nodeBinary;
+    this._scriptPath = this._scriptPath || program.scriptPath;
 
     this._version = this._version || program.version;
 
@@ -62,8 +82,8 @@ export class Program {
       args = process.argv;
 
       // @todo: do we have to hook here?
-      args.shift(); // remove 'node'
-      args.shift(); // remove 'path/to/main/script.js'
+      this._nodeBinary = args.shift(); // remove 'node'
+      this._scriptPath = args.shift(); // remove 'path/to/main/script.js'
     }
 
     this._opts.populate(args);
@@ -400,5 +420,13 @@ export class Program {
    */
   set description(value) {
     this._description = value;
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get NODE_BINARY() {
+    return 'node';
   }
 }
