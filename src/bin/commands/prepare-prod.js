@@ -144,7 +144,8 @@ module.exports = function(mainPath) {
 
         wait.ready(function() {
           if (removeSource) {
-            fse.removeSync(lambdaPath);
+            // @todo: replace with native code
+            exec('rm -rf ' + path.join(lambdaPath, '*'));
           }
 
           cb();
