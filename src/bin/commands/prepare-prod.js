@@ -18,6 +18,8 @@ module.exports = function(mainPath) {
   var Archiver = require('archiver');
   var tmp = require('tmp');
 
+  var removeSource = this.opts.locate('remove-source').exists;
+
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
@@ -140,7 +142,14 @@ module.exports = function(mainPath) {
           .directory(tmpFolder, false)
           .finalize();
 
-        wait.ready(cb);
+        wait.ready(function() {
+          if (removeSource) {
+            // @todo: replace with native code
+            exec('rm -rf ' + path.join(lambdaPath, '*'));
+          }
+
+          cb();
+        }.bind(this));
       }.bind(this));
     } else {
       console.log((new Date().toTimeString()) + ' No NPM package found in ' + lambdaPath + '. Skipping...');
