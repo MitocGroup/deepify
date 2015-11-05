@@ -15,7 +15,7 @@ module.exports = function(mainPath) {
   var exec = require('child_process').exec;
   var os = require('os');
   var fs = require('fs');
-  var open = require("open");
+  var open = require('open');
 
   var port = this.opts.locate('port').value || '8000';
   var buildPath = this.opts.locate('build-path').value || null;

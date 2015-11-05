@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.0.14",
+  "version": "1.0.21",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -65,7 +65,7 @@
     "open": "0.0.*"
   },
   "devDependencies": {
-    "aws-sdk": "2.1.*",
+    "aws-sdk": "2.2.*",
     "chai": "3.2.*",
     "sinon": "1.17.*",
     "sinon-chai": "2.8.*"

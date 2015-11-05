@@ -122,6 +122,18 @@ module.exports = {
         },
       },
     },
+    'prepare-prod': {
+      example: 'deepify prepare-prod path/to/web_app',
+      description: 'Prepare web app for production',
+      opts: {
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
     deploy: {
       example: 'deepify deploy path/to/web_app',
       description: 'Deploy an web app',
@@ -161,6 +173,11 @@ module.exports = {
         'cfg-bucket': {
           alias: 'b',
           description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',
+          required: false,
+        },
+        'resource': {
+          alias: 'r',
+          description: 'An generated AWS resource name from given deploy (ex. deep.prod.system.db0c09cc)',
           required: false,
         },
         dirty: {

@@ -13,6 +13,7 @@ module.exports = function(mainPath) {
   var fse = require('fs-extra');
   var Core = require('deep-core');
   var Config = require('../../lib.compiled/Property/Config').Config;
+  var AbstractService = require('../../lib.compiled/Provisioning/Service/AbstractService').AbstractService;
   var AwsRequestSyncStack = require('../../lib.compiled/Helpers/AwsRequestSyncStack').AwsRequestSyncStack;
   var WaitFor = require('../../lib.compiled/Helpers/WaitFor').WaitFor;
   var exec = require('child_process').exec;
@@ -23,6 +24,20 @@ module.exports = function(mainPath) {
 
   var dirtyMode = this.opts.locate('dirty').exists;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
+  var rawResource = this.opts.locate('resource').value;
+
+  var resource = null;
+  var skipDirtyCheck = false;
+
+  if (rawResource) {
+    resource = AbstractService.extractBaseHashFromResourceName(rawResource);
+    skipDirtyCheck = true;
+
+    if (!resource) {
+      console.error((new Date().toTimeString()) + ' Unable to extract base hash from ' + rawResource);
+      this.exit(1);
+    }
+  }
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
@@ -65,14 +80,16 @@ module.exports = function(mainPath) {
     var deployConfig = null;
 
     if (!rawDeployConfig) {
-      if (!dirtyMode) {
-        console.log('If \'.cfg.deeploy.json\' is missing you have to specify enable mode explicitly (add \'--dirty\' flag)');
-        console.log(os.EOL, 'BE AWARE! THIS DELETES ALL THE THINGS FOUND! RECOVERAGE IMPOSSIBLE!', os.EOL);
+      if (!skipDirtyCheck) {
+        if (!dirtyMode) {
+          console.log('If \'.cfg.deeploy.json\' is missing you have to specify enable mode explicitly (add \'--dirty\' flag)');
+          console.log(os.EOL, 'BE AWARE! THIS DELETES ALL THE THINGS FOUND! RECOVERAGE IMPOSSIBLE!', os.EOL);
 
-        this.exit(1);
+          this.exit(1);
+        }
+
+        console.log(os.EOL, (new Date().toTimeString()) + ' Dirty mode on!!!', os.EOL);
       }
-
-      console.log(os.EOL, (new Date().toTimeString()) + ' Dirty mode on!!!', os.EOL);
     } else {
       var deployConfigFile = path.join(mainPath, '.cfg.deeploy.json');
       var deployProvisioning = rawDeployConfig.provisioning || {};
@@ -178,8 +195,18 @@ module.exports = function(mainPath) {
       }
     }
 
+    function matchResourceName(resourceName) {
+      if (dirtyMode || deployConfig) {
+        return true;
+      }
+
+      return resource
+        ? AbstractService.extractBaseHashFromResourceName(resourceName) === resource
+        : false;
+    }
+
     function matchAwsResource(serviceName, item) {
-      if (!deployConfig) {
+      if (dirtyMode || resource) {
         return true;
       }
 
@@ -240,8 +267,9 @@ module.exports = function(mainPath) {
 
           var source = data[i].source;
           var apiId = source.id;
+          var apiName = source.name;
 
-          if (matchAwsResource('APIGateway', apiId)) {
+          if (matchAwsResource('APIGateway', apiId) && matchResourceName(apiName)) {
             pushQueue(deleteApiChain, [apiId]);
           }
         }
@@ -367,7 +395,7 @@ module.exports = function(mainPath) {
         var roleData = data.Roles[i];
         var roleName = roleData.RoleName;
 
-        if (matchAwsResource('IAM', roleName)) {
+        if (matchAwsResource('IAM', roleName) && matchResourceName(roleName)) {
           pushQueue(removeRoleChain, [roleName]);
         }
       }
@@ -400,8 +428,9 @@ module.exports = function(mainPath) {
       for (var i = 0; i < data.IdentityPools.length; i++) {
         var identityPoolData = data.IdentityPools[i];
         var identityPoolId = identityPoolData.IdentityPoolId;
+        var identityPoolName = identityPoolData.IdentityPoolName;
 
-        if (matchAwsResource('CognitoIdentity', identityPoolId)) {
+        if (matchAwsResource('CognitoIdentity', identityPoolId) && matchResourceName(identityPoolName)) {
           pushQueue(removeIdentityPoolChain, [identityPoolId]);
         }
       }
@@ -435,7 +464,7 @@ module.exports = function(mainPath) {
         var lambdaData = data.Functions[i];
         var functionName = lambdaData.FunctionName;
 
-        if (matchAwsResource('Lambda', functionName)) {
+        if (matchAwsResource('Lambda', functionName) && matchResourceName(functionName)) {
           pushQueue(removeLambdaChain, [functionName]);
         }
       }
@@ -457,6 +486,43 @@ module.exports = function(mainPath) {
         }
 
         var distConfig = data.DistributionConfig;
+
+        if (!distConfig.Enabled) {
+          var isDeployed = data.DistributionConfig.Status === 'Deployed';
+          var addMsg = '...';
+
+          if (!isDeployed) {
+            addMsg = ' but not yet deployed. Waiting...';
+          }
+
+          console.error((new Date().toTimeString()) + ' The CloudFront distribution '
+            + distId + ' is already disabled' + addMsg);
+
+          if (!isDeployed) {
+            waitForCfDistDisabled(distId, data.ETag, function(distId, eTag) {
+              cf.deleteDistribution({
+                Id: distId,
+                IfMatch: eTag,
+              }, function(error, data) {
+                if (error) {
+                  console.error((new Date().toTimeString()) + ' Error while removing CloudFront distribution: ' + error);
+                }
+              }.bind(this));
+            }.bind(this));
+          } else {
+            cf.deleteDistribution({
+              Id: distId,
+              IfMatch: data.ETag,
+            }, function(error, data) {
+              if (error) {
+                console.error((new Date().toTimeString()) + ' Error while removing CloudFront distribution: ' + error);
+              }
+            }.bind(this));
+          }
+
+          return;
+        }
+
         distConfig.Enabled = false;
 
         cf.updateDistribution({
@@ -469,7 +535,6 @@ module.exports = function(mainPath) {
             return;
           }
 
-          // @todo: find a better way to remove a distribution without waiting such a long time
           waitForCfDistDisabled(distId, data.ETag, function(distId, eTag) {
             cf.deleteDistribution({
               Id: distId,
@@ -527,8 +592,9 @@ module.exports = function(mainPath) {
       for (var i = 0; i < data.DistributionList.Items.length; i++) {
         var cfData = data.DistributionList.Items[i];
         var distId = cfData.Id;
+        var comment = cfData.Comment;
 
-        if (matchAwsResource('CloudFront', distId)) {
+        if (matchAwsResource('CloudFront', distId) && matchResourceName(comment)) {
           pushQueue(removeCfDistribution, [distId]);
         }
       }
@@ -561,7 +627,7 @@ module.exports = function(mainPath) {
       for (var i = 0; i < data.TableNames.length; i++) {
         var tableName = data.TableNames[i];
 
-        if (matchAwsResource('DynamoDB', tableName)) {
+        if (matchAwsResource('DynamoDB', tableName) && matchResourceName(tableName)) {
           pushQueue(removeDynamoDbTableChain, [tableName]);
         }
       }
@@ -633,7 +699,7 @@ module.exports = function(mainPath) {
         var bucketData = data.Buckets[i];
         var bucketName = bucketData.Name;
 
-        if (matchAwsResource('S3', bucketName)) {
+        if (matchAwsResource('S3', bucketName) && matchResourceName(bucketName)) {
           pushQueue(removeS3BucketChain, [bucketName]);
         }
       }
