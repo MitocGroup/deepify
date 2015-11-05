@@ -144,7 +144,7 @@ module.exports = function(mainPath) {
           console.log((new Date().toTimeString()), 'Start preparing for production');
 
           // @todo: abstract the way internal commands run
-          exec(this.nodeBinary + ' ' + this.scriptPath + ' prepare-prod ' + propertyPath,
+          exec(this.nodeBinary + ' ' + this.scriptPath + ' prepare-prod ' + propertyPath + ' --remove-source',
             function(error, stdout, stderr) {
               if (error) {
                 console.error((new Date().toTimeString()) + ' Error while preparing for production: ' + error);

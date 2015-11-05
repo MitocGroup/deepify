@@ -126,6 +126,11 @@ module.exports = {
       example: 'deepify prepare-prod path/to/web_app',
       description: 'Prepare web app for production',
       opts: {
+        'remove-source': {
+          alias: 's',
+          description: 'Remove original Lambda source',
+          required: false,
+        },
       },
       args: {
         path: {
