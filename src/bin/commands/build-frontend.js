@@ -40,7 +40,7 @@ module.exports = function(mainPath) {
 
   var propertyInstance;
 
-  exec('cp -R ' + path.join(mainPath, '') + ' ' + tmpPropertyPath,
+  exec('rsync -a --delete ' + path.join(mainPath, '') + ' ' + tmpPropertyPath,
     function(error, stdout, stderr) {
       if (error) {
         console.error((new Date().toTimeString()) + ' Error while creating working directory ' + tmpPropertyPath + ': ' + error);
@@ -59,7 +59,7 @@ module.exports = function(mainPath) {
 
         var frontendDumpPath = path.join(tmpPropertyPath, '_public');
 
-        exec('mkdir -p ' + dumpPath + '; cp -R ' + frontendDumpPath + '/ ' + dumpPath, function(error, stdout, stderr) {
+        exec('mkdir -p ' + dumpPath + '; rsync -a --delete ' + frontendDumpPath + '/ ' + dumpPath, function(error, stdout, stderr) {
           if (error) {
             console.error((new Date().toTimeString()) + ' Error while copying '
               + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
