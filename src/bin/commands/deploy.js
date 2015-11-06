@@ -53,7 +53,7 @@ module.exports = function(mainPath) {
     console.log((new Date().toTimeString()) + ' Local mode on!');
   }
 
-  exec('rsync -a --delete ' + path.join(mainPath, '') + ' ' + tmpPropertyPath,
+  exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/',
     function(error, stdout, stderr) {
       if (error) {
         console.error((new Date().toTimeString()) + ' Error while creating working directory ' + tmpPropertyPath + ': ' + error);
@@ -288,7 +288,7 @@ module.exports = function(mainPath) {
       mkdirp.sync(frontendDumpPath);
     }
 
-    exec('rsync -a --delete ' + tmpFrontendPath + '/* ' + frontendDumpPath + '/',
+    exec('rsync -a --delete ' + tmpFrontendPath + '/ ' + frontendDumpPath + '/',
       function(error, stdout, stderr) {
         if (error) {
           console.error((new Date().toTimeString()) + ' Unable to dump _frontend code into _www!');

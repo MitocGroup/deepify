@@ -106,7 +106,7 @@ module.exports = function(mainPath) {
       var tmpFolder = path.join(tmp.dirSync().name, Hash.md5(lambdaPath));
 
       var cmd = 'mkdir -p ' + tmpFolder  +
-        '; rsync -a --delete ' + lambdaPath + '/* ' + tmpFolder +
+        '; rsync -a --delete ' + lambdaPath + '/ ' + tmpFolder + '/' +
         '; cd ' + tmpFolder +
         '; rm -rf ' + path.join(tmpFolder, 'node_modules') +
         '; ' + installCmd;
