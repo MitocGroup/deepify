@@ -11,6 +11,7 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var os = require('os');
   var exec = require('child_process').exec;
+  var spawn = require('child_process').spawn;
   var mkdirp = require('mkdirp');
   var Property = require('../../lib.compiled/Property/Instance').Instance;
   var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
@@ -143,16 +144,25 @@ module.exports = function(mainPath) {
         if (result) {
           console.log((new Date().toTimeString()), 'Start preparing for production');
 
-          // @todo: abstract the way internal commands run
-          exec(this.nodeBinary + ' ' + this.scriptPath + ' prepare-prod ' + propertyPath + ' --remove-source',
-            function(error, stdout, stderr) {
-              if (error) {
-                console.error((new Date().toTimeString()) + ' Error while preparing for production: ' + error);
-              }
-
-              cb();
-            }
+          var prodPrepProcess = spawn(
+            this.nodeBinary,
+            [this.scriptPath, 'prepare-prod', propertyPath, '--remove-source']
           );
+
+          prodPrepProcess.stdout.pipe(process.stdout);
+          prodPrepProcess.stderr.pipe(process.stderr);
+
+          prodPrepProcess.on('close', function (code) {
+            if (code !== 0) {
+              console.error(
+                (new Date().toTimeString()) +
+                ' Error while preparing for production: Process exit with code ' +
+                code
+              );
+            }
+
+            cb();
+          });
 
           return;
         }
