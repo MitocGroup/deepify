@@ -4,6 +4,7 @@ deepify
 [![NPM Version](https://img.shields.io/npm/v/deepify.svg)](https://npmjs.org/package/deepify)
 [![Build Status](https://magnum.travis-ci.com/MitocGroup/deepify.svg?token=K6deyi9kwkfxRyXwcv6c)](https://magnum.travis-ci.com/MitocGroup/deepify)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/b5a92ac9c5f24794ae4e3eb468903810)](https://www.codacy.com/app/MitocGroup/deepify)
+[![Codacy Badge](https://api.codacy.com/project/badge/coverage/b5a92ac9c5f24794ae4e3eb468903810)](https://www.codacy.com/app/MitocGroup/deepify)
 [![API Docs](http://docs.deep.mg/badge.svg)](http://docs.deep.mg)
 
 [deepify](https://www.npmjs.com/package/deepify) is a node.js library, part of [DEEP Framework](https://github.com/MitocGroup/deep-framework).
@@ -87,14 +88,14 @@ Our short-to-medium-term roadmap items, in order of descending priority:
 
 Feature | Details | Owner
 --------|---------|------
-Implement provisioning update | Ready: DynamoDB. Remaining: Lambda, ApiGateway, IAM | [@alexanderc](https://github.com/alexanderc)
-Implement single microservice update | To be updated | [@alexanderc](https://github.com/alexanderc)
-Prepare frontend by adding deploy ID to the assets (html, css) | To be updated | [@alexanderc](https://github.com/alexanderc)
-Implement deployment rollbacks | To be updated | [@alexanderc](https://github.com/alexanderc)
-Optimize frontend code (browserify, minimize, reduce nr of calls, etc) | To be updated | [@alexanderc](https://github.com/alexanderc)
-Consolidate all logs / outputs / debugging info into deep-log | To be updated | [@alexanderc](https://github.com/alexanderc)
-Add caching option to the resource actions (via api gateway) | To be updated | [@alexanderc](https://github.com/alexanderc)
-Add choice of AWS credentials when generating them (server/deploy cmds) | To be updated | [@alexanderc](https://github.com/alexanderc)
+Implement provisioning update | Update provisioning (DynamoDB, Lambda, ApiGateway, IAM) when there are changes in the code or configuration of any web app part (aka microservice) | [@alexanderc](https://github.com/alexanderc)
+Implement single microservice update | Avoid overhead of an deploy by updating certain parts of a web app | [@alexanderc](https://github.com/alexanderc)
+Prepare frontend by adding deploy ID to the assets (html, css) | Parse assets and add deploy Id into the files (where possible) in order to allow CloudFront cache invalidation | [@alexanderc](https://github.com/alexanderc)
+Implement deployment rollbacks | Implement rollbacks in case if deployment fails or some logix is broken without undeploy-ing whole application (create diff's) | [@alexanderc](https://github.com/alexanderc)
+Optimize frontend code (browserify, minimize, reduce nr of calls, etc) | Optimize frontend code and build scripts in order to get deep-framework smaller footprint  | [@alexanderc](https://github.com/alexanderc)
+Consolidate all logs / outputs / debugging info into deep-log | Consolidate all logs to deep-log framework component | [@alexanderc](https://github.com/alexanderc)
+Add caching option to the resource actions (via api gateway) | Implement resource actions caching natively by adding an option to ApiGateway while provisioning | [@alexanderc](https://github.com/alexanderc)
+Add choice of AWS credentials when generating them (server/deploy cmds) | Make credentials pick up more verbose in order to avoid accidental deploys to unwanted accounts | [@alexanderc](https://github.com/alexanderc)
 
 ### License
 

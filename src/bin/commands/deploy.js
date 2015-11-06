@@ -13,6 +13,7 @@ module.exports = function(mainPath) {
   var exec = require('child_process').exec;
   var mkdirp = require('mkdirp');
   var Property = require('../../lib.compiled/Property/Instance').Instance;
+  var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
   var Config = require('../../lib.compiled/Property/Config').Config;
   var S3Service = require('../../lib.compiled/Provisioning/Service/S3Service').S3Service;
 
@@ -65,7 +66,11 @@ module.exports = function(mainPath) {
           console.error((new Date().toTimeString()) + ' Error while assuring frontend engine: ' + error);
         }
 
-        hasToPullDeps ? pullDeps.bind(this)(doDeploy) : doDeploy.bind(this)();
+        var deployCb = function() {
+          prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
+        };
+
+        hasToPullDeps ? pullDeps.bind(this)(deployCb) : deployCb.bind(this)();
       }.bind(this));
     }.bind(this)
   );
@@ -128,6 +133,39 @@ module.exports = function(mainPath) {
 
       dumpConfigToS3(propertyInstance, cb);
     }.bind(this));
+  }
+
+  function prepareProduction(propertyPath, cb) {
+    if (!localOnly) {
+      var prompt = new Prompt('Prepare for production?');
+
+      prompt.readConfirm(function(result) {
+        if (result) {
+          console.log((new Date().toTimeString()), 'Start preparing for production');
+
+          // @todo: abstract the way internal commands run
+          exec(this.nodeBinary + ' ' + this.scriptPath + ' prepare-prod ' + propertyPath + ' --remove-source',
+            function(error, stdout, stderr) {
+              if (error) {
+                console.error((new Date().toTimeString()) + ' Error while preparing for production: ' + error);
+              }
+
+              cb();
+            }
+          );
+
+          return;
+        }
+
+        console.log((new Date().toTimeString()), 'Skipping production preparation...');
+
+        cb();
+      }.bind(this));
+
+      return;
+    }
+
+    cb();
   }
 
   function doDeploy() {
