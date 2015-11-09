@@ -22,6 +22,7 @@ module.exports = function(mainPath) {
   var dumpCodePath = this.opts.locate('dump-local').value;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
   var hasToPullDeps = this.opts.locate('pull-deps').exists;
+  var microservicesToDeploy = this.opts.locate('partial').value;
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
@@ -146,7 +147,13 @@ module.exports = function(mainPath) {
 
           var prodPrepProcess = spawn(
             this.nodeBinary,
-            [this.scriptPath, 'prepare-prod', propertyPath, '--remove-source']
+            [
+              this.scriptPath,
+              'prepare-prod',
+              propertyPath,
+              '--remove-source',
+              microservicesToDeploy ? '--partial="' + microservicesToDeploy + '"' : '',
+            ]
           );
 
           prodPrepProcess.stdout.pipe(process.stdout);
@@ -238,7 +245,7 @@ module.exports = function(mainPath) {
               console.log((new Date().toTimeString()) + ' Website address: ' + getPublicWebsite(propertyInstance));
 
               dumpConfig.bind(this)(propertyInstance, dumpCode);
-            }.bind(this));
+            }.bind(this), getMicroservicesToDeploy());
           } else {
             console.log((new Date().toTimeString()) + ' Installing web app ' + config.appIdentifier);
 
@@ -259,8 +266,30 @@ module.exports = function(mainPath) {
         console.log((new Date().toTimeString()) + ' Website address: ' + getPublicWebsite(propertyInstance));
 
         dumpConfig.bind(this)(propertyInstance, dumpCode);
-      }.bind(this));
+      }.bind(this), getMicroservicesToDeploy());
     }
+  }
+
+  function arrayUnique(a) {
+    return a.reduce(function(p, c) {
+      if (p.indexOf(c) < 0) {
+        p.push(c);
+      }
+
+      return p;
+    }, []);
+  }
+
+  function getMicroservicesToDeploy() {
+    if (!microservicesToDeploy) {
+      return [];
+    }
+
+    var msIdentifiers = arrayUnique(microservicesToDeploy.split(',').map(function(id) {
+      return id.trim();
+    }));
+
+    return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
   }
 
   function pullDeps(cb) {
