@@ -14,7 +14,7 @@ module.exports = function(mainPath) {
   var Property = require('../../lib.compiled/Property/Instance').Instance;
   var Config = require('../../lib.compiled/Property/Config').Config;
 
-  var dumpPath = this.opts.locate('output-path').value;
+  var dumpPath = path.join(this.opts.locate('output-path').value, '');
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
@@ -40,7 +40,7 @@ module.exports = function(mainPath) {
 
   var propertyInstance;
 
-  exec('cp -R ' + path.join(mainPath, '') + ' ' + tmpPropertyPath,
+  exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/',
     function(error, stdout, stderr) {
       if (error) {
         console.error((new Date().toTimeString()) + ' Error while creating working directory ' + tmpPropertyPath + ': ' + error);
@@ -59,7 +59,7 @@ module.exports = function(mainPath) {
 
         var frontendDumpPath = path.join(tmpPropertyPath, '_public');
 
-        exec('mkdir -p ' + dumpPath + '; cp -R ' + frontendDumpPath + '/ ' + dumpPath, function(error, stdout, stderr) {
+        exec('mkdir -p ' + dumpPath + '; rsync -a --delete ' + frontendDumpPath + '/ ' + dumpPath + '/', function(error, stdout, stderr) {
           if (error) {
             console.error((new Date().toTimeString()) + ' Error while copying '
               + frontendDumpPath + ' into ' + dumpPath + ': ' + error);

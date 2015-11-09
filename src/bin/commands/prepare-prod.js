@@ -18,16 +18,21 @@ module.exports = function(mainPath) {
   var Archiver = require('archiver');
   var tmp = require('tmp');
 
+  var removeSource = this.opts.locate('remove-source').exists;
+  var microservicesToDeploy = this.opts.locate('partial').value;
+
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
   var property = new Property(mainPath);
+  property.microservicesToUpdate = getMicroservicesToDeploy();
 
+  var microservices = property.workingMicroservices;
   var lambdaPaths = [];
 
-  for (var i = 0; i < property.microservices.length; i++) {
-    var microservice = property.microservices[i];
+  for (var i = 0; i < microservices.length; i++) {
+    var microservice = microservices[i];
 
     for (var j = 0; j < microservice.resources.actions.length; j++) {
       var microserviceRoute = microservice.resources.actions[j];
@@ -41,8 +46,21 @@ module.exports = function(mainPath) {
   lambdaPaths = arrayUnique(lambdaPaths);
 
   dispatchLambdaPathsChain(chunk(lambdaPaths, 2), function() {
-    console.log((new Date().toTimeString()) + ' You Lambdas were successfully prepared for production');
+    console.log((new Date().toTimeString()) +
+      ' Application Lambdas were successfully prepared for production');
   }.bind(this));
+
+  function getMicroservicesToDeploy() {
+    if (!microservicesToDeploy) {
+      return [];
+    }
+
+    var msIdentifiers = arrayUnique(microservicesToDeploy.split(',').map(function(id) {
+      return id.trim();
+    }));
+
+    return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
+  }
 
   function prepareBatch(lambdaPaths, cb) {
     var remaining = lambdaPaths.length;
@@ -104,7 +122,7 @@ module.exports = function(mainPath) {
       var tmpFolder = path.join(tmp.dirSync().name, Hash.md5(lambdaPath));
 
       var cmd = 'mkdir -p ' + tmpFolder  +
-        '; cp -R ' + lambdaPath + '/* ' + tmpFolder +
+        '; rsync -a --delete ' + lambdaPath + '/ ' + tmpFolder + '/' +
         '; cd ' + tmpFolder +
         '; rm -rf ' + path.join(tmpFolder, 'node_modules') +
         '; ' + installCmd;
@@ -140,7 +158,14 @@ module.exports = function(mainPath) {
           .directory(tmpFolder, false)
           .finalize();
 
-        wait.ready(cb);
+        wait.ready(function() {
+          if (removeSource) {
+            // @todo: replace with native code
+            exec('rm -rf ' + path.join(lambdaPath, '*'));
+          }
+
+          cb();
+        }.bind(this));
       }.bind(this));
     } else {
       console.log((new Date().toTimeString()) + ' No NPM package found in ' + lambdaPath + '. Skipping...');

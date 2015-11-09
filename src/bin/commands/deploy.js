@@ -11,6 +11,7 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var os = require('os');
   var exec = require('child_process').exec;
+  var spawn = require('child_process').spawn;
   var mkdirp = require('mkdirp');
   var Property = require('../../lib.compiled/Property/Instance').Instance;
   var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
@@ -21,6 +22,7 @@ module.exports = function(mainPath) {
   var dumpCodePath = this.opts.locate('dump-local').value;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
   var hasToPullDeps = this.opts.locate('pull-deps').exists;
+  var microservicesToDeploy = this.opts.locate('partial').value;
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
@@ -52,7 +54,7 @@ module.exports = function(mainPath) {
     console.log((new Date().toTimeString()) + ' Local mode on!');
   }
 
-  exec('cp -R ' + path.join(mainPath, '') + ' ' + tmpPropertyPath,
+  exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/',
     function(error, stdout, stderr) {
       if (error) {
         console.error((new Date().toTimeString()) + ' Error while creating working directory ' + tmpPropertyPath + ': ' + error);
@@ -143,16 +145,31 @@ module.exports = function(mainPath) {
         if (result) {
           console.log((new Date().toTimeString()), 'Start preparing for production');
 
-          // @todo: abstract the way internal commands run
-          exec(this.nodeBinary + ' ' + this.scriptPath + ' prepare-prod ' + propertyPath,
-            function(error, stdout, stderr) {
-              if (error) {
-                console.error((new Date().toTimeString()) + ' Error while preparing for production: ' + error);
-              }
-
-              cb();
-            }
+          var prodPrepProcess = spawn(
+            this.nodeBinary,
+            [
+              this.scriptPath,
+              'prepare-prod',
+              propertyPath,
+              '--remove-source',
+              microservicesToDeploy ? '--partial="' + microservicesToDeploy + '"' : '',
+            ]
           );
+
+          prodPrepProcess.stdout.pipe(process.stdout);
+          prodPrepProcess.stderr.pipe(process.stderr);
+
+          prodPrepProcess.on('close', function (code) {
+            if (code !== 0) {
+              console.error(
+                (new Date().toTimeString()) +
+                ' Error while preparing for production: Process exit with code ' +
+                code
+              );
+            }
+
+            cb();
+          });
 
           return;
         }
@@ -206,6 +223,10 @@ module.exports = function(mainPath) {
     // @todo: rewrite this section!
     if (!updateCfg) {
       if (!cfgBucket) {
+        if (microservicesToDeploy) {
+          console.warn((new Date().toTimeString()) + ' Partial deploy option is useless during first deploy...');
+        }
+
         console.log((new Date().toTimeString()) + ' Installing web app ' + config.appIdentifier);
 
         propertyInstance.install(function() {
@@ -228,8 +249,12 @@ module.exports = function(mainPath) {
               console.log((new Date().toTimeString()) + ' Website address: ' + getPublicWebsite(propertyInstance));
 
               dumpConfig.bind(this)(propertyInstance, dumpCode);
-            }.bind(this));
+            }.bind(this), getMicroservicesToDeploy());
           } else {
+            if (microservicesToDeploy) {
+              console.warn((new Date().toTimeString()) + ' Partial deploy option is useless during first deploy...');
+            }
+
             console.log((new Date().toTimeString()) + ' Installing web app ' + config.appIdentifier);
 
             propertyInstance.install(function() {
@@ -249,8 +274,30 @@ module.exports = function(mainPath) {
         console.log((new Date().toTimeString()) + ' Website address: ' + getPublicWebsite(propertyInstance));
 
         dumpConfig.bind(this)(propertyInstance, dumpCode);
-      }.bind(this));
+      }.bind(this), getMicroservicesToDeploy());
     }
+  }
+
+  function arrayUnique(a) {
+    return a.reduce(function(p, c) {
+      if (p.indexOf(c) < 0) {
+        p.push(c);
+      }
+
+      return p;
+    }, []);
+  }
+
+  function getMicroservicesToDeploy() {
+    if (!microservicesToDeploy) {
+      return [];
+    }
+
+    var msIdentifiers = arrayUnique(microservicesToDeploy.split(',').map(function(id) {
+      return id.trim();
+    }));
+
+    return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
   }
 
   function pullDeps(cb) {
@@ -278,7 +325,7 @@ module.exports = function(mainPath) {
       mkdirp.sync(frontendDumpPath);
     }
 
-    exec('cp -R ' + tmpFrontendPath + '/* ' + frontendDumpPath + '/',
+    exec('rsync -a --delete ' + tmpFrontendPath + '/ ' + frontendDumpPath + '/',
       function(error, stdout, stderr) {
         if (error) {
           console.error((new Date().toTimeString()) + ' Unable to dump _frontend code into _www!');

@@ -65,7 +65,7 @@ export class Option {
       if (eqPos !== -1) {
         return {
           name: option.substr(0, eqPos),
-          value: option.substr(eqPos + 1),
+          value: Option._cleanupValue(option.substr(eqPos + 1)),
         };
       } else {
         return {
@@ -76,6 +76,17 @@ export class Option {
     }
 
     return null;
+  }
+
+  /**
+   * @param {String} val
+   * @returns {String|null}
+   * @private
+   */
+  static _cleanupValue(val) {
+    val = val.trim().replace(/^("|')?([^'"].*[^'"])*("|')?$/, '$2');
+
+    return val || null;
   }
 
   /**
