@@ -131,6 +131,11 @@ module.exports = {
           description: 'Remove original Lambda source',
           required: false,
         },
+        partial: {
+          alias: 'm',
+          description: 'Partial deploy (one or several comma separated microservices identifiers)',
+          required: false,
+        },
       },
       args: {
         path: {
@@ -161,6 +166,11 @@ module.exports = {
         'pull-deps': {
           alias: 'p',
           description: 'Pull dependencies from the remote repository',
+          required: false,
+        },
+        partial: {
+          alias: 'm',
+          description: 'Partial deploy (one or several comma separated microservices identifiers)',
           required: false,
         },
       },
