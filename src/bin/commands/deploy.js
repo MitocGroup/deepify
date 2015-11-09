@@ -223,6 +223,10 @@ module.exports = function(mainPath) {
     // @todo: rewrite this section!
     if (!updateCfg) {
       if (!cfgBucket) {
+        if (microservicesToDeploy) {
+          console.warn((new Date().toTimeString()) + ' Partial deploy option is useless during first deploy...');
+        }
+
         console.log((new Date().toTimeString()) + ' Installing web app ' + config.appIdentifier);
 
         propertyInstance.install(function() {
@@ -247,6 +251,10 @@ module.exports = function(mainPath) {
               dumpConfig.bind(this)(propertyInstance, dumpCode);
             }.bind(this), getMicroservicesToDeploy());
           } else {
+            if (microservicesToDeploy) {
+              console.warn((new Date().toTimeString()) + ' Partial deploy option is useless during first deploy...');
+            }
+
             console.log((new Date().toTimeString()) + ' Installing web app ' + config.appIdentifier);
 
             propertyInstance.install(function() {
