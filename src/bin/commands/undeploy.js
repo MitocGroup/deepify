@@ -565,9 +565,15 @@ module.exports = function(mainPath) {
         var status = data.Distribution.Status;
 
         if (status !== 'Deployed') {
+          var estTimeMinutes = (estTime / 60);
+
+          if (estTimeMinutes < 0) {
+            estTimeMinutes = '...';
+          }
+
           console.log((new Date().toTimeString()) +
             ' Waiting for CloudFront distribution ' +
-            distId + ' to be disabled (currently ' + status + ', ETC ' + (estTime / 60) + ' min.)'
+            distId + ' to be disabled (currently ' + status + ', ETC ' + estTimeMinutes + ' min.)'
           );
 
           setTimeout(function() {
