@@ -145,16 +145,19 @@ module.exports = function(mainPath) {
         if (result) {
           console.log((new Date().toTimeString()), 'Start preparing for production');
 
-          var prodPrepProcess = spawn(
-            this.nodeBinary,
-            [
-              this.scriptPath,
-              'prepare-prod',
-              propertyPath,
-              '--remove-source',
-              microservicesToDeploy ? '--partial="' + microservicesToDeploy + '"' : '',
-            ]
-          );
+          var cmdParts = [
+            this.scriptPath,
+            'prepare-prod',
+            propertyPath,
+            '--remove-source',
+          ];
+
+          if (microservicesToDeploy) {
+            cmdParts.push('--partial="' + microservicesToDeploy + '"');
+          }
+
+          var prodPrepProcess = spawn(this.nodeBinary, cmdParts);
+
 
           prodPrepProcess.stdout.pipe(process.stdout);
           prodPrepProcess.stderr.pipe(process.stderr);
