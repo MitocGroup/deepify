@@ -133,7 +133,7 @@ module.exports = function(mainPath) {
         console.error((new Date().toTimeString()) + ' Error while dumping config into ' + deepConfigFile + ': ' + error);
       }
 
-      dumpConfigToS3(propertyInstance, cb);
+      dumpConfigToS3.bind(this)(propertyInstance, cb);
     }.bind(this));
   }
 
