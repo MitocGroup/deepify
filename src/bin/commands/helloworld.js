@@ -24,7 +24,7 @@ module.exports = function(dumpPath) {
       return;
     }
 
-    npmInstall('babel-cli', function(error) {
+    npmInstall('babel@5.8.19', function(error) {
       console.log((new Date().toTimeString()) + ' Sample web app was successfully dumped.');
 
       //if (!error) {
