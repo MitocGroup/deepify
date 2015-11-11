@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.0.24",
+  "version": "1.1.2",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -58,7 +58,7 @@
     "link-deep-package-manager-npm": "ln -s `pwd`/node_modules/deep-package-manager/node_modules/* `pwd`/node_modules || true"
   },
   "dependencies": {
-    "deep-package-manager": "1.0.*",
+    "deep-package-manager": "1.1.*",
     "proxyquire": "1.5.*",
     "v8-profiler": "5.2.*",
     "traceviewify": "0.4.*",
