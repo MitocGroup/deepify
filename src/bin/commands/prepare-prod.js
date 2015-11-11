@@ -46,8 +46,7 @@ module.exports = function(mainPath) {
   lambdaPaths = arrayUnique(lambdaPaths);
 
   dispatchLambdaPathsChain(chunk(lambdaPaths, 2), function() {
-    console.log((new Date().toTimeString()) +
-      ' Application Lambdas were successfully prepared for production');
+    console.log('Application Lambdas were successfully prepared for production');
   }.bind(this));
 
   function getMicroservicesToDeploy() {
@@ -104,7 +103,7 @@ module.exports = function(mainPath) {
 
     var batch = lambdaPathsChunks.pop();
 
-    console.log((new Date().toTimeString()) + ' Running next lambdas build batch: ' + batch.join(', '));
+    console.log('Running next lambdas build batch: ' + batch.join(', '));
 
     prepareBatch(batch, function() {
       dispatchLambdaPathsChain(lambdaPathsChunks, cb);
@@ -112,12 +111,12 @@ module.exports = function(mainPath) {
   }
 
   function npmInstall(lambdaPath, cb) {
-    console.log((new Date().toTimeString()) + ' Checking for NPM package in ' + lambdaPath);
+    console.log('Checking for NPM package in ' + lambdaPath);
 
     var packageFile = path.join(lambdaPath, 'package.json');
 
     if (fs.existsSync(packageFile)) {
-      console.log((new Date().toTimeString()) + ' Running "' + installCmd + '" for Lambda ' + lambdaPath);
+      console.log('Running "' + installCmd + '" for Lambda ' + lambdaPath);
 
       var tmpFolder = path.join(tmp.dirSync().name, Hash.md5(lambdaPath));
 
@@ -129,7 +128,7 @@ module.exports = function(mainPath) {
 
       exec(cmd, function(error, stdout, stderr) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Failed to run "' + installCmd + '" for Lambda ' + lambdaPath
+          console.error('Failed to run "' + installCmd + '" for Lambda ' + lambdaPath
             + ' (' + stderr + '). Skipping...');
         }
 
@@ -152,7 +151,7 @@ module.exports = function(mainPath) {
 
         archive.pipe(output);
 
-        console.log((new Date().toTimeString()) + ' Packing Lambda code into ' + outputFile);
+        console.log('Packing Lambda code into ' + outputFile);
 
         archive
           .directory(tmpFolder, false)
@@ -168,7 +167,7 @@ module.exports = function(mainPath) {
         }.bind(this));
       }.bind(this));
     } else {
-      console.log((new Date().toTimeString()) + ' No NPM package found in ' + lambdaPath + '. Skipping...');
+      console.log('No NPM package found in ' + lambdaPath + '. Skipping...');
     }
   }
 

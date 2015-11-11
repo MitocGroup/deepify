@@ -51,13 +51,13 @@ module.exports = function(mainPath) {
   var propertyInstance;
 
   if (localOnly) {
-    console.log((new Date().toTimeString()) + ' Local mode on!');
+    console.log('Local mode on!');
   }
 
   exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/',
     function(error, stdout, stderr) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error while creating working directory ' + tmpPropertyPath + ': ' + error);
+        console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + error);
         this.exit(1);
       }
 
@@ -65,7 +65,7 @@ module.exports = function(mainPath) {
 
       propertyInstance.assureFrontendEngine(function(error) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Error while assuring frontend engine: ' + error);
+          console.error('Error while assuring frontend engine: ' + error);
         }
 
         var deployCb = function() {
@@ -78,7 +78,7 @@ module.exports = function(mainPath) {
   );
 
   function getConfigFromS3(propertyInstance, cb) {
-    console.log((new Date().toTimeString()) + ' Trying to retrieve .cfg.deeploy.json from S3 ' + cfgBucket);
+    console.log('Trying to retrieve .cfg.deeploy.json from S3 ' + cfgBucket);
 
     var s3 = new propertyInstance.AWS.S3();
 
@@ -109,7 +109,7 @@ module.exports = function(mainPath) {
 
     s3.putObject(payload, function(error, data) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error persisting config to S3', error);
+        console.error('Error persisting config to S3', error);
         this.exit(1);
       }
 
@@ -126,11 +126,11 @@ module.exports = function(mainPath) {
     var deepConfigFile = path.join(mainPath, '.cfg.deeploy.json');
     var plainConfig = JSON.stringify(propertyInstance.config);
 
-    console.log((new Date().toTimeString()) + ' Dumping config into ' + deepConfigFile);
+    console.log('Dumping config into ' + deepConfigFile);
 
     fs.writeFile(deepConfigFile, plainConfig, function(error) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error while dumping config into ' + deepConfigFile + ': ' + error);
+        console.error('Error while dumping config into ' + deepConfigFile + ': ' + error);
       }
 
       dumpConfigToS3.bind(this)(propertyInstance, cb);
@@ -143,7 +143,7 @@ module.exports = function(mainPath) {
 
       prompt.readConfirm(function(result) {
         if (result) {
-          console.log((new Date().toTimeString()), 'Start preparing for production');
+          console.log('Start preparing for production');
 
           var cmdParts = [
             this.scriptPath,
@@ -165,8 +165,7 @@ module.exports = function(mainPath) {
           prodPrepProcess.on('close', function (code) {
             if (code !== 0) {
               console.error(
-                (new Date().toTimeString()) +
-                ' Error while preparing for production: Process exit with code ' +
+                'Error while preparing for production: Process exit with code ' +
                 code
               );
             }
@@ -177,7 +176,7 @@ module.exports = function(mainPath) {
           return;
         }
 
-        console.log((new Date().toTimeString()), 'Skipping production preparation...');
+        console.log('Skipping production preparation...');
 
         cb();
       }.bind(this));
@@ -197,7 +196,7 @@ module.exports = function(mainPath) {
     // Gracefully teardown...
     (function() {
       process.on('uncaughtException', function(error) {
-        console.error((new Date().toTimeString()), error.toString(), os.EOL, error.stack);
+        console.error(error.toString(), os.EOL, error.stack);
 
         if (propertyInstance.config.provisioning) {
           dumpConfig.bind(this)(propertyInstance, function() {
@@ -209,7 +208,7 @@ module.exports = function(mainPath) {
       }.bind(this));
 
       process.on('SIGINT', function() {
-        console.log((new Date().toTimeString()) + ' Gracefully shutting down from SIGINT (Ctrl-C)...');
+        console.log('Gracefully shutting down from SIGINT (Ctrl-C)...');
 
         if (propertyInstance.config.provisioning) {
           dumpConfig.bind(this)(propertyInstance, function() {
@@ -227,42 +226,42 @@ module.exports = function(mainPath) {
     if (!updateCfg) {
       if (!cfgBucket) {
         if (microservicesToDeploy) {
-          console.warn((new Date().toTimeString()) + ' Partial deploy option is useless during first deploy...');
+          console.warn(' Partial deploy option is useless during first deploy...');
         }
 
-        console.log((new Date().toTimeString()) + ' Installing web app ' + config.appIdentifier);
+        console.log('Installing web app ' + config.appIdentifier);
 
         propertyInstance.install(function() {
-          console.log((new Date().toTimeString()) + ' CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-          console.log((new Date().toTimeString()) + ' Website address: ' + getPublicWebsite(propertyInstance));
+          console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
+          console.log('Website address: ' + getPublicWebsite(propertyInstance));
 
           dumpConfig.bind(this)(propertyInstance, dumpCode);
         }.bind(this));
       } else {
         getConfigFromS3.bind(this)(propertyInstance, function(error, updateCfg) {
           if (error) {
-            console.error((new Date().toTimeString()) + ' Error fetching config from AWS S3 bucket ' + cfgBucket, error);
+            console.error('Error fetching config from AWS S3 bucket ' + cfgBucket, error);
           }
 
           if (!error) {
-            console.log((new Date().toTimeString()) + ' Updating web app ' + config.appIdentifier);
+            console.log('Updating web app ' + config.appIdentifier);
 
             propertyInstance.update(JSON.parse(updateCfg.Body.toString()), function() {
-              console.log((new Date().toTimeString()) + ' CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-              console.log((new Date().toTimeString()) + ' Website address: ' + getPublicWebsite(propertyInstance));
+              console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
+              console.log('Website address: ' + getPublicWebsite(propertyInstance));
 
               dumpConfig.bind(this)(propertyInstance, dumpCode);
             }.bind(this), getMicroservicesToDeploy());
           } else {
             if (microservicesToDeploy) {
-              console.warn((new Date().toTimeString()) + ' Partial deploy option is useless during first deploy...');
+              console.warn(' Partial deploy option is useless during first deploy...');
             }
 
-            console.log((new Date().toTimeString()) + ' Installing web app ' + config.appIdentifier);
+            console.log('Installing web app ' + config.appIdentifier);
 
             propertyInstance.install(function() {
-              console.log((new Date().toTimeString()) + ' CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-              console.log((new Date().toTimeString()) + ' Website address: ' + getPublicWebsite(propertyInstance));
+              console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
+              console.log('Website address: ' + getPublicWebsite(propertyInstance));
 
               dumpConfig.bind(this)(propertyInstance, dumpCode);
             }.bind(this));
@@ -270,11 +269,11 @@ module.exports = function(mainPath) {
         }.bind(this));
       }
     } else {
-      console.log((new Date().toTimeString()) + ' Updating web app ' + config.appIdentifier);
+      console.log('Updating web app ' + config.appIdentifier);
 
       propertyInstance.update(updateCfg, function() {
-        console.log((new Date().toTimeString()) + ' CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-        console.log((new Date().toTimeString()) + ' Website address: ' + getPublicWebsite(propertyInstance));
+        console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
+        console.log('Website address: ' + getPublicWebsite(propertyInstance));
 
         dumpConfig.bind(this)(propertyInstance, dumpCode);
       }.bind(this), getMicroservicesToDeploy());
@@ -304,11 +303,11 @@ module.exports = function(mainPath) {
   }
 
   function pullDeps(cb) {
-    console.log((new Date().toTimeString()) + ' Resolving dependencies in ' + tmpPropertyPath);
+    console.log('Resolving dependencies in ' + tmpPropertyPath);
 
     exec('node ' + path.join(__dirname, './../deepify.js') + ' pull-deps ' + tmpPropertyPath, function(error, stdout, stderr) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error while pulling dependencies in ' + tmpPropertyPath + ': ' + error);
+        console.error('Error while pulling dependencies in ' + tmpPropertyPath + ': ' + error);
         this.exit(1);
       }
 
@@ -331,7 +330,7 @@ module.exports = function(mainPath) {
     exec('rsync -a --delete ' + tmpFrontendPath + '/ ' + frontendDumpPath + '/',
       function(error, stdout, stderr) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Unable to dump _frontend code into _www!');
+          console.error('Unable to dump _frontend code into _www!');
         }
 
         dumpLambdas();
@@ -343,7 +342,7 @@ module.exports = function(mainPath) {
     var lambdas = getLambdas(tmpPropertyPath);
 
     if (lambdas.length <= 0) {
-      console.log((new Date().toTimeString()) + ' There are no Lambdas to be dumped!');
+      console.log('There are no Lambdas to be dumped!');
       return;
     }
 
@@ -369,7 +368,7 @@ module.exports = function(mainPath) {
 
       lambdasVector.push(path.basename(newLambdaPath));
 
-      console.log((new Date().toTimeString()) + ' Unpacking Lambda into ' + newLambdaPath);
+      console.log('Unpacking Lambda into ' + newLambdaPath);
 
       // @todo: find a smarter way to deny lambda runtime installing deps in runtime
       try {
@@ -382,12 +381,12 @@ module.exports = function(mainPath) {
 
       exec(command, function(error, stdout, stderr) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Error unpacking lambda: ' + error);
+          console.error('Error unpacking lambda: ' + error);
         }
 
         stack--;
 
-        console.log((new Date().toTimeString()) + ' Remaining ' + stack + ' Lambdas to be unpacked...');
+        console.log('Remaining ' + stack + ' Lambdas to be unpacked...');
       });
     }
 
@@ -397,8 +396,8 @@ module.exports = function(mainPath) {
       } else {
         fs.unlinkSync(globalAwsConfigFile);
 
-        console.log((new Date().toTimeString()) + ' [' + lambdasVector.join(', ') + ']');
-        console.log((new Date().toTimeString()) + ' All Lambdas are now ready to run locally!');
+        console.log('[' + lambdasVector.join(', ') + ']');
+        console.log('All Lambdas are now ready to run locally!');
       }
     }
 

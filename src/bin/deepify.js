@@ -8,6 +8,9 @@
 var Program = require('../lib.compiled/Terminal/Program.js').Program;
 var ValidationException = require('../lib.compiled/Terminal/Exception/ValidationException.js').ValidationException;
 var path = require('path');
+var DeepLog = require('deep-log');
+
+new DeepLog().overrideJsConsole();
 
 var manifest = require('./manifest.js');
 

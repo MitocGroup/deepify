@@ -59,7 +59,7 @@ module.exports = function(mainPath) {
 
   property.assureFrontendEngine(function(error) {
     if (error) {
-      console.error((new Date().toTimeString()) + ' Error while assuring frontend engine: ' + error);
+      console.error('Error while assuring frontend engine: ' + error);
     }
 
     property.runInitMsHooks(function() {
@@ -94,14 +94,14 @@ module.exports = function(mainPath) {
 
     var hookPath = path.join(mainPath, 'hook.server.js');
 
-    console.log((new Date().toTimeString()) + ' Checking for build hook in ' + hookPath);
+    console.log('Checking for build hook in ' + hookPath);
 
     if (!fs.existsSync(hookPath)) {
       cb();
       return;
     }
 
-    console.log((new Date().toTimeString()) + ' Running build hook from ' + hookPath);
+    console.log('Running build hook from ' + hookPath);
 
     var hook = require(hookPath);
 
@@ -113,7 +113,7 @@ module.exports = function(mainPath) {
   }
 
   function npmInstall(lambdaPath, cb) {
-    console.log((new Date().toTimeString()) + ' Checking for NPM package in ' + lambdaPath);
+    console.log('Checking for NPM package in ' + lambdaPath);
 
     var packageFile = path.join(lambdaPath, 'package.json');
 
@@ -121,31 +121,31 @@ module.exports = function(mainPath) {
       var nodeModulesPath = path.join(lambdaPath, 'node_modules');
       var cmd = fs.existsSync(nodeModulesPath) ? 'update' : 'install';
 
-      console.log((new Date().toTimeString()) + ' Running "npm ' + cmd + '" in ' + lambdaPath);
+      console.log('Running "npm ' + cmd + '" in ' + lambdaPath);
 
       exec('cd ' + lambdaPath + ' && npm ' + cmd, function(error, stdout, stderr) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Failed to run "npm ' + cmd + '" in ' + lambdaPath
+          console.error('Failed to run "npm ' + cmd + '" in ' + lambdaPath
             + ' (' + stderr + '). Skipping...');
         }
 
         cb();
       }.bind(this));
     } else {
-      console.log((new Date().toTimeString()) + ' No NPM package found in ' + lambdaPath + '. Skipping...');
+      console.log('No NPM package found in ' + lambdaPath + '. Skipping...');
     }
   }
 
   function linkAwsSdk(lambdaPath, cb) {
-    console.log((new Date().toTimeString()) + ' Linking aws-sdk library in ' + lambdaPath);
+    console.log('Linking aws-sdk library in ' + lambdaPath);
 
     exec('cd ' + lambdaPath + ' && npm link aws-sdk', function(error, stdout, stderr) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Failed to link aws-sdk library in ' + lambdaPath + ' (' + stderr + '). Trying to install it...');
+        console.error('Failed to link aws-sdk library in ' + lambdaPath + ' (' + stderr + '). Trying to install it...');
 
         exec('cd ' + lambdaPath + ' && npm install aws-sdk', function(error, stdout, stderr) {
           if (error) {
-            console.error((new Date().toTimeString()) + ' Failed to link or install aws-sdk locally in ' + lambdaPath
+            console.error('Failed to link or install aws-sdk locally in ' + lambdaPath
               + ' (' + stderr + '). Skipping...');
           }
 
@@ -215,7 +215,7 @@ module.exports = function(mainPath) {
 
     var batch = lambdaPathsChunks.pop();
 
-    console.log((new Date().toTimeString()) + ' Running next lambdas build batch: ' + batch.join(', '));
+    console.log('Running next lambdas build batch: ' + batch.join(', '));
 
     prepareBatch(batch, function() {
       dispatchLambdaPathsChain(lambdaPathsChunks, cb);

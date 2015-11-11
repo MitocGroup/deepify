@@ -36,7 +36,7 @@ module.exports = function(mainPath) {
   var configExists = fs.existsSync(configFile);
 
   if (!configExists) {
-    console.error((new Date().toTimeString()) + ' Missing ' + Config.DEFAULT_FILENAME + ' configuration file in ' + mainPath);
+    console.error('Missing ' + Config.DEFAULT_FILENAME + ' configuration file in ' + mainPath);
     this.exit(1);
   }
 
@@ -45,7 +45,7 @@ module.exports = function(mainPath) {
   if (!config.dependencies
     || typeof config.dependencies.bucket === 'undefined') {
 
-    console.error((new Date().toTimeString()) + ' Missing dependencies or bucket properties');
+    console.error('Missing dependencies or bucket properties');
     this.exit(1);
   }
 
@@ -62,19 +62,19 @@ module.exports = function(mainPath) {
   mg.driver.dryRun = dryRun;
 
   console.log(
-    (new Date().toTimeString()) +
-    ' Resolving dependencies from ' + mainPath + ' using \'s3://' + s3Bucket + '/' + s3Prefix + ' \' repository'
+    'Resolving dependencies from ' + mainPath +
+    ' using \'s3://' + s3Bucket + '/' + s3Prefix + ' \' repository'
   );
 
   if (microservicesStack.length > 0) {
-    console.log((new Date().toTimeString()) + ' ---> ', microservicesStack);
+    console.log('---> ', microservicesStack);
 
     mg.pullBatch(microservicesStack, function() {
-      console.log((new Date().toTimeString()) + ' Done!');
+      console.log('Done!');
     });
   } else {
     mg.pull(function() {
-      console.log((new Date().toTimeString()) + ' Done!');
+      console.log('Done!');
     });
   }
 };

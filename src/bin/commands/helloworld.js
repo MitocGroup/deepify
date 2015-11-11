@@ -25,20 +25,20 @@ module.exports = function(dumpPath) {
     }
 
     npmInstall('babel@5.8.19', function(error) {
-      console.log((new Date().toTimeString()) + ' Sample web app was successfully dumped.');
+      console.log('Sample web app was successfully dumped.');
 
       //if (!error) {
-      //  console.log((new Date().toTimeString()) + ' Running "npm install" on SayHello Lambda');
+      //  console.log('Running "npm install" on SayHello Lambda');
       //
       //  var lambdaPath = path.join(helloWorldPath, 'Backend/src/SayHello');
       //
       //  exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
       //    if (error) {
-      //      console.error((new Date().toTimeString()) + ' Error installing SayHello Lambda dependencies: ' + stderr);
+      //      console.error('Error installing SayHello Lambda dependencies: ' + stderr);
       //      return;
       //    }
       //
-      //    console.log((new Date().toTimeString()) + ' Sample web app was successfully dumped.');
+      //    console.log('Sample web app was successfully dumped.');
       //  }.bind(this));
       //}
     });
@@ -48,11 +48,11 @@ module.exports = function(dumpPath) {
 function npmInstall(repo, cb) {
   var exec = require('child_process').exec;
 
-  console.log((new Date().toTimeString()) + ' Installing ' + repo + ' via NPM globally');
+  console.log('Installing ' + repo + ' via NPM globally');
 
   exec('npm list -g --depth 1 ' + repo + ' > /dev/null 2>&1 || npm install -g ' + repo, function(error, stdout, stderr) {
     if (error) {
-      console.error((new Date().toTimeString()) + ' Error installing ' + repo + ' globally: ' + stderr);
+      console.error('Error installing ' + repo + ' globally: ' + stderr);
 
       cb(error);
       return;
@@ -73,11 +73,11 @@ function gitClone(repo, subfolder, targetDir, cb, copyFiles) {
 
   var tmpFolder = tmp.dirSync().name;
 
-  console.log((new Date().toTimeString()) + ' Cloning the ' + repo + ' into ' + tmpFolder);
+  console.log('Cloning the ' + repo + ' into ' + tmpFolder);
 
   exec('cd ' + tmpFolder + ' && git clone --depth=1 ' + repo + ' .', function(error, stdout, stderr) {
     if (error) {
-      console.error((new Date().toTimeString()) + ' Error cloning ' + repo + ' repository into ' + tmpFolder + ': ' + stderr);
+      console.error('Error cloning ' + repo + ' repository into ' + tmpFolder + ': ' + stderr);
 
       fse.removeSync(tmpFolder);
       cb(error);

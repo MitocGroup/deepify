@@ -32,7 +32,7 @@ module.exports = function(mainPath) {
     config = JSON.parse(fs.readFileSync(configFile));
   }
 
-  console.log((new Date().toTimeString()) + ' Dumping frontend into ' + dumpPath);
+  console.log('Dumping frontend into ' + dumpPath);
 
   var tmpDir = os.tmpdir();
   var tmpPropertyPath = path.join(tmpDir, path.basename(mainPath));
@@ -43,7 +43,7 @@ module.exports = function(mainPath) {
   exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/',
     function(error, stdout, stderr) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error while creating working directory ' + tmpPropertyPath + ': ' + error);
+        console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + error);
         this.exit(1);
       }
 
@@ -51,7 +51,7 @@ module.exports = function(mainPath) {
 
       propertyInstance.assureFrontendEngine(function(error) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Error while assuring frontend engine: ' + error);
+          console.error('Error while assuring frontend engine: ' + error);
         }
 
         propertyInstance.fakeBuild();
@@ -61,12 +61,12 @@ module.exports = function(mainPath) {
 
         exec('mkdir -p ' + dumpPath + '; rsync -a --delete ' + frontendDumpPath + '/ ' + dumpPath + '/', function(error, stdout, stderr) {
           if (error) {
-            console.error((new Date().toTimeString()) + ' Error while copying '
+            console.error('Error while copying '
               + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
             this.exit(1);
           }
 
-          console.log((new Date().toTimeString()) + ' Frontend dumped successfully');
+          console.log('Frontend dumped successfully');
         }.bind(this));
       }.bind(this));
     }.bind(this)
