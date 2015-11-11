@@ -87,7 +87,6 @@ Our short-to-medium-term roadmap items, in order of descending priority:
 
 Feature | Details | Owner
 --------|---------|------
-
 Implement deployment rollbacks | Implement rollbacks in case if deployment fails or some logix is broken without undeploy-ing whole application (create diff's) | [@alexanderc](https://github.com/alexanderc)
 Optimize frontend code (browserify, minimize, reduce nr of calls, etc) | Optimize frontend code and build scripts in order to get deep-framework smaller footprint  | [@alexanderc](https://github.com/alexanderc)
 Consolidate all logs / outputs / debugging info into deep-log | Consolidate all logs to deep-log framework component | [@alexanderc](https://github.com/alexanderc)
