@@ -6,7 +6,6 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  var aws = require('aws-sdk');
   var path = require('path');
   var fs = require('fs');
   var os = require('os');
