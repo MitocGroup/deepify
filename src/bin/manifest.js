@@ -14,6 +14,20 @@ module.exports = {
   description: 'DEEP CLI',
   commandsPath: './commands',
   commands: {
+
+    // @todo: remove this thing when figuring out a better way to abstract es6 compilation
+    'compile-es6': {
+      example: 'deepify compile-es6 path/to/lambda',
+      description: 'Compiles ES6 scripts to ES5 using babel (matched by *.es6)',
+      opts: {
+      },
+      args: {
+        path: {
+          description: 'The path to the lambda root',
+          required: true,
+        },
+      },
+    },
     helloworld: {
       example: 'deepify helloworld path/to/web_app',
       description: 'Dump the "Hello World" sample web app',
