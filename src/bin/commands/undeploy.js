@@ -34,7 +34,7 @@ module.exports = function(mainPath) {
     skipDirtyCheck = true;
 
     if (!resource) {
-      console.error((new Date().toTimeString()) + ' Unable to extract base hash from ' + rawResource);
+      console.error('Unable to extract base hash from ' + rawResource);
       this.exit(1);
     }
   }
@@ -47,7 +47,7 @@ module.exports = function(mainPath) {
   var configExists = fs.existsSync(configFile);
 
   if (!configExists) {
-    console.error((new Date().toTimeString()) + ' Missing ' + Config.DEFAULT_FILENAME + ' configuration file in ' + mainPath);
+    console.error('Missing ' + Config.DEFAULT_FILENAME + ' configuration file in ' + mainPath);
     this.exit(1);
   }
 
@@ -88,7 +88,7 @@ module.exports = function(mainPath) {
           this.exit(1);
         }
 
-        console.log(os.EOL, (new Date().toTimeString()) + ' Dirty mode on!!!', os.EOL);
+        console.log(os.EOL, ' Dirty mode on!!!', os.EOL);
       }
     } else {
       var deployConfigFile = path.join(mainPath, '.cfg.deeploy.json');
@@ -177,20 +177,20 @@ module.exports = function(mainPath) {
       if (fs.existsSync(deployConfigFile)) {
         fse.move(deployConfigFile, deployConfigFileBck, function(error) {
           if (error) {
-            console.error((new Date().toTimeString()) + ' Error moving \'.cfg.deeploy.json\' file: ' + error);
+            console.error('Error moving \'.cfg.deeploy.json\' file: ' + error);
             return;
           }
 
-          console.log((new Date().toTimeString()) + ' Config file \'.cfg.deeploy.json\' moved to ' + deployConfigFileBck);
+          console.log('Config file \'.cfg.deeploy.json\' moved to ' + deployConfigFileBck);
         }.bind(this));
       } else {
         fs.writeFile(deployConfigFileBck, JSON.stringify(rawDeployConfig), function(error) {
           if (error) {
-            console.error((new Date().toTimeString()) + ' Error persisting remote version of \'.cfg.deeploy.json\' file: ' + error);
+            console.error('Error persisting remote version of \'.cfg.deeploy.json\' file: ' + error);
             return;
           }
 
-          console.log((new Date().toTimeString()) + ' Remote config file \'.cfg.deeploy.json\' persisted to ' + deployConfigFileBck);
+          console.log('Remote config file \'.cfg.deeploy.json\' persisted to ' + deployConfigFileBck);
         }.bind(this));
       }
     }
@@ -245,16 +245,16 @@ module.exports = function(mainPath) {
       });
     }
 
-    console.log((new Date().toTimeString()) + ' === API Gateway ===');
+    console.log('=== API Gateway ===');
 
     var apiGateway = deepAwsService('APIGateway');
 
     var deleteApiChain = function(apiId) {
-      console.log((new Date().toTimeString()) + ' --> Removing API Gateway ' + apiId);
+      console.log('--> Removing API Gateway ' + apiId);
 
       apiGateway.deleteRestapi({restapiId: apiId})
         .catch(function(error) {
-          console.error((new Date().toTimeString()) + ' Error while removing API Gateway ' + apiId + ': ' + error);
+          console.error('Error while removing API Gateway ' + apiId + ': ' + error);
         }.bind(this));
     };
 
@@ -275,10 +275,10 @@ module.exports = function(mainPath) {
         }
       }.bind(this))
       .catch(function(error) {
-        console.error((new Date().toTimeString()) + ' Error while listing API Gateway: ' + error);
+        console.error('Error while listing API Gateway: ' + error);
       }.bind(this));
 
-    console.log((new Date().toTimeString()) + ' === IAM ===');
+    console.log('=== IAM ===');
 
     var iam = deepAwsService('IAM');
 
@@ -289,14 +289,14 @@ module.exports = function(mainPath) {
         if (error) {
           // remove inline policies...
           if (error.code === 'DeleteConflict') {
-            console.log((new Date().toTimeString()) + ' --> Removing inline policies for IAM Role ' + roleName);
+            console.log('--> Removing inline policies for IAM Role ' + roleName);
 
             iam.listRolePolicies({
               RoleName: roleName,
               MaxItems: 1000,
             }, function(error, data) {
               if (error) {
-                console.error((new Date().toTimeString()) + ' Error while listing inline policies of the IAM role: ' + error);
+                console.error('Error while listing inline policies of the IAM role: ' + error);
 
                 return;
               }
@@ -306,14 +306,14 @@ module.exports = function(mainPath) {
               for (var i = 0; i < data.PolicyNames.length; i++) {
                 var inlinePolicyName = data.PolicyNames[i];
 
-                console.log((new Date().toTimeString()) + ' --> Deleting inline IAM Policy ' + inlinePolicyName + ' for IAM Role ' + roleName);
+                console.log('--> Deleting inline IAM Policy ' + inlinePolicyName + ' for IAM Role ' + roleName);
 
                 awsStack.push(iam.deleteRolePolicy({
                   RoleName: roleName,
                   PolicyName: inlinePolicyName,
                 }), function(error, data) {
                   if (error) {
-                    console.error((new Date().toTimeString()) + ' Error deleting inline IAM Policy: ' + error);
+                    console.error('Error deleting inline IAM Policy: ' + error);
                   }
                 });
               }
@@ -326,20 +326,20 @@ module.exports = function(mainPath) {
             return;
           }
 
-          console.error((new Date().toTimeString()) + ' Error deleting IAM role: ' + error);
+          console.error('Error deleting IAM role: ' + error);
         }
       });
     };
 
     var removeRoleChain = function(roleName) {
-      console.log((new Date().toTimeString()) + ' --> Deleting IAM Role ' + roleName);
+      console.log('--> Deleting IAM Role ' + roleName);
 
       iam.listAttachedRolePolicies({
         RoleName: roleName,
         MaxItems: 1000,
       }, function(error, data) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Error while listing attached policies of the IAM role: ' + error);
+          console.error('Error while listing attached policies of the IAM role: ' + error);
           return;
         }
 
@@ -353,25 +353,25 @@ module.exports = function(mainPath) {
 
             var policyArn = policyData.PolicyArn;
 
-            console.log((new Date().toTimeString()) + ' --> Detaching IAM Policy ' + policyArn + ' from IAM Role ' + roleName);
+            console.log('--> Detaching IAM Policy ' + policyArn + ' from IAM Role ' + roleName);
 
             awsStack.push(iam.detachRolePolicy({
               PolicyArn: policyArn,
               RoleName: roleName,
             }), function(error, data) {
               if (error) {
-                console.error((new Date().toTimeString()) + ' Error while detaching IAM role policy: ' + error);
+                console.error('Error while detaching IAM role policy: ' + error);
               }
             });
 
-            console.log((new Date().toTimeString()) + ' --> Deleting IAM Policy ' + policyArn);
+            console.log('--> Deleting IAM Policy ' + policyArn);
 
             // @todo: do not try to delete foreign policies...
             iam.deletePolicy({
               PolicyArn: policyArn,
             }, function(error, data) {
               if (error) {
-                console.error((new Date().toTimeString()) + ' Error while deleting IAM policy: ' + error);
+                console.error('Error while deleting IAM policy: ' + error);
               }
             });
           }
@@ -387,7 +387,7 @@ module.exports = function(mainPath) {
       MaxItems: 1000,
     }, function(error, data) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error while retrieving IAM roles: ' + error);
+        console.error('Error while retrieving IAM roles: ' + error);
         return;
       }
 
@@ -401,18 +401,18 @@ module.exports = function(mainPath) {
       }
     });
 
-    console.log((new Date().toTimeString()) + ' === CognitoIdentity ===');
+    console.log('=== CognitoIdentity ===');
 
     var cognitoidentity = deepAwsService('CognitoIdentity');
 
     function removeIdentityPoolChain(identityPoolId) {
-      console.log((new Date().toTimeString()) + ' --> Deleting Cognito Identity Pool ' + identityPoolId);
+      console.log('--> Deleting Cognito Identity Pool ' + identityPoolId);
 
       cognitoidentity.deleteIdentityPool({
         IdentityPoolId: identityPoolId,
       }, function(error, data) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Error while deleting Cognito Identity Pool: ' + error);
+          console.error('Error while deleting Cognito Identity Pool: ' + error);
         }
       });
     }
@@ -421,7 +421,7 @@ module.exports = function(mainPath) {
       MaxResults: 60,
     }, function(error, data) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error while retrieving Cognito Identity Pools: ' + error);
+        console.error('Error while retrieving Cognito Identity Pools: ' + error);
         return;
       }
 
@@ -436,18 +436,18 @@ module.exports = function(mainPath) {
       }
     });
 
-    console.log((new Date().toTimeString()) + ' === Lambda ===');
+    console.log('=== Lambda ===');
 
     var lambda = deepAwsService('Lambda');
 
     function removeLambdaChain(functionName) {
-      console.log((new Date().toTimeString()) + ' --> Deleting Lambda function ' + functionName);
+      console.log('--> Deleting Lambda function ' + functionName);
 
       lambda.deleteFunction({
         FunctionName: functionName,
       }, function(error, data) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Error while deleting Lambda function: ' + error);
+          console.error('Error while deleting Lambda function: ' + error);
         }
       });
     }
@@ -456,7 +456,7 @@ module.exports = function(mainPath) {
       MaxItems: 1000,
     }, function(error, data) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error while retrieving Lambda functions: ' + error);
+        console.error('Error while retrieving Lambda functions: ' + error);
         return;
       }
 
@@ -470,18 +470,18 @@ module.exports = function(mainPath) {
       }
     });
 
-    console.log((new Date().toTimeString()) + ' === CloudFront ===');
+    console.log('=== CloudFront ===');
 
     var cf = deepAwsService('CloudFront');
 
     function removeCfDistribution(distId) {
-      console.log((new Date().toTimeString()) + ' --> Deleting CloudFront distribution ' + distId);
+      console.log('--> Deleting CloudFront distribution ' + distId);
 
       cf.getDistributionConfig({
         Id: distId,
       }, function(error, data) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Error while retrieving CloudFront distribution config: ' + error);
+          console.error('Error while retrieving CloudFront distribution config: ' + error);
           return;
         }
 
@@ -495,7 +495,7 @@ module.exports = function(mainPath) {
             addMsg = ' but not yet deployed. Waiting...';
           }
 
-          console.error((new Date().toTimeString()) + ' The CloudFront distribution '
+          console.error('The CloudFront distribution '
             + distId + ' is already disabled' + addMsg);
 
           if (!isDeployed) {
@@ -505,7 +505,7 @@ module.exports = function(mainPath) {
                 IfMatch: eTag,
               }, function(error, data) {
                 if (error) {
-                  console.error((new Date().toTimeString()) + ' Error while removing CloudFront distribution: ' + error);
+                  console.error('Error while removing CloudFront distribution: ' + error);
                 }
               }.bind(this));
             }.bind(this));
@@ -515,7 +515,7 @@ module.exports = function(mainPath) {
               IfMatch: data.ETag,
             }, function(error, data) {
               if (error) {
-                console.error((new Date().toTimeString()) + ' Error while removing CloudFront distribution: ' + error);
+                console.error('Error while removing CloudFront distribution: ' + error);
               }
             }.bind(this));
           }
@@ -531,7 +531,7 @@ module.exports = function(mainPath) {
           DistributionConfig: distConfig,
         }, function(error, data) {
           if (error) {
-            console.error((new Date().toTimeString()) + ' Error while updating CloudFront distribution: ' + error);
+            console.error('Error while updating CloudFront distribution: ' + error);
             return;
           }
 
@@ -541,7 +541,7 @@ module.exports = function(mainPath) {
               IfMatch: eTag,
             }, function(error, data) {
               if (error) {
-                console.error((new Date().toTimeString()) + ' Error while removing CloudFront distribution: ' + error);
+                console.error('Error while removing CloudFront distribution: ' + error);
               }
             }.bind(this));
           }.bind(this));
@@ -558,7 +558,7 @@ module.exports = function(mainPath) {
         Id: distId,
       }, function(error, data) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Error while retrieving CloudFront distribution status: ' + error);
+          console.error('Error while retrieving CloudFront distribution status: ' + error);
           return;
         }
 
@@ -571,8 +571,8 @@ module.exports = function(mainPath) {
             estTimeMinutes = '...';
           }
 
-          console.log((new Date().toTimeString()) +
-            ' Waiting for CloudFront distribution ' +
+          console.log(
+            'Waiting for CloudFront distribution ' +
             distId + ' to be disabled (currently ' + status + ', ETC ' + estTimeMinutes + ' min.)'
           );
 
@@ -591,7 +591,7 @@ module.exports = function(mainPath) {
       MaxItems: '1000',
     }, function(error, data) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error while retrieving CloudFront distributions: ' + error);
+        console.error('Error while retrieving CloudFront distributions: ' + error);
         return;
       }
 
@@ -606,18 +606,18 @@ module.exports = function(mainPath) {
       }
     }.bind(this));
 
-    console.log((new Date().toTimeString()) + ' === DynamoDB ===');
+    console.log('=== DynamoDB ===');
 
     var dynamodb = deepAwsService('DynamoDB');
 
     function removeDynamoDbTableChain(tableName) {
-      console.log((new Date().toTimeString()) + ' --> Deleting DynamoDB table ' + tableName);
+      console.log('--> Deleting DynamoDB table ' + tableName);
 
       dynamodb.deleteTable({
         TableName: tableName,
       }, function(error, data) {
         if (error) {
-          console.error((new Date().toTimeString()) + ' Error while deleting DynamoDB table: ' + error);
+          console.error('Error while deleting DynamoDB table: ' + error);
         }
       });
     }
@@ -626,7 +626,7 @@ module.exports = function(mainPath) {
       Limit: 100,
     }, function(error, data) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error while retrieving DynamoDB tables: ' + error);
+        console.error('Error while retrieving DynamoDB tables: ' + error);
         return;
       }
 
@@ -639,24 +639,24 @@ module.exports = function(mainPath) {
       }
     });
 
-    console.log((new Date().toTimeString()) + ' === S3 ===');
+    console.log('=== S3 ===');
 
     var s3 = deepAwsService('S3');
 
     function removeS3BucketChain(bucketName) {
-      console.log((new Date().toTimeString()) + ' --> Deleting S3 bucket ' + bucketName);
+      console.log('--> Deleting S3 bucket ' + bucketName);
 
       s3.deleteBucketWebsite({
         Bucket: bucketName,
       }, function(error, data) {
         if (error) {
-          console.log((new Date().toTimeString()) + ' No public website bound to ' + bucketName + '. Skipping...');
+          console.log('No public website bound to ' + bucketName + '. Skipping...');
         }
 
         // @todo: remove this hook when fixing s3 sync functionality
         tmp.tmpName(function(error, credentialsFile) {
           if (error) {
-            console.error((new Date().toTimeString()) + ' Error while creating tmp credentials file for deleting S3 bucket: ' + error);
+            console.error('Error while creating tmp credentials file for deleting S3 bucket: ' + error);
             return;
           }
 
@@ -667,7 +667,7 @@ module.exports = function(mainPath) {
 
           fs.writeFile(credentialsFile, credentials, function(error) {
             if (error) {
-              console.error((new Date().toTimeString()) + ' Error while persisting tmp credentials into ' + credentialsFile + ' for deleting S3 bucket: ' + error);
+              console.error('Error while persisting tmp credentials into ' + credentialsFile + ' for deleting S3 bucket: ' + error);
               return;
             }
 
@@ -676,7 +676,7 @@ module.exports = function(mainPath) {
 
             exec(removeCommand, function(error, stdout, stderr) {
               if (error) {
-                console.error((new Date().toTimeString()) + ' Error while executing S3 bucket remove command (' + removeCommand + '): ' + stderr);
+                console.error('Error while executing S3 bucket remove command (' + removeCommand + '): ' + stderr);
               }
 
               fs.unlink(credentialsFile);
@@ -689,7 +689,7 @@ module.exports = function(mainPath) {
         //  Bucket: bucketName,
         //}, function(error, data) {
         //  if (error) {
-        //    console.error((new Date().toTimeString()) + ' Error while deleting S3 bucket: ' + error);
+        //    console.error('Error while deleting S3 bucket: ' + error);
         //  }
         //});
       });
@@ -697,7 +697,7 @@ module.exports = function(mainPath) {
 
     s3.listBuckets(function(error, data) {
       if (error) {
-        console.error((new Date().toTimeString()) + ' Error while retrieving S3 buckets: ' + error);
+        console.error('Error while retrieving S3 buckets: ' + error);
         return;
       }
 

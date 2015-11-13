@@ -10,6 +10,7 @@ import JsonFile from 'jsonfile';
 import RequireProxy from 'proxyquire';
 import {Hash} from '../Helpers/Hash';
 import {Thread} from './Thread';
+import {Timer} from './Timer';
 
 /**
  * Lambda runtime
@@ -24,9 +25,12 @@ export class Runtime {
 
     this._succeed = this._logCallback('SUCCEED');
     this._fail = this._logCallback('FAILED');
-    this._complete = (error, response) => {};
+
+    this._complete = () => {};
 
     this._measureTime = false;
+    this._timer = null;
+
     this._silent = false;
     this._profiler = null;
     this._name = Hash.pseudoRandomId(this);
@@ -145,13 +149,10 @@ export class Runtime {
    */
   run(event, measureTime = undefined) {
     if (typeof measureTime !== 'undefined') {
-      this._measureTime = measureTime;
+      this.measureTime = measureTime;
     }
 
-    if (this._measureTime) {
-      console.time(this._name);
-    }
-
+    this._measureTime && this._timer.start();
     this._profiler && this._profiler.start();
 
     this._lambda.handler.bind(this)(event, this.context);
@@ -171,6 +172,10 @@ export class Runtime {
    */
   set measureTime(state) {
     this._measureTime = state;
+
+    if (state) {
+      this._timer = new Timer(this._name);
+    }
   }
 
   /**
@@ -235,9 +240,7 @@ export class Runtime {
 
         this._succeed(result);
 
-        if (this._measureTime) {
-          console.timeEnd(this._name);
-        }
+        this._measureTime && this._log(this._timer.stop().toString());
 
         this._complete(null, result);
       }.bind(this),
@@ -246,9 +249,7 @@ export class Runtime {
 
         this._fail(error);
 
-        if (this._measureTime) {
-          console.timeEnd(this._name);
-        }
+        this._measureTime && this._log(this._timer.stop().toString());
 
         this._complete(error, null);
       }.bind(this),

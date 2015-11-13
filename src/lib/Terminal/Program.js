@@ -12,6 +12,7 @@ import {Help} from './Help';
 import {InvalidActionException} from './Exception/InvalidActionException';
 import {UnknownOptionException} from './Exception/UnknownOptionException';
 import {ValidationException} from './Exception/ValidationException';
+import DeepLog from 'deep-log';
 
 export class Program {
   /**
@@ -208,6 +209,9 @@ export class Program {
     this._validateInput();
 
     try {
+      // @todo: find a better place for this
+      new DeepLog().overrideJsConsole();
+
       this._action.bind(this)(...this._args.listValues());
     } catch (e) {
       console.log(e.message);

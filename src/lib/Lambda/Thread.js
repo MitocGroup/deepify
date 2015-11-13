@@ -46,7 +46,7 @@ export class Thread {
 
     let onError = (error) => {
       if (contextSent) {
-        console.error(`${new Date().toTimeString()} Sending context twice from Lambda (error thrown: ${error})`);
+        console.error(`Sending context twice from Lambda (error thrown: ${error})`);
         return;
       }
 
@@ -69,7 +69,7 @@ export class Thread {
 
     this._process.on('message', (payload) => {
       if (contextSent) {
-        console.error(`${new Date().toTimeString()} Sending context twice from Lambda (payload: ${JSON.stringify(payload)})`);
+        console.error(`Sending context twice from Lambda (payload: ${JSON.stringify(payload)})`);
         return;
       }
 

@@ -34,7 +34,7 @@ export class Instance {
     }
 
     this._logger = (...args) => {
-      console.log(new Date().toTimeString(), ...args);
+      console.log(...args);
     };
     this._property = property;
     this._server = null;
@@ -633,7 +633,7 @@ export class Instance {
    * @private
    */
   _log(...args) {
-    this._logger(`[${new Date().toISOString()}]`, ...args);
+    this._logger(...args);
   }
 
   /**
