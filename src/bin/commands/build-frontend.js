@@ -54,6 +54,11 @@ module.exports = function(mainPath) {
           console.error('Error while assuring frontend engine: ' + error);
         }
 
+        // @todo: move this anywhere
+        process.on('exit', function() {
+          exec('rm -rf ' + tmpPropertyPath);
+        });
+
         propertyInstance.fakeBuild();
         propertyInstance.buildFrontend();
 
@@ -61,8 +66,7 @@ module.exports = function(mainPath) {
 
         exec('mkdir -p ' + dumpPath + '; rsync -a --delete ' + frontendDumpPath + '/ ' + dumpPath + '/', function(error, stdout, stderr) {
           if (error) {
-            console.error('Error while copying '
-              + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
+            console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
             this.exit(1);
           }
 

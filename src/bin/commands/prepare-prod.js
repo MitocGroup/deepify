@@ -131,6 +131,11 @@ module.exports = function(mainPath) {
           console.error('Failed to run "' + installCmd + '" for Lambda ' + lambdaPath + '. Skipping...');
         }
 
+        // @todo: move this anywhere
+        process.on('exit', function() {
+          exec('rm -rf ' + tmpFolder);
+        });
+
         var packageFile = path.join(lambdaPath, 'package.json');
         var pathName = path.basename(lambdaPath);
         var outputFile = path.join(lambdaPath, '..', pathName + '.zip');

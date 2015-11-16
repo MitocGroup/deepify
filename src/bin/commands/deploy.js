@@ -60,6 +60,11 @@ module.exports = function(mainPath) {
         this.exit(1);
       }
 
+      // @todo: move this anywhere
+      process.on('exit', function() {
+        exec('rm -rf ' + tmpPropertyPath);
+      });
+
       propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
 
       propertyInstance.assureFrontendEngine(function(error) {
