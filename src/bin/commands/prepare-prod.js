@@ -121,15 +121,14 @@ module.exports = function(mainPath) {
       var tmpFolder = path.join(tmp.dirSync().name, Hash.md5(lambdaPath));
 
       var cmd = 'mkdir -p ' + tmpFolder  +
-        '; rsync -a --delete ' + lambdaPath + '/ ' + tmpFolder + '/' +
+        '; rsync -a --delete ' + lambdaPath + '/ ' + tmpFolder + '/ &>/dev/null' +
         '; cd ' + tmpFolder +
         '; rm -rf ' + path.join(tmpFolder, 'node_modules') +
-        '; ' + installCmd;
+        '; ' + installCmd + ' &>/dev/null';
 
-      exec(cmd, function(error, stdout, stderr) {
+      exec(cmd, function(error) {
         if (error) {
-          console.error('Failed to run "' + installCmd + '" for Lambda ' + lambdaPath
-            + ' (' + stderr + '). Skipping...');
+          console.error('Failed to run "' + installCmd + '" for Lambda ' + lambdaPath + '. Skipping...');
         }
 
         var packageFile = path.join(lambdaPath, 'package.json');

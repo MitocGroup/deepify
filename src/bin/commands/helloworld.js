@@ -32,9 +32,9 @@ module.exports = function(dumpPath) {
       //
       //  var lambdaPath = path.join(helloWorldPath, 'Backend/src/SayHello');
       //
-      //  exec('cd ' + lambdaPath + ' && npm install', function(error, stdout, stderr) {
+      //  exec('cd ' + lambdaPath + ' && npm install &>/dev/null', function(error) {
       //    if (error) {
-      //      console.error('Error installing SayHello Lambda dependencies: ' + stderr);
+      //      console.error('Error installing SayHello Lambda dependencies!');
       //      return;
       //    }
       //
@@ -50,9 +50,9 @@ function npmInstall(repo, cb) {
 
   console.log('Installing ' + repo + ' via NPM globally');
 
-  exec('npm list -g --depth 1 ' + repo + ' > /dev/null 2>&1 || npm install -g ' + repo, function(error, stdout, stderr) {
+  exec('npm list -g --depth 1 ' + repo + ' > /dev/null 2>&1 || npm install -g ' + repo + ' &>/dev/null', function(error) {
     if (error) {
-      console.error('Error installing ' + repo + ' globally: ' + stderr);
+      console.error('Error installing ' + repo + ' globally!');
 
       cb(error);
       return;
@@ -75,9 +75,9 @@ function gitClone(repo, subfolder, targetDir, cb, copyFiles) {
 
   console.log('Cloning the ' + repo + ' into ' + tmpFolder);
 
-  exec('cd ' + tmpFolder + ' && git clone --depth=1 ' + repo + ' .', function(error, stdout, stderr) {
+  exec('cd ' + tmpFolder + ' && git clone --depth=1 ' + repo + ' . &>/dev/null', function(error) {
     if (error) {
-      console.error('Error cloning ' + repo + ' repository into ' + tmpFolder + ': ' + stderr);
+      console.error('Error cloning ' + repo + ' repository into ' + tmpFolder);
 
       fse.removeSync(tmpFolder);
       cb(error);
