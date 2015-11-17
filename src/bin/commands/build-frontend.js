@@ -14,11 +14,14 @@ module.exports = function(mainPath) {
   var Property = require('../../lib.compiled/Property/Instance').Instance;
   var Config = require('../../lib.compiled/Property/Config').Config;
 
-  var dumpPath = path.join(this.opts.locate('output-path').value, '');
-
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
+
+  var dumpPath = path.join(
+    this.opts.locate('output-path').value || path.join(mainPath, '_www'),
+    ''
+  );
 
   var configFile = path.join(mainPath, Config.DEFAULT_FILENAME);
   var configExists = fs.existsSync(configFile);
