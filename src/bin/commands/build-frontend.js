@@ -14,11 +14,14 @@ module.exports = function(mainPath) {
   var Property = require('../../lib.compiled/Property/Instance').Instance;
   var Config = require('../../lib.compiled/Property/Config').Config;
 
-  var dumpPath = path.join(this.opts.locate('output-path').value, '');
-
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
+
+  var dumpPath = path.join(
+    this.opts.locate('output-path').value || path.join(mainPath, '_www'),
+    ''
+  );
 
   var configFile = path.join(mainPath, Config.DEFAULT_FILENAME);
   var configExists = fs.existsSync(configFile);
@@ -54,6 +57,11 @@ module.exports = function(mainPath) {
           console.error('Error while assuring frontend engine: ' + error);
         }
 
+        // @todo: move this anywhere
+        process.on('exit', function() {
+          exec('rm -rf ' + tmpPropertyPath);
+        });
+
         propertyInstance.fakeBuild();
         propertyInstance.buildFrontend();
 
@@ -61,8 +69,7 @@ module.exports = function(mainPath) {
 
         exec('mkdir -p ' + dumpPath + '; rsync -a --delete ' + frontendDumpPath + '/ ' + dumpPath + '/', function(error, stdout, stderr) {
           if (error) {
-            console.error('Error while copying '
-              + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
+            console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
             this.exit(1);
           }
 

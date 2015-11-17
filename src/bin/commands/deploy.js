@@ -53,12 +53,17 @@ module.exports = function(mainPath) {
     console.log('Local mode on!');
   }
 
-  exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/',
-    function(error, stdout, stderr) {
+  exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/ &>/dev/null',
+    function(error) {
       if (error) {
         console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + error);
         this.exit(1);
       }
+
+      // @todo: move this anywhere
+      process.on('exit', function() {
+        exec('rm -rf ' + tmpPropertyPath);
+      });
 
       propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
 
@@ -326,8 +331,8 @@ module.exports = function(mainPath) {
       mkdirp.sync(frontendDumpPath);
     }
 
-    exec('rsync -a --delete ' + tmpFrontendPath + '/ ' + frontendDumpPath + '/',
-      function(error, stdout, stderr) {
+    exec('rsync -a --delete ' + tmpFrontendPath + '/ ' + frontendDumpPath + '/ &>/dev/null',
+      function(error) {
         if (error) {
           console.error('Unable to dump _frontend code into _www!');
         }
@@ -376,9 +381,9 @@ module.exports = function(mainPath) {
       }
 
       var command = 'unzip -qq -o ' + lambdaPath + ' -d ' + newLambdaPath +
-        ' && cp ' + globalAwsConfigFile + ' ' + awsConfigFile;
+        ' &>/dev/null && cp ' + globalAwsConfigFile + ' ' + awsConfigFile;
 
-      exec(command, function(error, stdout, stderr) {
+      exec(command, function(error) {
         if (error) {
           console.error('Error unpacking lambda: ' + error);
         }

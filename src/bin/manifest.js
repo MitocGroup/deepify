@@ -125,7 +125,7 @@ module.exports = {
       opts: {
         'output-path': {
           alias: 'o',
-          description: 'Path to output built frontend of the web app',
+          description: 'Path to output built frontend of the web app (default _www)',
           required: false,
         },
       },

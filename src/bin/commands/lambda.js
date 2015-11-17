@@ -67,10 +67,10 @@ module.exports = function(lambdaPath) {
   if (awsSdkResult.status !== 0) {
     console.error('Failed to link aws-sdk library. Trying to install it...');
 
-    awsSdkResult = exec('cd ' + mainPath + ' && npm install aws-sdk');
+    awsSdkResult = exec('cd ' + mainPath + ' && npm install aws-sdk &>/dev/null');
 
     if (awsSdkResult.status !== 0) {
-      console.error('Failed to link or install aws-sdk locally (' + awsSdkResult.stderr + '). Skipping...');
+      console.error('Failed to link or install aws-sdk locally. Skipping...');
     }
   }
 

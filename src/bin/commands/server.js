@@ -123,10 +123,9 @@ module.exports = function(mainPath) {
 
       console.log('Running "npm ' + cmd + '" in ' + lambdaPath);
 
-      exec('cd ' + lambdaPath + ' && npm ' + cmd, function(error, stdout, stderr) {
+      exec('cd ' + lambdaPath + ' && npm ' + cmd + ' &>/dev/null', function(error) {
         if (error) {
-          console.error('Failed to run "npm ' + cmd + '" in ' + lambdaPath
-            + ' (' + stderr + '). Skipping...');
+          console.error('Failed to run "npm ' + cmd + '" in ' + lambdaPath + '. Skipping...');
         }
 
         cb();
@@ -143,10 +142,9 @@ module.exports = function(mainPath) {
       if (error) {
         console.error('Failed to link aws-sdk library in ' + lambdaPath + ' (' + stderr + '). Trying to install it...');
 
-        exec('cd ' + lambdaPath + ' && npm install aws-sdk', function(error, stdout, stderr) {
+        exec('cd ' + lambdaPath + ' && npm install aws-sdk &>/dev/null', function(error) {
           if (error) {
-            console.error('Failed to link or install aws-sdk locally in ' + lambdaPath
-              + ' (' + stderr + '). Skipping...');
+            console.error('Failed to link or install aws-sdk locally in ' + lambdaPath + '. Skipping...');
           }
 
           cb();
