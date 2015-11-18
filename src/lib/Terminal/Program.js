@@ -87,6 +87,8 @@ export class Program {
       this._scriptPath = args.shift(); // remove 'path/to/main/script.js'
     }
 
+    Options.normalizeInputOpts(args);
+
     this._opts.populate(args);
     this._args.populate(args);
 
