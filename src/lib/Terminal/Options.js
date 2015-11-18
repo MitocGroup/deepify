@@ -137,7 +137,7 @@ export class Options {
 
   /**
    * Parse smth like this:
-   *  deepify --resource=somevelue arg1 -b optval --dirty -- arg2
+   *  deepify --resource=somevelue arg1 -- -coptval3 -b optval --dirty -- arg2
    *
    * @param {String[]} args
    */
@@ -147,14 +147,23 @@ export class Options {
     for (let i = 0; i < len; i++) {
       let item = args[i];
 
-      if (Options.SHORT_OPT_REGEX.test(item) || Options.LONG_OPT_REGEX.test(item)) {
+      if (Options.SHORT_OPT_REGEX.test(item) ||
+        Options.LONG_OPT_REGEX.test(item)) {
+
         if (!Options.EXPL_OPT_VAL_REGEX.test(item) && i < (len - 1)) {
+          if (Options.SL_SHORT_OPT_VAL_REGEX.test(item)) {
+            let slMatches = item.match(Options.SL_SHORT_OPT_VAL_REGEX);
+
+            args[i] = `${slMatches[1]}=${slMatches[2]}`;
+            continue;
+          }
+
           let nextItem = args[i + 1];
 
           if(Options.SHORT_OPT_REGEX.test(nextItem) ||
             Options.LONG_OPT_REGEX.test(nextItem)) {
             continue;
-          } else if(nextItem !== '--') {
+          } else if(!Options.SKIP_OPT_VAL_REGEX.test(nextItem)) {
             args[i] = `${item}=${nextItem}`;
           }
 
@@ -167,18 +176,30 @@ export class Options {
 
   /**
    * @returns {RegExp}
-   * @constructor
    */
-  static get EXPL_OPT_VAL_REGEX() {
-    return /^--?[a-z0-9]+=.*$/;
+  static get SKIP_OPT_VAL_REGEX() {
+    return /^--$/;
   }
 
   /**
    * @returns {RegExp}
-   * @constructor
+   */
+  static get EXPL_OPT_VAL_REGEX() {
+    return /^--?[a-z0-9]+=.*$/i;
+  }
+
+  /**
+   * @returns {RegExp}
+   */
+  static get SL_SHORT_OPT_VAL_REGEX() {
+    return /^(-[a-z0-9])([^=].*)$/i;
+  }
+
+  /**
+   * @returns {RegExp}
    */
   static get SHORT_OPT_REGEX() {
-    return /^-[a-z0-9]+/i;
+    return /^-[a-z0-9]/i;
   }
 
   /**
@@ -186,6 +207,6 @@ export class Options {
    * @constructor
    */
   static get LONG_OPT_REGEX() {
-    return /^--[a-z0-9]+/i;
+    return /^--[a-z0-9]/i;
   }
 }
