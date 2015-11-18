@@ -587,24 +587,42 @@ module.exports = function(mainPath) {
       }.bind(this));
     }
 
-    cf.listDistributions({
-      MaxItems: '100',
-    }, function(error, data) {
-      if (error) {
-        console.error('Error while retrieving CloudFront distributions: ' + error);
-        return;
+    function listCfDistributions(nextMarker) {
+      var payload = {
+        MaxItems: '100',
+      };
+
+      if (nextMarker) {
+        payload.Marker = nextMarker;
       }
 
-      for (var i = 0; i < data.DistributionList.Items.length; i++) {
-        var cfData = data.DistributionList.Items[i];
-        var distId = cfData.Id;
-        var comment = cfData.Comment;
-
-        if (matchAwsResource('CloudFront', distId) && matchResourceName(comment)) {
-          pushQueue(removeCfDistribution, [distId]);
+      cf.listDistributions(payload, function(error, data) {
+        if (error) {
+          console.error('Error while retrieving CloudFront distributions: ' + error);
+          return;
         }
-      }
-    }.bind(this));
+
+        for (var i = 0; i < data.DistributionList.Items.length; i++) {
+          var cfData = data.DistributionList.Items[i];
+          var distId = cfData.Id;
+          var comment = cfData.Comment;
+
+          if (matchAwsResource('CloudFront', distId) && matchResourceName(comment)) {
+            pushQueue(removeCfDistribution, [distId]);
+          }
+        }
+
+        if (data.DistributionList.IsTruncated) {
+          var marker = data.DistributionList.NextMarker;
+
+          console.log('Retrieve next set of CloudFront distributions (#' + marker + ')');
+
+          listCfDistributions(marker);
+        }
+      }.bind(this));
+    }
+
+    listCfDistributions.bind(this)();
 
     console.log('=== DynamoDB ===');
 
