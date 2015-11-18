@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -63,10 +63,10 @@
     "proxyquire": "^1.5.x",
     "v8-profiler": "^5.2.x",
     "traceviewify": "^0.4.x",
-    "open": "^0.0.x"
+    "open": "^0.0.x",
+    "aws-sdk": "^2.2.x"
   },
   "devDependencies": {
-    "aws-sdk": "^2.2.x",
     "chai": "^3.2.x",
     "sinon": "^1.17.x",
     "sinon-chai": "^2.8.x"
