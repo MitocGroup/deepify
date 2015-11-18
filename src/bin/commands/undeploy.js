@@ -588,7 +588,7 @@ module.exports = function(mainPath) {
     }
 
     cf.listDistributions({
-      MaxItems: '1000',
+      MaxItems: '100',
     }, function(error, data) {
       if (error) {
         console.error('Error while retrieving CloudFront distributions: ' + error);
