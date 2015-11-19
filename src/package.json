@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.2.14",
+  "version": "1.2.16",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -67,7 +67,11 @@
     "open": "^0.0.x",
     "aws-sdk": "^2.2.x",
     "jsonfile": "^1.1.x",
-    "fs-extra": "^0.23.x"
+    "fs-extra": "^0.23.x",
+    "sync-exec": "^0.6.x",
+    "archiver": "^0.14.x",
+    "tmp": "^0.0.x",
+    "aws-api-gw-client": "^0.1.x"
   },
   "devDependencies": {
     "chai": "^3.2.x",
