@@ -13,7 +13,7 @@ __deepify_comp() {
         return 0
     fi
 
-    COMPREPLY=($(${SCRIPT_PATH}/../bin/deepify.js --cmd-auto-complete "$CUR_WORD"))
+    COMPREPLY=($(${SCRIPT_PATH}/../bin/deepify.js --cmd-auto-complete -- "$CUR_WORD"))
 
     return 0
 }
