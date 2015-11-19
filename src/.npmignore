@@ -2,13 +2,3 @@ test
 tests
 /lib
 .gitignore
-
-# ignore symlinks
-lib.compiled/Compilation
-lib.compiled/Dependencies
-lib.compiled/Exception
-lib.compiled/Helpers
-lib.compiled/Microservice
-lib.compiled/Parameters
-lib.compiled/Property
-lib.compiled/Provisioning
