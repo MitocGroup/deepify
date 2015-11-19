@@ -56,6 +56,12 @@ module.exports = function(mainPath) {
   aws.config.update(config.aws);
 
   function getDeployConfigFile(cb) {
+    // avoid double undeploy for set resource option!
+    if (resource) {
+      cb.bind(this)(null);
+      return;
+    }
+
     var deployConfigFile = path.join(mainPath, '.cfg.deeploy.json');
 
     if (fs.existsSync(deployConfigFile)) {
