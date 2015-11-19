@@ -74,11 +74,13 @@ module.exports = function(mainPath) {
           console.error('Error while assuring frontend engine: ' + error);
         }
 
-        var deployCb = function() {
-          prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
-        };
+        propertyInstance.runInitMsHooks(function() {
+          var deployCb = function() {
+            prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
+          };
 
-        hasToPullDeps ? pullDeps.bind(this)(deployCb) : deployCb.bind(this)();
+          hasToPullDeps ? pullDeps.bind(this)(deployCb) : deployCb.bind(this)();
+        }.bind(this));
       }.bind(this));
     }.bind(this)
   );
