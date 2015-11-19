@@ -53,6 +53,8 @@ module.exports = function(mainPath) {
     console.log('Local mode on!');
   }
 
+  console.log('Copying sources to ' + tmpPropertyPath);
+
   exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/ &>/dev/null',
     function(error) {
       if (error) {
@@ -151,7 +153,7 @@ module.exports = function(mainPath) {
 
           var cmdParts = [
             this.scriptPath,
-            'prepare-prod',
+            'compile-prod',
             propertyPath,
             '--remove-source',
           ];

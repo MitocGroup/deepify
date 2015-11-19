@@ -14,20 +14,6 @@ module.exports = {
   description: 'DEEP CLI',
   commandsPath: './commands',
   commands: {
-
-    // @todo: remove this thing when figuring out a better way to abstract es6 compilation
-    'compile-es6': {
-      example: 'deepify compile-es6 path/to/lambda',
-      description: 'Compiles ES6 scripts to ES5 using babel (matched by *.es6)',
-      opts: {
-      },
-      args: {
-        path: {
-          description: 'The path to the lambda root',
-          required: true,
-        },
-      },
-    },
     helloworld: {
       example: 'deepify helloworld path/to/web_app',
       description: 'Dump the "Hello World" sample web app',
@@ -92,72 +78,6 @@ module.exports = {
         },
       },
     },
-    lambda: {
-      example: 'deepify lambda path/to/the/lambda -e=\'{"Name":"John Doe"}\'',
-      description: 'Run Lambda function locally',
-      opts: {
-        event: {
-          alias: 'e',
-          description: 'JSON string used as the Lambda payload',
-          required: false,
-        },
-        'skip-frontend-build': {
-          alias: 'f',
-          description: 'Skip picking up _build path from the microservices Frontend',
-          required: false,
-        },
-        'db-server': {
-          alias: 'l',
-          description: 'Local DynamoDB server implementation (ex. LocalDynamo, Dynalite)',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the Lambda (directory of handler itself)',
-          required: true,
-        },
-      },
-    },
-    'build-frontend': {
-      example: 'deepify build-frontend path/to/web_app',
-      description: 'Build frontend of a web app',
-      opts: {
-        'output-path': {
-          alias: 'o',
-          description: 'Path to output built frontend of the web app (default _www)',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: true,
-        },
-      },
-    },
-    'prepare-prod': {
-      example: 'deepify prepare-prod path/to/web_app',
-      description: 'Prepare web app for production',
-      opts: {
-        'remove-source': {
-          alias: 's',
-          description: 'Remove original Lambda source',
-          required: false,
-        },
-        partial: {
-          alias: 'm',
-          description: 'Partial deploy (one or several comma separated microservices identifiers)',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: true,
-        },
-      },
-    },
     deploy: {
       example: 'deepify deploy path/to/web_app',
       description: 'Deploy an web app',
@@ -218,6 +138,84 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
+    'build-frontend': {
+      example: 'deepify build-frontend path/to/web_app',
+      description: 'Build frontend of a web app',
+      opts: {
+        'output-path': {
+          alias: 'o',
+          description: 'Path to output built frontend of the web app (default _www)',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
+    'compile-es6': {
+      example: 'deepify compile-es6 path/to/lambda',
+      description: 'Compiles ES6 scripts to ES5 using babel (matched by *.es6)',
+      opts: {
+      },
+      args: {
+        path: {
+          description: 'The path to the lambda root',
+          required: true,
+        },
+      },
+    },
+    'compile-prod': {
+      example: 'deepify compile-prod path/to/web_app',
+      description: 'Compile lambdas for production',
+      opts: {
+        'remove-source': {
+          alias: 's',
+          description: 'Remove original Lambda source',
+          required: false,
+        },
+        partial: {
+          alias: 'm',
+          description: 'Partial deploy (one or several comma separated microservices identifiers)',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
+    'run-lambda': {
+      example: 'deepify run-lambda path/to/the/lambda -e=\'{"Name":"John Doe"}\'',
+      description: 'Run Lambda function locally',
+      opts: {
+        event: {
+          alias: 'e',
+          description: 'JSON string used as the Lambda payload',
+          required: false,
+        },
+        'skip-frontend-build': {
+          alias: 'f',
+          description: 'Skip picking up _build path from the microservices Frontend',
+          required: false,
+        },
+        'db-server': {
+          alias: 'l',
+          description: 'Local DynamoDB server implementation (ex. LocalDynamo, Dynalite)',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the Lambda (directory of handler itself)',
           required: true,
         },
       },
