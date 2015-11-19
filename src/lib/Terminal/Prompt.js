@@ -4,7 +4,7 @@
 
 'use strict';
 
-import {Prompt as MainPrompt} from '../Helpers/Terminal/Prompt';
+import {Helpers_Terminal_Prompt as MainPrompt} from 'deep-package-manager';
 
 export class Prompt extends MainPrompt {
   /**

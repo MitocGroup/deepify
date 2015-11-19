@@ -8,7 +8,7 @@ import Path from 'path';
 import AWS from 'aws-sdk';
 import JsonFile from 'jsonfile';
 import RequireProxy from 'proxyquire';
-import {Hash} from '../Helpers/Hash';
+import {Helpers_Hash as Hash} from 'deep-package-manager';
 import {Thread} from './Thread';
 import {Timer} from './Timer';
 

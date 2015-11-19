@@ -7,7 +7,7 @@
 import Core from 'deep-core';
 import FileSystem from 'fs';
 import Path from 'path';
-import {Hash} from '../../Helpers/Hash';
+import {Helpers_Hash as Hash} from 'deep-package-manager';
 import OS from 'os';
 import MakeDir from 'mkdirp';
 

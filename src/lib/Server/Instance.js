@@ -4,7 +4,6 @@
 
 'use strict';
 
-import {Instance as Property} from '../Property/Instance';
 import {PropertyObjectRequiredException} from './Exception/PropertyObjectRequiredException';
 import Http from 'http';
 import Path from 'path';
@@ -16,12 +15,13 @@ import OS from 'os';
 import Mime from 'mime';
 import JsonFile from 'jsonfile';
 import {Runtime as LambdaRuntime} from '../Lambda/Runtime';
-import {Frontend} from '../Property/Frontend';
 import {Profiler} from '../Lambda/Profile/Profiler';
 import QueryString from 'querystring';
 import {TraceBuilder} from './TraceBuilder';
-import {Action} from '../Microservice/Metadata/Action';
-import {Config} from '../Property/Config';
+import {Property_Instance as Property} from 'deep-package-manager';
+import {Property_Frontend as Frontend} from 'deep-package-manager';
+import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
+import {Property_Config as Config} from 'deep-package-manager';
 import DeepDB from 'deep-db';
 
 export class Instance {

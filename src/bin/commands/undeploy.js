@@ -12,15 +12,15 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var fse = require('fs-extra');
   var Core = require('deep-core');
-  var Config = require('../../lib.compiled/Property/Config').Config;
-  var AbstractService = require('../../lib.compiled/Provisioning/Service/AbstractService').AbstractService;
-  var AwsRequestSyncStack = require('../../lib.compiled/Helpers/AwsRequestSyncStack').AwsRequestSyncStack;
-  var WaitFor = require('../../lib.compiled/Helpers/WaitFor').WaitFor;
+  var Config = require('deep-package-manager').Property_Config;
+  var AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
+  var AwsRequestSyncStack = require('deep-package-manager').Helpers_AwsRequestSyncStack;
+  var WaitFor = require('deep-package-manager').Helpers_WaitFor;
   var exec = require('child_process').exec;
   var AwsApiGatewayClient = require('aws-api-gw-client').Client;
 
   // @todo: hook to avoid TypeError: Super expression must either be null or a function, not undefined
-  require('../../lib.compiled/Provisioning/Instance.js');
+  require('deep-package-manager').Provisioning_Instance;
 
   var dirtyMode = this.opts.locate('dirty').exists;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
@@ -224,7 +224,7 @@ module.exports = function(mainPath) {
     }
 
     function deepAwsService(name) {
-      var service = require('../../lib.compiled/Provisioning/Service/' + name + 'Service.js')[name + 'Service'];
+      var service = require('deep-package-manager')['Provisioning_Service_' + name + 'Service'];
 
       var appropriateRegion = Core.AWS.Region.getAppropriateAwsRegion(
         config.aws.region,

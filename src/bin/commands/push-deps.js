@@ -9,9 +9,9 @@ module.exports = function(mainPath) {
   var aws = require('aws-sdk');
   var path = require('path');
   var fs = require('fs');
-  var Manager = require('../../lib.compiled/Dependencies/Manager').Manager;
-  var S3Driver = require('../../lib.compiled/Dependencies/Driver/S3StdDriver').S3StdDriver;
-  var Config = require('../../lib.compiled/Property/Config').Config;
+  var Manager = require('deep-package-manager').Dependencies_Manager;
+  var S3Driver = require('deep-package-manager').Dependencies_Driver_S3StdDriver;
+  var Config = require('deep-package-manager').Property_Config;
 
   var dryRun = this.opts.locate('dry-run').exists;
 

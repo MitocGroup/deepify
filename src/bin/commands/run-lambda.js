@@ -6,13 +6,13 @@
 'use strict';
 
 module.exports = function(lambdaPath) {
-  var Runtime = require('../../lib.compiled/Lambda/Runtime.js').Runtime;
+  var Runtime = require('../../lib.compiled/Lambda/Runtime').Runtime;
   var DeepDB = require('deep-db');
   var path = require('path');
   var fs = require('fs');
   var exec = require('sync-exec');
   var os = require('os');
-  var Autoload = require('../../lib.compiled/Microservice/Metadata/Autoload').Autoload;
+  var Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
 
   var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   var event = this.opts.locate('event').value;

@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -49,17 +49,17 @@
   "scripts": {
     "coverage": "babel-node `which istanbul` cover --report lcovonly _mocha -- --ui tdd --recursive --reporter spec",
     "preinstall": "npm run compile",
-    "postinstall": "npm run link-deep-package-manager && npm run link-deep-package-manager-npm && hooks/assure_deep_dev.js && hooks/autocomplete_deepify.sh",
+    "postinstall": "hooks/assure_deep_dev.js && hooks/autocomplete_deepify.sh",
     "test": "mocha --ui tdd --compilers js:mocha-babel --recursive --reporter spec",
     "compile": "if [ -d 'lib/' ]; then BABEL_ENV=production babel lib/ --out-dir lib.compiled/; fi",
     "obfuscate-compiled": "if [ -d 'lib/' ]; then npm list -g --depth 1 uglify > /dev/null 2>&1 || npm install uglify -g; for f in $(find lib.compiled -type f -name *.js); do uglify -s ${f} -o ${f}; done; fi",
-    "prepublish": "npm run obfuscate-compiled",
-    "link-deep-package-manager": "ln -s `pwd`/node_modules/deep-package-manager/lib.compiled/* `pwd`/lib.compiled || true",
-    "link-deep-package-manager-npm": "ln -s `pwd`/node_modules/deep-package-manager/node_modules/* `pwd`/node_modules || true"
+    "prepublish": "npm run obfuscate-compiled"
   },
   "dependencies": {
     "deep-package-manager": "^1.x.x",
     "deep-log": "^1.x.x",
+    "deep-db": "^1.x.x",
+    "deep-core": "^1.x.x",
     "proxyquire": "^1.5.x",
     "v8-profiler": "^5.2.x",
     "traceviewify": "^0.4.x",

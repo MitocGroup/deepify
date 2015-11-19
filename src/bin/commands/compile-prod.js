@@ -12,9 +12,9 @@ module.exports = function(mainPath) {
   var fse = require('fs-extra');
   var fs = require('fs');
   var exec = require('child_process').exec;
-  var WaitFor = require('../../lib.compiled/Helpers/WaitFor').WaitFor;
-  var Hash = require('../../lib.compiled/Helpers/Hash').Hash;
-  var Property = require('../../lib.compiled/Property/Instance').Instance;
+  var WaitFor = require('deep-package-manager').Helpers_WaitFor;
+  var Hash = require('deep-package-manager').Helpers_Hash;
+  var Property = require('deep-package-manager').Property_Instance;
   var Archiver = require('archiver');
   var tmp = require('tmp');
 

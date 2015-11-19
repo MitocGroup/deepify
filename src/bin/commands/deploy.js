@@ -12,10 +12,10 @@ module.exports = function(mainPath) {
   var exec = require('child_process').exec;
   var spawn = require('child_process').spawn;
   var mkdirp = require('mkdirp');
-  var Property = require('../../lib.compiled/Property/Instance').Instance;
   var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
-  var Config = require('../../lib.compiled/Property/Config').Config;
-  var S3Service = require('../../lib.compiled/Provisioning/Service/S3Service').S3Service;
+  var Property = require('deep-package-manager').Property_Instance;
+  var Config = require('deep-package-manager').Property_Config;
+  var S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
 
   var localOnly = this.opts.locate('dry-run').exists;
   var dumpCodePath = this.opts.locate('dump-local').value;

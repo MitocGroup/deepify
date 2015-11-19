@@ -11,8 +11,8 @@ module.exports = function(mainPath) {
   var os = require('os');
   var exec = require('child_process').exec;
   var mkdirp = require('mkdirp');
-  var Property = require('../../lib.compiled/Property/Instance').Instance;
-  var Config = require('../../lib.compiled/Property/Config').Config;
+  var Property = require('deep-package-manager').Property_Instance;
+  var Config = require('deep-package-manager').Property_Config;
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
@@ -67,7 +67,9 @@ module.exports = function(mainPath) {
 
         var frontendDumpPath = path.join(tmpPropertyPath, '_public');
 
-        exec('mkdir -p ' + dumpPath + '; rsync -a --delete ' + frontendDumpPath + '/ ' + dumpPath + '/', function(error, stdout, stderr) {
+        console.log('Copying built sources into ' + dumpPath);
+
+        exec('mkdir -p ' + dumpPath + '; rsync -a --delete ' + frontendDumpPath + '/ ' + dumpPath + '/ &>/dev/null', function(error) {
           if (error) {
             console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
             this.exit(1);

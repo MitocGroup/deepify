@@ -24,23 +24,12 @@ module.exports = function(dumpPath) {
       return;
     }
 
-    npmInstall('babel@5.8.19', function(error) {
-      console.log('Sample web app was successfully dumped.');
+    npmInstall('"babel@^5.x.x"', function(error) {
+      if (error) {
+        console.error('Error while installing babel: ' + error);
+      }
 
-      //if (!error) {
-      //  console.log('Running "npm install" on SayHello Lambda');
-      //
-      //  var lambdaPath = path.join(helloWorldPath, 'Backend/src/SayHello');
-      //
-      //  exec('cd ' + lambdaPath + ' && npm install &>/dev/null', function(error) {
-      //    if (error) {
-      //      console.error('Error installing SayHello Lambda dependencies!');
-      //      return;
-      //    }
-      //
-      //    console.log('Sample web app was successfully dumped.');
-      //  }.bind(this));
-      //}
+      console.log('Sample web app was successfully dumped.');
     });
   }.bind(this));
 };
