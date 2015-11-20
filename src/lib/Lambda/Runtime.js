@@ -11,6 +11,7 @@ import RequireProxy from 'proxyquire';
 import {Helpers_Hash as Hash} from 'deep-package-manager';
 import {Thread} from './Thread';
 import {Timer} from './Timer';
+import {ForksManager} from './ForksManager';
 
 /**
  * Lambda runtime
@@ -134,12 +135,11 @@ export class Runtime {
   /**
    * @param {Object} event
    * @param {Boolean|undefined} measureTime
-   * @returns {Runtime}
+   * @returns {Thread}
    */
   runForked(event, measureTime = undefined) {
-    new Thread(this).run(event, measureTime);
-
-    return this;
+    return new Thread(this)
+      .run(event, measureTime);
   }
 
   /**
@@ -195,16 +195,18 @@ export class Runtime {
             callback(error, null);
           };
 
-          lambda.runForked(data.payload);
+          let thread = lambda.runForked(data.payload);
+
+          ForksManager.manage(thread.process);
         },
         invokeAsync: function (localPath, data, callback) {
           this.invoke(localPath, data, (error, result) => {
             if (error) {
-              this._log(`Lambda ${data.lambda} async execution fail: ${error.message}`);
+              _this._log(`Lambda ${data.lambda} async execution fail: ${error.message}`);
               return;
             }
 
-            this._log(`Result for Lambda ${data.lambda} async call: ${JSON.stringify(result)}`);
+            _this._log(`Result for Lambda ${data.lambda} async call: ${JSON.stringify(result)}`);
           });
 
           callback(null, null);
