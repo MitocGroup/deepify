@@ -193,6 +193,18 @@ module.exports = {
         },
       },
     },
+    'init-backend': {
+      example: 'deepify init-backend path/to/web_app',
+      description: 'Initialize backend',
+      opts: {
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
     'run-lambda': {
       example: 'deepify run-lambda path/to/the/lambda -e=\'{"Name":"John Doe"}\'',
       description: 'Run Lambda function locally',
