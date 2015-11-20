@@ -314,7 +314,7 @@ export class Instance {
       return;
     }
 
-    lambda.profiler.save(function(error, profilePath) {
+    lambda.profiler.save((error) => {
       if (error) {
         this._log(`Error while saving profile for Lambda ${lambda.name}: ${error}`);
         return;
@@ -323,7 +323,7 @@ export class Instance {
       let profileUrl = `${this._host}${Instance.PROFILE_URI}?p=${lambda.name}`;
 
       this._log(`Profile for Lambda ${lambda.name} accessible at ${profileUrl}`);
-    }.bind(this));
+    });
   }
 
   /**
@@ -337,9 +337,10 @@ export class Instance {
    * @param {Http.ServerResponse} response
    * @param {Object} lambdaConfig
    * @param {Object} payload
+   * @param {Boolean} asyncMode
    * @private
    */
-  _runLambda(response, lambdaConfig, payload) {
+  _runLambda(response, lambdaConfig, payload, asyncMode) {
     let lambda = LambdaRuntime.createLambda(
       lambdaConfig.path,
       lambdaConfig.buildPath ? Path.join(lambdaConfig.buildPath, '.aws.json') : null
@@ -348,23 +349,35 @@ export class Instance {
     lambda.name = `${lambdaConfig.name}-${this.localId}`;
     lambda.profiler = this._profiling ? new Profiler(lambda.name) : null;
 
-    lambda.runForked(payload);
-
-    lambda.succeed = function(result) {
+    lambda.succeed = (result) => {
       this._trySaveProfile(lambda);
 
       let plainResult = JSON.stringify(result);
 
-      this._log(`Serving result for Lambda ${lambdaConfig.name}: ${plainResult}`);
-      this._send(response, plainResult, 200, 'application/json', false);
-    }.bind(this);
+      if (!asyncMode) {
+        this._log(`Serving result for Lambda ${lambdaConfig.name}: ${plainResult}`);
+        this._send(response, plainResult, 200, 'application/json', false);
+      } else {
+        this._log(`Result for Lambda ${lambdaConfig.name} async call: ${plainResult}`);
+      }
+    };
 
-    lambda.fail = function(error) {
+    lambda.fail = (error) => {
       this._trySaveProfile(lambda);
 
-      this._log(`Lambda ${lambdaConfig.name} execution fail: ${error.message}`);
-      this._send500(response, error);
-    }.bind(this);
+      if (!asyncMode) {
+        this._log(`Lambda ${lambdaConfig.name} execution fail: ${error.message}`);
+        this._send500(response, error);
+      } else {
+        this._log(`Lambda ${lambdaConfig.name} async execution fail: ${error.message}`);
+      }
+    };
+
+    lambda.runForked(payload);
+
+    if (asyncMode) {
+      this._send(response, JSON.stringify(null), 202, 'application/json', false);
+    }
   }
 
   /**
@@ -419,7 +432,9 @@ export class Instance {
 
       this._send500(response, 'You have to specify profile id');
       return;
-    } else if (uri === Instance.LAMBDA_URI) {
+    } else if (uri === Instance.LAMBDA_URI || uri === Instance.LAMBDA_ASYNC_URI) {
+      let isAsync = uri === Instance.LAMBDA_ASYNC_URI;
+
       this._readRequestData(request, function(rawData) {
         let data = JSON.parse(rawData);
 
@@ -432,7 +447,9 @@ export class Instance {
         let lambda = data.lambda;
         let payload = data.payload;
 
-        this._log(`Running Lambda ${lambda} with payload ${JSON.stringify(payload)}`);
+        this._log(
+          `Running Lambda ${lambda} with payload ${JSON.stringify(payload)}${isAsync ? ' in async mode' : ''}`
+        );
 
         if (this.buildPath) {
           let lambdaConfig = this._buildConfig.lambdas[lambda];
@@ -447,14 +464,7 @@ export class Instance {
             Path.join(lambdaConfig.buildPath, '_config.json'),
             Path.join(Path.dirname(lambdaConfig.path), '_config.json'),
             function(error) {
-              // @todo: manage this error?
-              //if (error) {
-              //  this._log(`Unable to link Lambda ${lambda} config: ${error}`);
-              //  this._send500(response, error);
-              //  return;
-              //}
-
-              this._runLambda(response, lambdaConfig, payload);
+              this._runLambda(response, lambdaConfig, payload, isAsync);
             }.bind(this)
           );
         } else {
@@ -469,13 +479,6 @@ export class Instance {
           let lambdaConfigFile = Path.join(Path.dirname(lambdaConfig.path), '_config.json');
 
           FileSystemExtra.remove(lambdaConfigFile, function(error) {
-            // @todo: manage this error?
-            //if (error) {
-            //  this._log(`Error while removing Lambda ${lambda} old config: ${error}`);
-            //  this._send500(response, error);
-            //  return;
-            //}
-
             FileSystemExtra.outputJson(
               lambdaConfigFile,
               lambdaConfig,
@@ -486,7 +489,7 @@ export class Instance {
                   return;
                 }
 
-                this._runLambda(response, lambdaConfig, payload);
+                this._runLambda(response, lambdaConfig, payload, isAsync);
               }.bind(this)
             );
           }.bind(this));
@@ -641,6 +644,13 @@ export class Instance {
    */
   static get PROFILE_URI() {
     return '/_/profile';
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get LAMBDA_ASYNC_URI() {
+    return '/_/lambda-async';
   }
 
   /**

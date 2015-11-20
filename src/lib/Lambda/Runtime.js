@@ -148,6 +148,8 @@ export class Runtime {
    * @returns {Runtime}
    */
   run(event, measureTime = undefined) {
+    this._injectSiblingExecutionWrapper();
+
     if (typeof measureTime !== 'undefined') {
       this.measureTime = measureTime;
     }
@@ -158,6 +160,64 @@ export class Runtime {
     this._lambda.handler.bind(this)(event, this.context);
 
     return this;
+  }
+
+  /**
+   * Inject a wrapper for sibling lambdas
+   * execution. Used by deep-resource
+   *
+   * @private
+   */
+  _injectSiblingExecutionWrapper() {
+    let _this = this;
+
+    global[Runtime.SIBLING_EXEC_WRAPPER_NAME] = new function() {
+      return {
+        invoke: function (localPath, data, callback) {
+          let lambda = Runtime.createLambda(localPath, _this._awsConfigFile);
+
+          lambda.name = data.lambda;
+          lambda.profiler = _this._profiler;
+
+          lambda.succeed = (result) => {
+            lambda.profiler && lambda.profiler.save((error) => {
+              error && _this._log(`Error while saving profile for Lambda ${lambda.name}: ${error}`);
+            });
+
+            callback(null, result);
+          };
+
+          lambda.fail = (error) => {
+            lambda.profiler && lambda.profiler.save((error) => {
+              error && _this._log(`Error while saving profile for Lambda ${lambda.name}: ${error}`);
+            });
+
+            callback(error, null);
+          };
+
+          lambda.runForked(data.payload);
+        },
+        invokeAsync: function (localPath, data, callback) {
+          this.invoke(localPath, data, (error, result) => {
+            if (error) {
+              this._log(`Lambda ${data.lambda} async execution fail: ${error.message}`);
+              return;
+            }
+
+            this._log(`Result for Lambda ${data.lambda} async call: ${JSON.stringify(result)}`);
+          });
+
+          callback(null, null);
+        },
+      };
+    };
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get SIBLING_EXEC_WRAPPER_NAME() {
+    return '_deep_lambda_exec_';
   }
 
   /**
