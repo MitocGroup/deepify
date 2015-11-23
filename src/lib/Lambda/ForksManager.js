@@ -15,36 +15,87 @@ export class ForksManager {
    * @param {ChildProcess} fork
    */
   static manage(fork) {
-    if (!global.hasOwnProperty(ForksManager.STORAGE_KEY) ||
-      !global.hasOwnProperty(ForksManager.SIGKILL_KEY)) {
+    if (!ForksManager._isManaged) {
       return;
     }
 
-    global[ForksManager.STORAGE_KEY].push(fork);
+    ForksManager._addForkToStack(fork);
 
     fork.on('exit', () => {
-      let forkIdx = global[ForksManager.STORAGE_KEY].indexOf(fork);
+      ForksManager._removeFork(fork);
 
-      global[ForksManager.STORAGE_KEY] = global[ForksManager.STORAGE_KEY].slice(forkIdx, 1);
+      if (ForksManager._isForksStackEmpty &&
+        ForksManager._wasMainProcessKilled) {
 
-      if (global[ForksManager.STORAGE_KEY].length <= 0 &&
-        global[ForksManager.SIGKILL_KEY] === true) {
         process.exit();
       }
     });
   }
 
   /**
+   * @returns {Boolean}
+   * @private
+   */
+  static get _isManaged() {
+    return global.hasOwnProperty(ForksManager.STORAGE_KEY) &&
+      global.hasOwnProperty(ForksManager.SIGKILL_KEY);
+  }
+
+  /**
+   * @param {ChildProcess} fork
+   * @private
+   */
+  static _addForkToStack(fork) {
+    if (global.hasOwnProperty(ForksManager.STORAGE_KEY)) {
+      global[ForksManager.STORAGE_KEY][fork.pid] = fork;
+    }
+  }
+
+  /**
+   * @returns {Boolean}
+   * @private
+   */
+  static get _wasMainProcessKilled() {
+    return global.hasOwnProperty(ForksManager.SIGKILL_KEY) &&
+      global[ForksManager.SIGKILL_KEY] === true;
+  }
+
+  /**
+   * @returns {Boolean}
+   * @private
+   */
+  static get _isForksStackEmpty() {
+    return !global.hasOwnProperty(ForksManager.STORAGE_KEY) ||
+      Object.keys(global[ForksManager.STORAGE_KEY]).length <= 0;
+  }
+
+  /**
+   * @param {ChildProcess} fork
+   * @private
+   */
+  static _removeFork(fork) {
+    if (global.hasOwnProperty(ForksManager.STORAGE_KEY) &&
+      global[ForksManager.STORAGE_KEY].hasOwnProperty(fork.pid)) {
+
+      delete global[ForksManager.STORAGE_KEY][fork.pid];
+    }
+  }
+
+  /**
    * Register listener
    */
   static registerListener() {
-    global[ForksManager.STORAGE_KEY] = [];
+    if (ForksManager._isManaged) {
+      return;
+    }
+
+    global[ForksManager.STORAGE_KEY] = {};
     global[ForksManager.SIGKILL_KEY] = false;
 
     process.on('SIGTERM', () => {
       global[ForksManager.SIGKILL_KEY] = true;
 
-      if (global[ForksManager.STORAGE_KEY].length <= 0) {
+      if (ForksManager._isForksStackEmpty) {
         process.exit();
       }
     });
