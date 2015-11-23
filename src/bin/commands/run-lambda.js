@@ -7,6 +7,7 @@
 
 module.exports = function(lambdaPath) {
   var Runtime = require('../../lib.compiled/Lambda/Runtime').Runtime;
+  var ForksManager = require('../../lib.compiled/Lambda/ForksManager').ForksManager;
   var DeepDB = require('deep-db');
   var path = require('path');
   var fs = require('fs');
@@ -89,16 +90,20 @@ module.exports = function(lambdaPath) {
 
       if (error) {
         console.error(error);
-        this.exit(1);
       }
 
-      this.exit(0);
+      // assure invokeAsync()s are executed!
+      process.kill(process.pid);
     }.bind(this);
 
     console.log('Starting Lambda.', os.EOL);
 
     try {
       process.chdir(path.dirname(lambdaPath));
+
+      // avoid process to be killed when some async calls are still active!
+      ForksManager.registerListener();
+
       lambda.run(event, true);
     } catch (e) {
       console.error(e);
