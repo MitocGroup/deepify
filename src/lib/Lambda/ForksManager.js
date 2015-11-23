@@ -21,7 +21,17 @@ export class ForksManager {
 
     ForksManager._addForkToStack(fork);
 
-    fork.on('exit', () => {
+    fork.on('exit', ForksManager._getForkOnExitCallback(fork));
+    fork.on('uncaughtException', ForksManager._getForkOnExitCallback(fork));
+  }
+
+  /**
+   * @param {ChildProcess} fork
+   * @returns {Function}
+   * @private
+   */
+  static _getForkOnExitCallback(fork) {
+    return () => {
       ForksManager._removeFork(fork);
 
       if (ForksManager._isForksStackEmpty &&
@@ -29,7 +39,7 @@ export class ForksManager {
 
         process.exit();
       }
-    });
+    }
   }
 
   /**
