@@ -90,7 +90,7 @@ Feature | Details | Owner
 Implement deployment rollbacks | Implement rollbacks in case if deployment fails or some logix is broken without undeploy-ing whole application (create diff's) | [@alexanderc](https://github.com/alexanderc)
 Optimize frontend code (browserify, minimize, reduce nr of calls, etc) | Optimize frontend code and build scripts in order to get deep-framework smaller footprint  | [@alexanderc](https://github.com/alexanderc)
 Add caching option to the resource actions (via api gateway) | Implement resource actions caching natively by adding an option to ApiGateway while provisioning | [@alexanderc](https://github.com/alexanderc)
-Add choice of AWS credentials when generating them (server/deploy cmds) | Make credentials pick up more verbose in order to avoid accidental deploys to unwanted accounts | [@alexanderc](https://github.com/alexanderc)
+Notify developer on possible naming collisions | Notify developer on possible naming collisions during deploy process | [@alexanderc](https://github.com/alexanderc)
 Add Windows support for development tools | Add development tools Windows support | [@alexanderc](https://github.com/alexanderc)
 
 ### License
