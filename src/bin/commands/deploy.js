@@ -55,7 +55,7 @@ module.exports = function(mainPath) {
 
   console.log('Copying sources to ' + tmpPropertyPath);
 
-  exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/ &>/dev/null',
+  exec('cp -R ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/ &>/dev/null',
     function(error) {
       if (error) {
         console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + error);
@@ -335,7 +335,7 @@ module.exports = function(mainPath) {
       mkdirp.sync(frontendDumpPath);
     }
 
-    exec('rsync -a --delete ' + tmpFrontendPath + '/ ' + frontendDumpPath + '/ &>/dev/null',
+    exec('cp -R ' + tmpFrontendPath + '/ ' + frontendDumpPath + '/ &>/dev/null',
       function(error) {
         if (error) {
           console.error('Unable to dump _frontend code into _www!');

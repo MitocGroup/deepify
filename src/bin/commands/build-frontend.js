@@ -43,8 +43,8 @@ module.exports = function(mainPath) {
 
   var propertyInstance;
 
-  exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/',
-    function(error, stdout, stderr) {
+  exec('cp -R ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/ &>/dev/null',
+    function(error) {
       if (error) {
         console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + error);
         this.exit(1);
@@ -69,7 +69,7 @@ module.exports = function(mainPath) {
 
         console.log('Copying built sources into ' + dumpPath);
 
-        exec('mkdir -p ' + dumpPath + '; rsync -a --delete ' + frontendDumpPath + '/ ' + dumpPath + '/ &>/dev/null', function(error) {
+        exec('mkdir -p ' + dumpPath + '; cp -R ' + frontendDumpPath + '/ ' + dumpPath + '/ &>/dev/null', function(error) {
           if (error) {
             console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
             this.exit(1);
