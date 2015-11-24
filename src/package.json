@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.2.24",
+  "version": "1.2.25",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -60,7 +60,6 @@
     "deep-log": "^1.x.x",
     "deep-db": "^1.x.x",
     "deep-core": "^1.x.x",
-    "mkdirp": "^0.5.x",
     "proxyquire": "^1.5.x",
     "v8-profiler": "^5.2.x",
     "traceviewify": "^0.4.x",

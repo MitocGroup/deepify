@@ -8,10 +8,10 @@
 module.exports = function(mainPath) {
   var path = require('path');
   var fs = require('fs');
+  var fse = require('fs-extra');
   var os = require('os');
   var exec = require('child_process').exec;
   var spawn = require('child_process').spawn;
-  var mkdirp = require('mkdirp');
   var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
   var Property = require('deep-package-manager').Property_Instance;
   var Config = require('deep-package-manager').Property_Config;
@@ -53,12 +53,14 @@ module.exports = function(mainPath) {
     console.log('Local mode on!');
   }
 
+  fse.ensureDirSync(tmpPropertyPath);
+
   console.log('Copying sources to ' + tmpPropertyPath);
 
-  exec('cp -R ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/ &>/dev/null',
+  exec('cp -R ' + path.join(mainPath, '*') + ' ' + tmpPropertyPath + '/ &>/dev/null',
     function(error) {
       if (error) {
-        console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + error);
+        console.error('Error copying sources into ' + tmpPropertyPath + ': ' + error);
         this.exit(1);
       }
 
@@ -331,11 +333,9 @@ module.exports = function(mainPath) {
     var tmpFrontendPath = path.join(tmpPropertyPath, '_public');
     var frontendDumpPath = path.join(dumpCodePath, '_www');
 
-    if (!fs.existsSync(frontendDumpPath)) {
-      mkdirp.sync(frontendDumpPath);
-    }
+    fse.ensureDirSync(frontendDumpPath);
 
-    exec('cp -R ' + tmpFrontendPath + '/ ' + frontendDumpPath + '/ &>/dev/null',
+    exec('cp -R ' + path.join(tmpFrontendPath, '*') + ' ' + frontendDumpPath + '/ &>/dev/null',
       function(error) {
         if (error) {
           console.error('Unable to dump _frontend code into _www!');
@@ -354,9 +354,7 @@ module.exports = function(mainPath) {
       return;
     }
 
-    if (!fs.existsSync(dumpCodePath)) {
-      mkdirp.sync(dumpCodePath);
-    }
+    fse.ensureDirSync(dumpCodePath);
 
     var awsConfigPlain = JSON.stringify(config.aws);
     var globalAwsConfigFile = path.join(dumpCodePath, '.aws.json');

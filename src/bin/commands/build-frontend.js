@@ -8,9 +8,9 @@
 module.exports = function(mainPath) {
   var path = require('path');
   var fs = require('fs');
+  var fse = require('fs-extra');
   var os = require('os');
   var exec = require('child_process').exec;
-  var mkdirp = require('mkdirp');
   var Property = require('deep-package-manager').Property_Instance;
   var Config = require('deep-package-manager').Property_Config;
 
@@ -43,7 +43,9 @@ module.exports = function(mainPath) {
 
   var propertyInstance;
 
-  exec('cp -R ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/ &>/dev/null',
+  fse.ensureDirSync(tmpPropertyPath);
+
+  exec('cp -R ' + path.join(mainPath, '*') + ' ' + tmpPropertyPath + '/ &>/dev/null',
     function(error) {
       if (error) {
         console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + error);
@@ -69,7 +71,9 @@ module.exports = function(mainPath) {
 
         console.log('Copying built sources into ' + dumpPath);
 
-        exec('mkdir -p ' + dumpPath + '; cp -R ' + frontendDumpPath + '/ ' + dumpPath + '/ &>/dev/null', function(error) {
+        fse.ensureDirSync(dumpPath);
+
+        exec('cp -R ' + path.join(frontendDumpPath, '*') + ' ' + dumpPath + '/ &>/dev/null', function(error) {
           if (error) {
             console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
             this.exit(1);
