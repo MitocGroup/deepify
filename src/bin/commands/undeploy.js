@@ -34,8 +34,13 @@ module.exports = function(mainPath) {
     skipDirtyCheck = true;
 
     if (!resource) {
-      console.error('Unable to extract base hash from ' + rawResource);
-      this.exit(1);
+      // in case the hash is provided
+      if (rawResource.length === 8) {
+        resource = rawResource;
+      } else {
+        console.error('Unable to extract base hash from ' + rawResource);
+        this.exit(1);
+      }
     }
   }
 

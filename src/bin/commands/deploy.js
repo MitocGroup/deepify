@@ -16,6 +16,7 @@ module.exports = function(mainPath) {
   var Property = require('deep-package-manager').Property_Instance;
   var Config = require('deep-package-manager').Property_Config;
   var S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
+  var ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
 
   var localOnly = this.opts.locate('dry-run').exists;
   var dumpCodePath = this.opts.locate('dump-local').value;
@@ -206,7 +207,22 @@ module.exports = function(mainPath) {
     // Gracefully teardown...
     (function() {
       process.on('uncaughtException', function(error) {
-        console.error(error.toString(), os.EOL, error.stack);
+        if (error instanceof ProvisioningCollisionsDetectedException) {
+          console.error(
+            os.EOL,
+            os.EOL,
+            'Seems like there are some resources on AWS that may generate collisions while provisioning the web app!',
+            os.EOL,
+            'Remove them by running "deepify undeploy ' + mainPath + ' --resource ' + error.collisionHash + '"',
+            os.EOL,
+            os.EOL,
+            error.constructor._stringifyResourcesObj(error.resourcesObj)
+          );
+
+          this.exit(1);
+        } else {
+          console.error(error.toString(), os.EOL, error.stack);
+        }
 
         if (propertyInstance.config.provisioning) {
           dumpConfig.bind(this)(propertyInstance, function() {
