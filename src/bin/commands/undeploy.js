@@ -35,7 +35,7 @@ module.exports = function(mainPath) {
 
     if (!resource) {
       // in case the hash is provided
-      if (rawResource.length === 8) {
+      if (rawResource.length === AbstractService.MAIN_HASH_SIZE) {
         resource = rawResource;
       } else {
         console.error('Unable to extract base hash from ' + rawResource);
