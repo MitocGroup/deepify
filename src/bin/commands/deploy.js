@@ -216,7 +216,7 @@ module.exports = function(mainPath) {
             'Remove them by running "deepify undeploy ' + mainPath + ' --resource ' + error.collisionHash + '"',
             os.EOL,
             os.EOL,
-            error.constructor._stringifyResourcesObj(error.resourcesObj)
+            error.stringifiedResourcesObj
           );
 
           this.exit(1);
