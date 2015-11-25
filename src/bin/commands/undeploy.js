@@ -56,6 +56,15 @@ module.exports = function(mainPath) {
     this.exit(1);
   }
 
+  var Property = require('deep-package-manager').Property_Instance;//@todo:test
+  var Undeploy = require('deep-package-manager').Provisioning_Undeploy;//@todo:test
+  var property = new Property(mainPath, Config.DEFAULT_FILENAME);
+  var undeploy = new Undeploy(property, true);
+  undeploy.execute(function (error, resources) {
+  }.bind(this), resource);
+  return;
+
+
   var config = Config.createFromJsonFile(configFile).extract();
 
   aws.config.update(config.aws);
