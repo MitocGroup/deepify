@@ -51,11 +51,6 @@ module.exports = function(mainPath) {
       return;
     }
 
-    // set it only when NO resource set explicitly
-    if (dirtyMode && !resource) {
-      resource = AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP;
-    }
-
     var backupConfig = !error;
 
     var undeploy = new Undeploy(
@@ -89,6 +84,6 @@ module.exports = function(mainPath) {
       }
 
       this.exit(0);
-    }.bind(this), resource);
+    }.bind(this), resource = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP);
   }.bind(this), cfgBucket);
 };
