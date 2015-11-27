@@ -478,21 +478,19 @@ export class Instance {
 
           let lambdaConfigFile = Path.join(Path.dirname(lambdaConfig.path), '_config.json');
 
-          FileSystemExtra.remove(lambdaConfigFile, function(error) {
-            FileSystemExtra.outputJson(
-              lambdaConfigFile,
-              lambdaConfig,
-              function(error) {
-                if (error) {
-                  this._log(`Unable to persist fake Lambda ${lambda} config: ${error}`);
-                  this._send500(response, error);
-                  return;
-                }
+          FileSystemExtra.outputJson(
+            lambdaConfigFile,
+            lambdaConfig,
+            (error) => {
+              if (error) {
+                this._log(`Unable to persist fake Lambda ${lambda} config: ${error}`);
+                this._send500(response, error);
+                return;
+              }
 
-                this._runLambda(response, lambdaConfig, payload, isAsync);
-              }.bind(this)
-            );
-          }.bind(this));
+              this._runLambda(response, lambdaConfig, payload, isAsync);
+            }
+          );
         }
       }.bind(this));
 
