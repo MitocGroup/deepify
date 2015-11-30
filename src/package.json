@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.2.26",
+  "version": "1.2.29",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -61,7 +61,7 @@
     "deep-db": "^1.x.x",
     "deep-core": "^1.x.x",
     "proxyquire": "^1.5.x",
-    "v8-profiler": "^5.2.x",
+    "v8-profiler": "^5.3.x",
     "traceviewify": "^0.4.x",
     "open": "^0.0.x",
     "aws-sdk": "^2.2.x",
@@ -79,7 +79,7 @@
     "sinon-chai": "^2.8.x"
   },
   "engines": {
-    "node": ">=0.12 <5.0.0",
+    "node": ">=0.12",
     "npm": ">=2.10"
   },
   "os": [
