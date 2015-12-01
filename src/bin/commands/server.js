@@ -7,6 +7,11 @@
 
 module.exports = function(mainPath) {
   var path = require('path');
+  var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
+  var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
+  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  var NpmUpdate = require('../../lib.compiled/NodeJS/NpmUpdate').NpmUpdate;
+  var NpmLink = require('../../lib.compiled/NodeJS/NpmLink').NpmLink;
   var Server = require('../../lib.compiled/Server/Instance').Instance;
   var WaitFor = require('deep-package-manager').Helpers_WaitFor;
   var Config = require('deep-package-manager').Property_Config;
@@ -66,7 +71,8 @@ module.exports = function(mainPath) {
       server = new Server(property);
       server.profiling = profiling;
 
-      var lambdaPaths = [];
+      var lambdasToInstall = [];
+      var lambdasToUpdate = [];
 
       for (var i = 0; i < server.property.microservices.length; i++) {
         var microservice = server.property.microservices[i];
@@ -75,16 +81,66 @@ module.exports = function(mainPath) {
           var microserviceRoute = microservice.resources.actions[j];
 
           if (microserviceRoute.type === 'lambda') {
-            lambdaPaths.push(path.join(microservice.autoload.backend, microserviceRoute.source));
+            let lambdaPath = path.join(microservice.autoload.backend, microserviceRoute.source);
+
+            if (fs.existsSync(path.join(lambdaPath, 'node_modules'))) {
+              lambdasToUpdate.push(lambdaPath);
+            } else {
+              lambdasToInstall.push(lambdaPath);
+            }
           }
         }
       }
 
       runInstallHook(function() {
-        dispatchLambdaPathsChain(chunk(lambdaPaths, 2), startServer);
+        let wait = new WaitFor();
+        let remaining = 2;
+
+        wait.push(function() {
+          return remaining <= 0;
+        }.bind(this));
+
+        let npmInstall = new NpmInstall(lambdasToInstall);
+        let npmUpdate = new NpmUpdate(lambdasToUpdate);
+
+        console.log('Running "npm install" on ' + lambdasToInstall.length + ' Lambdas');
+        console.log('Running "npm update" on ' + lambdasToUpdate.length + ' Lambdas');
+
+        npmInstall.runChunk(function() {
+          remaining--;
+        }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE / 2);
+
+        npmUpdate.runChunk(function() {
+          remaining--;
+        }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE / 2);
+
+        wait.ready(function() {
+          if (Bin.npmModuleInstalled('aws-sdk', true)) {
+            console.log('Start linking aws-sdk');
+
+            linkAwsSdk(lambdasToInstall.concat(lambdasToUpdate), startServer);
+          } else {
+            let awsSdkInstall = new NpmInstallLibs('aws-sdk');
+            awsSdkInstall.global = true;
+
+            awsSdkInstall.run(function() {
+              console.log('Installing aws-sdk globally');
+
+              linkAwsSdk(lambdasToInstall.concat(lambdasToUpdate), startServer);
+            }.bind(this));
+          }
+        }.bind(this));
       }.bind(this));
     }.bind(this));
   }.bind(this));
+
+  function linkAwsSdk(paths, cb) {
+    let npmLink = new NpmLink('aws-sdk', paths);
+
+    npmLink.runChunk(function() {
+      cb.bind(this)();
+    }.bind(this));
+  }
 
   function runInstallHook(cb) {
     if (skipBuildHook) {
@@ -112,113 +168,20 @@ module.exports = function(mainPath) {
     }
   }
 
-  function npmInstall(lambdaPath, cb) {
-    console.log('Checking for NPM package in ' + lambdaPath);
-
-    var packageFile = path.join(lambdaPath, 'package.json');
-
-    if (fs.existsSync(packageFile)) {
-      var nodeModulesPath = path.join(lambdaPath, 'node_modules');
-      var cmd = fs.existsSync(nodeModulesPath) ? 'update' : 'install';
-
-      console.log('Running "npm ' + cmd + '" in ' + lambdaPath);
-
-      exec('cd ' + lambdaPath + ' && npm ' + cmd + ' &>/dev/null', function(error) {
-        if (error) {
-          console.error(error);
-          console.error('Failed to run "npm ' + cmd + '" in ' + lambdaPath + '. Skipping...');
-        }
-
-        cb();
-      }.bind(this));
-    } else {
-      console.log('No NPM package found in ' + lambdaPath + '. Skipping...');
-    }
-  }
-
-  function linkAwsSdk(lambdaPath, cb) {
-    console.log('Linking aws-sdk library in ' + lambdaPath);
-
-    exec('cd ' + lambdaPath + ' && npm link aws-sdk', function(error, stdout, stderr) {
-      if (error) {
-        console.error('Failed to link aws-sdk library in ' + lambdaPath + ' (' + stderr + '). Trying to install it...');
-
-        exec('cd ' + lambdaPath + ' && npm install aws-sdk &>/dev/null', function(error) {
-          if (error) {
-            console.error(error);
-            console.error('Failed to link or install aws-sdk locally in ' + lambdaPath + '. Skipping...');
-          }
-
-          cb();
-        }.bind(this));
-
-        return;
-      }
-
-      cb();
-    }.bind(this));
-  }
-
   function startServer() {
     if (buildPath) {
       server.buildPath = buildPath;
     }
 
     server.listen(parseInt(port, 10), dbServer, function(error) {
+      if (error) {
+        console.error(error);
+        this.exit(1);
+      }
+
       if (openBrowser) {
         open(serverAddress);
       }
-    });
-  }
-
-  function prepareBatch(lambdaPaths, cb) {
-    var remaining = lambdaPaths.length;
-
-    var wait = new WaitFor();
-
-    for (var i = 0; i < lambdaPaths.length; i++) {
-      var lambdaPath = lambdaPaths[i];
-
-      npmInstall(lambdaPath, function(lambdaPath) {
-        linkAwsSdk(lambdaPath, function() {
-          remaining--;
-        }.bind(this));
-      }.bind(this, lambdaPath));
-    }
-
-    wait.push(function() {
-      return remaining <= 0;
-    }.bind(this));
-
-    wait.ready(function() {
-      cb();
-    }.bind(this));
-  }
-
-  function chunk(arr, len) {
-    var chunks = [];
-    var i = 0;
-    var n = arr.length;
-
-    while (i < n) {
-      chunks.push(arr.slice(i, i += len));
-    }
-
-    return chunks;
-  }
-
-  function dispatchLambdaPathsChain(lambdaPathsChunks, cb) {
-    if (lambdaPathsChunks.length <= 0) {
-      cb();
-      return;
-    }
-
-    var batch = lambdaPathsChunks.pop();
-
-    console.log('Running next lambdas build batch: ' + batch.join(', '));
-
-    prepareBatch(batch, function() {
-      dispatchLambdaPathsChain(lambdaPathsChunks, cb);
     }.bind(this));
   }
 };
