@@ -30,11 +30,11 @@ export class NpmInstall {
   }
 
   /**
-   * @param {String} arg
+   * @param {String|*} args
    * @returns {NpmInstall}
    */
-  addExtraArg(arg) {
-    this._extraArgs.push(arg);
+  addExtraArg(...args) {
+    this._extraArgs.push(...args);
 
     return this;
   }

@@ -13,6 +13,7 @@ module.exports = function(mainPath) {
   var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   var NpmPrune = require('../../lib.compiled/NodeJS/NpmPrune').NpmPrune;
+  var NpmDedupe = require('../../lib.compiled/NodeJS/NpmDedupe').NpmDedupe;
   var NpmRun = require('../../lib.compiled/NodeJS/NpmRun').NpmRun;
   var NpmChain = require('../../lib.compiled/NodeJS/NpmChain').NpmChain;
   var NpmListDependencies = require('../../lib.compiled/NodeJS/NpmListDependencies').NpmListDependencies;
@@ -58,8 +59,22 @@ module.exports = function(mainPath) {
 
     chain.add(
       new NpmInstall(lambdas.tmpPath)
-        .addExtraArg('--production')
+        .addExtraArg(
+          '--no-bin-links',
+          '--no-optional',
+          '--loglevel silent',
+          '--production'
+        )
     );
+
+    // @todo: fix symlinks zip-ing
+    //chain.add(
+    //  new NpmDedupe(lambdas.tmpPath)
+    //    .addExtraArg(
+    //      '--loglevel silent',
+    //      '--production'
+    //    )
+    //);
 
     chain.add(
       new NpmPrune(lambdas.tmpPath)

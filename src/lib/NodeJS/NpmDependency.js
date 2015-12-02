@@ -10,13 +10,22 @@ export class NpmDependency {
   /**
    * @param {String} name
    * @param {String} version
+   * @param {Boolean} isMain
    */
-  constructor(name, version) {
+  constructor(name, version, isMain = false) {
     this._name = name;
     this._version = version;
 
     this._parent = null;
     this._children = [];
+    this._isMain = isMain;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  get isMain() {
+    return this._isMain;
   }
 
   /**
@@ -93,12 +102,20 @@ export class NpmDependency {
 
   /**
    * @param {String} rootPath
+   * @param {Boolean} skipMain
    * @returns {String}
    */
-  getPath(rootPath = '') {
+  getPath(rootPath = '', skipMain = true) {
+    if (skipMain && this._isMain) {
+      return rootPath;
+    }
+
+    if (!this._parent) {
+      return path.join(rootPath, this._name);
+    }
+
     return path.join(
-      rootPath,
-      this._parent ? this._parent.getPath(rootPath) : '',
+      this._parent.getPath(rootPath),
       'node_modules',
       this._name
     );
@@ -144,10 +161,19 @@ export class NpmDependency {
 
   /**
    * @param {Object} rawDepsObject
+   * @param {Boolean|null} isMain
    * @returns {NpmDependency}
    */
-  static createFromRawObject(rawDepsObject) {
-    let mainDep = new NpmDependency(rawDepsObject.name, rawDepsObject.version);
+  static createFromRawObject(rawDepsObject, isMain = null) {
+    let mainDep = new NpmDependency(
+      rawDepsObject.name,
+      rawDepsObject.version,
+      isMain === null ? true : isMain
+    );
+
+    if (mainDep.isMain && isMain === null) {
+      isMain = false;
+    }
 
     if (rawDepsObject.hasOwnProperty('dependencies') &&
       typeof rawDepsObject.dependencies === 'object') {
@@ -160,7 +186,7 @@ export class NpmDependency {
         let depData = rawDepsObject.dependencies[depName];
         depData.name = depName;
 
-        let dep = NpmDependency.createFromRawObject(depData);
+        let dep = NpmDependency.createFromRawObject(depData, isMain);
         dep.parent = mainDep;
 
         mainDep.addChild(dep);

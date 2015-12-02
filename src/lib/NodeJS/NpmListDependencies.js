@@ -43,10 +43,10 @@ export class NpmListDependencies {
 
     let deps = JSON.parse(result.result);
 
-    if (!deps || !deps.dependencies) {
+    if (!deps) {
       throw new Error(`Broken dependencies object: ${result.result}`);
     }
 
-    return NpmDependency.createFromRawObject(deps.dependencies);
+    return NpmDependency.createFromRawObject(deps);
   }
 }
