@@ -17,7 +17,6 @@ module.exports = function(mainPath) {
   var Config = require('deep-package-manager').Property_Config;
   var Property = require('deep-package-manager').Property_Instance;
   var Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
-  var exec = require('child_process').exec;
   var os = require('os');
   var fs = require('fs');
   var open = require('open');

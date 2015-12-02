@@ -168,7 +168,7 @@ export class Exec {
 
       this._checkError(code);
 
-      if (this.succeed) {
+      if (this.succeed && this._result) {
         this._result = this._result.trim();
       }
 

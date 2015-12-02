@@ -34,15 +34,38 @@ export class LambdasExtractor {
    * @param {Function|null} filter
    * @returns {String[]}
    */
+  extractWorking(filter = null) {
+    return LambdasExtractor._extract(
+      this._property.workingMicroservices,
+      filter
+    );
+  }
+
+  /**
+   * @param {Function|null} filter
+   * @returns {String[]}
+   */
   extract(filter = null) {
+    return LambdasExtractor._extract(
+      this._property.microservices,
+      filter
+    );
+  }
+
+  /**
+   * @param {Object} microservices
+   * @param {Function|null} filter
+   * @returns {String[]}
+   */
+  static _extract(microservices, filter = null) {
     let lambdas = [];
 
-    for (let i in this._property.microservices) {
-      if (!this._property.microservices.hasOwnProperty(i)) {
+    for (let i in microservices) {
+      if (!microservices.hasOwnProperty(i)) {
         continue;
       }
 
-      let microservice = this._property.microservices[i];
+      let microservice = microservices[i];
 
       for (let j in microservice.resources.actions) {
         if (!microservice.resources.actions.hasOwnProperty(j)) {

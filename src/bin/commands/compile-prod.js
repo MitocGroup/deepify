@@ -6,15 +6,19 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  var installCmd = "npm install --production";
-
   var path = require('path');
   var fse = require('fs-extra');
   var fs = require('fs');
-  var exec = require('child_process').exec;
-  var WaitFor = require('deep-package-manager').Helpers_WaitFor;
+  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
+  var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
+  var NpmPrune = require('../../lib.compiled/NodeJS/NpmPrune').NpmPrune;
+  var NpmRun = require('../../lib.compiled/NodeJS/NpmRun').NpmRun;
+  var NpmChain = require('../../lib.compiled/NodeJS/NpmChain').NpmChain;
+  var NpmListDependencies = require('../../lib.compiled/NodeJS/NpmListDependencies').NpmListDependencies;
   var Hash = require('deep-package-manager').Helpers_Hash;
   var Property = require('deep-package-manager').Property_Instance;
+  var WaitFor = require('deep-package-manager').Helpers_WaitFor;
   var Archiver = require('archiver');
   var tmp = require('tmp');
 
@@ -29,25 +33,186 @@ module.exports = function(mainPath) {
   property.microservicesToUpdate = getMicroservicesToDeploy();
 
   var microservices = property.workingMicroservices;
-  var lambdaPaths = [];
+  var lambdas = {
+    path: [],
+    tmpPath: [],
+  };
 
-  for (var i = 0; i < microservices.length; i++) {
-    var microservice = microservices[i];
+  lambdas.path = arrayUnique(new LambdaExtractor(property).extractWorking(function(lambdaPath) {
+    return fs.existsSync(path.join(lambdaPath, 'package.json'));
+  }));
 
-    for (var j = 0; j < microservice.resources.actions.length; j++) {
-      var microserviceRoute = microservice.resources.actions[j];
+  for (var i in lambdas.path) {
+    if (!lambdas.path.hasOwnProperty(i)) {
+      continue;
+    }
 
-      if (microserviceRoute.type === 'lambda') {
-        lambdaPaths.push(path.join(microservice.autoload.backend, microserviceRoute.source));
+    var lambdaPath = lambdas.path[i];
+    var lambdaTmpPath = path.join(tmp.dirSync().name, Hash.md5(lambdaPath) + '_' + new Date().getTime());
+
+    lambdas.tmpPath.push(lambdaTmpPath);
+  }
+
+  prepareSources.bind(this)(function() {
+    var chain = new NpmChain();
+
+    chain.add(
+      new NpmInstall(lambdas.tmpPath)
+        .addExtraArg('--production')
+    );
+
+    chain.add(
+      new NpmPrune(lambdas.tmpPath)
+        .addExtraArg('--production')
+    );
+
+    chain.runChunk(function() {
+      optimize.bind(this)(function() {
+        pack.bind(this)(function() {
+          lambdas.tmpPath.forEach(function(lambdaTmpPath) {
+            fse.removeSync(lambdaTmpPath);
+          });
+
+          if (removeSource) {
+            lambdas.path.forEach(function(lambdaPath) {
+              fse.removeSync(lambdaPath);
+            });
+          }
+
+          console.log(lambdas.path.length + ' Lambdas were successfully prepared for production');
+        }.bind(this), lambdas);
+      }.bind(this), lambdas);
+    }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE);
+  }.bind(this), lambdas);
+
+  function prepareSources(cb, lambdas) {
+    var wait = new WaitFor();
+    var remaining = lambdas.path.length;
+
+    console.log(lambdas.path.length + ' Lambdas sources are going to be copied...');
+
+    wait.push(function() {
+      return remaining <= 0;
+    }.bind(this));
+
+    wait.ready(cb);
+
+    for (var i in lambdas.path) {
+      if (!lambdas.path.hasOwnProperty(i)) {
+        continue;
       }
+
+      var lambdaPath = lambdas.path[i];
+      var lambdaTmpPath = lambdas.tmpPath[i];
+
+      console.log('Copying Lambda sources from ' + lambdaPath + ' into ' + lambdaTmpPath);
+
+      if (fs.existsSync(lambdaTmpPath)) {
+        fse.removeSync(lambdaTmpPath);
+      }
+
+      fse.copy(lambdaPath, lambdaTmpPath, function(lambdaTmpPath, i, error) {
+        if (error) {
+          console.error(error);
+
+          lambdas.splice(i, 1);
+        } else {
+          var nodeModules = path.join(lambdaTmpPath, 'node_modules');
+
+          if (fs.existsSync(nodeModules)) {
+            fse.removeSync(nodeModules);
+          }
+        }
+
+        remaining--;
+      }.bind(this, lambdaTmpPath, i));
     }
   }
 
-  lambdaPaths = arrayUnique(lambdaPaths);
+  function optimize(cb, lambdas) {
+    var frameworkPaths = [];
 
-  dispatchLambdaPathsChain(chunk(lambdaPaths, 2), function() {
-    console.log('Application Lambdas were successfully prepared for production');
-  }.bind(this));
+    for (var i in lambdas.tmpPath) {
+      if (!lambdas.tmpPath.hasOwnProperty(i)) {
+        continue;
+      }
+
+      var lambdaTmpPath = lambdas.tmpPath[i];
+
+      console.log('Optimizing Lambda code in ' + lambdaTmpPath);
+
+      var depsLister = new NpmListDependencies(lambdaTmpPath);
+      var depsObj = depsLister.list();
+
+      var frameworkVector = depsObj.findAll('deep-framework');
+
+      for (var j in frameworkVector) {
+        if (!frameworkVector.hasOwnProperty(j)) {
+          continue;
+        }
+
+        var depObj = frameworkVector[j];
+        var depPath = depObj.getPath(lambdaTmpPath);
+
+        console.log('Optimizing deep-framework in ' + depPath);
+
+        frameworkPaths.push(depPath);
+      }
+    }
+
+    if (frameworkPaths.length <= 0) {
+      cb();
+      return;
+    }
+
+    var run = new NpmRun(frameworkPaths);
+    run.cmd = 'prepare-for-lambda-usage';
+
+    run.runChunk(cb, NpmInstall.DEFAULT_CHUNK_SIZE);
+  }
+
+  function pack(cb, lambdas) {
+    var wait = new WaitFor();
+    var remaining = lambdas.path.length;
+
+    console.log(lambdas.path.length + ' Lambdas are going to be packed...');
+
+    wait.push(function() {
+      return remaining <= 0;
+    }.bind(this));
+
+    wait.ready(cb);
+
+    for (var i in lambdas.path) {
+      if (!lambdas.path.hasOwnProperty(i)) {
+        continue;
+      }
+
+      var lambdaPath = lambdas.path[i];
+      var lambdaTmpPath = lambdas.tmpPath[i];
+
+      var outputFile = path.join(
+        lambdaPath,
+        '..',
+        path.basename(lambdaPath) + '.zip'
+      );
+
+      console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
+
+      var output = fs.createWriteStream(outputFile);
+      var archive = Archiver('zip');
+
+      output.on('close', function() {
+        remaining--;
+      }.bind(this));
+
+      archive.pipe(output);
+
+      archive
+        .directory(lambdaTmpPath, false)
+        .finalize();
+    }
+  }
 
   function getMicroservicesToDeploy() {
     if (!microservicesToDeploy) {
@@ -59,119 +224,6 @@ module.exports = function(mainPath) {
     }));
 
     return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
-  }
-
-  function prepareBatch(lambdaPaths, cb) {
-    var remaining = lambdaPaths.length;
-
-    var wait = new WaitFor();
-
-    for (var i = 0; i < lambdaPaths.length; i++) {
-      var lambdaPath = lambdaPaths[i];
-
-      npmInstall(lambdaPath, function(lambdaPath) {
-        remaining--;
-      }.bind(this, lambdaPath));
-    }
-
-    wait.push(function() {
-      return remaining <= 0;
-    }.bind(this));
-
-    wait.ready(function() {
-      cb();
-    }.bind(this));
-  }
-
-  function chunk(arr, len) {
-    var chunks = [];
-    var i = 0;
-    var n = arr.length;
-
-    while (i < n) {
-      chunks.push(arr.slice(i, i += len));
-    }
-
-    return chunks;
-  }
-
-  function dispatchLambdaPathsChain(lambdaPathsChunks, cb) {
-    if (lambdaPathsChunks.length <= 0) {
-      cb();
-      return;
-    }
-
-    var batch = lambdaPathsChunks.pop();
-
-    console.log('Running next lambdas build batch: ' + batch.join(', '));
-
-    prepareBatch(batch, function() {
-      dispatchLambdaPathsChain(lambdaPathsChunks, cb);
-    }.bind(this));
-  }
-
-  function npmInstall(lambdaPath, cb) {
-    console.log('Checking for NPM package in ' + lambdaPath);
-
-    var packageFile = path.join(lambdaPath, 'package.json');
-
-    if (fs.existsSync(packageFile)) {
-      console.log('Running "' + installCmd + '" for Lambda ' + lambdaPath);
-
-      var tmpFolder = path.join(tmp.dirSync().name, Hash.md5(lambdaPath));
-
-      fse.ensureDirSync(tmpFolder);
-
-      var cmd =
-        'cp -R ' + path.join(lambdaPath, '*') + ' ' + tmpFolder + '/ &>/dev/null' +
-        '; cd ' + tmpFolder +
-        '; rm -rf ' + path.join(tmpFolder, 'node_modules') +
-        '; ' + installCmd + ' &>/dev/null';
-
-      exec(cmd, function(error) {
-        if (error) {
-          console.error('Failed to run "' + installCmd + '" for Lambda ' + lambdaPath + '. Skipping...');
-        }
-
-        var packageFile = path.join(lambdaPath, 'package.json');
-        var pathName = path.basename(lambdaPath);
-        var outputFile = path.join(lambdaPath, '..', pathName + '.zip');
-
-        var wait = new WaitFor();
-        var ready = false;
-        var output = fs.createWriteStream(outputFile);
-        var archive = Archiver('zip');
-
-        output.on('close', function() {
-          ready = true;
-        }.bind(this));
-
-        wait.push(function() {
-          return ready;
-        }.bind(this));
-
-        archive.pipe(output);
-
-        console.log('Packing Lambda code into ' + outputFile);
-
-        archive
-          .directory(tmpFolder, false)
-          .finalize();
-
-        wait.ready(function() {
-          if (removeSource) {
-            // @todo: replace with native code
-            exec('rm -rf ' + path.join(lambdaPath, '*'));
-          }
-
-          exec('rm -rf ' + tmpFolder);
-
-          cb();
-        }.bind(this));
-      }.bind(this));
-    } else {
-      console.log('No NPM package found in ' + lambdaPath + '. Skipping...');
-    }
   }
 
   function arrayUnique(a) {

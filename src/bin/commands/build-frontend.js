@@ -10,7 +10,6 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var fse = require('fs-extra');
   var os = require('os');
-  var exec = require('child_process').exec;
   var Property = require('deep-package-manager').Property_Instance;
   var Config = require('deep-package-manager').Property_Config;
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;

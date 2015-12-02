@@ -7,14 +7,17 @@
 
 module.exports = function(mainPath) {
   var path = require('path');
-  var spawn = require('child_process').spawn;
+  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
-  var childProcess = spawn(path.join(__dirname, 'bin/compile-es6.sh'), [mainPath]);
-
-  childProcess.stdout.pipe(process.stdout);
-  childProcess.stderr.pipe(process.stderr);
+  new Exec(path.join(__dirname, 'bin/compile-es6.sh'), mainPath)
+    .run(function(result) {
+      if (result.failed) {
+        console.error(result.error);
+        this.exit(1);
+      }
+    }.bind(this), true);
 };
