@@ -67,12 +67,11 @@ module.exports = function(mainPath) {
         )
     );
 
-    // @todo: fix symlinks zip-ing
+    // @todo: Fix broken zip due to symlinks
     //chain.add(
     //  new NpmDedupe(lambdas.tmpPath)
     //    .addExtraArg(
-    //      '--loglevel silent',
-    //      '--production'
+    //      '--loglevel silent'
     //    )
     //);
 
