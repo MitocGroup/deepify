@@ -4,7 +4,7 @@
 
 'use strict';
 
-import {Exec} from './Exec';
+import {Exec} from '../Helpers/Exec';
 
 let _npm = null;
 let _node = null;

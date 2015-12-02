@@ -9,13 +9,12 @@ import {NpmInstall} from './NpmInstall';
 
 export class NpmInstallLibs extends NpmInstall {
   /**
-   * @param {String|String[]} libs
    * @param {*} args
    */
-  constructor(libs, ...args) {
+  constructor(...args) {
     super(...args);
 
-    this._libsPlain = Array.isArray(libs) ? libs.join(' ') : libs;
+    this._libsPlain = null;
     this._global = false;
   }
 
@@ -38,10 +37,29 @@ export class NpmInstallLibs extends NpmInstall {
   }
 
   /**
+   * @param {String|String[]} libs
+   */
+  set libs(libs) {
+    this._libsPlain = Array.isArray(libs) ? libs.join(' ') : libs;
+  }
+
+  /**
    * @returns {String}
    */
   get libsPlain() {
     return this._libsPlain;
+  }
+
+  /**
+   * @param {*} args
+   * @private
+   */
+  _newInstance(...args) {
+    let instance = super._newInstance(...args);
+
+    instance._libsPlain = this._libsPlain;
+
+    return instance;
   }
 
   /**

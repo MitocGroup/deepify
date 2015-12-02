@@ -9,12 +9,18 @@ import {NpmInstall} from './NpmInstall';
 
 export class NpmLink extends NpmInstall {
   /**
-   * @param {String|String[]} libs
    * @param {*} args
    */
-  constructor(libs, ...args) {
+  constructor(...args) {
     super(...args);
 
+    this._libsPlain = null;
+  }
+
+  /**
+   * @param {String|String[]} libs
+   */
+  set libs(libs) {
     this._libsPlain = Array.isArray(libs) ? libs.join(' ') : libs;
   }
 
@@ -23,6 +29,18 @@ export class NpmLink extends NpmInstall {
    */
   get libsPlain() {
     return this._libsPlain;
+  }
+
+  /**
+   * @param {*} args
+   * @private
+   */
+  _newInstance(...args) {
+    let instance = super._newInstance(...args);
+
+    instance._libsPlain = this._libsPlain;
+
+    return instance;
   }
 
   /**

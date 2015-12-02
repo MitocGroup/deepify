@@ -7,10 +7,10 @@
 
 module.exports = function(mainPath) {
   var path = require('path');
+  var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
-  var NpmUpdate = require('../../lib.compiled/NodeJS/NpmUpdate').NpmUpdate;
   var NpmLink = require('../../lib.compiled/NodeJS/NpmLink').NpmLink;
   var Server = require('../../lib.compiled/Server/Instance').Instance;
   var WaitFor = require('deep-package-manager').Helpers_WaitFor;
@@ -71,71 +71,39 @@ module.exports = function(mainPath) {
       server = new Server(property);
       server.profiling = profiling;
 
-      var lambdasToInstall = [];
-      var lambdasToUpdate = [];
-
-      for (var i = 0; i < server.property.microservices.length; i++) {
-        var microservice = server.property.microservices[i];
-
-        for (var j = 0; j < microservice.resources.actions.length; j++) {
-          var microserviceRoute = microservice.resources.actions[j];
-
-          if (microserviceRoute.type === 'lambda') {
-            let lambdaPath = path.join(microservice.autoload.backend, microserviceRoute.source);
-
-            if (fs.existsSync(path.join(lambdaPath, 'node_modules'))) {
-              lambdasToUpdate.push(lambdaPath);
-            } else {
-              lambdasToInstall.push(lambdaPath);
-            }
-          }
-        }
-      }
+      var lambdasToInstall = LambdaExtractor
+        .createFromServer(server)
+        .extract();
 
       runInstallHook(function() {
-        let wait = new WaitFor();
-        let remaining = 2;
-
-        wait.push(function() {
-          return remaining <= 0;
-        }.bind(this));
-
-        let npmInstall = new NpmInstall(lambdasToInstall);
-        let npmUpdate = new NpmUpdate(lambdasToUpdate);
-
         console.log('Running "npm install" on ' + lambdasToInstall.length + ' Lambdas');
-        console.log('Running "npm update" on ' + lambdasToUpdate.length + ' Lambdas');
+
+        var npmInstall = new NpmInstall(lambdasToInstall);
 
         npmInstall.runChunk(function() {
-          remaining--;
-        }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE / 2);
-
-        npmUpdate.runChunk(function() {
-          remaining--;
-        }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE / 2);
-
-        wait.ready(function() {
           if (Bin.npmModuleInstalled('aws-sdk', true)) {
             console.log('Start linking aws-sdk');
 
-            linkAwsSdk(lambdasToInstall.concat(lambdasToUpdate), startServer);
+            linkAwsSdk.bind(this)(lambdasToInstall, startServer);
           } else {
-            let awsSdkInstall = new NpmInstallLibs('aws-sdk');
+            var awsSdkInstall = new NpmInstallLibs();
+            awsSdkInstall.libs = 'aws-sdk';
             awsSdkInstall.global = true;
 
             awsSdkInstall.run(function() {
               console.log('Installing aws-sdk globally');
 
-              linkAwsSdk(lambdasToInstall.concat(lambdasToUpdate), startServer);
+              linkAwsSdk.bind(this)(lambdasToInstall, startServer);
             }.bind(this));
           }
-        }.bind(this));
+        }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE);
       }.bind(this));
     }.bind(this));
   }.bind(this));
 
   function linkAwsSdk(paths, cb) {
-    let npmLink = new NpmLink('aws-sdk', paths);
+    var npmLink = new NpmLink(paths);
+    npmLink.libs = 'aws-sdk';
 
     npmLink.runChunk(function() {
       cb.bind(this)();
@@ -173,12 +141,7 @@ module.exports = function(mainPath) {
       server.buildPath = buildPath;
     }
 
-    server.listen(parseInt(port, 10), dbServer, function(error) {
-      if (error) {
-        console.error(error);
-        this.exit(1);
-      }
-
+    server.listen(parseInt(port, 10), dbServer, function() {
       if (openBrowser) {
         open(serverAddress);
       }

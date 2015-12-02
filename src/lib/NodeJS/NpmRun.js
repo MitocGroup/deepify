@@ -9,12 +9,30 @@ import {NpmInstall} from './NpmInstall';
 
 export class NpmRun extends NpmInstall {
   /**
-   * @param {String} cmd
    * @param {*} args
    */
-  constructor(cmd, ...args) {
+  constructor(...args) {
     super(...args);
 
+    this._cmd = null;
+  }
+
+  /**
+   * @param {*} args
+   * @private
+   */
+  _newInstance(...args) {
+    let instance = super._newInstance(...args);
+
+    instance._cmd = this._cmd;
+
+    return instance;
+  }
+
+  /**
+   * @param {String} cmd
+   */
+  set cmd(cmd) {
     this._cmd = cmd;
   }
 

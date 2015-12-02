@@ -20,6 +20,7 @@ export class Exec {
     this._isExec = false;
     this._devNull = false;
     this._result = null;
+
     this._cwd = process.cwd();
   }
 
@@ -132,7 +133,11 @@ export class Exec {
    * @private
    */
   _spawn(cb) {
-    let proc = ChildProcess.spawn(this._cmd, this._args, {
+    let cmdParts = this._cmd.trim().split(' ');
+    let realCmd = cmdParts.shift();
+    let realArgs = cmdParts.concat(this._args);
+
+    let proc = ChildProcess.spawn(realCmd, realArgs, {
       cwd: this._cwd,
     });
     let uncaughtError = false;
@@ -211,7 +216,7 @@ export class Exec {
    * @private
    */
   get _fullCmd() {
-    return `${this._cmd} ${this._args.join(' ')} ${this._internalCmdSuffix}`;
+    return `${this._cmd} ${this._args.join(' ')} ${this._internalCmdSuffix}`.trim();
   }
 
   /**

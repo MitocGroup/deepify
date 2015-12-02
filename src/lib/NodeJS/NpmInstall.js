@@ -5,7 +5,7 @@
 'use strict';
 
 import {Bin} from './Bin';
-import {Exec} from './Exec';
+import {Exec} from '../Helpers/Exec';
 import {Helpers_WaitFor as WaitFor} from 'deep-package-manager';
 
 export class NpmInstall {
@@ -13,6 +13,11 @@ export class NpmInstall {
    * @param {String|*} dirs
    */
   constructor(...dirs) {
+    // try to make it compatible with ES5
+    if (dirs.length === 1 && Array.isArray(dirs[0])) {
+      dirs = dirs[0];
+    }
+
     this._dirs = dirs;
     this._extraArgs = [];
   }
@@ -50,6 +55,7 @@ export class NpmInstall {
   runChunk(cb, chunkSize = NpmInstall.DEFAULT_CHUNK_SIZE, silent = NpmInstall.DEFAULT_SILENT_STATE) {
     let wait = new WaitFor();
     let remaining = this._dirs.length;
+
     let chunks = NpmInstall._chunkArray(this._dirs, chunkSize);
 
     wait.push(() => {
@@ -62,18 +68,29 @@ export class NpmInstall {
       }
 
       let chunk = chunks[i];
-      let instance = new NpmInstall(chunk);
 
-      instance._extraArgs = this._extraArgs;
+      let instance = this._newInstance(...chunk);
 
       instance.run(() => {
         remaining--;
-      }, !silent);
+      }, silent);
     }
 
     wait.ready(cb);
 
     return this;
+  }
+
+  /**
+   * @param {*} args
+   * @private
+   */
+  _newInstance(...args) {
+    let instance = new this.constructor(...args);
+
+    instance._extraArgs = this._extraArgs;
+
+    return instance;
   }
 
   /**
@@ -128,10 +145,7 @@ export class NpmInstall {
    * @private
    */
   get _execArgs() {
-    let cmd = this._mainCmd;
-    let args = this._extraArgs;
-
-    return [cmd, args];
+    return [this._mainCmd, ...this._extraArgs];
   }
 
   /**
