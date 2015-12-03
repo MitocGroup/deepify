@@ -11,6 +11,7 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
+  var DepsTreeOptimizer = require('../../lib.compiled/NodeJS/DepsTreeOptimizer').DepsTreeOptimizer;
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   var NpmPrune = require('../../lib.compiled/NodeJS/NpmPrune').NpmPrune;
   var NpmDedupe = require('../../lib.compiled/NodeJS/NpmDedupe').NpmDedupe;
@@ -137,6 +138,24 @@ module.exports = function(mainPath) {
 
   function optimize(cb, lambdas) {
     var frameworkPaths = [];
+    var wait = new WaitFor();
+    var remaining = lambdas.tmpPath.length;
+
+    wait.push(function() {
+      return remaining <= 0;
+    }.bind(this));
+
+    wait.ready(function() {
+      if (frameworkPaths.length <= 0) {
+        cb();
+        return;
+      }
+
+      var run = new NpmRun(frameworkPaths);
+      run.cmd = 'prepare-production';
+
+      run.runChunk(cb, NpmInstall.DEFAULT_CHUNK_SIZE);
+    }.bind(this));
 
     for (var i in lambdas.tmpPath) {
       if (!lambdas.tmpPath.hasOwnProperty(i)) {
@@ -146,6 +165,14 @@ module.exports = function(mainPath) {
       var lambdaTmpPath = lambdas.tmpPath[i];
 
       console.log('Optimizing Lambda code in ' + lambdaTmpPath);
+
+      let depsOptimizer = new DepsTreeOptimizer(lambdaTmpPath);
+
+      depsOptimizer.optimize(function(lambdaTmpPath, depsFullNames) {
+        console.log('Flatten dependencies in ' + lambdaTmpPath + ': ' + depsFullNames.join(', '));
+
+        remaining--;
+      }.bind(this), lambdaTmpPath);
 
       var depsLister = new NpmListDependencies(lambdaTmpPath);
       var depsObj = depsLister.list();
@@ -165,16 +192,6 @@ module.exports = function(mainPath) {
         frameworkPaths.push(depPath);
       }
     }
-
-    if (frameworkPaths.length <= 0) {
-      cb();
-      return;
-    }
-
-    var run = new NpmRun(frameworkPaths);
-    run.cmd = 'prepare-production';
-
-    run.runChunk(cb, NpmInstall.DEFAULT_CHUNK_SIZE);
   }
 
   function pack(cb, lambdas) {

@@ -43,10 +43,23 @@ export class NpmDependency {
   }
 
   /**
+   * @returns {String}
+   */
+  get fullName() {
+    return `${this._name}@${this._version}`;
+  }
+
+  /**
    * @param {String} dependencyName
+   * @param {String|null} version
    * @returns {NpmDependency[]}
    */
-  findAll(dependencyName) {
+  findAll(dependencyName, version = null) {
+    let depObj = NpmDependency._resolveFullDepName(dependencyName);
+
+    dependencyName = depObj.name;
+    version = version || depObj.version;
+
     let result = [];
 
     for (let i in this._children) {
@@ -56,11 +69,11 @@ export class NpmDependency {
 
       let child = this._children[i];
 
-      if (child.name === dependencyName) {
+      if (child.name === dependencyName && (!version || child.version === version)) {
         result.push(child);
       }
 
-      result = result.concat(child.findAll(dependencyName));
+      result = result.concat(child.findAll(dependencyName, version));
     }
 
     return result;
@@ -68,9 +81,15 @@ export class NpmDependency {
 
   /**
    * @param {String} dependencyName
+   * @param {String|null} version
    * @returns {NpmDependency|null}
    */
-  find(dependencyName) {
+  find(dependencyName, version = null) {
+    let depObj = NpmDependency._resolveFullDepName(dependencyName);
+
+    dependencyName = depObj.name;
+    version = version || depObj.version;
+
     for (let i in this._children) {
       if (!this._children.hasOwnProperty(i)) {
         continue;
@@ -78,7 +97,7 @@ export class NpmDependency {
 
       let child = this._children[i];
 
-      if (child.name === dependencyName) {
+      if (child.name === dependencyName && (!version || child.version === version)) {
         return child;
       }
     }
@@ -90,7 +109,7 @@ export class NpmDependency {
 
       let child = this._children[i];
 
-      let dep = child.find(dependencyName);
+      let dep = child.find(dependencyName, version);
 
       if (dep) {
         return dep;
@@ -98,6 +117,39 @@ export class NpmDependency {
     }
 
     return null;
+  }
+
+  /**
+   * @param {String} dependencyName
+   * @returns {{name: *, version: *}}
+   * @private
+   */
+  static _resolveFullDepName(dependencyName) {
+    let parts = (dependencyName || '').split('@');
+
+    return {
+      name: parts[0],
+      version: parts.length > 1 ? parts[1] : null,
+    };
+  }
+
+  /**
+   * @param {String} rootPath
+   * @returns {String}
+   */
+  getModulesPath(rootPath = '') {
+    return path.join(rootPath, NpmDependency.NODE_MODULES_DIR);
+  }
+
+  /**
+   * @param {String} rootPath
+   * @param {Boolean} skipMain
+   * @returns {String}
+   */
+  getPackagePath(rootPath = '', skipMain = true) {
+    let mainPath = this.getPath(rootPath, skipMain);
+
+    return path.join(mainPath, 'package.json');
   }
 
   /**
@@ -116,7 +168,7 @@ export class NpmDependency {
 
     return path.join(
       this._parent.getPath(rootPath),
-      'node_modules',
+      NpmDependency.NODE_MODULES_DIR,
       this._name
     );
   }
@@ -194,5 +246,12 @@ export class NpmDependency {
     }
 
     return mainDep;
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get NODE_MODULES_DIR() {
+    return 'node_modules';
   }
 }
