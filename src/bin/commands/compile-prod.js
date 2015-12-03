@@ -75,18 +75,20 @@ module.exports = function(mainPath) {
 
     chain.runChunk(function() {
       optimize.bind(this)(function() {
-        pack.bind(this)(function() {
-          lambdas.tmpPath.forEach(function(lambdaTmpPath) {
-            fse.removeSync(lambdaTmpPath);
-          });
-
-          if (removeSource) {
-            lambdas.path.forEach(function(lambdaPath) {
-              fse.removeSync(lambdaPath);
+        optimizeDeps.bind(this)(function() {
+          pack.bind(this)(function() {
+            lambdas.tmpPath.forEach(function(lambdaTmpPath) {
+              fse.removeSync(lambdaTmpPath);
             });
-          }
 
-          console.log(lambdas.path.length + ' Lambdas were successfully prepared for production');
+            if (removeSource) {
+              lambdas.path.forEach(function(lambdaPath) {
+                fse.removeSync(lambdaPath);
+              });
+            }
+
+            console.log(lambdas.path.length + ' Lambdas were successfully prepared for production');
+          }.bind(this), lambdas);
         }.bind(this), lambdas);
       }.bind(this), lambdas);
     }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE);
@@ -136,26 +138,8 @@ module.exports = function(mainPath) {
     }
   }
 
-  function optimize(cb, lambdas) {
+  function optimize(cb, lambdas, final) {
     var frameworkPaths = [];
-    var wait = new WaitFor();
-    var remaining = lambdas.tmpPath.length;
-
-    wait.push(function() {
-      return remaining <= 0;
-    }.bind(this));
-
-    wait.ready(function() {
-      if (frameworkPaths.length <= 0) {
-        cb();
-        return;
-      }
-
-      var run = new NpmRun(frameworkPaths);
-      run.cmd = 'prepare-production';
-
-      run.runChunk(cb, NpmInstall.DEFAULT_CHUNK_SIZE);
-    }.bind(this));
 
     for (var i in lambdas.tmpPath) {
       if (!lambdas.tmpPath.hasOwnProperty(i)) {
@@ -166,13 +150,21 @@ module.exports = function(mainPath) {
 
       console.log('Optimizing Lambda code in ' + lambdaTmpPath);
 
-      let depsOptimizer = new DepsTreeOptimizer(lambdaTmpPath);
+      if (final) {
+        let lambdaPackage = fse.readJsonSync(
+          path.join(lambdaTmpPath, 'package.json')
+        );
 
-      depsOptimizer.optimize(function(lambdaTmpPath, depsFullNames) {
-        console.log('Flatten dependencies in ' + lambdaTmpPath + ': ' + depsFullNames.join(', '));
+        if (lambdaPackage.dependencies
+          && lambdaPackage.dependencies.hasOwnProperty('deep-framework')) {
 
-        remaining--;
-      }.bind(this), lambdaTmpPath);
+          let frameworkPath = lambdaPackage.dependencies['deep-framework'];
+
+          frameworkPaths.push(path.join(lambdaTmpPath, frameworkPath));
+        }
+
+        continue;
+      }
 
       var depsLister = new NpmListDependencies(lambdaTmpPath);
       var depsObj = depsLister.list();
@@ -192,6 +184,47 @@ module.exports = function(mainPath) {
         frameworkPaths.push(depPath);
       }
     }
+
+    if (frameworkPaths.length <= 0) {
+      cb();
+      return;
+    }
+
+    var run = new NpmRun(frameworkPaths);
+    run.cmd = final ? 'final-prepare-production' : 'prepare-production';
+
+    run.runChunk(cb, NpmInstall.DEFAULT_CHUNK_SIZE);
+  }
+
+  function optimizeDeps(cb, lambdas) {
+    var wait = new WaitFor();
+    var remaining = lambdas.tmpPath.length;
+
+    wait.push(function() {
+      return remaining <= 0;
+    }.bind(this));
+
+    for (var i in lambdas.tmpPath) {
+      if (!lambdas.tmpPath.hasOwnProperty(i)) {
+        continue;
+      }
+
+      var lambdaTmpPath = lambdas.tmpPath[i];
+
+      console.log('Optimizing Lambda dependencies in ' + lambdaTmpPath);
+
+      let depsOptimizer = new DepsTreeOptimizer(lambdaTmpPath);
+
+      depsOptimizer.optimize(function(lambdaTmpPath, depsFullNames) {
+        console.log('Flatten dependencies in ' + lambdaTmpPath + ': ' + depsFullNames.join(', '));
+
+        remaining--;
+      }.bind(this, lambdaTmpPath));
+    }
+
+    wait.ready(function() {
+      optimize.bind(this)(cb, lambdas, true);
+    }.bind(this));
   }
 
   function pack(cb, lambdas) {

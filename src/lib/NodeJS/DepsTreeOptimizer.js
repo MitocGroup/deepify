@@ -31,12 +31,9 @@ export class DepsTreeOptimizer {
    * @returns {DepsTreeOptimizer}
    */
   optimize(cb) {
-    this.lockDeps((lockedDepsRawObject) => {
-      if (!lockedDepsRawObject) {
-        throw new Error(`Broken shrinkwrap file`);
-      }
+    this._lockDeps((lockedDepsRawObject) => {
+      let mainDep = NpmDependency.createFromRawObject(lockedDepsRawObject);
 
-      let mainDep = NpmDependency.createFromRawObject(lockedDepsRawObject, true);
       let depsFullNames = this._depsCopyFlatten(mainDep);
 
       for (let i in depsFullNames) {
@@ -62,6 +59,9 @@ export class DepsTreeOptimizer {
         }
       }
 
+      fse.removeSync(mainDep.getModulesPath(this._path));
+      fse.removeSync(this._shrinkwrapConfig);
+
       cb(depsFullNames);
     });
 
@@ -74,25 +74,32 @@ export class DepsTreeOptimizer {
    * @private
    */
   _injectFinalDep(dep, depFinalPath) {
-    let depPackagePath = dep.getPackagePath(this._path);
-    let depName = dep.name;
-
     if (!dep.parent) {
       throw new Error(`Unable to identify ${dep.fullName} usage`);
     }
 
-    let packageObj = fse.readJSONSync(depPackagePath);
+    // o_O some weird stuff...
+    if (dep.fullName === dep.parent.fullName) {
+      return;
+    }
+
+    let finalPkgPath = dep.parent.isMain
+      ? dep.parent.getPath(this._path)
+      : this._getFinalPkgPath(dep.parent.fullName);
+
+    let depPackagePath = path.join(finalPkgPath, 'package.json');
+    let depName = dep.name;
+
+    let packageObj = fse.readJsonSync(depPackagePath);
 
     if (!packageObj.dependencies ||
       !packageObj.dependencies.hasOwnProperty(depName)) {
-      throw new Error(`Missing ${dep.fullName} in ${dep.fullName} package`);
+      return;
     }
 
-    let depRealPath = dep.parent.getPath(this._path);
+    packageObj.dependencies[depName] = `./${this._getRelativeFinalPath(depFinalPath, finalPkgPath)}`;
 
-    packageObj.dependencies[depName] = `file:${this._getRelativeFinalPath(depFinalPath, depRealPath)}`;
-
-    fs.outputJsonSync(depPackagePath, packageObj);
+    fse.outputJsonSync(depPackagePath, packageObj);
   }
 
   /**
@@ -102,7 +109,7 @@ export class DepsTreeOptimizer {
    * @private
    */
   _getRelativeFinalPath(depFinalPath, depRealPath) {
-    return path.relative(depFinalPath, depRealPath);
+    return path.relative(depRealPath, depFinalPath);
   }
 
   /**
@@ -126,9 +133,8 @@ export class DepsTreeOptimizer {
       let pkgPath = depsFlattenObj[pkgFullName];
       let pkgFinalPath = this._getFinalPkgPath(pkgFullName);
 
-      fse.ensureDirSync(pkgFinalPath);
-      fse.copy(pkgPath, pkgFinalPath);
-      fse.removeSync(pkgPath);
+      fse.copySync(pkgPath, pkgFinalPath);
+      fse.removeSync(path.join(pkgFinalPath, NpmDependency.NODE_MODULES_DIR));
     }
 
     return depsFullNames;
@@ -151,8 +157,10 @@ export class DepsTreeOptimizer {
   _getDepsFlatten(dep) {
     let depsFlattenObj = {};
 
-    depsFlattenObj[dep.fullName] = dep.getPath(this._path);
-console.log(dep.fullName, dep.getPath(this._path));//@todo:remove
+    if (!dep.isMain) {
+      depsFlattenObj[dep.fullName] = dep.getPath(this._path);
+    }
+
     if (dep.hasChildren) {
       for (let i in dep.children) {
         if (!dep.children.hasOwnProperty(i)) {
@@ -180,13 +188,11 @@ console.log(dep.fullName, dep.getPath(this._path));//@todo:remove
    * @param {Function} cb
    * @returns {DepsTreeOptimizer}
    */
-  lockDeps(cb) {
+  _lockDeps(cb) {
     let locker = new NpmShrinkwrap(this._path);
 
     locker.run(() => {
-      let lockedDepsRawObject = this._readShrinkwrapFile();
-
-      cb(lockedDepsRawObject);
+      cb(this._readShrinkwrapFile());
     });
 
     return this;
@@ -197,13 +203,15 @@ console.log(dep.fullName, dep.getPath(this._path));//@todo:remove
    * @private
    */
   _readShrinkwrapFile() {
-    let file = path.join(this._path, DepsTreeOptimizer.SHRINKWRAP_FILE);
+    return fse.readJsonSync(this._shrinkwrapConfig);
+  }
 
-    if (!fs.existsSync(file)) {
-      return null;
-    }
-
-    return fse.readJSONSync(file);
+  /**
+   * @returns {String}
+   * @private
+   */
+  get _shrinkwrapConfig() {
+    return path.join(this._path, DepsTreeOptimizer.SHRINKWRAP_FILE);
   }
 
   /**
