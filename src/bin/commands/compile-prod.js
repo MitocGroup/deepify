@@ -67,14 +67,6 @@ module.exports = function(mainPath) {
         )
     );
 
-    // @todo: Fix broken zip due to symlinks
-    //chain.add(
-    //  new NpmDedupe(lambdas.tmpPath)
-    //    .addExtraArg(
-    //      '--loglevel silent'
-    //    )
-    //);
-
     chain.add(
       new NpmPrune(lambdas.tmpPath)
         .addExtraArg('--production')
@@ -180,7 +172,7 @@ module.exports = function(mainPath) {
     }
 
     var run = new NpmRun(frameworkPaths);
-    run.cmd = 'prepare-for-lambda-usage';
+    run.cmd = 'prepare-production';
 
     run.runChunk(cb, NpmInstall.DEFAULT_CHUNK_SIZE);
   }
