@@ -77,7 +77,7 @@ export class DepsTreeOptimizer {
             }
           }
 
-          fse.removeSync(mainDep.getModulesPath(this._path));
+          fse.removeSync(mainDep.getModulesPath());
           fse.removeSync(this._shrinkwrapConfig);
 
           this._dumpDependencies();
@@ -190,7 +190,7 @@ export class DepsTreeOptimizer {
         continue;
       }
 
-      let pkgPath = depsFlattenObj[pkgFullName];
+      let pkgPath = this._findPkgDownTree(depsFlattenObj[pkgFullName]);
       let pkgFinalPath = this._getFinalPkgPath(pkgFullName);
 
       fse.copySync(pkgPath, pkgFinalPath);
@@ -198,6 +198,82 @@ export class DepsTreeOptimizer {
     }
 
     return depsFullNames;
+  }
+
+  /**
+   * @param {String} pkgPath
+   * @param {String|null} initialPkgPath
+   * @returns {String}
+   * @private
+   */
+  _findPkgDownTree(pkgPath, initialPkgPath= null) {
+    if (fs.existsSync(pkgPath)) {
+      return pkgPath;
+    }
+
+    initialPkgPath = initialPkgPath || pkgPath;
+
+    let resolvedPath = path.normalize(this._path);
+    let pkgName = path.basename(pkgPath);
+    let downPath = path.normalize(
+      path.join(pkgPath, '..', '..', '..')
+    );
+
+    if (downPath.length < resolvedPath.length ||
+      path.basename(downPath) !== NpmDependency.NODE_MODULES_DIR) {
+
+      throw new Error(
+        `Missing package in the deps tree: ${initialPkgPath} ---> ${pkgPath}`
+      );
+    }
+
+    let matchedPkgPath = this._findPkgUpperTheTree(downPath, pkgName);
+
+    if (matchedPkgPath) {
+      return matchedPkgPath;
+    }
+
+    return this._findPkgDownTree(path.join(downPath, pkgName), initialPkgPath);
+  }
+
+  /**
+   * @param {String} upperPath
+   * @param {String} pkgName
+   * @returns {String}
+   * @private
+   */
+  _findPkgUpperTheTree(upperPath, pkgName) {
+    let pkgPath = path.join(upperPath, pkgName);
+
+    if (fs.existsSync(pkgPath)) {
+      return pkgPath;
+    }
+
+    if (!fs.existsSync(upperPath)) {
+      return null;
+    }
+
+    let upperPkgVector = fs.readdirSync(upperPath);
+
+    for (let i in upperPkgVector) {
+      if (!upperPkgVector.hasOwnProperty(i)) {
+        continue;
+      }
+
+      let upperPkgName = upperPkgVector[i];
+
+      let upperPkgPath = path.join(upperPath, upperPkgName, NpmDependency.NODE_MODULES_DIR);
+
+      if (fs.existsSync(upperPkgPath)) {
+        let matchedPath = this._findPkgUpperTheTree(upperPkgPath, pkgName);
+
+        if (matchedPath) {
+          return matchedPath;
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
