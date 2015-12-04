@@ -21,6 +21,21 @@ export class NpmDependency {
     this._parent = null;
     this._children = [];
     this._isMain = isMain;
+    this._defaultRootPath = '';
+  }
+
+  /**
+   * @returns {String}
+   */
+  get defaultRootPath() {
+    return this._defaultRootPath;
+  }
+
+  /**
+   * @param {String} path
+   */
+  set defaultRootPath(path) {
+    this._defaultRootPath = path;
   }
 
   /**
@@ -198,10 +213,34 @@ export class NpmDependency {
   }
 
   /**
+   * @returns {NpmDependency}
+   */
+  removeUndefined() {
+    for (let i in this._children) {
+      if (!this._children.hasOwnProperty(i)) {
+        continue;
+      }
+
+      let childDep = this._children[i];
+
+      if (!childDep.version || childDep.version === 'undefined') {
+        delete this._children[i];
+        continue;
+      }
+
+      childDep.removeUndefined();
+    }
+
+    return this;
+  }
+
+  /**
    * @param {String} rootPath
    * @returns {String}
    */
   getModulesPath(rootPath = '') {
+    rootPath = rootPath || this._defaultRootPath;
+
     return path.join(rootPath, NpmDependency.NODE_MODULES_DIR);
   }
 
@@ -211,6 +250,8 @@ export class NpmDependency {
    * @returns {String}
    */
   getPackagePath(rootPath = '', skipMain = true) {
+    rootPath = rootPath || this._defaultRootPath;
+
     let mainPath = this.getPath(rootPath, skipMain);
 
     return path.join(mainPath, 'package.json');
@@ -222,6 +263,8 @@ export class NpmDependency {
    * @returns {String}
    */
   getPath(rootPath = '', skipMain = true) {
+    rootPath = rootPath || this._defaultRootPath;
+
     if (skipMain && this._isMain) {
       return rootPath;
     }

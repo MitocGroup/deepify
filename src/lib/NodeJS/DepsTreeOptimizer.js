@@ -33,18 +33,17 @@ export class DepsTreeOptimizer {
 
   /**
    * @param {Function} cb
-   * @param {String} bootstrapFile
    * @returns {DepsTreeOptimizer}
    */
-  optimize(cb, bootstrapFile = DepsTreeOptimizer.BOOTSTRAP_FILE) {
+  optimize(cb) {
     this._lockDeps((lockedDepsRawObject) => {
       let mainDep = NpmDependency.createFromRawObject(lockedDepsRawObject);
+      mainDep.defaultRootPath = this._path;
 
       //@todo: remove when shrinkwrap dump file fixed
       new UndefinedDepsResolver(mainDep)
         .resolve(() => {
-          console.log(mainDep.toString());//@todo:Remove
-          process.exit(0);//@todo:Remove
+          mainDep.removeUndefined();
 
           let depsFullNames = this._depsCopyFlatten(mainDep);
           let tweakedModules = {};

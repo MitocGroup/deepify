@@ -12,10 +12,11 @@ let _cache = {};
 
 export class PackageVersionResolver {
   /**
+   * @param {String} packagePath
    * @param {String} name
    * @param {String} version
    */
-  constructor(name, version = null) {
+  constructor(packagePath, name, version = null) {
     if (!version) {
       let parts = name.split('@');
 
@@ -25,8 +26,16 @@ export class PackageVersionResolver {
       }
     }
 
+    this._packagePath = packagePath;
     this._name = name;
     this._version = version;
+  }
+
+  /**
+   * @returns {String}
+   */
+  get packagePath() {
+    return this._packagePath;
   }
 
   /**
@@ -45,29 +54,64 @@ export class PackageVersionResolver {
 
   /**
    * @param {Function} cb
+   * @param {Boolean} async
    * @returns {PackageVersionResolver}
    */
-  resolve(cb) {
+  resolve(cb, async = true) {
     if (_cache.hasOwnProperty(this._fullName)) {
-      cb(_cache[this._fullName]);
+      cb(null, _cache[this._fullName]);
       return this;
     }
 
     let cmd = new Exec(this._command);
+    cmd.cwd = this._packagePath;
 
-    cmd.avoidBufferOverflow();
+    if (!async) {
+      this._dispatch(cb, cmd.runSync());
+
+      return this;
+    }
+
     cmd.run((result) => {
-      if (result.failed) {
-        cb(result.error, null);
-        return;
-      }
-
-      _cache[this._fullName] = result.result;
-
-      cb(null, _cache[this._fullName]);
+      this._dispatch(cb, result);
     });
 
     return this;
+  }
+
+  /**
+   * @param {Function} cb
+   * @param {Exec} result
+   * @private
+   */
+  _dispatch(cb, result) {
+    if (result.failed) {
+      cb(result.error, null);
+      return;
+    }
+
+    let rawInfo = result.result;
+    let info = JSON.parse(rawInfo);
+
+    if (!info || !info.hasOwnProperty('dependencies')) {
+      cb(new Error(`Broken package version JSON object: ${rawInfo}`), null);
+      return;
+    }
+
+    let tmpDeps = info.dependencies;
+
+    while(true) {
+      let firstD = tmpDeps[Object.keys(tmpDeps).shift()];
+
+      if (firstD.hasOwnProperty('dependencies')) {
+        tmpDeps = firstD.dependencies;
+      } else {
+        _cache[this._fullName] = firstD.version;
+        break;
+      }
+    }
+
+    cb(null, _cache[this._fullName]);
   }
 
   /**
@@ -75,7 +119,7 @@ export class PackageVersionResolver {
    * @private
    */
   get _command() {
-    return `${Bin.npm} view ${this._fullName} | sed -n 1p`;
+    return `${Bin.npm} ls --loglevel silent --json ${this._fullName}`;
   }
 
   /**

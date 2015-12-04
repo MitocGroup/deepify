@@ -21,6 +21,8 @@ export class UndefinedDepsResolver {
 
     this._mainDep = mainDep;
     this._undefinedStack = [];
+    this._cloneShadow = {};
+    this._resolvedStack = {};
   }
 
   /**
@@ -45,6 +47,34 @@ export class UndefinedDepsResolver {
     });
 
     wait.ready(() => {
+      for (let shadowKey in this._cloneShadow) {
+        if (!this._cloneShadow.hasOwnProperty(shadowKey)) {
+          continue;
+        }
+
+        if (!this._resolvedStack.hasOwnProperty(shadowKey)) {
+          continue;
+        }
+
+        let shadowStack = this._cloneShadow[shadowKey];
+
+        for (let i in shadowStack) {
+          if (!shadowStack.hasOwnProperty(i)) {
+            continue;
+          }
+
+          let shadowDep = shadowStack[i];
+          let suitableDep = this._mainDep.find(shadowDep.name, this._resolvedStack[shadowKey]);
+
+          // @todo: set through an setter
+          shadowDep._version = suitableDep.version;
+          this._cloneChildrenStack(suitableDep, shadowDep);
+        }
+      }
+
+      this._cloneShadow = {};
+      this._resolvedStack = {};
+
       cb();
     });
 
@@ -55,28 +85,32 @@ export class UndefinedDepsResolver {
 
       let undefinedDep = this._undefinedStack[i];
 
-      new PackageVersionResolver(undefinedDep.name, undefinedDep.requestedVersion)
+      new PackageVersionResolver(this._mainDep.defaultRootPath, undefinedDep.name, undefinedDep.requestedVersion)
         .resolve((error, resolvedVersion) => {
           if (error) {
-            throw error;
+            remaining--;
+            return;
           }
 
           let suitableDep = this._mainDep.find(undefinedDep.name, resolvedVersion);
+          let shadowKey = `${undefinedDep.name}@${undefinedDep.requestedVersion}`;
 
           if (!suitableDep) {
-            let fullVersion = `${undefinedDep.name}@${undefinedDep.requestedVersion}`;
             let resolvedFullName = `${undefinedDep.name}@${resolvedVersion}`;
 
             throw new Error(
-              `Unable to find suitable dep for ${fullVersion} resolved into ${resolvedFullName}`
+              `Unable to find suitable dep for ${shadowKey} resolved into ${resolvedFullName}`
             );
           }
 
           // @todo: set through an setter
           undefinedDep._version = suitableDep.version;
+          this._cloneChildrenStack(suitableDep, undefinedDep);
 
-          UndefinedDepsResolver._cloneChildrenStack(suitableDep, undefinedDep);
-        });
+          this._resolvedStack[shadowKey] = resolvedVersion;
+
+          remaining--;
+        }, false /* @todo: set this to async by default? */);
     }
 
     return this;
@@ -87,7 +121,7 @@ export class UndefinedDepsResolver {
    * @param {NpmDependency} parentDep
    * @private
    */
-  static _cloneChildrenStack(suitableDep, parentDep) {
+  _cloneChildrenStack(suitableDep, parentDep) {
     for (let i in suitableDep.children) {
       if (!suitableDep.children.hasOwnProperty(i)) {
         continue;
@@ -97,10 +131,20 @@ export class UndefinedDepsResolver {
       let clonedDep = new NpmDependency(childDep.name, childDep.version, childDep.isMain);
       clonedDep.requestedVersion = childDep.requestedVersion;
 
-      UndefinedDepsResolver._cloneChildrenStack(childDep, clonedDep);
+      this._cloneChildrenStack(childDep, clonedDep);
 
       parentDep.addChild(clonedDep);
       clonedDep.parent = parentDep;
+
+      if (!clonedDep.version || clonedDep.version === 'undefined') {
+        let shadowKey = `${clonedDep.name}@${clonedDep.requestedVersion}`;
+
+        if (!this._cloneShadow.hasOwnProperty(shadowKey)) {
+          this._cloneShadow[shadowKey] = [];
+        }
+
+        this._cloneShadow[shadowKey].push(clonedDep);
+      }
     }
   }
 
@@ -125,7 +169,7 @@ export class UndefinedDepsResolver {
         continue;
       }
 
-      this._tryResolveUndefined(this.children[i]);
+      this._tryResolveUndefined(dep.children[i]);
     }
 
     return this;
