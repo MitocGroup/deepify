@@ -10,6 +10,9 @@ import fse from 'fs-extra';
 import {NpmShrinkwrap} from './NpmShrinkwrap';
 import {NpmDependency} from './NpmDependency';
 import {_extend as extend} from 'util';
+import {Exec} from '../Helpers/Exec';
+import gatherDependencies from 'gather-dependencies';
+import {UndefinedDepsResolver} from './UndefinedDepsResolver';
 
 export class DepsTreeOptimizer {
   /**
@@ -17,6 +20,8 @@ export class DepsTreeOptimizer {
    */
   constructor(path) {
     this._path = path;
+
+    this._packageCache = {};
   }
 
   /**
@@ -28,59 +33,112 @@ export class DepsTreeOptimizer {
 
   /**
    * @param {Function} cb
+   * @param {String} bootstrapFile
    * @returns {DepsTreeOptimizer}
    */
-  optimize(cb) {
+  optimize(cb, bootstrapFile = DepsTreeOptimizer.BOOTSTRAP_FILE) {
     this._lockDeps((lockedDepsRawObject) => {
       let mainDep = NpmDependency.createFromRawObject(lockedDepsRawObject);
 
-      let depsFullNames = this._depsCopyFlatten(mainDep);
+      //@todo: remove when shrinkwrap dump file fixed
+      new UndefinedDepsResolver(mainDep)
+        .resolve(() => {
+          console.log(mainDep.toString());//@todo:Remove
+          process.exit(0);//@todo:Remove
 
-      for (let i in depsFullNames) {
-        if (!depsFullNames.hasOwnProperty(i)) {
-          continue;
-        }
+          let depsFullNames = this._depsCopyFlatten(mainDep);
+          let tweakedModules = {};
 
-        let depFullName = depsFullNames[i];
-        let depsVector = mainDep.findAll(depFullName);
-
-        if (depsVector.length > 0) {
-          let depFinalPath = this._getFinalPkgPath(depFullName);
-
-          for (let j in depsVector) {
-            if (!depsVector.hasOwnProperty(j)) {
+          for (let i in depsFullNames) {
+            if (!depsFullNames.hasOwnProperty(i)) {
               continue;
             }
 
-            let dep = depsVector[j];
+            let depFullName = depsFullNames[i];
+            let depsVector = mainDep.findAll(depFullName);
 
-            this._injectFinalDep(dep, depFinalPath);
+            if (depsVector.length > 0) {
+              let depFinalPath = this._getFinalPkgPath(depFullName);
+
+              for (let j in depsVector) {
+                if (!depsVector.hasOwnProperty(j)) {
+                  continue;
+                }
+
+                let dep = depsVector[j];
+
+                if (this._injectFinalDep(dep, depFinalPath) && !dep.parent.isMain) {
+                  if (!tweakedModules.hasOwnProperty(depFullName)) {
+                    tweakedModules[depFullName] = [];
+                  }
+
+                  tweakedModules[depFullName].push(dep.parent.fullName);
+                }
+              }
+            }
           }
-        }
-      }
 
-      fse.removeSync(mainDep.getModulesPath(this._path));
-      fse.removeSync(this._shrinkwrapConfig);
+          fse.removeSync(mainDep.getModulesPath(this._path));
+          fse.removeSync(this._shrinkwrapConfig);
 
-      cb(depsFullNames);
+          this._dumpDependencies();
+
+          cb(depsFullNames);
+        });
     });
 
     return this;
   }
 
   /**
+   * @private
+   */
+  _dumpDependencies() {
+    for (let depPackagePath in this._packageCache) {
+      if (!this._packageCache.hasOwnProperty(depPackagePath)) {
+        continue;
+      }
+
+      let packageObj = this._packageCache[depPackagePath];
+
+      if (packageObj.hasOwnProperty('dependencies')) {
+        let nodeModulesPath = path.join(path.dirname(depPackagePath), NpmDependency.NODE_MODULES_DIR);
+
+        fse.ensureDirSync(nodeModulesPath);
+
+        for (let depName in packageObj.dependencies) {
+          if (!packageObj.dependencies.hasOwnProperty(depName)) {
+            continue;
+          }
+
+          let depLocalPath = packageObj.dependencies[depName];
+
+          let linkCmd = new Exec('ln -s', path.join('..', depLocalPath), depName);
+          linkCmd.cwd = nodeModulesPath;
+
+          let result = linkCmd.runSync();
+
+          if (result.failed) {
+            throw new Error(result.error);
+          }
+        }
+      }
+
+      fse.outputJsonSync(depPackagePath, packageObj);
+    }
+
+    this._packageCache = {};
+  }
+
+  /**
    * @param {NpmDependency} dep
    * @param {String} depFinalPath
+   * @returns {Boolean}
    * @private
    */
   _injectFinalDep(dep, depFinalPath) {
     if (!dep.parent) {
       throw new Error(`Unable to identify ${dep.fullName} usage`);
-    }
-
-    // o_O some weird stuff...
-    if (dep.fullName === dep.parent.fullName) {
-      return;
     }
 
     let finalPkgPath = dep.parent.isMain
@@ -90,16 +148,19 @@ export class DepsTreeOptimizer {
     let depPackagePath = path.join(finalPkgPath, 'package.json');
     let depName = dep.name;
 
-    let packageObj = fse.readJsonSync(depPackagePath);
+    let packageObj = null;
 
-    if (!packageObj.dependencies ||
-      !packageObj.dependencies.hasOwnProperty(depName)) {
-      return;
+    if (!this._packageCache.hasOwnProperty(depPackagePath)) {
+      packageObj = fse.readJsonSync(depPackagePath);
+
+      this._packageCache[depPackagePath] = packageObj;
+    } else {
+      packageObj = this._packageCache[depPackagePath];
     }
 
     packageObj.dependencies[depName] = `./${this._getRelativeFinalPath(depFinalPath, finalPkgPath)}`;
 
-    fse.outputJsonSync(depPackagePath, packageObj);
+    return true;
   }
 
   /**
@@ -192,7 +253,17 @@ export class DepsTreeOptimizer {
     let locker = new NpmShrinkwrap(this._path);
 
     locker.run(() => {
-      cb(this._readShrinkwrapFile());
+      // @todo: fix missing deps (need all of them!)
+      //cb(this._readShrinkwrapFile());
+
+      // @todo: remove when fixed the issue above
+      gatherDependencies(this._path, (error, data) => {
+        if (error) {
+          throw error;
+        }
+
+        cb(data);
+      });
     });
 
     return this;

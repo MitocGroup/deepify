@@ -5,6 +5,7 @@
 'use strict';
 
 import path from 'path';
+import os from 'os';
 
 export class NpmDependency {
   /**
@@ -15,10 +16,25 @@ export class NpmDependency {
   constructor(name, version, isMain = false) {
     this._name = name;
     this._version = version;
+    this._requestedVersion = version;
 
     this._parent = null;
     this._children = [];
     this._isMain = isMain;
+  }
+
+  /**
+   * @param {String} version
+   */
+  set requestedVersion(version) {
+    this._requestedVersion = version;
+  }
+
+  /**
+   * @returns {String}
+   */
+  get requestedVersion() {
+    return this._requestedVersion;
   }
 
   /**
@@ -51,7 +67,7 @@ export class NpmDependency {
 
   /**
    * @param {String} dependencyName
-   * @param {String|null} version
+   * @param {String|RegExp|null} version
    * @returns {NpmDependency[]}
    */
   findAll(dependencyName, version = null) {
@@ -69,7 +85,8 @@ export class NpmDependency {
 
       let child = this._children[i];
 
-      if (child.name === dependencyName && (!version || child.version === version)) {
+      if (child.name === dependencyName &&
+        NpmDependency._matchVersion(version, child.version)) {
         result.push(child);
       }
 
@@ -80,8 +97,36 @@ export class NpmDependency {
   }
 
   /**
+   * @param {NpmDependency[]} depsVector
    * @param {String} dependencyName
-   * @param {String|null} version
+   * @param {String} version
+   * @returns {NpmDependency|null}
+   */
+  static matchInVector(depsVector, dependencyName, version = null) {
+    let depObj = NpmDependency._resolveFullDepName(dependencyName);
+
+    dependencyName = depObj.name;
+    version = version || depObj.version;
+
+    for (let i in depsVector) {
+      if (!depsVector.hasOwnProperty(i)) {
+        continue;
+      }
+
+      let dep = depsVector[i];
+
+      if (dep.name === dependencyName &&
+        NpmDependency._matchVersion(version, dep.version)) {
+        return dep;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @param {String} dependencyName
+   * @param {String|RegExp|null} version
    * @returns {NpmDependency|null}
    */
   find(dependencyName, version = null) {
@@ -97,7 +142,8 @@ export class NpmDependency {
 
       let child = this._children[i];
 
-      if (child.name === dependencyName && (!version || child.version === version)) {
+      if (child.name === dependencyName &&
+        NpmDependency._matchVersion(version, child.version)) {
         return child;
       }
     }
@@ -117,6 +163,24 @@ export class NpmDependency {
     }
 
     return null;
+  }
+
+  /**
+   * @param {String|RegExp|null} version
+   * @param {String} pkgVersion
+   * @returns {Boolean}
+   * @private
+   */
+  static _matchVersion(version, pkgVersion) {
+    pkgVersion = pkgVersion || '';
+
+    if (!version) {
+      return true;
+    } else if(version instanceof RegExp) {
+      return version.test(pkgVersion);
+    }
+
+    return version === pkgVersion;
   }
 
   /**
@@ -223,13 +287,15 @@ export class NpmDependency {
       isMain === null ? true : isMain
     );
 
+    if (rawDepsObject.hasOwnProperty('requestedVersion')) {
+      mainDep.requestedVersion = rawDepsObject.requestedVersion;
+    }
+
     if (mainDep.isMain && isMain === null) {
       isMain = false;
     }
 
-    if (rawDepsObject.hasOwnProperty('dependencies') &&
-      typeof rawDepsObject.dependencies === 'object') {
-
+    if (rawDepsObject.hasOwnProperty('dependencies')) {
       for (let depName in rawDepsObject.dependencies) {
         if (!rawDepsObject.dependencies.hasOwnProperty(depName)) {
           continue;
@@ -253,5 +319,52 @@ export class NpmDependency {
    */
   static get NODE_MODULES_DIR() {
     return 'node_modules';
+  }
+
+  /**
+   * @param {Boolean} noHeader
+   * @returns {String}
+   */
+  toString(noHeader = false) {
+    let str = '';
+    let pad = '    '.repeat(this._getParentsDepth());
+
+    if (!noHeader) {
+      str += `- ${pad}${this.fullName}${os.EOL}`;
+    }
+
+    for (let i in this._children) {
+      if (!this._children.hasOwnProperty(i)) {
+        continue;
+      }
+
+      let childDep = this._children[i];
+
+      str += `${pad}  - ${childDep.fullName}${os.EOL}`;
+
+      if (!childDep.hasChildren) {
+        continue;
+      }
+
+      str += childDep.toString(true);
+    }
+
+    return str;
+  }
+
+  /**
+   * @returns {Number}
+   * @private
+   */
+  _getParentsDepth() {
+    let i = 0;
+    let current = this;
+
+    while(current.parent) {
+      i++;
+      current = current.parent;
+    }
+
+    return i;
   }
 }

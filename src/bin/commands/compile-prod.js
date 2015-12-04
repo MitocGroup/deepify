@@ -64,7 +64,8 @@ module.exports = function(mainPath) {
           '--no-bin-links',
           '--no-optional',
           '--loglevel silent',
-          '--production'
+          '--production',
+          '--save'
         )
     );
 
@@ -150,22 +151,6 @@ module.exports = function(mainPath) {
 
       console.log('Optimizing Lambda code in ' + lambdaTmpPath);
 
-      if (final) {
-        let lambdaPackage = fse.readJsonSync(
-          path.join(lambdaTmpPath, 'package.json')
-        );
-
-        if (lambdaPackage.dependencies
-          && lambdaPackage.dependencies.hasOwnProperty('deep-framework')) {
-
-          let frameworkPath = lambdaPackage.dependencies['deep-framework'];
-
-          frameworkPaths.push(path.join(lambdaTmpPath, frameworkPath));
-        }
-
-        continue;
-      }
-
       var depsLister = new NpmListDependencies(lambdaTmpPath);
       var depsObj = depsLister.list();
 
@@ -215,11 +200,13 @@ module.exports = function(mainPath) {
 
       let depsOptimizer = new DepsTreeOptimizer(lambdaTmpPath);
 
-      depsOptimizer.optimize(function(lambdaTmpPath, depsFullNames) {
-        console.log('Flatten dependencies in ' + lambdaTmpPath + ': ' + depsFullNames.join(', '));
+      depsOptimizer.optimize(
+        function(lambdaTmpPath, depsFullNames) {
+          console.log('Flatten dependencies in ' + lambdaTmpPath + ': ' + depsFullNames.join(', '));
 
-        remaining--;
-      }.bind(this, lambdaTmpPath));
+          remaining--;
+        }.bind(this, lambdaTmpPath)
+      );
     }
 
     wait.ready(function() {
