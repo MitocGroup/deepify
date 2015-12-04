@@ -248,11 +248,11 @@ module.exports = function(mainPath) {
         '-y',
         '-r',
         outputFile,
-        '.',
-        '--display-bytes'
+        '.'
       );
 
       zip.cwd = lambdaTmpPath;
+      zip.avoidBufferOverflow();
 
       zip.run(function(result) {
         if (result.failed) {
@@ -261,7 +261,7 @@ module.exports = function(mainPath) {
         }
 
         remaining--;
-      }.bind(this), true);
+      }.bind(this));
     }
   }
 
