@@ -17,11 +17,11 @@ module.exports = function(mainPath) {
   var NpmDedupe = require('../../lib.compiled/NodeJS/NpmDedupe').NpmDedupe;
   var NpmRun = require('../../lib.compiled/NodeJS/NpmRun').NpmRun;
   var NpmChain = require('../../lib.compiled/NodeJS/NpmChain').NpmChain;
+  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   var NpmListDependencies = require('../../lib.compiled/NodeJS/NpmListDependencies').NpmListDependencies;
   var Hash = require('deep-package-manager').Helpers_Hash;
   var Property = require('deep-package-manager').Property_Instance;
   var WaitFor = require('deep-package-manager').Helpers_WaitFor;
-  var Archiver = require('archiver');
   var tmp = require('tmp');
 
   var removeSource = this.opts.locate('remove-source').exists;
@@ -242,18 +242,26 @@ module.exports = function(mainPath) {
 
       console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
 
-      var output = fs.createWriteStream(outputFile);
-      var archive = Archiver('zip');
+      // @todo: replace this with a node native
+      var zip = new Exec(
+        Bin._resolve('zip'),
+        '-y',
+        '-r',
+        outputFile,
+        '.',
+        '--display-bytes'
+      );
 
-      output.on('close', function() {
+      zip.cwd = lambdaTmpPath;
+
+      zip.run(function(result) {
+        if (result.failed) {
+          console.error(result.error);
+          this.exit(1);
+        }
+
         remaining--;
-      }.bind(this));
-
-      archive.pipe(output);
-
-      archive
-        .directory(lambdaTmpPath, false)
-        .finalize();
+      }.bind(this), true);
     }
   }
 

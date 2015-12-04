@@ -68,7 +68,6 @@
     "jsonfile": "^1.1.x",
     "fs-extra": "^0.23.x",
     "sync-exec": "^0.6.x",
-    "archiver": "^0.14.x",
     "tmp": "^0.0.x",
     "aws-api-gw-client": "^0.1.x",
     "mime": "^1.3.x",
