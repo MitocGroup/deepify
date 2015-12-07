@@ -29,7 +29,7 @@ export class Bin {
       return Bin._npm;
     }
 
-    Bin._npm = Bin._resolve('npm');
+    Bin._npm = Bin.resolve('npm');
 
     return Bin._npm;
   }
@@ -42,7 +42,13 @@ export class Bin {
       return Bin._node;
     }
 
-    Bin._node = Bin._resolve(Bin._envBin());
+    try {
+      Bin._node = Bin.resolve(Bin._envBin());
+    } catch (e) {
+
+      // fallback here
+      Bin._node = Bin.resolve('node');
+    }
 
     return Bin._node;
   }
@@ -50,9 +56,8 @@ export class Bin {
   /**
    * @param {String} bin
    * @returns {String}
-   * @private
    */
-  static _resolve(bin) {
+  static resolve(bin) {
     if (Bin._isWin) {
       throw new Error('Unable to resolve a binary on win* platform');
     }

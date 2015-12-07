@@ -197,6 +197,11 @@ module.exports = {
       example: 'deepify init-backend path/to/web_app',
       description: 'Initialize backend',
       opts: {
+        partial: {
+          alias: 'm',
+          description: 'Partial init (one or several comma separated microservices identifiers)',
+          required: false,
+        },
       },
       args: {
         path: {

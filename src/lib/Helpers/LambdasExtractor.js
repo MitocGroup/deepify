@@ -5,6 +5,7 @@
 'use strict';
 
 import path from 'path';
+import fs from 'fs';
 import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
 
 export class LambdasExtractor {
@@ -88,5 +89,14 @@ export class LambdasExtractor {
     return filter
       ? lambdas.filter(filter)
       : lambdas;
+  }
+
+  /**
+   * @returns {Function}
+   */
+  static get NPM_PACKAGE_FILTER() {
+    return (lambdaPath) => {
+      return fs.existsSync(path.join(lambdaPath, 'package.json'));
+    };
   }
 }

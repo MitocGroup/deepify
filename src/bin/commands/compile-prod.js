@@ -40,9 +40,7 @@ module.exports = function(mainPath) {
     tmpPath: [],
   };
 
-  lambdas.path = arrayUnique(new LambdaExtractor(property).extractWorking(function(lambdaPath) {
-    return fs.existsSync(path.join(lambdaPath, 'package.json'));
-  }));
+  lambdas.path = arrayUnique(new LambdaExtractor(property).extractWorking(LambdaExtractor.NPM_PACKAGE_FILTER));
 
   for (var i in lambdas.path) {
     if (!lambdas.path.hasOwnProperty(i)) {
@@ -244,7 +242,7 @@ module.exports = function(mainPath) {
 
       // @todo: replace this with a node native
       var zip = new Exec(
-        Bin._resolve('zip'),
+        Bin.resolve('zip'),
         '-y',
         '-r',
         outputFile,
