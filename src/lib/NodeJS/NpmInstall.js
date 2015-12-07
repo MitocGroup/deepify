@@ -54,9 +54,8 @@ export class NpmInstall {
    */
   runChunk(cb, chunkSize = NpmInstall.DEFAULT_CHUNK_SIZE, silent = NpmInstall.DEFAULT_SILENT_STATE) {
     let wait = new WaitFor();
-    let remaining = this._dirs.length;
-
     let chunks = NpmInstall._chunkArray(this._dirs, chunkSize);
+    let remaining = chunks.length;
 
     wait.push(() => {
       return remaining <= 0;

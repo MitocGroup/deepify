@@ -26,6 +26,9 @@ export class PackageVersionResolver {
     this._packagePath = packagePath;
     this._name = name;
     this._version = version;
+
+    // @todo: remove when static properties available in ES6
+    PackageVersionResolver._cache = PackageVersionResolver._cache || {};
   }
 
   /**
