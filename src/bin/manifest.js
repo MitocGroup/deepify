@@ -21,7 +21,23 @@ module.exports = {
       },
       args: {
         path: {
-          description: 'The path to dump the sample web app to',
+          description: 'The path to dump the sample web app into',
+          required: true,
+        },
+      },
+    },
+    'install': {
+      example: 'deepify install https://github.com/MitocGroup/deep-microservices-todo-app.git path/to/web_app',
+      description: 'Installs an microservice from remote git repository',
+      opts: {
+      },
+      args: {
+        repository: {
+          description: 'The remote microservice git repository',
+          required: true,
+        },
+        path: {
+          description: 'The path to dump microservice into',
           required: true,
         },
       },

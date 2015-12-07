@@ -136,11 +136,12 @@ export class Exec {
     let cmdParts = this._cmd.trim().split(' ');
     let realCmd = cmdParts.shift();
     let realArgs = cmdParts.concat(this._args);
+    let uncaughtError = false;
 
     let proc = ChildProcess.spawn(realCmd, realArgs, {
       cwd: this._cwd,
+      stdio: [process.stdin, 'pipe', 'pipe'],
     });
-    let uncaughtError = false;
 
     proc.stdout.pipe(process.stdout);
     proc.stderr.pipe(process.stderr);
@@ -155,7 +156,6 @@ export class Exec {
 
     proc.on('uncaughtException', (error) => {
       uncaughtError = true;
-
       this._error = error;
 
       cb(this);

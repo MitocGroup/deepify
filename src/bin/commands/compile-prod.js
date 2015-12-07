@@ -196,7 +196,7 @@ module.exports = function(mainPath) {
 
       console.log('Optimizing Lambda dependencies in ' + lambdaTmpPath);
 
-      let depsOptimizer = new DepsTreeOptimizer(lambdaTmpPath);
+      var depsOptimizer = new DepsTreeOptimizer(lambdaTmpPath);
 
       depsOptimizer.optimize(
         function(lambdaTmpPath, depsFullNames) {

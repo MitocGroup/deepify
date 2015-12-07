@@ -179,7 +179,6 @@ module.exports = function(mainPath) {
           cmd.run(function(result) {
             if (result.failed) {
               console.error(result.error);
-
             }
 
             cb();
