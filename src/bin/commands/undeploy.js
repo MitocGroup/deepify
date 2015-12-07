@@ -10,7 +10,6 @@ module.exports = function(mainPath) {
   var Undeploy = require('deep-package-manager').Provisioning_Undeploy;
   var ProvisioningDumpFileMatcher = require('deep-package-manager').Provisioning_UndeployMatcher_ProvisioningDumpFileMatcher;
   var AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
-  var exec = require('child_process').exec;
   var path = require('path');
 
   var dirtyMode = this.opts.locate('dirty').exists;

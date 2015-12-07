@@ -10,9 +10,9 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var fse = require('fs-extra');
   var os = require('os');
-  var exec = require('child_process').exec;
   var Property = require('deep-package-manager').Property_Instance;
   var Config = require('deep-package-manager').Property_Config;
+  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
@@ -45,10 +45,11 @@ module.exports = function(mainPath) {
 
   fse.ensureDirSync(tmpPropertyPath);
 
-  exec('cp -R ' + path.join(mainPath, '*') + ' ' + tmpPropertyPath + '/ &>/dev/null',
-    function(error) {
-      if (error) {
-        console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + error);
+  new Exec('cp -R', path.join(mainPath, '*'), tmpPropertyPath + '/')
+    .avoidBufferOverflow()
+    .run(function(result) {
+      if (result.failed) {
+        console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + result.error);
         this.exit(1);
       }
 
@@ -61,7 +62,13 @@ module.exports = function(mainPath) {
 
         // @todo: move this anywhere
         process.on('exit', function() {
-          exec('rm -rf ' + tmpPropertyPath);
+          new Exec('rm -rf', tmpPropertyPath)
+            .avoidBufferOverflow()
+            .run(function(result) {
+              if (result.failed) {
+                console.error(result.error);
+              }
+            });
         });
 
         propertyInstance.fakeBuild();
@@ -73,15 +80,16 @@ module.exports = function(mainPath) {
 
         fse.ensureDirSync(dumpPath);
 
-        exec('cp -R ' + path.join(frontendDumpPath, '*') + ' ' + dumpPath + '/ &>/dev/null', function(error) {
-          if (error) {
-            console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
-            this.exit(1);
-          }
+        new Exec('cp -R', path.join(frontendDumpPath, '*'), dumpPath + '/')
+          .avoidBufferOverflow()
+          .run(function(result) {
+            if (result.failed) {
+              console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + result.error);
+              this.exit(1);
+            }
 
-          console.log('Frontend dumped successfully');
-        }.bind(this));
+            console.log('Frontend dumped successfully');
+          }.bind(this));
       }.bind(this));
-    }.bind(this)
-  );
+    }.bind(this));
 };

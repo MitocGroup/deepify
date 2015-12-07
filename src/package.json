@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.2.30",
+  "version": "1.2.31",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -52,7 +52,7 @@
     "postinstall": "hooks/assure_deep_dev.js && hooks/autocomplete_deepify.sh",
     "test": "mocha --ui tdd --compilers js:mocha-babel --recursive --reporter spec",
     "compile": "if [ -d 'lib/' ]; then BABEL_ENV=production babel lib/ --out-dir lib.compiled/; fi",
-    "obfuscate-compiled": "if [ -d 'lib/' ]; then npm list -g --depth 1 uglify > /dev/null 2>&1 || npm install uglify -g; for f in $(find lib.compiled -type f -name *.js); do uglify -s ${f} -o ${f}; done; fi",
+    "obfuscate-compiled": "if [ -d 'lib/' ]; then npm list -g --depth 0 uglify > /dev/null 2>&1 || npm install uglify -g; for f in $(find lib.compiled -type f -name *.js); do uglify -s ${f} -o ${f}; done; fi",
     "prepublish": "npm run obfuscate-compiled"
   },
   "dependencies": {
@@ -68,10 +68,10 @@
     "jsonfile": "^1.1.x",
     "fs-extra": "^0.23.x",
     "sync-exec": "^0.6.x",
-    "archiver": "^0.14.x",
     "tmp": "^0.0.x",
     "aws-api-gw-client": "^0.1.x",
-    "mime": "^1.3.x"
+    "mime": "^1.3.x",
+    "gather-dependencies": "^1.0.x"
   },
   "devDependencies": {
     "chai": "^3.2.x",
@@ -79,7 +79,7 @@
     "sinon-chai": "^2.8.x"
   },
   "engines": {
-    "node": ">=0.12",
+    "node": ">=0.12 <5.0.0",
     "npm": ">=2.10"
   },
   "os": [
