@@ -11,9 +11,11 @@ module.exports = function(lambdaPath) {
   var DeepDB = require('deep-db');
   var path = require('path');
   var fs = require('fs');
-  var exec = require('sync-exec');
   var os = require('os');
   var Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
+  var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
+  var NpmLink = require('../../lib.compiled/NodeJS/NpmLink').NpmLink;
+  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
 
   var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   var event = this.opts.locate('event').value;
@@ -34,7 +36,6 @@ module.exports = function(lambdaPath) {
     }
   } catch (e) {
   }
-
 
   if (!fs.existsSync(lambdaPath)) {
     console.error('Missing lambda in ' + lambdaPath);
@@ -63,51 +64,58 @@ module.exports = function(lambdaPath) {
 
   console.log('Linking aws-sdk library');
 
-  var awsSdkResult = exec('cd ' + mainPath + ' && npm link aws-sdk');
+  if (!Bin.npmModuleInstalled('aws-sdk', true)) {
+    var awsSdkGlobalCmd = new NpmInstallLibs();
+    awsSdkGlobalCmd.libs = 'aws-sdk';
+    awsSdkGlobalCmd.global = true;
 
-  if (awsSdkResult.status !== 0) {
-    console.error('Failed to link aws-sdk library. Trying to install it...');
-
-    awsSdkResult = exec('cd ' + mainPath + ' && npm install aws-sdk &>/dev/null');
-
-    if (awsSdkResult.status !== 0) {
-      console.error('Failed to link or install aws-sdk locally. Skipping...');
-    }
-  }
-
-  console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
-
-  DeepDB.startLocalDynamoDBServer(function(error) {
-    if (error) {
-      console.error('Failed to start DynamoDB server: ' + error);
-      this.exit(1);
-    }
-
-    var lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
-
-    lambda.complete = function(error, response) {
-      console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
-
-      if (error) {
-        console.error(error);
+    awsSdkGlobalCmd.run(function(result) {
+      if (result.failed) {
+        console.error('Failed to install aws-sdk globally: ' + result.error);
+        this.exit(1);
       }
 
-      // assure invokeAsync()s are executed!
-      process.kill(process.pid);
-    }.bind(this);
+      startServer.bind(this)();
+    }.bind(this));
+  } else {
+    startServer.bind(this)();
+  }
 
-    console.log('Starting Lambda.', os.EOL);
+  function startServer() {
+    console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
 
-    try {
-      process.chdir(path.dirname(lambdaPath));
+    DeepDB.startLocalDynamoDBServer(function(error) {
+      if (error) {
+        console.error('Failed to start DynamoDB server: ' + error);
+        this.exit(1);
+      }
 
-      // avoid process to be killed when some async calls are still active!
-      ForksManager.registerListener();
+      var lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
 
-      lambda.run(event, true);
-    } catch (e) {
-      console.error(e);
-      this.exit(1);
-    }
-  }.bind(this), dbServer);
+      lambda.complete = function(error, response) {
+        console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
+
+        if (error) {
+          console.error(error);
+        }
+
+        // assure invokeAsync()s are executed!
+        process.kill(process.pid);
+      }.bind(this);
+
+      console.log('Starting Lambda.', os.EOL);
+
+      try {
+        process.chdir(path.dirname(lambdaPath));
+
+        // avoid process to be killed when some async calls are still active!
+        ForksManager.registerListener();
+
+        lambda.run(event, true);
+      } catch (e) {
+        console.error(e);
+        this.exit(1);
+      }
+    }.bind(this), dbServer);
+  }
 };

@@ -12,6 +12,7 @@ module.exports = function(mainPath) {
   var WaitFor = require('deep-package-manager').Helpers_WaitFor;
   var Config = require('deep-package-manager').Property_Config;
   var fs = require('fs');
+  var fse = require('fs-extra');
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
   var NpmLink = require('../../lib.compiled/NodeJS/NpmLink').NpmLink;
@@ -28,7 +29,7 @@ module.exports = function(mainPath) {
   var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
 
   if (!fs.existsSync(propertyConfigFile)) {
-    fs.writeFileSync(propertyConfigFile, JSON.stringify(Config.generate()));
+    fse.outputJsonSync(propertyConfigFile, Config.generate());
   }
 
   var property = new Property(mainPath);

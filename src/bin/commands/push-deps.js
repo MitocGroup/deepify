@@ -9,6 +9,7 @@ module.exports = function(mainPath) {
   var aws = require('aws-sdk');
   var path = require('path');
   var fs = require('fs');
+  var fse = require('fs-extra');
   var Manager = require('deep-package-manager').Dependencies_Manager;
   var S3Driver = require('deep-package-manager').Dependencies_Driver_S3StdDriver;
   var Config = require('deep-package-manager').Property_Config;
@@ -40,7 +41,7 @@ module.exports = function(mainPath) {
     this.exit(1);
   }
 
-  var config = JSON.parse(fs.readFileSync(configFile));
+  var config = fse.readJsonSync(configFile);
 
   if (!config.dependencies
     || typeof config.dependencies.bucket === 'undefined') {
