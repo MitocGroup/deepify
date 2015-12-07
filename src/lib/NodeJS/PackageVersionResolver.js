@@ -7,9 +7,6 @@
 import {Exec} from '../Helpers/Exec';
 import {Bin} from './Bin';
 
-// @todo: switch to OOP style
-let _cache = {};
-
 export class PackageVersionResolver {
   /**
    * @param {String} packagePath
@@ -58,8 +55,8 @@ export class PackageVersionResolver {
    * @returns {PackageVersionResolver}
    */
   resolve(cb, async = true) {
-    if (_cache.hasOwnProperty(this._fullName)) {
-      cb(null, _cache[this._fullName]);
+    if (PackageVersionResolver._cache.hasOwnProperty(this._fullName)) {
+      cb(null, PackageVersionResolver._cache[this._fullName]);
       return this;
     }
 
@@ -106,12 +103,12 @@ export class PackageVersionResolver {
       if (firstD.hasOwnProperty('dependencies')) {
         tmpDeps = firstD.dependencies;
       } else {
-        _cache[this._fullName] = firstD.version;
+        PackageVersionResolver._cache[this._fullName] = firstD.version;
         break;
       }
     }
 
-    cb(null, _cache[this._fullName]);
+    cb(null, PackageVersionResolver._cache[this._fullName]);
   }
 
   /**

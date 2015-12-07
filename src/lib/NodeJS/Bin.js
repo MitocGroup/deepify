@@ -6,9 +6,6 @@
 
 import {Exec} from '../Helpers/Exec';
 
-let _npm = null;
-let _node = null;
-
 export class Bin {
   /**
    * @param {String} module
