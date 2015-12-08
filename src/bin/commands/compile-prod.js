@@ -232,34 +232,51 @@ module.exports = function(mainPath) {
       var lambdaPath = lambdas.path[i];
       var lambdaTmpPath = lambdas.tmpPath[i];
 
-      var outputFile = path.join(
-        lambdaPath,
-        '..',
-        path.basename(lambdaPath) + '.zip'
+      // @todo: move it somewhere...
+      var cleanupCmd = new Exec(
+        'find . -type d -iname "aws-sdk*" -print0 | xargs -0 rm -rf'
       );
 
-      console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
+      cleanupCmd.cwd = lambdaTmpPath;
 
-      // @todo: replace this with a node native
-      var zip = new Exec(
-        Bin.resolve('zip'),
-        '-y',
-        '-r',
-        outputFile,
-        '.'
-      );
+      cleanupCmd
+        .avoidBufferOverflow()
+        .run(function(lambdaPath, lambdaTmpPath, result) {
+          if (result.failed) {
+            console.error(result.error);
+          } else {
+            console.log('Removed aws-sdk@* in ' + lambdaTmpPath);
+          }
 
-      zip.cwd = lambdaTmpPath;
-      zip.avoidBufferOverflow();
+          var outputFile = path.join(
+            lambdaPath,
+            '..',
+            path.basename(lambdaPath) + '.zip'
+          );
 
-      zip.run(function(result) {
-        if (result.failed) {
-          console.error(result.error);
-          this.exit(1);
-        }
+          console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
 
-        remaining--;
-      }.bind(this));
+          // @todo: replace this with a node native
+          var zip = new Exec(
+            Bin.resolve('zip'),
+            '-y',
+            '-r',
+            outputFile,
+            '.'
+          );
+
+          zip.cwd = lambdaTmpPath;
+          zip.avoidBufferOverflow();
+
+          zip.run(function(result) {
+            if (result.failed) {
+              console.error(result.error);
+              this.exit(1);
+            }
+
+            remaining--;
+          }.bind(this));
+        }.bind(this, lambdaPath, lambdaTmpPath));
     }
   }
 

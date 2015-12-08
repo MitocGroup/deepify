@@ -129,13 +129,19 @@ export class Exec {
 
   /**
    * @param {Boolean} increase
+   * @param {EventEmitter|*} emitters
    * @private
    */
-  static _tweakProcessListeners(increase = true) {
+  static _tweakProcessListeners(increase = true, ...emitters) {
     /**
      * @type {EventEmitter[]}
      */
-    let emitters = [process.stdout, process.stderr, process.stdin];
+    emitters = [
+      process,
+      process.stdout,
+      process.stderr,
+      process.stdin,
+    ].concat(emitters);
 
     for (let i in emitters) {
       if (!emitters.hasOwnProperty(i)) {
@@ -163,12 +169,12 @@ export class Exec {
     let realArgs = cmdParts.concat(this._args);
     let uncaughtError = false;
 
-    Exec._tweakProcessListeners();
-
     let proc = ChildProcess.spawn(realCmd, realArgs, {
       cwd: this._cwd,
       stdio: [process.stdin, 'pipe', 'pipe'],
     });
+
+    Exec._tweakProcessListeners(true, proc);
 
     proc.stdout.pipe(process.stdout);
     proc.stderr.pipe(process.stderr);
@@ -184,7 +190,7 @@ export class Exec {
     proc.on('uncaughtException', (error) => {
       uncaughtError = true;
 
-      Exec._tweakProcessListeners(false);
+      Exec._tweakProcessListeners(false, proc);
 
       this._error = error;
 
@@ -196,7 +202,7 @@ export class Exec {
         return;
       }
 
-      Exec._tweakProcessListeners(false);
+      Exec._tweakProcessListeners(false, proc);
 
       this._checkError(code);
 
