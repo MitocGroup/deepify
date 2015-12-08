@@ -128,6 +128,31 @@ export class Exec {
   }
 
   /**
+   * @param {Boolean} increase
+   * @private
+   */
+  static _tweakProcessListeners(increase = true) {
+    /**
+     * @type {EventEmitter[]}
+     */
+    let emitters = [process.stdout, process.stderr, process.stdin];
+
+    for (let i in emitters) {
+      if (!emitters.hasOwnProperty(i)) {
+        continue;
+      }
+
+      let emitter = emitters[i];
+
+      if (increase) {
+        emitter.setMaxListeners(emitter.getMaxListeners() + 1);
+      } else {
+        emitter.setMaxListeners(Math.max(emitter.getMaxListeners() - 1, 0));
+      }
+    }
+  }
+
+  /**
    * @param {Function} cb
    * @returns {Exec}
    * @private
@@ -137,6 +162,8 @@ export class Exec {
     let realCmd = cmdParts.shift();
     let realArgs = cmdParts.concat(this._args);
     let uncaughtError = false;
+
+    Exec._tweakProcessListeners();
 
     let proc = ChildProcess.spawn(realCmd, realArgs, {
       cwd: this._cwd,
@@ -156,6 +183,9 @@ export class Exec {
 
     proc.on('uncaughtException', (error) => {
       uncaughtError = true;
+
+      Exec._tweakProcessListeners(false);
+
       this._error = error;
 
       cb(this);
@@ -165,6 +195,8 @@ export class Exec {
       if (uncaughtError) {
         return;
       }
+
+      Exec._tweakProcessListeners(false);
 
       this._checkError(code);
 
