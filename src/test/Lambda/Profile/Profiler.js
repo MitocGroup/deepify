@@ -3,10 +3,10 @@
 'use strict';
 
 import chai from 'chai';
-import {Profiler} from '../../../lib.compiled/Lambda/Profile/Profiler';
+import {Profiler} from '../../../lib/Lambda/Profile/Profiler';
 
 // @todo: Add more advanced tests
-suite("Lambda/Profile/Profiler", function() {
+suite('Lambda/Profile/Profiler', function() {
   test('Class Profiler exists in Lambda/Profile/Profiler', function() {
     chai.expect(typeof Profiler).to.equal('function');
   });

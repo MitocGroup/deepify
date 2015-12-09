@@ -3,10 +3,10 @@
 'use strict';
 
 import chai from 'chai';
-import {Options} from '../../lib.compiled/Terminal/Options';
+import {Options} from '../../lib/Terminal/Options';
 
 // @todo: Add more advanced tests
-suite("Terminal/Options", function() {
+suite('Terminal/Options', function() {
   test('Class Options exists in Terminal/Options', function() {
     chai.expect(typeof Options).to.equal('function');
   });
