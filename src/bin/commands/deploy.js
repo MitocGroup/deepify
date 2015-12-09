@@ -8,14 +8,15 @@
 module.exports = function(mainPath) {
   var path = require('path');
   var fs = require('fs');
+  var fse = require('fs-extra');
   var os = require('os');
-  var exec = require('child_process').exec;
-  var spawn = require('child_process').spawn;
-  var mkdirp = require('mkdirp');
-  var Property = require('../../lib.compiled/Property/Instance').Instance;
+  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
-  var Config = require('../../lib.compiled/Property/Config').Config;
-  var S3Service = require('../../lib.compiled/Provisioning/Service/S3Service').S3Service;
+  var Property = require('deep-package-manager').Property_Instance;
+  var Config = require('deep-package-manager').Property_Config;
+  var S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
+  var ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
 
   var localOnly = this.opts.locate('dry-run').exists;
   var dumpCodePath = this.opts.locate('dump-local').value;
@@ -38,9 +39,9 @@ module.exports = function(mainPath) {
   if (!configExists) {
     config = Config.generate();
 
-    fs.writeFileSync(configFile, JSON.stringify(config));
+    fse.outputJsonSync(configFile, config);
   } else {
-    config = JSON.parse(fs.readFileSync(configFile));
+    config = fse.readJsonSync(configFile);
   }
 
   var tmpDir = os.tmpdir();
@@ -53,16 +54,32 @@ module.exports = function(mainPath) {
     console.log('Local mode on!');
   }
 
-  exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/ &>/dev/null',
-    function(error) {
-      if (error) {
-        console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + error);
+  fse.ensureDirSync(tmpPropertyPath);
+
+  console.log('Copying sources to ' + tmpPropertyPath);
+
+  new Exec(
+    'cp',
+    '-R',
+    path.join(mainPath, '*'),
+    tmpPropertyPath + '/'
+  )
+    .avoidBufferOverflow()
+    .run(function(result) {
+      if (result.failed) {
+        console.error('Error copying sources into ' + tmpPropertyPath + ': ' + result.error);
         this.exit(1);
       }
 
-      // @todo: move this anywhere
+      // @todo: remove it?
       process.on('exit', function() {
-        exec('rm -rf ' + tmpPropertyPath);
+        var result = new Exec('rm', '-rf', tmpPropertyPath)
+          .avoidBufferOverflow()
+          .runSync();
+
+        if (result.failed) {
+          console.error(result.error);
+        }
       });
 
       propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
@@ -72,14 +89,15 @@ module.exports = function(mainPath) {
           console.error('Error while assuring frontend engine: ' + error);
         }
 
-        var deployCb = function() {
-          prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
-        };
+        propertyInstance.runInitMsHooks(function() {
+          var deployCb = function() {
+            prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
+          };
 
-        hasToPullDeps ? pullDeps.bind(this)(deployCb) : deployCb.bind(this)();
+          hasToPullDeps ? pullDeps.bind(this)(deployCb) : deployCb.bind(this)();
+        }.bind(this));
       }.bind(this));
-    }.bind(this)
-  );
+    }.bind(this));
 
   function getConfigFromS3(propertyInstance, cb) {
     console.log('Trying to retrieve .cfg.deeploy.json from S3 ' + cfgBucket);
@@ -149,33 +167,22 @@ module.exports = function(mainPath) {
         if (result) {
           console.log('Start preparing for production');
 
-          var cmdParts = [
+          var cmd = new Exec(
+            Bin.node,
             this.scriptPath,
-            'prepare-prod',
+            'compile-prod',
             propertyPath,
             '--remove-source',
-          ];
+            microservicesToDeploy ? '--partial ' + microservicesToDeploy : ''
+          );
 
-          if (microservicesToDeploy) {
-            cmdParts.push('--partial="' + microservicesToDeploy + '"');
-          }
-
-          var prodPrepProcess = spawn(this.nodeBinary, cmdParts);
-
-
-          prodPrepProcess.stdout.pipe(process.stdout);
-          prodPrepProcess.stderr.pipe(process.stderr);
-
-          prodPrepProcess.on('close', function (code) {
-            if (code !== 0) {
-              console.error(
-                'Error while preparing for production: Process exit with code ' +
-                code
-              );
+          cmd.run(function(result) {
+            if (result.failed) {
+              console.error(result.error);
             }
 
             cb();
-          });
+          }, true);
 
           return;
         }
@@ -200,7 +207,22 @@ module.exports = function(mainPath) {
     // Gracefully teardown...
     (function() {
       process.on('uncaughtException', function(error) {
-        console.error(error.toString(), os.EOL, error.stack);
+        if (error instanceof ProvisioningCollisionsDetectedException) {
+          console.error(
+            os.EOL,
+            os.EOL,
+            'Seems like there are some resources on AWS that may generate collisions while provisioning the web app!',
+            os.EOL,
+            'Remove them by running "deepify undeploy ' + mainPath + ' --resource ' + error.collisionHash + '"',
+            os.EOL,
+            os.EOL,
+            error.stringifiedResourcesObj
+          );
+
+          this.exit(1);
+        } else {
+          console.error(error.toString(), os.EOL, error.stack);
+        }
 
         if (propertyInstance.config.provisioning) {
           dumpConfig.bind(this)(propertyInstance, function() {
@@ -309,14 +331,21 @@ module.exports = function(mainPath) {
   function pullDeps(cb) {
     console.log('Resolving dependencies in ' + tmpPropertyPath);
 
-    exec('node ' + path.join(__dirname, './../deepify.js') + ' pull-deps ' + tmpPropertyPath, function(error, stdout, stderr) {
-      if (error) {
-        console.error('Error while pulling dependencies in ' + tmpPropertyPath + ': ' + error);
-        this.exit(1);
-      }
+    new Exec(
+      Bin.node,
+      this.scriptPath,
+      'pull-deps',
+      tmpPropertyPath
+    )
+      .avoidBufferOverflow()
+      .run(function(result) {
+        if (result.failed) {
+          console.error('Error while pulling dependencies in ' + tmpPropertyPath + ': ' + result.error);
+          this.exit(1);
+        }
 
-      cb.bind(this)();
-    }.bind(this));
+        cb.bind(this)();
+      }.bind(this));
   }
 
   function dumpCode() {
@@ -327,19 +356,22 @@ module.exports = function(mainPath) {
     var tmpFrontendPath = path.join(tmpPropertyPath, '_public');
     var frontendDumpPath = path.join(dumpCodePath, '_www');
 
-    if (!fs.existsSync(frontendDumpPath)) {
-      mkdirp.sync(frontendDumpPath);
-    }
+    fse.ensureDirSync(frontendDumpPath);
 
-    exec('rsync -a --delete ' + tmpFrontendPath + '/ ' + frontendDumpPath + '/ &>/dev/null',
-      function(error) {
-        if (error) {
-          console.error('Unable to dump _frontend code into _www!');
+    new Exec(
+      'cp',
+      '-R',
+      path.join(tmpFrontendPath, '*'),
+      frontendDumpPath + '/'
+    )
+      .avoidBufferOverflow()
+      .run(function(result) {
+        if (result.failed) {
+          console.error('Unable to dump _frontend code into _www: ' + result.error);
         }
 
         dumpLambdas();
-      }
-    );
+      }.bind(this));
   }
 
   function dumpLambdas() {
@@ -350,14 +382,11 @@ module.exports = function(mainPath) {
       return;
     }
 
-    if (!fs.existsSync(dumpCodePath)) {
-      mkdirp.sync(dumpCodePath);
-    }
+    fse.ensureDirSync(dumpCodePath);
 
-    var awsConfigPlain = JSON.stringify(config.aws);
     var globalAwsConfigFile = path.join(dumpCodePath, '.aws.json');
 
-    fs.writeFileSync(globalAwsConfigFile, awsConfigPlain);
+    fs.outputJsonSync(globalAwsConfigFile, config.aws);
 
     var lambdasVector = [];
     var stack = lambdas.length;
@@ -380,18 +409,26 @@ module.exports = function(mainPath) {
       } catch (e) {
       }
 
-      var command = 'unzip -qq -o ' + lambdaPath + ' -d ' + newLambdaPath +
-        ' &>/dev/null && cp ' + globalAwsConfigFile + ' ' + awsConfigFile;
+      new Exec(
+        'unzip',
+        '-qq',
+        '-o',
+        lambdaPath,
+        '-d',
+        newLambdaPath
+      )
+        .avoidBufferOverflow()
+        .run(function(awsConfigFile, result) {
+          if (result.failed) {
+            console.error(result.error);
+          }
 
-      exec(command, function(error) {
-        if (error) {
-          console.error('Error unpacking lambda: ' + error);
-        }
+          fse.copySync(globalAwsConfigFile, awsConfigFile);
 
-        stack--;
+          stack--;
 
-        console.log('Remaining ' + stack + ' Lambdas to be unpacked...');
-      });
+          console.log('Remaining ' + stack + ' Lambdas to be unpacked...');
+        }.bind(this, awsConfigFile));
     }
 
     function waitUntilDone() {

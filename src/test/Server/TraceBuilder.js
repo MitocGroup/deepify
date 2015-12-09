@@ -3,10 +3,10 @@
 'use strict';
 
 import chai from 'chai';
-import {TraceBuilder} from '../../lib.compiled/Server/TraceBuilder';
+import {TraceBuilder} from '../../lib/Server/TraceBuilder';
 
 // @todo: Add more advanced tests
-suite("Server/TraceBuilder", function() {
+suite('Server/TraceBuilder', function() {
   test('Class TraceBuilder exists in Server/TraceBuilder', function() {
     chai.expect(typeof TraceBuilder).to.equal('function');
   });

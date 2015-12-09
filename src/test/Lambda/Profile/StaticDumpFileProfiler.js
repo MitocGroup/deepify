@@ -3,10 +3,10 @@
 'use strict';
 
 import chai from 'chai';
-import {StaticDumpFileProfiler} from '../../../lib.compiled/Lambda/Profile/StaticDumpFileProfiler';
+import {StaticDumpFileProfiler} from '../../../lib/Lambda/Profile/StaticDumpFileProfiler';
 
 // @todo: Add more advanced tests
-suite("Lambda/Profile/StaticDumpFileProfiler", function() {
+suite('Lambda/Profile/StaticDumpFileProfiler', function() {
   test('Class StaticDumpFileProfiler exists in Lambda/Profile/StaticDumpFileProfiler', function() {
     chai.expect(typeof StaticDumpFileProfiler).to.equal('function');
   });

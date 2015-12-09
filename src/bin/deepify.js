@@ -5,11 +5,11 @@
 
 'use strict';
 
-var Program = require('../lib.compiled/Terminal/Program.js').Program;
-var ValidationException = require('../lib.compiled/Terminal/Exception/ValidationException.js').ValidationException;
+var Program = require('../lib.compiled/Terminal/Program').Program;
+var ValidationException = require('../lib.compiled/Terminal/Exception/ValidationException').ValidationException;
 var path = require('path');
 
-var manifest = require('./manifest.js');
+var manifest = require('./manifest');
 
 var cli = new Program('deepify', manifest.version, manifest.description);
 

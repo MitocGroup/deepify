@@ -8,9 +8,10 @@ import Path from 'path';
 import AWS from 'aws-sdk';
 import JsonFile from 'jsonfile';
 import RequireProxy from 'proxyquire';
-import {Hash} from '../Helpers/Hash';
+import {Helpers_Hash as Hash} from 'deep-package-manager';
 import {Thread} from './Thread';
 import {Timer} from './Timer';
+import {ForksManager} from './ForksManager';
 
 /**
  * Lambda runtime
@@ -134,12 +135,11 @@ export class Runtime {
   /**
    * @param {Object} event
    * @param {Boolean|undefined} measureTime
-   * @returns {Runtime}
+   * @returns {Thread}
    */
   runForked(event, measureTime = undefined) {
-    new Thread(this).run(event, measureTime);
-
-    return this;
+    return new Thread(this)
+      .run(event, measureTime);
   }
 
   /**
@@ -148,6 +148,8 @@ export class Runtime {
    * @returns {Runtime}
    */
   run(event, measureTime = undefined) {
+    this._injectSiblingExecutionWrapper();
+
     if (typeof measureTime !== 'undefined') {
       this.measureTime = measureTime;
     }
@@ -158,6 +160,66 @@ export class Runtime {
     this._lambda.handler.bind(this)(event, this.context);
 
     return this;
+  }
+
+  /**
+   * Inject a wrapper for sibling lambdas
+   * execution. Used by deep-resource
+   *
+   * @private
+   */
+  _injectSiblingExecutionWrapper() {
+    let _this = this;
+
+    global[Runtime.SIBLING_EXEC_WRAPPER_NAME] = new function() {
+      return {
+        invoke: function (localPath, data, callback) {
+          let lambda = Runtime.createLambda(localPath, _this._awsConfigFile);
+
+          lambda.name = data.lambda;
+          lambda.profiler = _this._profiler;
+
+          lambda.succeed = (result) => {
+            lambda.profiler && lambda.profiler.save((error) => {
+              error && _this._log(`Error while saving profile for Lambda ${lambda.name}: ${error}`);
+            });
+
+            callback(null, result);
+          };
+
+          lambda.fail = (error) => {
+            lambda.profiler && lambda.profiler.save((error) => {
+              error && _this._log(`Error while saving profile for Lambda ${lambda.name}: ${error}`);
+            });
+
+            callback(error, null);
+          };
+
+          let thread = lambda.runForked(data.payload);
+
+          ForksManager.manage(thread.process);
+        },
+        invokeAsync: function (localPath, data, callback) {
+          this.invoke(localPath, data, (error, result) => {
+            if (error) {
+              _this._log(`Lambda ${data.lambda} async execution fail: ${error.message}`);
+              return;
+            }
+
+            _this._log(`Result for Lambda ${data.lambda} async call: ${JSON.stringify(result)}`);
+          });
+
+          callback(null, null);
+        },
+      };
+    };
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get SIBLING_EXEC_WRAPPER_NAME() {
+    return '_deep_lambda_exec_';
   }
 
   /**

@@ -8,11 +8,11 @@
 module.exports = function(mainPath) {
   var path = require('path');
   var fs = require('fs');
+  var fse = require('fs-extra');
   var os = require('os');
-  var exec = require('child_process').exec;
-  var mkdirp = require('mkdirp');
-  var Property = require('../../lib.compiled/Property/Instance').Instance;
-  var Config = require('../../lib.compiled/Property/Config').Config;
+  var Property = require('deep-package-manager').Property_Instance;
+  var Config = require('deep-package-manager').Property_Config;
+  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
@@ -43,10 +43,13 @@ module.exports = function(mainPath) {
 
   var propertyInstance;
 
-  exec('rsync -a --delete ' + path.join(mainPath, '') + '/ ' + tmpPropertyPath + '/',
-    function(error, stdout, stderr) {
-      if (error) {
-        console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + error);
+  fse.ensureDirSync(tmpPropertyPath);
+
+  new Exec('cp -R', path.join(mainPath, '*'), tmpPropertyPath + '/')
+    .avoidBufferOverflow()
+    .run(function(result) {
+      if (result.failed) {
+        console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + result.error);
         this.exit(1);
       }
 
@@ -59,7 +62,13 @@ module.exports = function(mainPath) {
 
         // @todo: move this anywhere
         process.on('exit', function() {
-          exec('rm -rf ' + tmpPropertyPath);
+          new Exec('rm -rf', tmpPropertyPath)
+            .avoidBufferOverflow()
+            .run(function(result) {
+              if (result.failed) {
+                console.error(result.error);
+              }
+            });
         });
 
         propertyInstance.fakeBuild();
@@ -67,15 +76,20 @@ module.exports = function(mainPath) {
 
         var frontendDumpPath = path.join(tmpPropertyPath, '_public');
 
-        exec('mkdir -p ' + dumpPath + '; rsync -a --delete ' + frontendDumpPath + '/ ' + dumpPath + '/', function(error, stdout, stderr) {
-          if (error) {
-            console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + error);
-            this.exit(1);
-          }
+        console.log('Copying built sources into ' + dumpPath);
 
-          console.log('Frontend dumped successfully');
-        }.bind(this));
+        fse.ensureDirSync(dumpPath);
+
+        new Exec('cp -R', path.join(frontendDumpPath, '*'), dumpPath + '/')
+          .avoidBufferOverflow()
+          .run(function(result) {
+            if (result.failed) {
+              console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + result.error);
+              this.exit(1);
+            }
+
+            console.log('Frontend dumped successfully');
+          }.bind(this));
       }.bind(this));
-    }.bind(this)
-  );
+    }.bind(this));
 };

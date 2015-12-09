@@ -70,7 +70,7 @@ export class Option {
       } else {
         return {
           name: option,
-          value: true,
+          value: null,
         };
       }
     }

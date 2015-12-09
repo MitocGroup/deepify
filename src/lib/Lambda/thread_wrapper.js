@@ -5,7 +5,11 @@
 'use strict';
 
 import {Runtime} from './Runtime';
+import {ForksManager} from './ForksManager';
 import {StaticDumpFileProfiler} from '../Lambda/Profile/StaticDumpFileProfiler';
+
+// avoid process to be killed when some async calls are still active!
+ForksManager.registerListener();
 
 let args = process.argv;
 

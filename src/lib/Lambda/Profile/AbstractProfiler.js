@@ -6,10 +6,10 @@
 
 import Core from 'deep-core';
 import FileSystem from 'fs';
+import FileSystemExtra from 'fs-extra';
 import Path from 'path';
-import {Hash} from '../../Helpers/Hash';
+import {Helpers_Hash as Hash} from 'deep-package-manager';
 import OS from 'os';
-import MakeDir from 'mkdirp';
 
 export class AbstractProfiler extends Core.OOP.Interface {
   /**
@@ -20,7 +20,7 @@ export class AbstractProfiler extends Core.OOP.Interface {
 
     this._profilesPath = AbstractProfiler._tmpDir;
 
-    MakeDir.sync(this._profilesPath);
+    FileSystemExtra.ensureDirSync(this._profilesPath);
 
     this._name = null;
     this._lastProfile = null;

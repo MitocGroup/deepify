@@ -7,7 +7,7 @@
 import Path from 'path';
 import ChildProcess from 'child_process';
 import {LambdaExecutionException} from './Exception/LambdaExecutionException';
-import {Lambda} from '../Property/Lambda';
+import {Property_Lambda as Lambda} from 'deep-package-manager';
 
 export class Thread {
   /**
