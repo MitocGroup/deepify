@@ -3,10 +3,10 @@
 'use strict';
 
 import chai from 'chai';
-import {Argument} from '../../lib.compiled/Terminal/Argument';
+import {Argument} from '../../lib/Terminal/Argument';
 
 // @todo: Add more advanced tests
-suite("Terminal/Argument", function() {
+suite('Terminal/Argument', function() {
   test('Class Argument exists in Terminal/Argument', function() {
     chai.expect(typeof Argument).to.equal('function');
   });

@@ -3,10 +3,10 @@
 'use strict';
 
 import chai from 'chai';
-import {Runtime} from '../../lib.compiled/Lambda/Runtime';
+import {Runtime} from '../../lib/Lambda/Runtime';
 
 // @todo: Add more advanced tests
-suite("Lambda/Runtime", function() {
+suite('Lambda/Runtime', function() {
   test('Class Runtime exists in Lambda/Runtime', function() {
     chai.expect(typeof Runtime).to.equal('function');
   });

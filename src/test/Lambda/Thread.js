@@ -3,10 +3,10 @@
 'use strict';
 
 import chai from 'chai';
-import {Thread} from '../../lib.compiled/Lambda/Thread';
+import {Thread} from '../../lib/Lambda/Thread';
 
 // @todo: Add more advanced tests
-suite("Lambda/Thread", function() {
+suite('Lambda/Thread', function() {
   test('Class Thread exists in Lambda/Thread', function() {
     chai.expect(typeof Thread).to.equal('function');
   });

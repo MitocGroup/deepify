@@ -3,10 +3,10 @@
 'use strict';
 
 import chai from 'chai';
-import {Instance} from '../../lib.compiled/Server/Instance';
+import {Instance} from '../../lib/Server/Instance';
 
 // @todo: Add more advanced tests
-suite("Server/Instance", function() {
+suite('Server/Instance', function() {
   test('Class Instance exists in Server/Instance', function() {
     chai.expect(typeof Instance).to.equal('function');
   });
