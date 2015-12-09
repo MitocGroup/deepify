@@ -262,7 +262,7 @@ export class Exec {
    * @private
    */
   get _internalCmdSuffix() {
-    return this._devNull ? '&>/dev/null' : '';
+    return this._devNull ? '2>&1 /dev/null' : '';
   }
 
   /**
