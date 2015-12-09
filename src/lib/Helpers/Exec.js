@@ -6,6 +6,7 @@
 
 import ChildProcess from 'child_process';
 import syncExec from 'sync-exec';
+import {EventEmitter} from 'events';
 
 export class Exec {
   /**
@@ -150,9 +151,25 @@ export class Exec {
 
       let emitter = emitters[i];
 
+      if (!emitter.hasOwnProperty('getMaxListeners')) {
+        emitter.__max_listeners__ = EventEmitter.defaultMaxListeners || 0;
+
+        emitter.getMaxListeners = () => {
+          return emitter.__max_listeners__;
+        };
+      }
+
       if (increase) {
+        if (emitter.hasOwnProperty('__max_listeners__')) {
+          emitter.__max_listeners__++;
+        }
+
         emitter.setMaxListeners(emitter.getMaxListeners() + 1);
       } else {
+        if (emitter.hasOwnProperty('__max_listeners__')) {
+          emitter.__max_listeners__--;
+        }
+
         emitter.setMaxListeners(Math.max(emitter.getMaxListeners() - 1, 0));
       }
     }
