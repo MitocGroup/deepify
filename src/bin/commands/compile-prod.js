@@ -240,6 +240,7 @@ module.exports = function(mainPath) {
       cleanupCmd.cwd = lambdaTmpPath;
 
       cleanupCmd
+        .avoidBufferOverflow()
         .run(function(lambdaPath, lambdaTmpPath, result) {
           if (result.failed) {
             console.error(result.error);

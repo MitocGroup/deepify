@@ -254,7 +254,17 @@ export class Exec {
    * @private
    */
   get _fullCmd() {
-    return `${this._cmd} ${this._args.join(' ')} ${this._internalCmdSuffix}`.trim();
+    let suffix = this._internalCmdSuffix;
+    let cmd = `${this._cmd} ${this._args.join(' ')}`;
+
+    cmd = cmd.split(';').join(` ${suffix}; `);
+    cmd = cmd.split('&&').join(` ${suffix}; `);
+    cmd = cmd.split('||').join(` ${suffix}; `);
+
+    cmd += suffix;
+    cmd = cmd.replace(new RegExp(`(${Exec.PIPE_VOID})+`), Exec.PIPE_VOID);
+
+    return cmd.trim();
   }
 
   /**
@@ -262,7 +272,7 @@ export class Exec {
    * @private
    */
   get _internalCmdSuffix() {
-    return this._devNull ? '2>&1 /dev/null' : '';
+    return this._devNull ? Exec.PIPE_VOID : '';
   }
 
   /**
@@ -272,5 +282,12 @@ export class Exec {
     if (!this._isExec) {
       throw new Error(`Command '${this._fullCmd}' is not yet executed (cwd: '${this._cwd}')`);
     }
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get PIPE_VOID() {
+    return ' > /dev/null 2>&1';
   }
 }
