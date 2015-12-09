@@ -160,17 +160,17 @@ export class Exec {
       }
 
       if (increase) {
+        emitter.setMaxListeners(emitter.getMaxListeners() + 1);
+
         if (emitter.hasOwnProperty('__max_listeners__')) {
           emitter.__max_listeners__++;
         }
-
-        emitter.setMaxListeners(emitter.getMaxListeners() + 1);
       } else {
+        emitter.setMaxListeners(Math.max(emitter.getMaxListeners() - 1, 0));
+
         if (emitter.hasOwnProperty('__max_listeners__')) {
           emitter.__max_listeners__--;
         }
-
-        emitter.setMaxListeners(Math.max(emitter.getMaxListeners() - 1, 0));
       }
     }
   }
