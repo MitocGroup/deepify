@@ -91,10 +91,15 @@ export class PackageVersionResolver {
     }
 
     let rawInfo = result.result;
-    let info = JSON.parse(rawInfo);
+
+    try {
+      let info = JSON.parse(rawInfo);
+    } catch (e) {
+      cb(new Error(`Broken ${this._fullName} package version JSON object (${e}): ${rawInfo}`), null);
+    }
 
     if (!info || !info.hasOwnProperty('dependencies')) {
-      cb(new Error(`Broken package version JSON object: ${rawInfo}`), null);
+      cb(new Error(`Broken ${this._fullName} package version JSON object: ${rawInfo}`), null);
       return;
     }
 
@@ -127,6 +132,6 @@ export class PackageVersionResolver {
    * @private
    */
   get _fullName() {
-    return `${this._name}@${this._version}`;
+    return `${this._name}@'${this._version}'`;
   }
 }
