@@ -91,9 +91,10 @@ export class PackageVersionResolver {
     }
 
     let rawInfo = result.result;
+    let info = null;
 
     try {
-      let info = JSON.parse(rawInfo);
+      info = JSON.parse(rawInfo);
     } catch (e) {
       cb(new Error(`Broken ${this._fullName} package version JSON object (${e}): ${rawInfo}`), null);
     }
