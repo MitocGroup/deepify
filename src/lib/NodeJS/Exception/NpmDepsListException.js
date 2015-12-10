@@ -25,16 +25,16 @@ export class NpmDepsListException extends Exception {
     let result = null;
 
     try {
-      result = JSON.parse(rawResult);
+      let resultObj = JSON.parse(rawResult);
 
-      if (typeof result === 'object' &&
-        result.hasOwnProperty('name') &&
-        result.hasOwnProperty('version') &&
-        result.hasOwnProperty('problems')) {
+      if (typeof resultObj === 'object' &&
+        resultObj.hasOwnProperty('name') &&
+        resultObj.hasOwnProperty('version') &&
+        resultObj.hasOwnProperty('problems')) {
 
-        result = `The following problems were found in the package ${result.name}@${result.version}:${os.EOL}`;
+        result = `The following problems were found in the package ${resultObj.name}@${resultObj.version}:${os.EOL}`;
 
-        result.problems.forEach((problem) => {
+        resultObj.problems.forEach((problem) => {
           result += `  - ${problem}${os.EOL}`;
         });
       }
