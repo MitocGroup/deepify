@@ -105,10 +105,7 @@ export class Exec {
     });
 
     this._checkError(result.status);
-
-    if (this.succeed) {
-      this._result = result.stdout.toString().trim();
-    }
+    this._result = result.stdout ? result.stdout.toString().trim() : null;
 
     return this;
   }
@@ -223,7 +220,7 @@ export class Exec {
 
       this._checkError(code);
 
-      if (this.succeed && this._result) {
+      if (this._result) {
         this._result = this._result.trim();
       }
 
@@ -247,7 +244,7 @@ export class Exec {
           `Command '${this._fullCmd}' failed in '${this._cwd}' with error: ${error}`
         );
       } else {
-        this._result = stdout.toString().trim();
+        this._result = stdout ? stdout.toString().trim() : null;
       }
 
       cb(this);

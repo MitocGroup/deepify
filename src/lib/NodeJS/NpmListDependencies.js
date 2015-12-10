@@ -7,6 +7,7 @@
 import {Bin} from './Bin';
 import {Exec} from '../Helpers/Exec';
 import {NpmDependency} from './NpmDependency';
+import {NpmDepsListException} from './Exception/NpmDepsListException';
 
 export class NpmListDependencies {
   /**
@@ -38,7 +39,7 @@ export class NpmListDependencies {
     let result = cmd.runSync();
 
     if (result.failed) {
-      throw result.error;
+      throw new NpmDepsListException(result.error, result.result);
     }
 
     let deps = JSON.parse(result.result);
