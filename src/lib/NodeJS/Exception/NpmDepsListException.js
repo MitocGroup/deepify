@@ -13,7 +13,7 @@ export class NpmDepsListException extends Exception {
    * @param {String} rawResult
    */
   constructor(error, rawResult) {
-    super(this._npmError(rawResult) || error);
+    super(NpmDepsListException._npmError(rawResult) || error);
   }
 
   /**
@@ -21,7 +21,7 @@ export class NpmDepsListException extends Exception {
    * @returns {String}
    * @private
    */
-  _npmError(rawResult) {
+  static _npmError(rawResult) {
     let result = null;
 
     try {
