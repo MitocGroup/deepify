@@ -95,6 +95,16 @@ export class Exec {
   }
 
   /**
+   * @param {String} arg
+   * @returns {Exec}
+   */
+  addArg(arg) {
+    this._args.push(arg);
+
+    return this;
+  }
+
+  /**
    * @returns {Exec}
    */
   runSync() {

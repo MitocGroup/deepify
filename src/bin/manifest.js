@@ -123,6 +123,11 @@ module.exports = {
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
           required: false,
         },
+        fast: {
+          alias: 'f',
+          description: 'Faster deployment without copying the sources (may alter the web app state)',
+          required: false,
+        },
       },
       args: {
         path: {
