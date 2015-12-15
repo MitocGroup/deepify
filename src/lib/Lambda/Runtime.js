@@ -293,7 +293,21 @@ export class Runtime {
    * @returns {Object}
    */
   get context() {
+    let date = new Date();
+    let logStreamDate = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+
     return {
+
+      /** make the context Lambda alike */
+      awsRequestId: '6bde10dc-a329-11e5-8f4d-55470b0a5783',
+      invokeid: '6bde10dc-a329-11e5-8f4d-55470b0a5783',
+      logGroupName: `/aws/lambda/${this._name}`,
+      logStreamName: `${logStreamDate}/${logStreamDate}[$LATEST]e680b516b0ea402eb3ff38f10b40a264`,
+      functionName: this._name,
+      memoryLimitInMB: '128',
+      functionVersion: '$LATEST',
+      invokedFunctionArn: `arn:aws:lambda:::function:${this._name}`,
+
       clientContext: {
         EnvironmentName: Runtime.ENVIRONMENT,
       },
