@@ -6,6 +6,7 @@
 
 import ChildProcess from 'child_process';
 import syncExec from 'sync-exec';
+import {EventEmitter} from 'events';
 
 export class Exec {
   /**
@@ -94,6 +95,16 @@ export class Exec {
   }
 
   /**
+   * @param {String} arg
+   * @returns {Exec}
+   */
+  addArg(arg) {
+    this._args.push(arg);
+
+    return this;
+  }
+
+  /**
    * @returns {Exec}
    */
   runSync() {
@@ -104,10 +115,7 @@ export class Exec {
     });
 
     this._checkError(result.status);
-
-    if (this.succeed) {
-      this._result = result.stdout.toString().trim();
-    }
+    this._result = result.stdout ? result.stdout.toString().trim() : null;
 
     return this;
   }
@@ -150,10 +158,26 @@ export class Exec {
 
       let emitter = emitters[i];
 
+      if (!emitter.hasOwnProperty('getMaxListeners')) {
+        emitter.__max_listeners__ = EventEmitter.defaultMaxListeners || 0;
+
+        emitter.getMaxListeners = () => {
+          return emitter.__max_listeners__;
+        };
+      }
+
       if (increase) {
         emitter.setMaxListeners(emitter.getMaxListeners() + 1);
+
+        if (emitter.hasOwnProperty('__max_listeners__')) {
+          emitter.__max_listeners__++;
+        }
       } else {
         emitter.setMaxListeners(Math.max(emitter.getMaxListeners() - 1, 0));
+
+        if (emitter.hasOwnProperty('__max_listeners__')) {
+          emitter.__max_listeners__--;
+        }
       }
     }
   }
@@ -206,7 +230,7 @@ export class Exec {
 
       this._checkError(code);
 
-      if (this.succeed && this._result) {
+      if (this._result) {
         this._result = this._result.trim();
       }
 
@@ -230,7 +254,7 @@ export class Exec {
           `Command '${this._fullCmd}' failed in '${this._cwd}' with error: ${error}`
         );
       } else {
-        this._result = stdout.toString().trim();
+        this._result = stdout ? stdout.toString().trim() : null;
       }
 
       cb(this);

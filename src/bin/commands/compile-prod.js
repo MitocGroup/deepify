@@ -234,7 +234,8 @@ module.exports = function(mainPath) {
 
       // @todo: move it somewhere...
       var cleanupCmd = new Exec(
-        'find . -type d -iname "aws-sdk*" -print0 | xargs -0 rm -rf'
+        'find . -type d -iname "aws-sdk*" -print0 | xargs -0 rm -rf;',
+        'find . -type f -iname "*.es6" -print0 | xargs -0 rm -rf'
       );
 
       cleanupCmd.cwd = lambdaTmpPath;

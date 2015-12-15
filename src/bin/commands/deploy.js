@@ -19,6 +19,7 @@ module.exports = function(mainPath) {
   var ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
 
   var localOnly = this.opts.locate('dry-run').exists;
+  var fastDeploy = this.opts.locate('fast').exists;
   var dumpCodePath = this.opts.locate('dump-local').value;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
   var hasToPullDeps = this.opts.locate('pull-deps').exists;
@@ -44,60 +45,85 @@ module.exports = function(mainPath) {
     config = fse.readJsonSync(configFile);
   }
 
-  var tmpDir = os.tmpdir();
-  var tmpPropertyPath = path.join(tmpDir, path.basename(mainPath));
-  tmpPropertyPath += '_' + (new Date()).getTime();
-
   var propertyInstance;
+  var tmpPropertyPath = mainPath;
 
   if (localOnly) {
     console.log('Local mode on!');
   }
 
-  fse.ensureDirSync(tmpPropertyPath);
+  if (fastDeploy) {
+    var prompt = new Prompt('Fast deploy may alter the web app state! Start anyway?');
 
-  console.log('Copying sources to ' + tmpPropertyPath);
+    prompt.readConfirm(function(result) {
+      if (result) {
+        process.on('exit', function() {
+          new Exec('rm', '-rf', path.join(tmpPropertyPath, '_public'))
+            .avoidBufferOverflow()
+            .runSync();
 
-  new Exec(
-    'cp',
-    '-R',
-    path.join(mainPath, '*'),
-    tmpPropertyPath + '/'
-  )
-    .avoidBufferOverflow()
-    .run(function(result) {
-      if (result.failed) {
-        console.error('Error copying sources into ' + tmpPropertyPath + ': ' + result.error);
-        this.exit(1);
+          removePackedLambdas.bind(this)();
+        });
+
+        startDeploy.bind(this)();
+        return;
       }
 
-      // @todo: remove it?
-      process.on('exit', function() {
-        var result = new Exec('rm', '-rf', tmpPropertyPath)
-          .avoidBufferOverflow()
-          .runSync();
+      console.log('Cancelled by the user...');
+    }.bind(this));
+  } else {
+    var tmpDir = os.tmpdir();
+    tmpPropertyPath = path.join(tmpDir, path.basename(mainPath));
+    tmpPropertyPath += '_' + (new Date()).getTime();
 
+    fse.ensureDirSync(tmpPropertyPath);
+
+    console.log('Copying sources to ' + tmpPropertyPath);
+
+    new Exec(
+      'cp',
+      '-R',
+      path.join(mainPath, '*'),
+      tmpPropertyPath + '/'
+    )
+      .avoidBufferOverflow()
+      .run(function(result) {
         if (result.failed) {
-          console.error(result.error);
-        }
-      });
-
-      propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
-
-      propertyInstance.assureFrontendEngine(function(error) {
-        if (error) {
-          console.error('Error while assuring frontend engine: ' + error);
+          console.error('Error copying sources into ' + tmpPropertyPath + ': ' + result.error);
+          this.exit(1);
         }
 
-        propertyInstance.runInitMsHooks(function() {
-          var deployCb = function() {
-            prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
-          };
+        process.on('exit', function() {
+          var result = new Exec('rm', '-rf', tmpPropertyPath)
+            .avoidBufferOverflow()
+            .runSync();
 
-          hasToPullDeps ? pullDeps.bind(this)(deployCb) : deployCb.bind(this)();
-        }.bind(this));
+          if (result.failed) {
+            console.error(result.error);
+          }
+        });
+
+        startDeploy.bind(this)();
+      }.bind(this));
+  }
+
+  function startDeploy() {
+    propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
+
+    propertyInstance.assureFrontendEngine(function(error) {
+      if (error) {
+        console.error('Error while assuring frontend engine: ' + error);
+      }
+
+      propertyInstance.runInitMsHooks(function() {
+        var deployCb = function() {
+          prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
+        };
+
+        hasToPullDeps ? pullDeps.bind(this)(deployCb) : deployCb.bind(this)();
       }.bind(this));
     }.bind(this));
+  }
 
   function getConfigFromS3(propertyInstance, cb) {
     console.log('Trying to retrieve .cfg.deeploy.json from S3 ' + cfgBucket);
@@ -171,18 +197,20 @@ module.exports = function(mainPath) {
             Bin.node,
             this.scriptPath,
             'compile-prod',
-            propertyPath,
-            '--remove-source',
-            microservicesToDeploy ? '--partial ' + microservicesToDeploy : ''
+            propertyPath
           );
+
+          !fastDeploy && cmd.addArg('--remove-source');
+          microservicesToDeploy && cmd.addArg('--partial');
 
           cmd.run(function(result) {
             if (result.failed) {
-              console.error(result.error);
+              console.error('Backend production preparations failed: ' + result.error);
+              this.exit(1);
             }
 
             cb();
-          }, true);
+          }.bind(this), true);
 
           return;
         }
@@ -372,6 +400,24 @@ module.exports = function(mainPath) {
 
         dumpLambdas();
       }.bind(this));
+  }
+
+  function removePackedLambdas() {
+    var lambdas = getLambdas(tmpPropertyPath);
+
+    if (lambdas.length <= 0) {
+      return;
+    }
+
+    var lambdasVector = [];
+    var stack = lambdas.length;
+
+    for (var i = 0; i < lambdas.length; i++) {
+      try {
+        fs.unlinkSync(lambdas[i]);
+      } catch (e) {
+      }
+    }
   }
 
   function dumpLambdas() {
