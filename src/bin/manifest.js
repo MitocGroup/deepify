@@ -28,7 +28,7 @@ module.exports = {
     },
     'install': {
       example: 'deepify install https://github.com/MitocGroup/deep-microservices-todo-app.git path/to/web_app',
-      description: 'Installs an microservice from remote git repository',
+      description: 'Install an microservice from remote git repository',
       opts: {
       },
       args: {
@@ -182,7 +182,7 @@ module.exports = {
     },
     'compile-es6': {
       example: 'deepify compile-es6 path/to/lambda',
-      description: 'Compiles ES6 scripts to ES5 using babel (matched by *.es6)',
+      description: 'Compile ES6 scripts to ES5 using babel (matched by *.es6)',
       opts: {
       },
       args: {
