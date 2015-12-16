@@ -128,6 +128,11 @@ module.exports = {
           description: 'Faster deployment without copying the sources (may alter the web app state)',
           required: false,
         },
+        'aws-sdk': {
+          alias: 'a',
+          description: 'Force latest aws-sdk in Lambda',
+          required: false,
+        },
       },
       args: {
         path: {
@@ -204,6 +209,11 @@ module.exports = {
         partial: {
           alias: 'm',
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
+          required: false,
+        },
+        'aws-sdk': {
+          alias: 'a',
+          description: 'Force latest aws-sdk in Lambda',
           required: false,
         },
       },
