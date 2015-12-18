@@ -23,6 +23,7 @@ import {Property_Frontend as Frontend} from 'deep-package-manager';
 import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
 import {Property_Config as Config} from 'deep-package-manager';
 import DeepDB from 'deep-db';
+import {Hook} from './Hook';
 
 export class Instance {
   /**
@@ -243,51 +244,60 @@ export class Instance {
    * @returns {Instance}
    */
   listen(port = 8080, dbServer = null, callback = () => {}) {
-    this._log(`Creating server on port ${port}`);
+    let hook = new Hook(this);
 
-    this._server = Http.createServer((...args) => {
-      this._handler(...args);
-    });
+    hook.runBefore(() => {
+      this._log(`Creating server on port ${port}`);
 
-    var localDbInstance = null;
+      this._server = Http.createServer((...args) => {
+        this._handler(...args);
+      });
 
-    this._server.listen(port, (error) => {
-      if (error) {
-        throw new FailedToStartServerException(port, error);
-      }
+      var localDbInstance = null;
 
-      this._host = `http://localhost:${port}`;
-
-      this._log('HTTP Server is up and running!');
-
-      if (!dbServer) {
-        callback(this);
-        return;
-      }
-
-      this._log(`Creating local DynamoDB instance on port ${DeepDB.LOCAL_DB_PORT}`);
-
-      localDbInstance = DeepDB.startLocalDynamoDBServer((error) => {
+      this._server.listen(port, (error) => {
         if (error) {
           throw new FailedToStartServerException(port, error);
         }
 
-        this._log(`You can access DynamoDB Console via http://localhost:${DeepDB.LOCAL_DB_PORT}/shell`);
+        this._host = `http://localhost:${port}`;
 
-        callback(this);
-      }, dbServer);
-    });
+        this._log('HTTP Server is up and running!');
 
-    // @todo: move it in destructor?
-    process.on('exit', () => {
-      this.stop(() => {
-        if (localDbInstance) {
-          localDbInstance.stop(() => {
-            process.exit(0);
+        if (!dbServer) {
+          hook.runAfter(() => {
+            callback(this);
           });
-        } else {
-          process.exit(0);
+
+          return;
         }
+
+        this._log(`Creating local DynamoDB instance on port ${DeepDB.LOCAL_DB_PORT}`);
+
+        localDbInstance = DeepDB.startLocalDynamoDBServer((error) => {
+          if (error) {
+            throw new FailedToStartServerException(port, error);
+          }
+
+          this._log(`You can access DynamoDB Console via http://localhost:${DeepDB.LOCAL_DB_PORT}/shell`);
+
+          hook.runAfter(() => {
+            callback(this);
+          });
+        }, dbServer);
+      });
+
+      // @todo: move it in destructor?
+      process.on('exit', () => {
+        this.stop(() => {
+          if (localDbInstance) {
+            localDbInstance.stop(() => {
+              process.exit(0);
+            });
+          } else {
+            process.exit(0);
+          }
+        });
       });
     });
 

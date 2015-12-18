@@ -74,29 +74,27 @@ module.exports = function(mainPath) {
         .createFromServer(server)
         .extract();
 
-      runInstallHook(function() {
-        console.log('Running "npm install" on ' + lambdasToInstall.length + ' Lambdas');
+      console.log('Running "npm install" on ' + lambdasToInstall.length + ' Lambdas');
 
-        var npmInstall = new NpmInstall(lambdasToInstall);
+      var npmInstall = new NpmInstall(lambdasToInstall);
 
-        npmInstall.runChunk(function() {
-          if (Bin.npmModuleInstalled('aws-sdk', true)) {
-            console.log('Start linking aws-sdk');
+      npmInstall.runChunk(function() {
+        if (Bin.npmModuleInstalled('aws-sdk', true)) {
+          console.log('Start linking aws-sdk');
+
+          linkAwsSdk.bind(this)(lambdasToInstall, startServer);
+        } else {
+          var awsSdkInstall = new NpmInstallLibs();
+          awsSdkInstall.libs = 'aws-sdk';
+          awsSdkInstall.global = true;
+
+          awsSdkInstall.run(function() {
+            console.log('Installing aws-sdk globally');
 
             linkAwsSdk.bind(this)(lambdasToInstall, startServer);
-          } else {
-            var awsSdkInstall = new NpmInstallLibs();
-            awsSdkInstall.libs = 'aws-sdk';
-            awsSdkInstall.global = true;
-
-            awsSdkInstall.run(function() {
-              console.log('Installing aws-sdk globally');
-
-              linkAwsSdk.bind(this)(lambdasToInstall, startServer);
-            }.bind(this));
-          }
-        }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE);
-      }.bind(this));
+          }.bind(this));
+        }
+      }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE);
     }.bind(this));
   }.bind(this));
 
@@ -107,32 +105,6 @@ module.exports = function(mainPath) {
     npmLink.runChunk(function() {
       cb.bind(this)();
     }.bind(this));
-  }
-
-  function runInstallHook(cb) {
-    if (skipBuildHook) {
-      cb();
-      return;
-    }
-
-    var hookPath = path.join(mainPath, 'hook.server.js');
-
-    console.log('Checking for build hook in ' + hookPath);
-
-    if (!fs.existsSync(hookPath)) {
-      cb();
-      return;
-    }
-
-    console.log('Running build hook from ' + hookPath);
-
-    var hook = require(hookPath);
-
-    if (typeof hook === 'function') {
-      hook.bind(server)(cb);
-    } else {
-      cb();
-    }
   }
 
   function startServer() {
