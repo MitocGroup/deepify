@@ -6,6 +6,7 @@
 
 import path from 'path';
 import fs from 'fs';
+import {Helpers_WaitFor as WaitFor} from 'deep-package-manager';
 
 export class Hook {
   /**
@@ -44,18 +45,53 @@ export class Hook {
    * @returns {Hook}
    */
   run(type, callback) {
-    let hookFile = path.join(this._server.property.path, Hook.FILE_NAME);
+    let wait = new WaitFor();
+    let microservices = this._server.property.microservices;
+    let remaining = microservices.length;
+
+    wait.push(() => {
+      return remaining <= 0;
+    });
+
+    wait.ready(callback);
+
+    for (let i in microservices) {
+      if (!microservices.hasOwnProperty(i)) {
+        continue;
+      }
+
+      let microservice = microservices[i];
+
+      this._run(microservice, type, () => {
+        remaining--;
+      });
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {Microservice} microservice
+   * @param {String} type
+   * @param {Function} callback
+   * @returns {Hook}
+   * @private
+   */
+  _run(microservice, type, callback) {
+    let hookFile = path.join(microservice.basePath, Hook.FILE_NAME);
 
     if (!fs.existsSync(hookFile)) {
+      console.log(`No server ${type} init hook found for ${microservice.identifier}`);
+
       callback();
       return this;
     }
 
+    console.log(`Running server ${type} init hook for ${microservice.identifier}`);
+
     let hook = require(hookFile);
 
     hook.bind(this._createContext(type))(callback);
-
-    return this;
   }
 
   /**
