@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -49,7 +49,7 @@
   "scripts": {
     "coverage": "babel-node `which istanbul` cover --report lcovonly _mocha -- --ui tdd --recursive --reporter spec",
     "preinstall": "npm run compile",
-    "postinstall": "hooks/assure_deep_dev.js && hooks/autocomplete_deepify.sh",
+    "postinstall": "hooks/autocomplete_deepify.sh",
     "test": "babel-node `which isparta` cover --include 'lib/**/*.js' _mocha -- 'test/**/*.js' --reporter spec --ui tdd",
     "compile": "if [ -d 'lib/' ]; then BABEL_ENV=production babel lib/ --out-dir lib.compiled/; fi",
     "obfuscate-compiled": "if [ -d 'lib/' ]; then npm list -g --depth 0 uglify > /dev/null 2>&1 || npm install uglify -g; for f in $(find lib.compiled -type f -name *.js); do uglify -s ${f} -o ${f}; done; fi",
