@@ -19,6 +19,26 @@ export class Bin {
   }
 
   /**
+   * @returns {Number}
+   */
+  static get npmMajorVersion() {
+    let versionResult = new Exec(Bin.npm, '--version').runSync();
+
+    if (versionResult.failed) {
+      throw new Error(versionResult.error);
+    }
+
+    return Number(versionResult.result.match(/^(\d+)\./)[1]);
+  }
+
+  /**
+   * @returns {Number}
+   */
+  static get nodeMajorVersion() {
+    return Number(process.version.match(/^v(\d+)\./)[1]);
+  }
+
+  /**
    * @returns {String}
    */
   static get npm() {
