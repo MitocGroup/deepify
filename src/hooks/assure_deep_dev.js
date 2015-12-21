@@ -13,6 +13,8 @@ var skipModules = [
   'mocha', 'chai', 'sinon',
   'sinon-chai', 'istanbul',
   'jscoverage', 'jshint', 'jshint-stylish',
+  'coveralls', 'karma', 'karma-mocha',
+  'mocha-lcov-reporter'
 ];
 
 if (process.env[npmEnvKey] !== 'true') {
@@ -21,6 +23,11 @@ if (process.env[npmEnvKey] !== 'true') {
   var exec = require('child_process').exec;
 
   var deepModulePath = path.join(__dirname, '../node_modules');
+
+  if (!fs.existsSync(deepModulePath)) {
+    console.error('Missing node_modules in ' + deepModulePath + '. Skipping...');
+    process.exit(0);
+  }
 
   fs.readdir(deepModulePath, function (error, files) {
     if (error) {
@@ -33,6 +40,11 @@ if (process.env[npmEnvKey] !== 'true') {
 
       if (['.', '..'].indexOf(basename) === -1 && basename.indexOf('deep-') === 0) {
         var modulePath = path.join(deepModulePath, basename);
+
+        if (!fs.existsSync(modulePath)) {
+          console.error('Missing node_modules in ' + modulePath + '. Skipping...');
+          continue;
+        }
 
         fs.stat(modulePath, function (modulePath, error, stats) {
           if (error) {
