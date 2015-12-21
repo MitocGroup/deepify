@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -78,8 +78,8 @@
     "sinon-chai": "^2.8.x"
   },
   "engines": {
-    "node": ">=0.12 <5.0.0",
-    "npm": ">=2.10"
+    "node": ">=0.12 <5.0",
+    "npm": ">=2.10 <3.0"
   },
   "os": [
     "!win32"
