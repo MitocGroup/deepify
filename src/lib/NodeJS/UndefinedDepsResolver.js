@@ -84,21 +84,16 @@ export class UndefinedDepsResolver {
       }
 
       let undefinedDep = this._undefinedStack[i];
-      let shadowKey = `${undefinedDep.name}@${undefinedDep.requestedVersion}`;
-
-      if (this._resolvedStack.hasOwnProperty(shadowKey)) {
-        remaining--;
-        continue;
-      }
 
       new PackageVersionResolver(this._mainDep.defaultRootPath, undefinedDep.name, undefinedDep.requestedVersion)
         .resolve((error, resolvedVersion) => {
-          if (error || this._resolvedStack.hasOwnProperty(shadowKey)) {
+          if (error) {
             remaining--;
             return;
           }
 
           let suitableDep = this._mainDep.find(undefinedDep.name, resolvedVersion);
+          let shadowKey = `${undefinedDep.name}@${undefinedDep.requestedVersion}`;
 
           if (!suitableDep) {
             let resolvedFullName = `${undefinedDep.name}@${resolvedVersion}`;
