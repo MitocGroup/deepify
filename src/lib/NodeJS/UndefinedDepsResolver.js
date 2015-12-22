@@ -93,15 +93,13 @@ export class UndefinedDepsResolver {
           }
 
           let suitableDep = this._mainDep.find(undefinedDep.name, resolvedVersion);
-          let shadowKey = `${undefinedDep.name}@${undefinedDep.requestedVersion}`;
 
           if (!suitableDep) {
-            let resolvedFullName = `${undefinedDep.name}@${resolvedVersion}`;
-
-            throw new Error(
-              `Unable to find suitable dep for ${shadowKey} resolved into ${resolvedFullName}`
-            );
+            remaining--;
+            return;
           }
+
+          let shadowKey = `${undefinedDep.name}@${undefinedDep.requestedVersion}`;
 
           // @todo: set through an setter
           undefinedDep._version = suitableDep.version;
