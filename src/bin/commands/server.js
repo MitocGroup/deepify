@@ -28,7 +28,6 @@ module.exports = function(mainPath) {
   var openBrowser = this.opts.locate('open-browser').exists;
   var skipBuildHook = this.opts.locate('skip-build-hook').exists;
   var skipBackendBuild = this.opts.locate('skip-backend-build').exists;
-  var profiling = this.opts.locate('profiling').exists;
   var skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
 
   // @todo: implement it in a better way
@@ -55,7 +54,6 @@ module.exports = function(mainPath) {
 
   if (skipBackendBuild) {
     server = new Server(property);
-    server.profiling = profiling;
 
     startServer();
     return;
@@ -68,7 +66,6 @@ module.exports = function(mainPath) {
 
     property.runInitMsHooks(function() {
       server = new Server(property);
-      server.profiling = profiling;
 
       var lambdasToInstall = LambdaExtractor
         .createFromServer(server)

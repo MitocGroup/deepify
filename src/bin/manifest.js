@@ -46,11 +46,6 @@ module.exports = {
       example: 'deepify server path/to/web_app -o',
       description: 'Run local development server',
       opts: {
-        profiling: {
-          alias: 'd',
-          description: 'Enable Lambdas profiling',
-          required: false,
-        },
         'build-path': {
           alias: 'b',
           description: 'The path to the build (in order to pick up config)',

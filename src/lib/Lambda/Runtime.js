@@ -33,7 +33,6 @@ export class Runtime {
     this._timer = null;
 
     this._silent = false;
-    this._profiler = null;
     this._name = Hash.pseudoRandomId(this);
     this._lambdaPath = lambdaPath;
     this._awsConfigFile = null;
@@ -105,20 +104,6 @@ export class Runtime {
   }
 
   /**
-   * @returns {AbstractProfiler}
-   */
-  get profiler() {
-    return this._profiler;
-  }
-
-  /**
-   * @param {AbstractProfiler} profiler
-   */
-  set profiler(profiler) {
-    this._profiler = profiler;
-  }
-
-  /**
    * @returns {Boolean}
    */
   get silent() {
@@ -155,7 +140,6 @@ export class Runtime {
     }
 
     this._measureTime && this._timer.start();
-    this._profiler && this._profiler.start();
 
     this._lambda.handler.bind(this)(event, this.context);
 
@@ -177,21 +161,12 @@ export class Runtime {
           let lambda = Runtime.createLambda(localPath, _this._awsConfigFile);
 
           lambda.name = data.lambda;
-          lambda.profiler = _this._profiler;
 
           lambda.succeed = (result) => {
-            lambda.profiler && lambda.profiler.save((error) => {
-              error && _this._log(`Error while saving profile for Lambda ${lambda.name}: ${error}`);
-            });
-
             callback(null, result);
           };
 
           lambda.fail = (error) => {
-            lambda.profiler && lambda.profiler.save((error) => {
-              error && _this._log(`Error while saving profile for Lambda ${lambda.name}: ${error}`);
-            });
-
             callback(error, null);
           };
 
@@ -312,8 +287,6 @@ export class Runtime {
         EnvironmentName: Runtime.ENVIRONMENT,
       },
       succeed: function(result) {
-        this._profiler && this._profiler.stop();
-
         this._succeed(result);
 
         this._measureTime && this._log(this._timer.stop().toString());
@@ -321,8 +294,6 @@ export class Runtime {
         this._complete(null, result);
       }.bind(this),
       fail: function(error) {
-        this._profiler && this._profiler.stop();
-
         this._fail(error);
 
         this._measureTime && this._log(this._timer.stop().toString());

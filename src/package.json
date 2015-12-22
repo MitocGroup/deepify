@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.4.11",
+  "version": "1.4.12",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -61,16 +61,14 @@
     "deep-db": "^1.x.x",
     "deep-core": "^1.x.x",
     "proxyquire": "^1.5.x",
-    "v8-profiler": "^5.3.x",
-    "traceviewify": "^0.4.x",
     "open": "^0.0.x",
-    "aws-sdk": "^2.2.x",
     "jsonfile": "^1.1.x",
     "fs-extra": "^0.23.x",
     "tmp": "^0.0.x",
     "aws-api-gw-client": "^0.1.x",
     "mime": "^1.3.x",
-    "gather-dependencies": "^1.0.x"
+    "gather-dependencies": "^1.0.x",
+    "aws-sdk": "^2.2.x"
   },
   "devDependencies": {
     "chai": "^3.2.x",

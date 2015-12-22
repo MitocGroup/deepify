@@ -6,7 +6,6 @@
 
 import {Runtime} from './Runtime';
 import {ForksManager} from './ForksManager';
-import {StaticDumpFileProfiler} from '../Lambda/Profile/StaticDumpFileProfiler';
 
 // avoid process to be killed when some async calls are still active!
 ForksManager.registerListener();
@@ -21,13 +20,6 @@ let rawRuntime = JSON.parse(args[0]);
 
 let runtime = Runtime.createLambda(rawRuntime._lambdaPath, rawRuntime._awsConfigFile);
 runtime.name = rawRuntime._name;
-
-if (rawRuntime._profiler) {
-  runtime.profiler = new StaticDumpFileProfiler(
-    rawRuntime._profiler._name,
-    rawRuntime._profiler._dumpFile
-  );
-}
 
 /**
  *
@@ -54,7 +46,6 @@ if (rawRuntime._profiler) {
     if (assureContextNotSent(result)) {
       process.send({
         state: 'succeed',
-        profile: runtime.profiler ? runtime.profiler.profile : null,
         args: [result],
       });
     }
@@ -64,7 +55,6 @@ if (rawRuntime._profiler) {
     if (assureContextNotSent(error)) {
       process.send({
         state: 'fail',
-        profile: runtime.profiler ? runtime.profiler.profile : null,
         args: [error],
       });
     }

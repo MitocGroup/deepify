@@ -15,9 +15,7 @@ import OS from 'os';
 import Mime from 'mime';
 import JsonFile from 'jsonfile';
 import {Runtime as LambdaRuntime} from '../Lambda/Runtime';
-import {Profiler} from '../Lambda/Profile/Profiler';
 import QueryString from 'querystring';
-import {TraceBuilder} from './TraceBuilder';
 import {Property_Instance as Property} from 'deep-package-manager';
 import {Property_Frontend as Frontend} from 'deep-package-manager';
 import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
@@ -315,28 +313,6 @@ export class Instance {
   }
 
   /**
-   * @param {LambdaRuntime} lambda
-   * @private
-   */
-  _trySaveProfile(lambda) {
-    // the second check is done because of threaded version!
-    if (!lambda.profiler || !lambda.profiler.profile) {
-      return;
-    }
-
-    lambda.profiler.save((error) => {
-      if (error) {
-        this._log(`Error while saving profile for Lambda ${lambda.name}: ${error}`);
-        return;
-      }
-
-      let profileUrl = `${this._host}${Instance.PROFILE_URI}?p=${lambda.name}`;
-
-      this._log(`Profile for Lambda ${lambda.name} accessible at ${profileUrl}`);
-    });
-  }
-
-  /**
    * @returns {Number}
    */
   get localId() {
@@ -357,11 +333,8 @@ export class Instance {
     );
 
     lambda.name = `${lambdaConfig.name}-${this.localId}`;
-    lambda.profiler = this._profiling ? new Profiler(lambda.name) : null;
 
     lambda.succeed = (result) => {
-      this._trySaveProfile(lambda);
-
       let plainResult = JSON.stringify(result);
 
       if (!asyncMode) {
@@ -373,8 +346,6 @@ export class Instance {
     };
 
     lambda.fail = (error) => {
-      this._trySaveProfile(lambda);
-
       if (!asyncMode) {
         this._log(`Lambda ${lambdaConfig.name} execution fail: ${error.message}`);
         this._send500(response, error);
@@ -413,35 +384,6 @@ export class Instance {
         this._send(response, JSON.stringify(this._defaultFrontendConfig), 200, 'application/json');
         return;
       }
-    }
-
-    if (uri === Instance.PROFILE_URI) {
-      if (queryObject.p) {
-        // @todo: make it compatible with other browsers
-        if (!this._isTracerCompatible(request)) {
-          this._send(response, '<h1>Try open profiling url in Chrome/Chromium browser</h1>', 200, 'text/html', false);
-          return;
-        }
-
-        let profileFile = Profiler.getDumpFile(queryObject.p);
-        let traceBuilder = new TraceBuilder(profileFile);
-
-        traceBuilder.compile(function(error, file) {
-          if (error) {
-            this._log(`Unable to read profile ${profileFile}: ${error}`);
-            this._send500(response, error);
-            return;
-          }
-
-          this._log(`Serving profile ${profileFile}`);
-          this._send(response, file, 200, 'text/html', true);
-        }.bind(this));
-
-        return;
-      }
-
-      this._send500(response, 'You have to specify profile id');
-      return;
     } else if (uri === Instance.LAMBDA_URI || uri === Instance.LAMBDA_ASYNC_URI) {
       let isAsync = uri === Instance.LAMBDA_ASYNC_URI;
 
@@ -545,17 +487,6 @@ export class Instance {
 
   /**
    * @param {Http.IncomingMessage} request
-   * @returns {Boolean}
-   * @private
-   */
-  _isTracerCompatible(request) {
-    let ua = request.headers['user-agent'] || '';
-
-    return /chrom(e|ium)/i.test(ua);
-  }
-
-  /**
-   * @param {Http.IncomingMessage} request
    * @param {Function} callback
    */
   _readRequestData(request, callback) {
@@ -645,13 +576,6 @@ export class Instance {
    */
   _log(...args) {
     this._logger(...args);
-  }
-
-  /**
-   * @returns {String}
-   */
-  static get PROFILE_URI() {
-    return '/_/profile';
   }
 
   /**
