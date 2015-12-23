@@ -160,8 +160,7 @@ export class Program {
    * @param {Array} args
    */
   run(args = null) {
-    // @todo: find a better place for this
-    new DeepLog().overrideJsConsole(false);
+    Program._logDriver.overrideJsConsole(false);
 
     if (args || !this._inputParsed) {
       this.input(args);
@@ -174,6 +173,8 @@ export class Program {
 
     // @todo: add it for commands as well
     if (showAutoCompletion && showAutoCompletion.exists) {
+      Program._logDriver.overrideJsConsole(false, false);
+
       this.help.printAutoCompletion(
         (this.hasCommands && command) ? command.value : ''
       );
@@ -214,8 +215,7 @@ export class Program {
     this._validateInput();
 
     try {
-      // @todo: find a better place for this
-      new DeepLog().overrideJsConsole();
+      Program._logDriver.overrideJsConsole();
 
       this._action.bind(this)(...this._args.listValues());
     } catch (e) {
@@ -437,5 +437,17 @@ export class Program {
    */
   static get NODE_BINARY() {
     return 'node';
+  }
+
+  /**
+   * @returns {DeepLog}
+   * @private
+   */
+  static get _logDriver() {
+    if (!Program.hasOwnProperty('__deep_log')) {
+      Program.__deep_log = new DeepLog();
+    }
+
+    return Program.__deep_log;
   }
 }

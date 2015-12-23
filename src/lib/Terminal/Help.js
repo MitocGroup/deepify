@@ -113,7 +113,7 @@ export class Help {
    */
   static _scoreSimilarWord(string, word, fuzziness = null) {
     // If the string is equal to the word, perfect match.
-    if (string === word) {
+    if (string === word || string.indexOf(word) !== -1) {
       return 1;
     }
 
