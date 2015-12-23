@@ -160,6 +160,9 @@ export class Program {
    * @param {Array} args
    */
   run(args = null) {
+    // @todo: find a better place for this
+    new DeepLog().overrideJsConsole(false);
+
     if (args || !this._inputParsed) {
       this.input(args);
     }
@@ -183,7 +186,7 @@ export class Program {
 
       if (!subProgram) {
         console.log('');
-        console.log(`No such command '${command.value}' found!`);
+        console.error(`No such command '${command.value}' found!`);
         this._outputListCommands();
 
         this.exit(1);
@@ -216,8 +219,8 @@ export class Program {
 
       this._action.bind(this)(...this._args.listValues());
     } catch (e) {
-      console.log(e.message);
-      console.log(e.stack);
+      console.error(e.message);
+      console.error(e.stack);
 
       this.exit(1);
     }
