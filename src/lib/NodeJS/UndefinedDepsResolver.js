@@ -75,6 +75,11 @@ export class UndefinedDepsResolver {
       this._cloneShadow = {};
       this._resolvedStack = {};
 
+      // @todo: remove?
+      if (process.env.hasOwnProperty('DEEP_DUMP_RESOLVED_DEPS_TREE')) {
+        console.log(this._mainDep.toString());
+      }
+
       cb();
     });
 
