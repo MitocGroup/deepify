@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -47,9 +47,8 @@
     "url": "https://github.com/MitocGroup/deepify.git"
   },
   "scripts": {
-    "coverage": "babel-node `which istanbul` cover --report lcovonly _mocha -- --ui tdd --recursive --reporter spec",
     "preinstall": "npm run compile",
-    "postinstall": "hooks/assure_deep_dev.js && hooks/autocomplete_deepify.sh",
+    "postinstall": "hooks/autocomplete_deepify.sh",
     "test": "babel-node `which isparta` cover --include 'lib/**/*.js' _mocha -- 'test/**/*.js' --reporter spec --ui tdd",
     "compile": "if [ -d 'lib/' ]; then BABEL_ENV=production babel lib/ --out-dir lib.compiled/; fi",
     "obfuscate-compiled": "if [ -d 'lib/' ]; then npm list -g --depth 0 uglify > /dev/null 2>&1 || npm install uglify -g; for f in $(find lib.compiled -type f -name *.js); do uglify -s ${f} -o ${f}; done; fi",
@@ -61,17 +60,14 @@
     "deep-db": "^1.x.x",
     "deep-core": "^1.x.x",
     "proxyquire": "^1.5.x",
-    "v8-profiler": "^5.3.x",
-    "traceviewify": "^0.4.x",
     "open": "^0.0.x",
-    "aws-sdk": "^2.2.x",
     "jsonfile": "^1.1.x",
     "fs-extra": "^0.23.x",
-    "sync-exec": "^0.6.x",
     "tmp": "^0.0.x",
     "aws-api-gw-client": "^0.1.x",
     "mime": "^1.3.x",
-    "gather-dependencies": "^1.0.x"
+    "gather-dependencies": "^1.0.x",
+    "aws-sdk": "^2.2.x"
   },
   "devDependencies": {
     "chai": "^3.2.x",
@@ -79,8 +75,8 @@
     "sinon-chai": "^2.8.x"
   },
   "engines": {
-    "node": ">=0.12 <5.0.0",
-    "npm": ">=2.10"
+    "node": ">=0.12 <5.0",
+    "npm": ">=2.10 <3.0"
   },
   "os": [
     "!win32"

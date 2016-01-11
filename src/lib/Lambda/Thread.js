@@ -75,10 +75,6 @@ export class Thread {
 
       contextSent = true;
 
-      if (this._runtime.profiler) {
-        this._runtime.profiler.profile = payload.profile;
-      }
-
       this._runtime[payload.state].apply(this._runtime, payload.args);
       this._cleanup();
     });

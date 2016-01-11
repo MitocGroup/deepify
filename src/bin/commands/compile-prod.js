@@ -13,6 +13,7 @@ module.exports = function(mainPath) {
   var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   var DepsTreeOptimizer = require('../../lib.compiled/NodeJS/DepsTreeOptimizer').DepsTreeOptimizer;
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
+  var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
   var NpmPrune = require('../../lib.compiled/NodeJS/NpmPrune').NpmPrune;
   var NpmDedupe = require('../../lib.compiled/NodeJS/NpmDedupe').NpmDedupe;
   var NpmRun = require('../../lib.compiled/NodeJS/NpmRun').NpmRun;
@@ -25,6 +26,7 @@ module.exports = function(mainPath) {
   var tmp = require('tmp');
 
   var removeSource = this.opts.locate('remove-source').exists;
+  var installSdk = this.opts.locate('aws-sdk').exists;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
   if (mainPath.indexOf('/') !== 0) {
@@ -246,39 +248,58 @@ module.exports = function(mainPath) {
           if (result.failed) {
             console.error(result.error);
           } else {
-            console.log('Removed aws-sdk@* in ' + lambdaTmpPath);
+            console.log('Cleanup Lambda sources in ' + lambdaTmpPath);
           }
 
-          var outputFile = path.join(
-            lambdaPath,
-            '..',
-            path.basename(lambdaPath) + '.zip'
-          );
+          if (installSdk) {
+            console.log('Installing latest aws-sdk into ' + lambdaTmpPath);
 
-          console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
+            var npmLink = new NpmInstallLibs(lambdaTmpPath);
+            npmLink.libs = 'aws-sdk';
 
-          // @todo: replace this with a node native
-          var zip = new Exec(
-            Bin.resolve('zip'),
-            '-y',
-            '-r',
-            outputFile,
-            '.'
-          );
-
-          zip.cwd = lambdaTmpPath;
-          zip.avoidBufferOverflow();
-
-          zip.run(function(result) {
-            if (result.failed) {
-              console.error(result.error);
-              this.exit(1);
-            }
-
-            remaining--;
-          }.bind(this));
+            npmLink.run(function() {
+              packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
+                remaining--;
+              }.bind(this));
+            }.bind(this));
+          } else {
+            packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
+              remaining--;
+            }.bind(this));
+          }
         }.bind(this, lambdaPath, lambdaTmpPath));
     }
+  }
+
+  function packSingle(lambdaPath, lambdaTmpPath, cb) {
+    var outputFile = path.join(
+      lambdaPath,
+      '..',
+      path.basename(lambdaPath) + '.zip'
+    );
+
+    console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
+
+    // @todo: replace this with a node native
+    var zip = new Exec(
+      Bin.resolve('zip'),
+      '-y',
+      '-r',
+      outputFile,
+      '.'
+    );
+
+    zip.cwd = lambdaTmpPath;
+    zip.avoidBufferOverflow();
+
+    zip.run(function(result) {
+      if (result.failed) {
+        console.error(result.error);
+        this.exit(1);
+      }
+
+      cb();
+    }.bind(this));
   }
 
   function getMicroservicesToDeploy() {

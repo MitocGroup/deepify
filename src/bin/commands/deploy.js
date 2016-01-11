@@ -18,6 +18,7 @@ module.exports = function(mainPath) {
   var S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
   var ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
 
+  var installSdk = this.opts.locate('aws-sdk').exists;
   var localOnly = this.opts.locate('dry-run').exists;
   var fastDeploy = this.opts.locate('fast').exists;
   var dumpCodePath = this.opts.locate('dump-local').value;
@@ -201,7 +202,8 @@ module.exports = function(mainPath) {
           );
 
           !fastDeploy && cmd.addArg('--remove-source');
-          microservicesToDeploy && cmd.addArg('--partial');
+          microservicesToDeploy && cmd.addArg('--partial ' + microservicesToDeploy);
+          installSdk && cmd.addArg('--aws-sdk');
 
           cmd.run(function(result) {
             if (result.failed) {
