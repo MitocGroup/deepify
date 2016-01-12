@@ -28,7 +28,7 @@ module.exports = {
     },
     'install': {
       example: 'deepify install https://github.com/MitocGroup/deep-microservices-todo-app.git path/to/web_app',
-      description: 'Installs an microservice from remote git repository',
+      description: 'Install an microservice from remote git repository',
       opts: {
       },
       args: {
@@ -46,11 +46,6 @@ module.exports = {
       example: 'deepify server path/to/web_app -o',
       description: 'Run local development server',
       opts: {
-        profiling: {
-          alias: 'd',
-          description: 'Enable Lambdas profiling',
-          required: false,
-        },
         'build-path': {
           alias: 'b',
           description: 'The path to the build (in order to pick up config)',
@@ -128,6 +123,11 @@ module.exports = {
           description: 'Faster deployment without copying the sources (may alter the web app state)',
           required: false,
         },
+        'aws-sdk': {
+          alias: 'a',
+          description: 'Force latest aws-sdk in Lambda',
+          required: false,
+        },
       },
       args: {
         path: {
@@ -182,7 +182,7 @@ module.exports = {
     },
     'compile-es6': {
       example: 'deepify compile-es6 path/to/lambda',
-      description: 'Compiles ES6 scripts to ES5 using babel (matched by *.es6)',
+      description: 'Compile ES6 scripts to ES5 using babel (matched by *.es6)',
       opts: {
       },
       args: {
@@ -204,6 +204,11 @@ module.exports = {
         partial: {
           alias: 'm',
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
+          required: false,
+        },
+        'aws-sdk': {
+          alias: 'a',
+          description: 'Force latest aws-sdk in Lambda',
           required: false,
         },
       },

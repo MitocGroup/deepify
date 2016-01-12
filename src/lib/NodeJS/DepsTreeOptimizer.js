@@ -13,6 +13,7 @@ import {_extend as extend} from 'util';
 import {Exec} from '../Helpers/Exec';
 import gatherDependencies from 'gather-dependencies';
 import {UndefinedDepsResolver} from './UndefinedDepsResolver';
+import {Bin} from './Bin';
 
 export class DepsTreeOptimizer {
   /**
@@ -329,16 +330,17 @@ export class DepsTreeOptimizer {
 
     locker.run(() => {
       // @todo: fix missing deps (need all of them!)
-      //cb(this._readShrinkwrapFile());
+      if (Bin.npmMajorVersion >= 3) {
+        cb(this._readShrinkwrapFile());
+      } else {
+        gatherDependencies(this._path, (error, data) => {
+          if (error) {
+            throw error;
+          }
 
-      // @todo: remove when fixed the issue above
-      gatherDependencies(this._path, (error, data) => {
-        if (error) {
-          throw error;
-        }
-
-        cb(data);
-      });
+          cb(data);
+        });
+      }
     });
 
     return this;

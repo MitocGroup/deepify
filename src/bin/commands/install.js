@@ -33,7 +33,7 @@ module.exports = function(microserviceRepo, dumpPath) {
 
       prompt.readConfirm(function(result) {
         if (result) {
-          console.log('Start preparing for production');
+          console.log('Start initializing backend...');
 
           var cmd = new Exec(
             Bin.node,
