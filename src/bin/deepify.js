@@ -35,7 +35,6 @@ for (var cmdName in manifest.commands) {
     }
 
     var optData = cmdData.opts[optName];
-    console.log('cmd.opts.create: ', JSON.stringify(optData) );
     cmd.opts
       .create(optName, optData.alias, optData.description, optData.required);
   }
