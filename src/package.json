@@ -55,7 +55,7 @@
     "prepublish": "npm run obfuscate-compiled"
   },
   "dependencies": {
-    "deep-package-manager": "^1.x.x",
+    "deep-package-manager": "file:../../deep-package-manager/src",
     "deep-log": "^1.x.x",
     "deep-db": "^1.x.x",
     "deep-core": "^1.x.x",
