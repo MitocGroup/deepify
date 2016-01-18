@@ -6,6 +6,7 @@
 'use strict';
 
 module.exports = function(mainPath) {
+  console.log('Starting init-backend');
   var path = require('path');
   var Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
   var Property = require('deep-package-manager').Property_Instance;
@@ -41,7 +42,9 @@ module.exports = function(mainPath) {
     }
 
     property.runInitMsHooks(function() {
+      console.log('run init hook cb')
       if (!Bin.npmModuleInstalled('aws-sdk', true)) {
+        console.log('in !bin.npmModuleInstalled');
         var awsSdkGlobalCmd = new NpmInstallLibs();
         awsSdkGlobalCmd.libs = 'aws-sdk';
         awsSdkGlobalCmd.global = true;
@@ -80,8 +83,9 @@ module.exports = function(mainPath) {
     linkCmd.libs = 'aws-sdk';
 
     chain.add(linkCmd);
-
+    console.log('calling chain.runChunk')
     chain.runChunk(function() {
+      console.log('in cb chain.runChunk')
       var lambdasConfig = property.fakeBuild();
 
       for (var lambdaArn in lambdasConfig) {

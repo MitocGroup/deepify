@@ -20,6 +20,7 @@ export class NpmDedupe extends NpmInstall {
    * @private
    */
   get _mainCmd() {
+    console.log('_mainCmd');
     return `${Bin.npm} dedupe`;
   }
 }

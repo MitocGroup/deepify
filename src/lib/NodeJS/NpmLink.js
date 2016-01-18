@@ -48,6 +48,7 @@ export class NpmLink extends NpmInstall {
    * @private
    */
   get _mainCmd() {
+    console.log('npm link _mainCmd');
     return `${Bin.npm} link ${this._libsPlain}`;
   }
 }

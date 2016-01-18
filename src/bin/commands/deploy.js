@@ -6,6 +6,7 @@
 'use strict';
 
 module.exports = function(mainPath) {
+  console.log('Starting deploy');
   var path = require('path');
   var fs = require('fs');
   var fse = require('fs-extra');

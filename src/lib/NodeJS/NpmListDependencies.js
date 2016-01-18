@@ -29,6 +29,7 @@ export class NpmListDependencies {
    * @returns {NpmDependency}
    */
   list(depth = null) {
+    console.log('npm deps _mainCmd');
     let cmd = new Exec(
       `${Bin.npm} ls --json true --parseable true --loglevel silent --production`,
       depth ? `--depth ${depth}` : ''

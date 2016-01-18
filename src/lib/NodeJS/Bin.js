@@ -22,6 +22,7 @@ export class Bin {
    * @returns {Number}
    */
   static get npmMajorVersion() {
+    console.log('npmMajorVersion');
     let versionResult = new Exec(Bin.npm, '--version').runSync();
 
     if (versionResult.failed) {
@@ -47,7 +48,7 @@ export class Bin {
     }
 
     Bin._npm = Bin.resolve('npm');
-
+    console.log('Bin._npm here', Bin._npm);
     return Bin._npm;
   }
 
@@ -61,10 +62,12 @@ export class Bin {
 
     try {
       Bin._node = Bin.resolve(Bin._envBin());
+      console.log('Bin._node', Bin._node)
     } catch (e) {
 
       // fallback here
       Bin._node = Bin.resolve('node');
+      console.log('catch Bin._node', Bin._node)
     }
 
     return Bin._node;
@@ -75,6 +78,8 @@ export class Bin {
    * @returns {String}
    */
   static resolve(bin) {
+    console.log('bin: ', bin);
+
     if (Bin._isWin) {
       console.log('Resolving on windows');
       //don't fail on Win
@@ -82,6 +87,7 @@ export class Bin {
     }
 
     let cmd = new Exec('which', bin).runSync();
+    console.log('cmd: ', cmd);
 
     if (cmd.failed) {
       throw cmd.error;

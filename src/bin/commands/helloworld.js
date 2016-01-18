@@ -6,7 +6,7 @@
 'use strict';
 
 module.exports = function(dumpPath) {
-
+  console.log('Starting helloworld');
   // @todo: put it anywhere in a config
   var helloWorldRepoUrl = 'https://github.com/MitocGroup/deep-microservices-helloworld.git';
 

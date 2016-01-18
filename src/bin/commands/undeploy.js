@@ -5,6 +5,7 @@
 'use strict';
 
 module.exports = function(mainPath) {
+  console.log('Starting undeploy');
   var Property = require('deep-package-manager').Property_Instance;
   var Config = require('deep-package-manager').Property_Config;
   var Undeploy = require('deep-package-manager').Provisioning_Undeploy;

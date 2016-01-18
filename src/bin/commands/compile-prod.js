@@ -6,6 +6,7 @@
 'use strict';
 
 module.exports = function(mainPath) {
+  console.log('Starting compile-prod');
   var path = require('path');
   var fse = require('fs-extra');
   var fs = require('fs');

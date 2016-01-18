@@ -20,6 +20,7 @@ export class NpmUpdate extends NpmInstall {
    * @private
    */
   get _mainCmd() {
+    console.log('npmUpdate _mainCmd');
     return `${Bin.npm} update`;
   }
 }

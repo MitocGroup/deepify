@@ -6,6 +6,7 @@
 'use strict';
 
 module.exports = function(mainPath) {
+  console.log('Starting push-deps');
   var aws = require('aws-sdk');
   var path = require('path');
   var fs = require('fs');

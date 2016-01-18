@@ -20,6 +20,7 @@ export class NpmShrinkwrap extends NpmInstall {
    * @private
    */
   get _mainCmd() {
+    console.log('npmShrink _mainCmd');
     return `${Bin.npm} shrinkwrap`;
   }
 }
