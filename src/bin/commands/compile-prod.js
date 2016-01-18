@@ -181,7 +181,7 @@ module.exports = function(mainPath) {
   }
 
   function _optimizeDepsChunk(chunks, cb, lambdas) {
-    let chunk = chunks.shift();
+    var chunk = chunks.shift();
 
     var wait = new WaitFor();
     var remaining = chunk.length;
