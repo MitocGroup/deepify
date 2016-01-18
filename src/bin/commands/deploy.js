@@ -516,7 +516,7 @@ module.exports = function(mainPath) {
   function getPublicWebsite(propertyInstance) {
     var config = propertyInstance.config;
     var bucketName = config.provisioning.s3.buckets[S3Service.PUBLIC_BUCKET].name;
-    var bucketRegion = propertyInstance.config.region;
+    var bucketRegion = propertyInstance.provisioning.s3.config.region;
 
     return 'http://' + bucketName + '.s3-website-' + bucketRegion + '.amazonaws.com';
   }
