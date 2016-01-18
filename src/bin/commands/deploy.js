@@ -129,7 +129,7 @@ module.exports = function(mainPath) {
   function getConfigFromS3(propertyInstance, cb) {
     console.log('Trying to retrieve .cfg.deeploy.json from S3 ' + cfgBucket);
 
-    var s3 = new propertyInstance.AWS.S3();
+    var s3 = propertyInstance.provisioning.s3;
 
     var payload = {
       Bucket: cfgBucket,
@@ -148,7 +148,7 @@ module.exports = function(mainPath) {
     }
 
     var plainConfig = JSON.stringify(propertyInstance.config);
-    var s3 = new propertyInstance.AWS.S3();
+    var s3 = propertyInstance.provisioning.s3;
 
     var payload = {
       Bucket: propertyInstance.config.provisioning.s3.buckets[S3Service.SYSTEM_BUCKET].name,
@@ -516,7 +516,8 @@ module.exports = function(mainPath) {
   function getPublicWebsite(propertyInstance) {
     var config = propertyInstance.config;
     var bucketName = config.provisioning.s3.buckets[S3Service.PUBLIC_BUCKET].name;
+    var bucketRegion = propertyInstance.provisioning.s3.config.region;
 
-    return 'http://' + bucketName + '.s3-website-' + config.awsRegion + '.amazonaws.com';
+    return 'http://' + bucketName + '.s3-website-' + bucketRegion + '.amazonaws.com';
   }
 };
