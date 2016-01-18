@@ -57,6 +57,7 @@
   "dependencies": {
     "deep-package-manager": "^1.x.x",
     "deep-log": "^1.x.x",
+    "deep-fs": "^1.x.x",
     "deep-db": "^1.x.x",
     "deep-core": "^1.x.x",
     "proxyquire": "^1.5.x",

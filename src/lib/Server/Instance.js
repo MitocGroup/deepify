@@ -21,6 +21,7 @@ import {Property_Frontend as Frontend} from 'deep-package-manager';
 import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
 import {Property_Config as Config} from 'deep-package-manager';
 import DeepDB from 'deep-db';
+import DeepFS from 'deep-fs';
 import {Hook} from './Hook';
 
 export class Instance {
@@ -37,6 +38,8 @@ export class Instance {
     };
     this._property = property;
     this._server = null;
+    this._fs = null;
+
     this._host = null;
 
     this._localId = 0;
@@ -52,6 +55,13 @@ export class Instance {
     this._microservices = {};
 
     this._setup();
+  }
+
+  /**
+   * @returns {DeepFS}
+   */
+  get fs() {
+    return this._fs;
   }
 
   /**
@@ -236,6 +246,41 @@ export class Instance {
   }
 
   /**
+   * @returns {Object}
+   * @private
+   */
+  get _kernelMock() {
+    let lambdasArns = Object.keys(this._defaultLambdasConfig);
+
+    let kernel = {
+      config: {
+        buckets: {
+          system: {
+            name: ''
+          },
+          public: {
+            name: ''
+          },
+          temp: {
+            name: ''
+          }
+        },
+      },
+      microservice: () => {
+        return {
+          identifier: '',
+        };
+      },
+    };
+
+    if (lambdasArns.length > 0) {
+      kernel.config = this._defaultLambdasConfig[lambdasArns[0]];
+    }
+
+    return kernel;
+  }
+
+  /**
    * @param {Number} port
    * @param {String} dbServer
    * @param {Function} callback
@@ -245,56 +290,63 @@ export class Instance {
     let hook = new Hook(this);
 
     hook.runBefore(() => {
-      this._log(`Creating server on port ${port}`);
+      this._log('Booting local FS');
 
-      this._server = Http.createServer((...args) => {
-        this._handler(...args);
-      });
+      this._fs = new DeepFS();
+      this._fs.localBackend = true;
 
-      var localDbInstance = null;
+      this._fs.boot(this._kernelMock, () => {
+        this._log(`Creating server on port ${port}`);
 
-      this._server.listen(port, (error) => {
-        if (error) {
-          throw new FailedToStartServerException(port, error);
-        }
+        this._server = Http.createServer((...args) => {
+          this._handler(...args);
+        });
 
-        this._host = `http://localhost:${port}`;
+        var localDbInstance = null;
 
-        this._log('HTTP Server is up and running!');
-
-        if (!dbServer) {
-          hook.runAfter(() => {
-            callback(this);
-          });
-
-          return;
-        }
-
-        this._log(`Creating local DynamoDB instance on port ${DeepDB.LOCAL_DB_PORT}`);
-
-        localDbInstance = DeepDB.startLocalDynamoDBServer((error) => {
+        this._server.listen(port, (error) => {
           if (error) {
             throw new FailedToStartServerException(port, error);
           }
 
-          this._log(`You can access DynamoDB Console via http://localhost:${DeepDB.LOCAL_DB_PORT}/shell`);
+          this._host = `http://localhost:${port}`;
 
-          hook.runAfter(() => {
-            callback(this);
-          });
-        }, dbServer);
-      });
+          this._log('HTTP Server is up and running!');
 
-      // @todo: move it in destructor?
-      process.on('exit', () => {
-        this.stop(() => {
-          if (localDbInstance) {
-            localDbInstance.stop(() => {
-              process.exit(0);
+          if (!dbServer) {
+            hook.runAfter(() => {
+              callback(this);
             });
-          } else {
-            process.exit(0);
+
+            return;
           }
+
+          this._log(`Creating local DynamoDB instance on port ${DeepDB.LOCAL_DB_PORT}`);
+
+          localDbInstance = DeepDB.startLocalDynamoDBServer((error) => {
+            if (error) {
+              throw new FailedToStartServerException(port, error);
+            }
+
+            this._log(`You can access DynamoDB Console via http://localhost:${DeepDB.LOCAL_DB_PORT}/shell`);
+
+            hook.runAfter(() => {
+              callback(this);
+            });
+          }, dbServer);
+        });
+
+        // @todo: move it in destructor?
+        process.on('exit', () => {
+          this.stop(() => {
+            if (localDbInstance) {
+              localDbInstance.stop(() => {
+                process.exit(0);
+              });
+            } else {
+              process.exit(0);
+            }
+          });
         });
       });
     });
@@ -449,14 +501,21 @@ export class Instance {
       return;
     }
 
-    FileSystem.exists(filename, function(exists) {
+    FileSystem.exists(filename, (exists) => {
       if (!exists) {
-        this._log(`File ${filename} not found`);
-        this._send404(response);
-        return;
+        if (this._fs.public.existsSync(uri)) {
+          filename = Path.join(this._fs.public._rootFolder, uri);
+
+          this._log(`{LFS} ${uri} resolved into ${filename}`);
+        } else {
+          this._log(`File ${filename} not found`);
+          this._send404(response);
+
+          return;
+        }
       }
 
-      FileSystem.stat(filename, function(error, stats) {
+      FileSystem.stat(filename, (error, stats) => {
         if (error) {
           this._log(`Unable to stat file ${filename}: ${error}`);
           this._send500(response, error);
@@ -469,7 +528,7 @@ export class Instance {
           filename = Path.join(filename, 'index.html');
         }
 
-        FileSystem.readFile(filename, 'binary', function(error, file) {
+        FileSystem.readFile(filename, 'binary', (error, file) => {
           if (error) {
             this._log(`Unable to read file ${filename}: ${error}`);
             this._send500(response, error);
@@ -480,9 +539,9 @@ export class Instance {
 
           this._log(`Serving file ${filename} of type ${mimeType}`);
           this._send(response, file, 200, mimeType, true);
-        }.bind(this));
-      }.bind(this));
-    }.bind(this));
+        });
+      });
+    });
   }
 
   /**
