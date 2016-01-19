@@ -97,16 +97,7 @@ module.exports = function(mainPath) {
   }.bind(this), lambdas);
 
   function prepareSources(cb, lambdas) {
-    var wait = new WaitFor();
-    var remaining = lambdas.path.length;
-
     console.log(lambdas.path.length + ' Lambdas sources are going to be copied...');
-
-    wait.push(function() {
-      return remaining <= 0;
-    }.bind(this));
-
-    wait.ready(cb);
 
     for (var i in lambdas.path) {
       if (!lambdas.path.hasOwnProperty(i)) {
@@ -122,22 +113,22 @@ module.exports = function(mainPath) {
         fse.removeSync(lambdaTmpPath);
       }
 
-      fse.copy(lambdaPath, lambdaTmpPath, function(lambdaTmpPath, i, error) {
-        if (error) {
-          console.error(error);
+      try {
+        fse.copySync(lambdaPath, lambdaTmpPath);
 
-          lambdas.splice(i, 1);
-        } else {
-          var nodeModules = path.join(lambdaTmpPath, 'node_modules');
+        var nodeModules = path.join(lambdaTmpPath, 'node_modules');
 
-          if (fs.existsSync(nodeModules)) {
-            fse.removeSync(nodeModules);
-          }
+        if (fs.existsSync(nodeModules)) {
+          fse.removeSync(nodeModules);
         }
+      } catch (error) {
+        console.error(error);
 
-        remaining--;
-      }.bind(this, lambdaTmpPath, i));
+        lambdas.splice(i, 1);
+      }
     }
+
+    cb();
   }
 
   function optimize(cb, lambdas, final) {
@@ -183,19 +174,29 @@ module.exports = function(mainPath) {
   }
 
   function optimizeDeps(cb, lambdas) {
+    _optimizeDepsChunk(
+      NpmInstall._chunkArray(lambdas.tmpPath, NpmInstall.DEFAULT_CHUNK_SIZE),
+      cb,
+      lambdas
+    );
+  }
+
+  function _optimizeDepsChunk(chunks, cb, lambdas) {
+    var chunk = chunks.shift();
+
     var wait = new WaitFor();
-    var remaining = lambdas.tmpPath.length;
+    var remaining = chunk.length;
 
     wait.push(function() {
       return remaining <= 0;
     }.bind(this));
 
-    for (var i in lambdas.tmpPath) {
-      if (!lambdas.tmpPath.hasOwnProperty(i)) {
+    for (var i in chunk) {
+      if (!chunk.hasOwnProperty(i)) {
         continue;
       }
 
-      var lambdaTmpPath = lambdas.tmpPath[i];
+      var lambdaTmpPath = chunk[i];
 
       console.log('Optimizing Lambda dependencies in ' + lambdaTmpPath);
 
@@ -211,7 +212,11 @@ module.exports = function(mainPath) {
     }
 
     wait.ready(function() {
-      optimize.bind(this)(cb, lambdas, true);
+      if (chunks.length <= 0) {
+        optimize.bind(this)(cb, lambdas, true);
+      } else {
+        _optimizeDepsChunk(chunks, cb, lambdas);
+      }
     }.bind(this));
   }
 
@@ -278,6 +283,11 @@ module.exports = function(mainPath) {
       '..',
       path.basename(lambdaPath) + '.zip'
     );
+
+    if (fs.existsSync(outputFile)) {
+      console.log('Removing old Lambda build ' + outputFile);
+      fse.removeSync(outputFile);
+    }
 
     console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
 
