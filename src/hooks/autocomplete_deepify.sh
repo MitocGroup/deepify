@@ -6,7 +6,7 @@ COMPLETION_ADD=". $SCRIPT_PATH/deepify_comp.sh"
 IS_MAC=$(uname -a | grep Darwin)
 CURRENT_USER=$(whoami)
 
-if [ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "win64" ]; then
+if [ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "msys" ]; then
    export DEEP_NO_INTERACTION=1
    echo "Added environment variable DEEP_NO_INTERACTION=1 for windows"
 fi
