@@ -5,9 +5,9 @@
 
 'use strict';
 
-var path = require('path');
 var Program = require('../lib.compiled/Terminal/Program').Program;
 var ValidationException = require('../lib.compiled/Terminal/Exception/ValidationException').ValidationException;
+var path = require('path');
 
 var manifest = require('./manifest');
 
