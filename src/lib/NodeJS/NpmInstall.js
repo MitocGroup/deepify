@@ -13,7 +13,6 @@ export class NpmInstall {
    * @param {String|*} dirs
    */
   constructor(...dirs) {
-    console.log('Constructor NpmInstall commands: ', dirs);
     // try to make it compatible with ES5
     if (dirs.length === 1 && Array.isArray(dirs[0])) {
       dirs = dirs[0];
@@ -54,36 +53,34 @@ export class NpmInstall {
    * @returns {NpmInstall}
    */
   runChunk(cb, chunkSize = NpmInstall.DEFAULT_CHUNK_SIZE, silent = NpmInstall.DEFAULT_SILENT_STATE) {
-
-    console.log('start runChunk, chunkSize: ', chunkSize);
-    let wait = new WaitFor();
-    let chunks = NpmInstall._chunkArray(this._dirs, chunkSize);
-    let remaining = chunks.length;
-
-    wait.push(() => {
-      return remaining <= 0;
-    });
-
-    console.log('chunks: ', chunks);
-    for (let i in chunks) {
-      if (!chunks.hasOwnProperty(i)) {
-        continue;
-      }
-
-      let chunk = chunks[i];
-
-      let instance = this._newInstance(...chunk);
-      console.log('instance.constructor.name: ', instance.constructor.name);
-
-      instance.run(() => {
-        console.log('instance.run cb, remaining: ', remaining);
-        remaining--;
-      }, silent);
-    }
-
-    wait.ready(cb);
+    this._runChunkItem(
+      NpmInstall._chunkArray(this._dirs, chunkSize),
+      silent,
+      cb
+    );
 
     return this;
+  }
+
+  /**
+   * @param {Array} chunks
+   * @param {Boolean} silent
+   * @param {Function} cb
+   * @private
+   */
+  _runChunkItem(chunks, silent, cb) {
+    let chunk = chunks.shift();
+
+    let instance = this._newInstance(...chunk);
+
+    instance.run(() => {
+      if (chunks.length <= 0) {
+        cb();
+        return;
+      }
+
+      this._runChunkItem(chunks, silent, cb);
+    }, silent);
   }
 
   /**
@@ -104,7 +101,6 @@ export class NpmInstall {
    * @returns {NpmInstall}
    */
   run(cb, silent = NpmInstall.DEFAULT_SILENT_STATE) {
-    console.log('NpmInstall run:', silent);
     let wait = new WaitFor();
     let remaining = this._dirs.length;
     let cmdStack = [];
@@ -113,7 +109,6 @@ export class NpmInstall {
       return remaining <= 0;
     });
 
-    console.log('this._dirs:', this._dirs);
     for (let i in this._dirs) {
       if (!this._dirs.hasOwnProperty(i)) {
         continue;
@@ -121,10 +116,7 @@ export class NpmInstall {
 
       let dir = this._dirs[i];
 
-
-      let cmd = new Exec(...this._execArgs)
-      console.log('cmd:', cmd);
-
+      let cmd = new Exec(...this._execArgs);
 
       cmd.cwd = dir;
 
@@ -135,14 +127,8 @@ export class NpmInstall {
       cmdStack.push(cmd);
     }
 
-    console.log('cmdStack:', cmdStack);
-
-
     cmdStack.forEach((cmd) => {
-      console.log('cmd.constructor.name: ', cmd.constructor.name);
       cmd.run((result) => {
-        console.log('result: ', result);
-
         if (result.failed && !this._silent) {
           console.error(result.error);
         }
@@ -161,7 +147,6 @@ export class NpmInstall {
    * @private
    */
   get _execArgs() {
-    console.log('_execArgs: ', this._extraArgs);
     return [this._mainCmd, ...this._extraArgs];
   }
 
@@ -170,7 +155,6 @@ export class NpmInstall {
    * @private
    */
   get _mainCmd() {
-    console.log('mainCmd');
     return `${Bin.npm} install`;
   }
 
@@ -203,6 +187,6 @@ export class NpmInstall {
    * @returns {Number}
    */
   static get DEFAULT_CHUNK_SIZE() {
-    return 4;
+    return 3;
   }
 }

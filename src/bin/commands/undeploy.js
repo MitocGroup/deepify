@@ -69,6 +69,8 @@ module.exports = function(mainPath) {
       }
 
       if (backupConfig) {
+        console.log('Create configuration backup in ' + this.fileNameBck);
+
         matcher.bckConfigFile(function(error) {
           if (error) {
             console.error(error);
