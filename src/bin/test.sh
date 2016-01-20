@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 if [ "$OSTYPE" != "msys" ] && [ "$OSTYPE" != "win32" ] && [ "$OSTYPE" != "win64" ]; then
     babel-node `which isparta` cover --include 'lib/**/*.js' `which _mocha` -- 'test/**/*.spec.js' --reporter spec --ui tdd --recursive
 elif [ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "win64" ]; then

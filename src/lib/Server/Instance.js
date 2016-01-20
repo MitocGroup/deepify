@@ -570,7 +570,7 @@ export class Instance {
    * @private
    */
   _resolveMicroservice(uri) {
-    let parts = uri.replace(/^\/(.+)$/, '$1').split(Path.sep);
+    let parts = uri.replace(/^\/(.+)$/, '$1').split('/');
 
     if (parts.length > 0) {
       for (let identifier in this._microservices) {
