@@ -9,8 +9,11 @@ module.exports = function(mainPath) {
   console.log('Starting compile-es6');
   var path = require('path');
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  console.log('mainPath: ', mainPath);
 
-  if (mainPath.indexOf('/') !== 0) {
+  if (mainPath === '`pwd`') {
+    mainPath = process.cwd();
+  } else if (mainPath.indexOf(path.sep) !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
@@ -20,5 +23,5 @@ module.exports = function(mainPath) {
         console.error(result.error);
         this.exit(1);
       }
-    }.bind(this), true);
+    }.bind(this), false);
 };
