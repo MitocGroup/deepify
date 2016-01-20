@@ -20,7 +20,6 @@ export class NpmUninstallLibs extends NpmInstallLibs {
    * @private
    */
   get _mainCmd() {
-    console.log('npmUninstall _mainCmd');
     return `${Bin.npm} uninstall ${this._libsPlain} ${this._global ? '-g' : ''}`;
   }
 }

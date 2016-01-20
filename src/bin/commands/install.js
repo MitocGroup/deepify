@@ -6,7 +6,6 @@
 'use strict';
 
 module.exports = function(microserviceRepo, dumpPath) {
-  console.log('Starting install');
   var fs = require('fs');
   var tmp = require('tmp');
   var path = require('path');

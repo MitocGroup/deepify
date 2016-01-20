@@ -20,7 +20,6 @@ export class NpmPrune extends NpmInstall {
    * @private
    */
   get _mainCmd() {
-    console.log('npm prune _mainCmd');
     return `${Bin.npm} prune`;
   }
 }

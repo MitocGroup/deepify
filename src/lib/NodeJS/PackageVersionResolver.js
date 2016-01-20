@@ -125,7 +125,6 @@ export class PackageVersionResolver {
    * @private
    */
   get _command() {
-  console.log('package version _mainCmd');
     return `${Bin.npm} ls --loglevel silent --json ${this._fullName}`;
   }
 

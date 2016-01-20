@@ -6,7 +6,6 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  console.log('Starting build-frontend');
   var path = require('path');
   var fs = require('fs');
   var fse = require('fs-extra');

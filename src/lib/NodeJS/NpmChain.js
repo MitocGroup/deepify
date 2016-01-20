@@ -12,7 +12,6 @@ export class NpmChain {
    * @param {NpmInstall|*} commands
    */
   constructor(...commands) {
-    console.log('Constructor NpmChain commands: ', commands);
     this._commands = commands;
   }
 
@@ -58,14 +57,13 @@ export class NpmChain {
    * @private
    */
   _trigger(method, cb, ...args) {
-    console.log('this._commands.length <= 0: ', this._commands.length <= 0)
     if (this._commands.length <= 0) {
       cb();
       return;
     }
 
     let instance = this._commands.shift();
-    console.log('instance method: ', method);
+
     instance[method](() => {
       this._trigger(method, cb, ...args);
     }, ...args);

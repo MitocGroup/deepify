@@ -67,7 +67,6 @@ export class NpmInstallLibs extends NpmInstall {
    * @private
    */
   get _mainCmd() {
-    console.log('npm install _mainCmd');
     return `${Bin.npm} install ${this._libsPlain} ${this._global ? '-g' : ''}`;
   }
 }

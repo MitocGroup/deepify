@@ -6,7 +6,6 @@
 'use strict';
 
 module.exports = function(lambdaPath) {
-  console.log('Starting run-lambda');
   var Runtime = require('../../lib.compiled/Lambda/Runtime').Runtime;
   var ForksManager = require('../../lib.compiled/Lambda/ForksManager').ForksManager;
   var DeepDB = require('deep-db');

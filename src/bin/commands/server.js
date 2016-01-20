@@ -6,7 +6,6 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  console.log('Starting server');
   var path = require('path');
   var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;

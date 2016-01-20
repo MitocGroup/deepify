@@ -48,7 +48,6 @@ export class NpmRun extends NpmInstall {
    * @private
    */
   get _mainCmd() {
-    console.log('npmRun _mainCmd');
     return `${Bin.npm} run ${this._cmd}`;
   }
 }
