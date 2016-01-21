@@ -49,9 +49,9 @@
   "scripts": {
     "preinstall": "npm run compile",
     "postinstall": "bash hooks/autocomplete_deepify.sh",
-    "test": "bash bin/test.sh",
-    "compile": "bash bin/compile.sh",
-    "obfuscate-compiled": "bash bin/obfuscate-compiled.sh",
+    "test": "bash node-bin/test.sh",
+    "compile": "bash node-bin/compile.sh",
+    "obfuscate-compiled": "bash node-bin/obfuscate-compiled.sh",
     "prepublish": "npm run obfuscate-compiled"
   },
   "dependencies": {

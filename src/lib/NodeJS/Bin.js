@@ -76,11 +76,6 @@ export class Bin {
    */
   static resolve(bin) {
 
-    //don't fail on Win
-    //if (Bin._isWin) {
-    //  throw new Error('Unable to resolve a binary on win* platform');
-    //}
-
     let cmd = new Exec('which', bin).runSync();
 
     if (cmd.failed) {

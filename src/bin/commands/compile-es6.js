@@ -9,9 +9,11 @@ module.exports = function(mainPath) {
   var path = require('path');
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
 
-  if (mainPath === '`pwd`') {
-    mainPath = process.cwd();
-  } else if (mainPath.indexOf(path.sep) !== 0) {
+  var regExp = /(`\s*pwd\s*`|\$\(\s*pwd\s*\))/ig;
+
+  mainPath = mainPath.replace(regExp, process.cwd());
+
+  if (mainPath.indexOf(path.sep) !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
