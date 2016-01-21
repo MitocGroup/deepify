@@ -5,10 +5,45 @@ BASH_PROFILE="$HOME/.bash_profile"
 COMPLETION_ADD=". $SCRIPT_PATH/deepify_comp.sh"
 IS_MAC=$(uname -a | grep Darwin)
 CURRENT_USER=$(whoami)
+NODE_VERSION=$(node -v)
+NODE_VERSION="${NODE_VERSION/v/}"
 
-if [ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "msys" ]; then
-   export DEEP_NO_INTERACTION=1
-   echo "Added environment variable DEEP_NO_INTERACTION=1 for windows"
+do_version_check() {
+
+   [ "$1" == "$2" ] && return 2
+
+   ver1front=`echo $1 | cut -d "." -f -1`
+   ver1back=`echo $1 | cut -d "." -f 2-`
+
+   ver2front=`echo $2 | cut -d "." -f -1`
+   ver2back=`echo $2 | cut -d "." -f 2-`
+
+   if [ "$ver1front" != "$1" ] || [ "$ver2front" != "$2" ]; then
+       [ "$ver1front" -gt "$ver2front" ] && return 3
+       [ "$ver1front" -lt "$ver2front" ] && return 1
+
+       [ "$ver1front" == "$1" ] || [ -z "$ver1back" ] && ver1back=0
+       [ "$ver2front" == "$2" ] || [ -z "$ver2back" ] && ver2back=0
+       do_version_check "$ver1back" "$ver2back"
+       return $?
+   else
+           [ "$1" -gt "$2" ] && return 3 || return 1
+   fi
+}
+
+do_version_check "${NODE_VERSION}" "4.2.4"
+
+VERSION_STATUS=$?
+
+if ([ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "win64" ] || [ "$OSTYPE" == "msys" ]) && [ $VERSION_STATUS -lt 2 ]; then
+   echo "Node ${NODE_VERSION} on Windows doesn’t support prompt! Do you want to use in no interaction mode?"
+   read answer
+   if echo "$answer" | grep -iq "^y" ;then
+     export DEEP_NO_INTERACTION=1
+     echo "Added environment variable DEEP_NO_INTERACTION=1 for Windows"
+   else
+     echo "Please update your node version on Windows to minimum 4.2.4"
+   fi
 fi
 
 if [ "$IS_MAC" = "" ]; then
