@@ -30,7 +30,7 @@ module.exports = function(mainPath) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
-  if (dumpCodePath && dumpCodePath.indexOf('/') !== 0) {
+  if (dumpCodePath && dumpCodePath.indexOf(path.sep) !== 0) {
     dumpCodePath = path.join(process.cwd(), dumpCodePath);
   }
 
