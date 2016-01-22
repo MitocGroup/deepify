@@ -14,7 +14,7 @@ module.exports = function(microserviceRepo, dumpPath) {
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
 
-  if (dumpPath.indexOf('/') !== 0) {
+  if (dumpPath.indexOf(path.sep) !== 0) {
     dumpPath = path.join(process.cwd(), dumpPath);
   }
 
