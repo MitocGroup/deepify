@@ -19,6 +19,7 @@ module.exports = function(mainPath) {
   var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
 
   var microservicesToInit = this.opts.locate('partial').value;
+  var useProd = this.opts.locate('prod').exists;
 
   if (mainPath.indexOf('/') !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
@@ -66,13 +67,16 @@ module.exports = function(mainPath) {
     var lambdaPaths = new LambdaExtractor(property).extractWorking(LambdaExtractor.NPM_PACKAGE_FILTER);
 
     var chain = new NpmChain();
-
-    chain.add(
-      new NpmInstall(lambdaPaths)
-        .addExtraArg(
-        '--loglevel silent'
-      )
+    var installCmd = new NpmInstall(lambdaPaths)
+      .addExtraArg(
+      '--loglevel silent'
     );
+
+    if (useProd) {
+      installCmd.addExtraArg('--prod');
+    }
+
+    chain.add(installCmd);
 
     var linkCmd = new NpmLink(lambdaPaths);
     linkCmd.libs = 'aws-sdk';
