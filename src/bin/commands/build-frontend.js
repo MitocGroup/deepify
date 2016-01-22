@@ -14,7 +14,7 @@ module.exports = function(mainPath) {
   var Config = require('deep-package-manager').Property_Config;
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
 
-  if (mainPath.indexOf('/') !== 0) {
+  if (mainPath.indexOf(path.sep) !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 

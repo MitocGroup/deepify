@@ -29,7 +29,7 @@ module.exports = function(mainPath) {
     mainPath = mainPath.substr(0, semicolonIndex);
   }
 
-  if (mainPath.indexOf('/') !== 0) {
+  if (mainPath.indexOf(path.sep) !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 

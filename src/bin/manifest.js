@@ -228,6 +228,11 @@ module.exports = {
           description: 'Partial init (one or several comma separated microservices identifiers)',
           required: false,
         },
+        prod: {
+          alias: 'p',
+          description: 'Run npm install with --prod flag',
+          required: false,
+        },
       },
       args: {
         path: {

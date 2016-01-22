@@ -26,7 +26,7 @@ module.exports = function(lambdaPath) {
     Autoload._skipBuild();
   }
 
-  if (lambdaPath.indexOf('/') !== 0) {
+  if (lambdaPath.indexOf(path.sep) !== 0) {
     lambdaPath = path.join(process.cwd(), lambdaPath);
   }
 

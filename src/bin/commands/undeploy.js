@@ -34,7 +34,7 @@ module.exports = function(mainPath) {
     }
   }
 
-  if (mainPath.indexOf('/') !== 0) {
+  if (mainPath.indexOf(path.sep) !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 

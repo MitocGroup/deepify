@@ -26,7 +26,7 @@ module.exports = function(mainPath) {
   var hasToPullDeps = this.opts.locate('pull-deps').exists;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
-  if (mainPath.indexOf('/') !== 0) {
+  if (mainPath.indexOf(path.sep) !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
