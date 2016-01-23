@@ -35,8 +35,9 @@ do_version_check "${NODE_VERSION}" "4.2.4"
 
 VERSION_STATUS=$?
 
-if ([ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "win64" ] || [ "$OSTYPE" == "msys" ]) && [ $VERSION_STATUS -lt 2 ]; then
-   echo "Node ${NODE_VERSION} on Windows doesn’t support prompt! Do you want to use in no interaction mode?"
+#if ([ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "win64" ] || [ "$OSTYPE" == "msys" ]) && [ $VERSION_STATUS -lt 2 ]; then
+if [ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "win64" ] || [ "$OSTYPE" == "msys" ]; then
+   echo "Node ${NODE_VERSION} on Windows doesn’t support prompt! Do you want to use in no interaction mode?[Y/N]"
    read answer
    if echo "$answer" | grep -iq "^y" ;then
      export DEEP_NO_INTERACTION=1
