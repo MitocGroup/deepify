@@ -29,6 +29,12 @@ module.exports = function(microserviceRepo, dumpPath) {
         console.error('Error while installing babel: ' + error);
       }
 
+      //@todo - temporary workarround for FATAL ERROR- JS Allocation failed – process out of memory
+      if(/^win/.test(process.platform)) {
+        console.log('The web application was successfully installed.');
+        return;
+      }
+
       var prompt = new Prompt('Initialize backend?');
 
       prompt.readConfirm(function(result) {
