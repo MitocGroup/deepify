@@ -48,6 +48,9 @@ export class Bin {
 
     Bin._npm = Bin.resolve('npm');
 
+    //@todo - temporary solution for windows -> node exists globally so we can use without full path
+    Bin._npm = (Bin._isWin) ? 'npm': Bin._npm;
+
     return Bin._npm;
   }
 
@@ -56,6 +59,7 @@ export class Bin {
    */
   static get node() {
     if (Bin._node) {
+
       return Bin._node;
     }
 
@@ -67,6 +71,9 @@ export class Bin {
       Bin._node = Bin.resolve('node');
     }
 
+    //@todo - temporary solution for windows -> node exists globally so we can use without full path
+    Bin._node = (Bin._isWin) ? 'node': Bin._node;
+
     return Bin._node;
   }
 
@@ -75,8 +82,8 @@ export class Bin {
    * @returns {String}
    */
   static resolve(bin) {
-
-    let cmd = new Exec('which', bin).runSync();
+    let locatorCmd = (Bin._isWin) ? 'where': 'which';
+    let cmd = new Exec(locatorCmd, bin).runSync();
 
     if (cmd.failed) {
       throw cmd.error;
