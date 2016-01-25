@@ -24,5 +24,5 @@ module.exports = function(mainPath) {
         console.error(result.error);
         this.exit(1);
       }
-    }.bind(this), false);
+    }.bind(this), true);
 };

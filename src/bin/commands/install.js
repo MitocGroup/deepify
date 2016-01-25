@@ -31,7 +31,9 @@ module.exports = function(microserviceRepo, dumpPath) {
 
       //@todo - temporary workarround for FATAL ERROR- JS Allocation failed – process out of memory
       if(/^win/.test(process.platform)) {
-        console.log('The web application was successfully installed.');
+        console.warn('The web application was successfully installed on Windows!\n');
+        console.info('To initialize backend use "deepify init-backend path/to" command');
+        console.info('To run local development server use "deepify server path/to" command');
         return;
       }
 
