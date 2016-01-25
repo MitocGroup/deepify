@@ -7,9 +7,7 @@
 
 module.exports = function(mainPath) {
   var path = require('path');
-  var Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
   var Property = require('deep-package-manager').Property_Instance;
-  var WaitFor = require('deep-package-manager').Helpers_WaitFor;
   var Config = require('deep-package-manager').Property_Config;
   var fs = require('fs');
   var fse = require('fs-extra');
@@ -23,7 +21,7 @@ module.exports = function(mainPath) {
   var microservicesToInit = this.opts.locate('partial').value;
   var useProd = this.opts.locate('prod').exists;
 
-  if (mainPath.indexOf('/') !== 0) {
+  if (mainPath.indexOf(path.sep) !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 

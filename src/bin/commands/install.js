@@ -14,7 +14,7 @@ module.exports = function(microserviceRepo, dumpPath) {
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
 
-  if (dumpPath.indexOf('/') !== 0) {
+  if (dumpPath.indexOf(path.sep) !== 0) {
     dumpPath = path.join(process.cwd(), dumpPath);
   }
 
@@ -27,6 +27,14 @@ module.exports = function(microserviceRepo, dumpPath) {
     npmInstall('"babel@^5.x.x"', function(error) {
       if (error) {
         console.error('Error while installing babel: ' + error);
+      }
+
+      //@todo - temporary workarround for FATAL ERROR- JS Allocation failed – process out of memory
+      if(/^win/.test(process.platform)) {
+        console.warn('The web application was successfully installed on Windows!\n');
+        console.info('To initialize backend use "deepify init-backend path/to" command');
+        console.info('To run local development server use "deepify server path/to" command');
+        return;
       }
 
       var prompt = new Prompt('Initialize backend?');

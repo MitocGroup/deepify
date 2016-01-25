@@ -35,11 +35,11 @@ module.exports = function(mainPath) {
     Autoload._skipBuild();
   }
 
-  if (mainPath.indexOf('/') !== 0) {
+  if (mainPath.indexOf(path.sep) !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
-  if (buildPath && buildPath.indexOf('/') !== 0) {
+  if (buildPath && buildPath.indexOf(path.sep) !== 0) {
     buildPath = path.join(process.cwd(), buildPath);
   }
 
