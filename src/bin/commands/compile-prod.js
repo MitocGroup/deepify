@@ -45,6 +45,10 @@ module.exports = function(mainPath) {
 
   lambdas.path = arrayUnique(new LambdaExtractor(property).extractWorking(LambdaExtractor.NPM_PACKAGE_FILTER));
 
+  console.log('Sync validation schemas into ' + lambdas.path.length + ' Lambdas');
+
+  new ValidationSchemasSync(property).syncWorking(ValidationSchemasSync.NPM_PACKAGE_FILTER);
+
   for (var i in lambdas.path) {
     if (!lambdas.path.hasOwnProperty(i)) {
       continue;
@@ -55,9 +59,6 @@ module.exports = function(mainPath) {
 
     lambdas.tmpPath.push(lambdaTmpPath);
   }
-
-  console.log('Sync validation schemas into ' + lambdas.path.length + ' Lambdas');
-  new ValidationSchemasSync(property).syncWorking(LambdaExtractor.NPM_PACKAGE_FILTER);
 
   prepareSources.bind(this)(function() {
     var chain = new NpmChain();

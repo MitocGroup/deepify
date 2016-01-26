@@ -9,7 +9,7 @@ import fs from 'fs';
 import fse from 'fs-extra';
 import Core from 'deep-core';
 import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
-import {Microservice_Property_ValidationSchema as ValidationSchema} from 'deep-package-manager';
+import {Property_ValidationSchema as ValidationSchema} from 'deep-package-manager';
 
 export class ValidationSchemasSync {
   /**
