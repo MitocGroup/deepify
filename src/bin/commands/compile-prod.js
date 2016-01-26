@@ -11,6 +11,7 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
+  var ValidationSchemasSync = require('../../lib.compiled/Helpers/ValidationSchemasSync').ValidationSchemasSync;
   var DepsTreeOptimizer = require('../../lib.compiled/NodeJS/DepsTreeOptimizer').DepsTreeOptimizer;
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
@@ -54,6 +55,9 @@ module.exports = function(mainPath) {
 
     lambdas.tmpPath.push(lambdaTmpPath);
   }
+
+  console.log('Sync validation schemas into ' + lambdas.path.length + ' Lambdas');
+  new ValidationSchemasSync(property).syncWorking(LambdaExtractor.NPM_PACKAGE_FILTER);
 
   prepareSources.bind(this)(function() {
     var chain = new NpmChain();
