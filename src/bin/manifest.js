@@ -136,6 +136,35 @@ module.exports = {
         },
       },
     },
+    'enable-ssl': {
+      example: 'deepify enable-ssl path/to/web_app',
+      description: 'Enables SSL on a deployed web app',
+      opts: {
+        domain: {
+          alias: 'd',
+          description: 'The domain to create the certificate for (overrides the "deeploy.json" value)',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
+    'disable-ssl': {
+      example: 'deepify disable-ssl path/to/web_app',
+      description: 'Disable activated SSL on a deployed web app',
+      opts: {
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
     undeploy: {
       example: 'deepify undeploy path/to/web_app',
       description: 'Remove web app provisioning and uploaded data',
