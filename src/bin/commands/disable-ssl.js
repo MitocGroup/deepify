@@ -39,7 +39,7 @@ module.exports = function(mainPath) {
   }
 
   getCertArn.bind(this)(function(certArn) {
-    deactivateForCf.bind(this)(certArn, function() {
+    deactivateForCf.bind(this)(function() {
       console.log(
         'Certificate \'' + certArn + '\' have been successfully unassigned on the \'' +
         cfDomain + '\' CloudFront distribution'
@@ -79,7 +79,7 @@ module.exports = function(mainPath) {
     }.bind(this));
   }
 
-  function deactivateForCf(certArn, cb) {
+  function deactivateForCf(cb) {
     console.log('Fetching CloudFront distribution \'' + cfDomain + '\' configuration');
 
     getCfConfig.bind(this)(function(distConfig, eTag) {
