@@ -296,6 +296,10 @@ export class Instance {
       this._fs.localBackend = true;
 
       this._fs.boot(this._kernelMock, () => {
+        this._log(`Linking custom validation schemas`);
+
+        Frontend.dumpValidationSchemas(this._property.config, this._fs.public._rootFolder, true);
+
         this._log(`Creating server on port ${port}`);
 
         this._server = Http.createServer((...args) => {
