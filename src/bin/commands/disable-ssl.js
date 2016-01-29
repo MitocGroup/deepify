@@ -11,7 +11,6 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var Property = require('deep-package-manager').Property_Instance;
   var ACMListing = require('deep-package-manager').Provisioning_ListingDriver_ACMDriver;
-  var Hash = require('deep-package-manager').Helpers_Hash;
   var Config = require('deep-package-manager').Property_Config;
 
   if (mainPath.indexOf(path.sep) !== 0) {
