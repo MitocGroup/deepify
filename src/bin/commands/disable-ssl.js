@@ -10,7 +10,8 @@ module.exports = function(mainPath) {
   var fse = require('fs-extra');
   var fs = require('fs');
   var Property = require('deep-package-manager').Property_Instance;
-  var ACMListing = require('deep-package-manager').Provisioning_ListingDriver_ACMDriver;
+  var ACMService = require('deep-package-manager').Provisioning_Service_ACMService;
+  var CloudFrontService = require('deep-package-manager').Provisioning_Service_CloudFrontService;
   var Config = require('deep-package-manager').Property_Config;
 
   if (mainPath.indexOf(path.sep) !== 0) {
@@ -25,107 +26,54 @@ module.exports = function(mainPath) {
   }
 
   var deployConfig = fse.readJsonSync(deployConfigFile);
-  var cfDomain = deployConfig.provisioning.cloudfront.domain;
-  var cfId = deployConfig.provisioning.cloudfront.id;
 
   var property = new Property(mainPath);
-  var acm = property.provisioning.acm;
-  var cf = property.provisioning.cloudFront;
+  property._config = deployConfig;
+  property.provisioning.injectConfig(deployConfig);
+
   var domain = property.config.domain;
 
   if (!domain) {
     console.error('Please add a domain to \'' + Config.DEFAULT_FILENAME + '\' config file in order to deactivate SSL!');
   }
 
-  getCertArn.bind(this)(function(certArn) {
-    deactivateForCf.bind(this)(function() {
-      console.log(
-        'Certificate \'' + certArn + '\' have been successfully unassigned on the \'' +
-        cfDomain + '\' CloudFront distribution'
-      );
-    }.bind(this));
-  }.bind(this));
+  var acmService = property.provisioning.services.find(ACMService);
+  var cfService = property.provisioning.services.find(CloudFrontService);
 
-  function getCertArn(cb) {
-    var domainRegex = new RegExp('^' + _escapeRegExp(domain) + '$', 'i');
+  console.log('Looking for ACM certificate available of the domain \'' + domain + '\'');
 
-    var listing = new ACMListing(
-      acm,
-      domainRegex
-    );
-
-    console.log('Fetching account certificates');
-
-    listing.list(function() {
-      var certificates = listing.extractResetStack;
-
-      for (var certArn in certificates) {
-        if (!certificates.hasOwnProperty(certArn)) {
-          continue;
-        }
-
-        var certData = certificates[certArn];
-
-        if (domain === certData.DomainName) {
-          console.log('Certificate \'' + certArn + '\' available for domain \'' + domain + '\'');
-          cb(certArn);
-          return;
-        }
-      }
-
+  acmService.getDomainCertificateArn(domain, function(certArn) {
+    if (!certArn) {
       console.error('There is no certificate available for the domain \'' + domain + '\'');
       this.exit(1);
-    }.bind(this));
-  }
+    }
 
-  function deactivateForCf(cb) {
-    console.log('Fetching CloudFront distribution \'' + cfDomain + '\' configuration');
-
-    getCfConfig.bind(this)(function(distConfig, eTag) {
-      var payload = {
-        DistributionConfig: distConfig,
-        Id: cfId,
-        IfMatch: eTag,
-      };
-
-      payload.DistributionConfig.DefaultCacheBehavior.ViewerProtocolPolicy = 'allow-all';
-      delete payload.DistributionConfig.ViewerCertificate.Certificate;
-      payload.DistributionConfig.ViewerCertificate.CertificateSource = 'cloudfront';
-      payload.DistributionConfig.ViewerCertificate.CloudFrontDefaultCertificate = true;
-      payload.DistributionConfig.Aliases = {
+    var configChanges = {
+      DefaultCacheBehavior: {
+        ViewerProtocolPolicy: 'allow-all',
+      },
+      ViewerCertificate: {
+        Certificate: null,
+        CertificateSource: 'cloudfront',
+        CloudFrontDefaultCertificate: true,
+      },
+      Aliases: {
         Quantity: 0,
-        Items: [],
-      };
-
-      console.log('Updating CloudFront distribution \'' + cfDomain + '\' configuration');
-
-      cf.updateDistribution(payload, function (error) {
-        if (error) {
-          console.error(error);
-          this.exit(1);
-        }
-
-        cb();
-      }.bind(this));
-    }.bind(this));
-  }
-
-  function getCfConfig(cb) {
-    var payload = {
-      Id: cfId,
+        Items: null,
+      },
     };
 
-    cf.getDistributionConfig(payload, function (error, data) {
+    console.log('Deactivating ACM certificate \'' + certArn + '\' for domain \'' + domain + '\'');
+
+    cfService.updateDistribution(configChanges, function(error) {
       if (error) {
         console.error(error);
         this.exit(1);
       }
 
-      cb(data.DistributionConfig, data.ETag);
+      console.log(
+        'Certificate \'' + certArn + '\' have been successfully unassigned from the CloudFront distribution'
+      );
     }.bind(this));
-  }
-
-  function _escapeRegExp(str) {
-    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-  }
+  }.bind(this));
 };
