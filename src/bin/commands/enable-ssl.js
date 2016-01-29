@@ -12,7 +12,6 @@ module.exports = function(mainPath) {
   var Property = require('deep-package-manager').Property_Instance;
   var ACMService = require('deep-package-manager').Provisioning_Service_ACMService;
   var CloudFrontService = require('deep-package-manager').Provisioning_Service_CloudFrontService;
-  var Hash = require('deep-package-manager').Helpers_Hash;
   var Config = require('deep-package-manager').Property_Config;
 
   var domain = this.opts.locate('domain').value || null;
