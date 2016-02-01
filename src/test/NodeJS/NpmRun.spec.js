@@ -2,9 +2,39 @@
 
 import chai from 'chai';
 import {NpmRun} from '../../lib/NodeJS/NpmRun';
+import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
 
 suite('NodeJS/NpmRun', function() {
+  let args = 'mocha -g';
+  let npmRun = null;
+
   test('Class NpmRun exists in NodeJS/NpmRun', function() {
     chai.expect(typeof NpmRun).to.equal('function');
+  });
+
+  test('Check constructor sets _cmd = null', function() {
+    npmRun = new NpmRun(args);
+    chai.expect(npmRun).to.be.an.instanceOf(NpmRun);
+    chai.expect(npmRun.cmd).to.equal(null);
+  });
+
+  test('Check _newInstance() returns new NpmInstall instance with dirs.length = 3', function() {
+    let args = ['mocha', '-g', 'logLevel=debug'];
+
+    let actualResult = npmRun._newInstance(args);
+
+    chai.expect(actualResult).to.be.an.instanceOf(NpmInstall);
+    chai.expect(actualResult.extraArgs).to.eql([]);
+    chai.expect(actualResult.dirs).to.eql(args);
+  });
+
+  test('Check cmd setter', function() {
+    npmRun.cmd = args;
+
+    chai.expect(npmRun._mainCmd).to.includes('npm run');
+  });
+
+  test('Check _mainCmd getter returns valid string', function() {
+    chai.expect(npmRun._mainCmd).to.includes(`npm run ${args}`);
   });
 });
