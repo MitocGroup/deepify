@@ -5,7 +5,7 @@ import {NpmPrune} from '../../lib/NodeJS/NpmPrune';
 import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
 
 suite('NodeJS/NpmPrune', function() {
-  let args = 'mocha -g';
+  let args = 'dirs';
   let npmPrune = null;
 
   test('Class NpmPrune exists in NodeJS/NpmPrune', function() {
@@ -13,7 +13,7 @@ suite('NodeJS/NpmPrune', function() {
   });
 
   test('Check constructor sets _cmd = null', function() {
-    npmPrune = new NpmPrune(args);
+    npmPrune = new NpmPrune();
     chai.expect(npmPrune).to.be.an.instanceOf(NpmPrune);
   });
 
