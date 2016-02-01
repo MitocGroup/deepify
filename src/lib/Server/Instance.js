@@ -390,7 +390,7 @@ export class Instance {
 
     lambda.name = `${lambdaConfig.name}-${this.localId}`;
 
-    lambda.succeed = (result) => {
+    let successCb = (result) => {
       let plainResult = JSON.stringify(result);
 
       if (!asyncMode) {
@@ -401,12 +401,29 @@ export class Instance {
       }
     };
 
+    lambda.succeed = successCb;
+
     lambda.fail = (error) => {
+      let errorObj = error;
+
+      if (typeof error === 'object' && error instanceof Error) {
+        errorObj = {
+          errorType: error.name,
+          errorMessage: error.message,
+          errorStack: error.stack
+        };
+
+        if (error.validationErrors) {
+          errorObj.validationErrors = error.validationErrors;
+        }
+      }
+
       if (!asyncMode) {
-        this._log(`Lambda ${lambdaConfig.name} execution fail: ${error.message}`);
-        this._send500(response, error);
+        this._log(`Lambda ${lambdaConfig.name} execution fail`, errorObj.errorMessage);
+
+        successCb(errorObj);
       } else {
-        this._log(`Lambda ${lambdaConfig.name} async execution fail: ${error.message}`);
+        this._log(`Lambda ${lambdaConfig.name} async execution fail`, errorObj.errorMessage);
       }
     };
 

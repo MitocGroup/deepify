@@ -30,7 +30,7 @@ module.exports = function(mainPath) {
   var deployConfig = fse.readJsonSync(deployConfigFile);
 
   if (domain) {
-    let config = null;
+    var config = null;
 
     config = fse.readJsonSync(propertyConfigFile);
     config.domain = domain;
