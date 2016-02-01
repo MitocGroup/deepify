@@ -101,8 +101,8 @@ export class ValidationSchemasSync {
     lambdas.forEach((lambdaPath) => {
       let schemasPath = path.join(lambdaPath, Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR);
 
-      if (fs.existsSync(validationSchemas)) {
-        fse.removeSync(validationSchemas);
+      if (fs.existsSync(schemasPath)) {
+        fse.removeSync(schemasPath);
       }
 
       validationSchemas.forEach((schema) => {
