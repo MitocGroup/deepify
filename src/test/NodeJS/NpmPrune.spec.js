@@ -5,7 +5,6 @@ import {NpmPrune} from '../../lib/NodeJS/NpmPrune';
 import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
 
 suite('NodeJS/NpmPrune', function() {
-  let args = 'dirs';
   let npmPrune = null;
 
   test('Class NpmPrune exists in NodeJS/NpmPrune', function() {
