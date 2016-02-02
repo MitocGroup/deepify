@@ -93,6 +93,11 @@ module.exports = {
       example: 'deepify deploy path/to/web_app',
       description: 'Deploy an web app',
       opts: {
+        env: {
+          alias: 'e',
+          description: 'Web app environment to be used (default fetched from deploy config)',
+          required: false,
+        },
         'cfg-bucket': {
           alias: 'b',
           description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',
@@ -128,6 +133,35 @@ module.exports = {
           description: 'Force latest aws-sdk in Lambda',
           required: false,
         },
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
+    'enable-ssl': {
+      example: 'deepify enable-ssl path/to/web_app',
+      description: 'Enables SSL on a deployed web app',
+      opts: {
+        domain: {
+          alias: 'd',
+          description: 'The domain to create the certificate for (overrides the "deeploy.json" value)',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
+    'disable-ssl': {
+      example: 'deepify disable-ssl path/to/web_app',
+      description: 'Disable activated SSL on a deployed web app',
+      opts: {
       },
       args: {
         path: {
