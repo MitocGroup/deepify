@@ -46,12 +46,12 @@ suite('Lambda/Thread', function () {
       fourthInputArg: null,
     };
 
-    //'_eventsCount' not exists in node 0.12
+    //'spawnargs', '_eventsCount' do not exist in node 0.12
     let expectedResultArray = [
       'domain', '_events', '_maxListeners',
       '_closesNeeded', '_closesGot', 'connected', 'signalCode',
       'exitCode', 'killed', 'spawnfile', '_handle',
-      'spawnargs', 'pid', 'stdin', 'stdout', 'stderr',
+      'pid', 'stdin', 'stdout', 'stderr',
       'stdio', '_channel', '_handleQueue', 'send', '_send',
       'disconnect', '_disconnect',
     ];
