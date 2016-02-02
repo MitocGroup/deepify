@@ -6,6 +6,8 @@ import ChildProcess from 'child_process';
 import path from 'path';
 
 suite('Lambda/ForksManager', function () {
+  let forkPath = path.join(__dirname + './../TestMaterials/PathToForked/child');
+
   test('Class ForksManager exists in Lambda/ForksManager', function () {
     chai.expect(typeof ForksManager).to.equal('function');
   });
@@ -31,7 +33,7 @@ suite('Lambda/ForksManager', function () {
   });
 
   test('Check manage() for !ForksManager._isManaged', function () {
-    let fork = ChildProcess.fork(path.join(__dirname + './../PathToForked/child'));
+    let fork = ChildProcess.fork(forkPath);
 
     let actualResult = ForksManager.manage(fork);
 
@@ -50,7 +52,7 @@ suite('Lambda/ForksManager', function () {
   });
 
   test('Check manage() > _addForkToStack() ', function() {
-    let fork = ChildProcess.fork(path.join(__dirname + './../PathToForked/child'));
+    let fork = ChildProcess.fork(forkPath);
 
     ForksManager.manage(fork);
 
