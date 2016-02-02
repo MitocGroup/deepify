@@ -64,7 +64,6 @@ export class Timer {
   get time() {
     if(!this.startTime) {
       this._startTime = this.stopTime || new Date().getTime();
-      console.log('this._startTime: ', this._startTime);
       this.stop();
     }
 
