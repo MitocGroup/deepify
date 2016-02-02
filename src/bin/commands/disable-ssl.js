@@ -19,61 +19,64 @@ module.exports = function(mainPath) {
   }
 
   var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
-  var deployConfigFile = path.join(mainPath, '.cfg.deeploy.json');
 
-  if (!fs.existsSync(propertyConfigFile) || !fs.existsSync(deployConfigFile)) {
-    console.error('You should have the application deployed');
+  if (!fs.existsSync(propertyConfigFile)) {
+    console.error('You should have the application configured');
+    this.exit(1);
   }
-
-  var deployConfig = fse.readJsonSync(deployConfigFile);
 
   var property = new Property(mainPath);
-  property._config = deployConfig;
-  property.provisioning.injectConfig(deployConfig);
 
-  var domain = property.config.domain;
-
-  if (!domain) {
-    console.error('Please add a domain to \'' + Config.DEFAULT_FILENAME + '\' config file in order to deactivate SSL!');
-  }
-
-  var acmService = property.provisioning.services.find(ACMService);
-  var cfService = property.provisioning.services.find(CloudFrontService);
-
-  console.log('Looking for ACM certificate available of the domain \'' + domain + '\'');
-
-  acmService.getDomainCertificateArn(domain, function(certArn) {
-    if (!certArn) {
-      console.error('There is no certificate available for the domain \'' + domain + '\'');
+  property.configObj.tryLoadConfig(function() {
+    if (!property.configObj.configExists) {
+      console.error('You should have the application deployed');
       this.exit(1);
     }
 
-    var configChanges = {
-      DefaultCacheBehavior: {
-        ViewerProtocolPolicy: 'allow-all',
-      },
-      ViewerCertificate: {
-        Certificate: null,
-        CertificateSource: 'cloudfront',
-        CloudFrontDefaultCertificate: true,
-      },
-      Aliases: {
-        Quantity: 0,
-        Items: null,
-      },
-    };
+    var domain = property.config.domain;
 
-    console.log('Deactivating ACM certificate \'' + certArn + '\' for domain \'' + domain + '\'');
+    if (!domain) {
+      console.error('Please add a domain to \'' + Config.DEFAULT_FILENAME + '\' config file in order to deactivate SSL!');
+    }
 
-    cfService.updateDistribution(configChanges, function(error) {
-      if (error) {
-        console.error(error);
+    var acmService = property.provisioning.services.find(ACMService);
+    var cfService = property.provisioning.services.find(CloudFrontService);
+
+    console.log('Looking for ACM certificate available of the domain \'' + domain + '\'');
+
+    acmService.getDomainCertificateArn(domain, function(certArn) {
+      if (!certArn) {
+        console.error('There is no certificate available for the domain \'' + domain + '\'');
         this.exit(1);
       }
 
-      console.log(
-        'Certificate \'' + certArn + '\' have been successfully unassigned from the CloudFront distribution'
-      );
+      var configChanges = {
+        DefaultCacheBehavior: {
+          ViewerProtocolPolicy: 'allow-all',
+        },
+        ViewerCertificate: {
+          Certificate: null,
+          CertificateSource: 'cloudfront',
+          CloudFrontDefaultCertificate: true,
+        },
+        Aliases: {
+          Quantity: 0,
+          Items: null,
+        },
+      };
+
+      console.log('Deactivating ACM certificate \'' + certArn + '\' for domain \'' + domain + '\'');
+
+      cfService.updateDistribution(configChanges, function(error) {
+        if (error) {
+          console.error(error);
+          this.exit(1);
+        }
+
+        console.log(
+          'Certificate \'' + certArn + '\' have been successfully unassigned from the CloudFront distribution'
+        );
+      }.bind(this));
     }.bind(this));
   }.bind(this));
 };

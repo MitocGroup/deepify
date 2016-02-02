@@ -93,6 +93,11 @@ module.exports = {
       example: 'deepify deploy path/to/web_app',
       description: 'Deploy an web app',
       opts: {
+        env: {
+          alias: 'e',
+          description: 'Web app environment to be used (default fetched from deploy config)',
+          required: false,
+        },
         'cfg-bucket': {
           alias: 'b',
           description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',

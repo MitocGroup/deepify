@@ -17,12 +17,14 @@ module.exports = function(mainPath) {
   var Config = require('deep-package-manager').Property_Config;
   var S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
   var ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
+  var DeployConfig = require('deep-package-manager').Property_DeployConfig;
 
   var installSdk = this.opts.locate('aws-sdk').exists;
   var localOnly = this.opts.locate('dry-run').exists;
   var fastDeploy = this.opts.locate('fast').exists;
   var dumpCodePath = this.opts.locate('dump-local').value;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
+  var appEnv = this.opts.locate('env').value;
   var hasToPullDeps = this.opts.locate('pull-deps').exists;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
@@ -38,12 +40,32 @@ module.exports = function(mainPath) {
   var configExists = fs.existsSync(configFile);
   var config = null;
 
+  appEnv = appEnv ? appEnv.toLowerCase() : null;
+
+  if (DeployConfig.AVAILABLE_ENV.indexOf(appEnv) === -1) {
+    console.error(
+      'Invalid environment "' + appEnv + '". Available environments: ' +
+      DeployConfig.AVAILABLE_ENV.join(', ')
+    );
+    this.exit(1);
+  }
+
   if (!configExists) {
     config = Config.generate();
+
+    if (appEnv) {
+      config.env = appEnv;
+    }
 
     fse.outputJsonSync(configFile, config);
   } else {
     config = fse.readJsonSync(configFile);
+
+    if (appEnv) {
+      config.env = appEnv;
+
+      fse.outputJsonSync(configFile, config);
+    }
   }
 
   var propertyInstance;
@@ -126,64 +148,8 @@ module.exports = function(mainPath) {
     }.bind(this));
   }
 
-  function getConfigFromS3(propertyInstance, cb) {
-    console.log('Trying to retrieve .cfg.deeploy.json from S3 ' + cfgBucket);
-
-    var s3 = propertyInstance.provisioning.s3;
-
-    var payload = {
-      Bucket: cfgBucket,
-      Key: '.cfg.deeploy.json',
-    };
-
-    s3.getObject(payload, function(error, data) {
-      cb.bind(this)(error, data);
-    }.bind(this));
-  }
-
-  function dumpConfigToS3(propertyInstance, cb) {
-    if (!propertyInstance.config || !propertyInstance.config.provisioning) {
-      cb && cb.bind(this)();
-      return;
-    }
-
-    var plainConfig = JSON.stringify(propertyInstance.config);
-    var s3 = propertyInstance.provisioning.s3;
-
-    var payload = {
-      Bucket: propertyInstance.config.provisioning.s3.buckets[S3Service.SYSTEM_BUCKET].name,
-      Key: '.cfg.deeploy.json',
-      Body: plainConfig,
-    };
-
-    s3.putObject(payload, function(error, data) {
-      if (error) {
-        console.error('Error persisting config to S3', error);
-        this.exit(1);
-      }
-
-      cb && cb.bind(this)();
-    }.bind(this));
-  }
-
   function dumpConfig(propertyInstance, cb) {
-    if (!propertyInstance.config) {
-      cb && cb.bind(this)();
-      return;
-    }
-
-    var deepConfigFile = path.join(mainPath, '.cfg.deeploy.json');
-    var plainConfig = JSON.stringify(propertyInstance.config);
-
-    console.log('Dumping config into ' + deepConfigFile);
-
-    fs.writeFile(deepConfigFile, plainConfig, function(error) {
-      if (error) {
-        console.error('Error while dumping config into ' + deepConfigFile + ': ' + error);
-      }
-
-      dumpConfigToS3.bind(this)(propertyInstance, cb);
-    }.bind(this));
+    propertyInstance.configObj.completeDump(cb.bind(this));
   }
 
   function prepareProduction(propertyPath, cb) {
@@ -231,8 +197,6 @@ module.exports = function(mainPath) {
   function doDeploy() {
     propertyInstance.localDeploy = localOnly;
 
-    var deepConfigFile = path.join(mainPath, '.cfg.deeploy.json');
-
     // @todo: improve it!
     // Gracefully teardown...
     (function() {
@@ -276,16 +240,18 @@ module.exports = function(mainPath) {
       }.bind(this));
     }.bind(this))();
 
-    var updateCfg = fs.existsSync(deepConfigFile) ? JSON.parse(fs.readFileSync(deepConfigFile)) : null;
+    propertyInstance.configObj.tryLoadConfig(function() {
+      if (propertyInstance.configObj.configExists) {
+        propertyInstance.update(function() {
+          console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
+          console.log('Website address: ' + getPublicWebsite(propertyInstance));
 
-    // @todo: rewrite this section!
-    if (!updateCfg) {
-      if (!cfgBucket) {
+          dumpConfig.bind(this)(propertyInstance, dumpCode);
+        }.bind(this), null, getMicroservicesToDeploy());
+      } else {
         if (microservicesToDeploy) {
           console.warn(' Partial deploy option is useless during first deploy...');
         }
-
-        console.log('Installing web app ' + config.appIdentifier);
 
         propertyInstance.install(function() {
           console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
@@ -293,47 +259,8 @@ module.exports = function(mainPath) {
 
           dumpConfig.bind(this)(propertyInstance, dumpCode);
         }.bind(this));
-      } else {
-        getConfigFromS3.bind(this)(propertyInstance, function(error, updateCfg) {
-          if (error) {
-            console.error('Error fetching config from AWS S3 bucket ' + cfgBucket, error);
-          }
-
-          if (!error) {
-            console.log('Updating web app ' + config.appIdentifier);
-
-            propertyInstance.update(JSON.parse(updateCfg.Body.toString()), function() {
-              console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-              console.log('Website address: ' + getPublicWebsite(propertyInstance));
-
-              dumpConfig.bind(this)(propertyInstance, dumpCode);
-            }.bind(this), getMicroservicesToDeploy());
-          } else {
-            if (microservicesToDeploy) {
-              console.warn(' Partial deploy option is useless during first deploy...');
-            }
-
-            console.log('Installing web app ' + config.appIdentifier);
-
-            propertyInstance.install(function() {
-              console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-              console.log('Website address: ' + getPublicWebsite(propertyInstance));
-
-              dumpConfig.bind(this)(propertyInstance, dumpCode);
-            }.bind(this));
-          }
-        }.bind(this));
       }
-    } else {
-      console.log('Updating web app ' + config.appIdentifier);
-
-      propertyInstance.update(updateCfg, function() {
-        console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-        console.log('Website address: ' + getPublicWebsite(propertyInstance));
-
-        dumpConfig.bind(this)(propertyInstance, dumpCode);
-      }.bind(this), getMicroservicesToDeploy());
-    }
+    }.bind(this), cfgBucket);
   }
 
   function arrayUnique(a) {
