@@ -4,6 +4,7 @@
 
 'use strict';
 
-module.exports = function(mainPath) {
-  var lambda = { name: 'testLambda from file', };
+module.exports = function() {
+  var lambda = { name: 'testLambda from file', handler: () => {},};
+  return lambda;
 };
