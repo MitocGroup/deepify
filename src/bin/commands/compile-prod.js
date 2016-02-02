@@ -15,7 +15,6 @@ module.exports = function(mainPath) {
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
   var NpmPrune = require('../../lib.compiled/NodeJS/NpmPrune').NpmPrune;
-  var NpmDedupe = require('../../lib.compiled/NodeJS/NpmDedupe').NpmDedupe;
   var NpmRun = require('../../lib.compiled/NodeJS/NpmRun').NpmRun;
   var NpmChain = require('../../lib.compiled/NodeJS/NpmChain').NpmChain;
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
