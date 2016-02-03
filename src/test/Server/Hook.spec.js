@@ -3,8 +3,8 @@
 import chai from 'chai';
 import {Hook} from '../../lib/Server/Hook';
 
-suite('Server/Hook', function() {
-  test('Class Hook exists in Server/Hook', function() {
-    chai.expect(typeof Hook).to.equal('function');
+suite('Server/Hook', () => {
+  test('Class Hook exists in Server/Hook', () => {
+    chai.expect(Hook).to.be.an('function');
   });
 });

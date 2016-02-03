@@ -5,7 +5,7 @@ import path from 'path';
 import {Runtime} from '../../lib/Lambda/Runtime';
 import {Timer} from '../../lib/Lambda/Timer';
 
-suite('Lambda/Runtime', function() {
+suite('Lambda/Runtime', () => {
   let runtime = null;
   let lambda = {
     name: 'testLambda',
@@ -13,57 +13,57 @@ suite('Lambda/Runtime', function() {
   };
   let lambdaPath = path.join(__dirname + './../TestMaterials/Lambda/lambda');
 
-  test('Class Runtime exists in Lambda/Runtime', function() {
-    chai.expect(typeof Runtime).to.equal('function');
+  test('Class Runtime exists in Lambda/Runtime', () => {
+    chai.expect(Runtime).to.be.an('function');
   });
 
-  test('Check constructor sets _lambda', function() {
+  test('Check constructor sets _lambda', () => {
     runtime = new Runtime(lambda);
 
     chai.expect(runtime).to.be.an.instanceOf(Runtime);
     chai.expect(runtime.lambda).to.eql(lambda);
   });
 
-  test('Check constructor sets _measureTime = false', function() {
+  test('Check constructor sets _measureTime = false', () => {
     chai.expect(runtime.measureTime).to.equal(false);
   });
 
-  test('Check constructor sets _timer = null', function() {
+  test('Check constructor sets _timer = null', () => {
     chai.expect(runtime._timer).to.equal(null);
   });
 
-  test('Check constructor sets _silent = false', function() {
+  test('Check constructor sets _silent = false', () => {
     chai.expect(runtime.silent).to.equal(false);
   });
 
-  test('Check constructor sets _name ', function() {
+  test('Check constructor sets _name ', () => {
     chai.expect(runtime.name).to.not.equal('');
   });
 
-  test('Check constructor sets _lambdaPath = null', function() {
+  test('Check constructor sets _lambdaPath = null', () => {
     chai.expect(runtime.lambdaPath).to.equal(null);
   });
 
-  test('Check constructor sets _awsConfigFile = null', function() {
+  test('Check constructor sets _awsConfigFile = null', () => {
     chai.expect(runtime._awsConfigFile).to.equal(null);
   });
 
-  test('Check ENVIRONMENT static getter', function() {
+  test('Check ENVIRONMENT static getter', () => {
     chai.expect(Runtime.ENVIRONMENT).to.equal('local');
   });
 
-  test('Check SIBLING_EXEC_WRAPPER_NAME static getter', function() {
+  test('Check SIBLING_EXEC_WRAPPER_NAME static getter', () => {
     chai.expect(Runtime.SIBLING_EXEC_WRAPPER_NAME).to.equal('_deep_lambda_exec_');
   });
 
-  test('Check createLambda()', function() {
+  test('Check createLambda()', () => {
     let actualResult = Runtime.createLambda(lambdaPath);
 
     chai.expect(actualResult).to.be.an.instanceOf(Runtime);
     chai.expect(actualResult.awsConfigFile).to.be.equal(null);
   });
 
-  test('Check complete setter/getter', function() {
+  test('Check complete setter/getter', () => {
     let cb = () => {
       return 'test cb';
     };
@@ -79,7 +79,7 @@ suite('Lambda/Runtime', function() {
     chai.expect(runtime.complete).to.equal(complete);
   });
 
-  test('Check fail setter/getter', function() {
+  test('Check fail setter/getter', () => {
     let cb = () => {
       return 'test cb fail';
     };
@@ -95,7 +95,7 @@ suite('Lambda/Runtime', function() {
     chai.expect(runtime.fail).to.equal(fail);
   });
 
-  test('Check succeed setter/getter', function() {
+  test('Check succeed setter/getter', () => {
     let cb = () => {
       return 'test cb succeed';
     };
@@ -111,7 +111,7 @@ suite('Lambda/Runtime', function() {
     chai.expect(runtime.succeed).to.equal(succeed);
   });
 
-  test('Check succeed setter/getter', function() {
+  test('Check succeed setter/getter', () => {
     let measureTime = runtime.measureTime;
 
     runtime.measureTime = true;
@@ -126,7 +126,7 @@ suite('Lambda/Runtime', function() {
     chai.expect(runtime.measureTime).to.equal(measureTime);
   });
 
-  test('Check name setter/getter', function() {
+  test('Check name setter/getter', () => {
     let name = runtime.name;
     let lambdaName = 'new test name';
 
@@ -140,7 +140,7 @@ suite('Lambda/Runtime', function() {
     chai.expect(runtime.name).to.equal(name);
   });
 
-  test('Check silent setter/getter', function() {
+  test('Check silent setter/getter', () => {
     let silent = runtime.silent;
 
     runtime.silent = true;
@@ -156,7 +156,7 @@ suite('Lambda/Runtime', function() {
     chai.expect(runtime.silent).to.equal(silent);
   });
 
-  test('Check context getter', function() {
+  test('Check context getter', () => {
     let expectedContextKeys = [
       'awsRequestId',
       'fail',
@@ -178,14 +178,14 @@ suite('Lambda/Runtime', function() {
     chai.expect(runtime.context.fail).to.be.an('function');
   });
 
-  test('Check _injectSiblingExecutionWrapper', function() {
+  test('Check _injectSiblingExecutionWrapper', () => {
     let actualResult = runtime._injectSiblingExecutionWrapper();
     chai.expect(global[Runtime.SIBLING_EXEC_WRAPPER_NAME]).to.be.an('object');
     chai.expect(global[Runtime.SIBLING_EXEC_WRAPPER_NAME].invoke).to.be.an('function');
     chai.expect(global[Runtime.SIBLING_EXEC_WRAPPER_NAME].invokeAsync).to.be.an('function');
   });
 
-  test('Check run for _measureTime = undefined', function() {
+  test('Check run for _measureTime = undefined', () => {
     let event = {
       firstInputArg: 'test',
       secondInputArg: 2,
@@ -200,7 +200,7 @@ suite('Lambda/Runtime', function() {
     chai.expect(actualResult.lambda.name).to.equal(lambda.name);
   });
 
-  test('Check run for _measureTime != undefined', function() {
+  test('Check run for _measureTime != undefined', () => {
     let event = {
       firstInputArg: 'test',
       secondInputArg: 2,
@@ -217,7 +217,7 @@ suite('Lambda/Runtime', function() {
     chai.expect(actualResult.lambda.name).to.equal(lambda.name);
   });
 
-  test('Check _logCallback()', function() {
+  test('Check _logCallback()', () => {
     runtime.silent = true;
     let type = 'number';
 

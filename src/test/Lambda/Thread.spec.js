@@ -5,7 +5,7 @@ import path from 'path';
 import {Thread} from '../../lib/Lambda/Thread';
 import {Runtime} from '../../lib/Lambda/Runtime';
 
-suite('Lambda/Thread', function () {
+suite('Lambda/Thread', () => {
   let lambda = {
     name: 'testLambda',
     handler: () => {},
@@ -14,11 +14,11 @@ suite('Lambda/Thread', function () {
   let runtime = new Runtime(lambda, lambdaPath);
   let thread = null;
 
-  test('Class Thread exists in Lambda/Thread', function () {
-    chai.expect(typeof Thread).to.equal('function');
+  test('Class Thread exists in Lambda/Thread', () => {
+    chai.expect(Thread).to.be.an('function');
   });
 
-  test('Check constructor sets _lambda', function () {
+  test('Check constructor sets _lambda', () => {
     thread = new Thread(runtime);
 
     chai.expect(thread).to.be.an.instanceOf(Thread);
@@ -26,18 +26,18 @@ suite('Lambda/Thread', function () {
     chai.expect(thread.process).to.equal(null);
   });
 
-  test('Check WRAPPER static getter', function () {
+  test('Check WRAPPER static getter', () => {
     chai.expect(Thread.WRAPPER).to.contains('thread_wrapper.js');
   });
 
-  test('Check _cleanup()', function () {
+  test('Check _cleanup()', () => {
     let actualResult = thread._cleanup();
 
     chai.expect(actualResult).to.be.an.instanceOf(Thread);
     chai.expect(thread.process).to.equal(null);
   });
 
-  test('Check run()', function () {
+  test('Check run()', () => {
     runtime.silent = true;
     let event = {
       firstInputArg: 'test',

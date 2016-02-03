@@ -3,8 +3,8 @@
 import chai from 'chai';
 import {Option} from '../../lib/Terminal/Option';
 
-suite('Terminal/Option', function() {
-  test('Class Option exists in Terminal/Option', function() {
-    chai.expect(typeof Option).to.equal('function');
+suite('Terminal/Option', () => {
+  test('Class Option exists in Terminal/Option', () => {
+    chai.expect(Option).to.be.an('function');
   });
 });

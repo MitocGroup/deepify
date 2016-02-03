@@ -4,17 +4,17 @@ import chai from 'chai';
 import {UndefinedDepsResolver} from '../../lib/NodeJS/UndefinedDepsResolver';
 import {NpmDependency} from '../../lib/NodeJS/NpmDependency';
 
-suite('NodeJS/UndefinedDepsResolver', function() {
+suite('NodeJS/UndefinedDepsResolver', () => {
   let name = 'mocha';
   let version = '2.3.4';
   let mainDep = new NpmDependency(name, version, true);
   let undefinedDepsResolver = new UndefinedDepsResolver(mainDep);
 
-  test('Class UndefinedDepsResolver exists in NodeJS/UndefinedDepsResolver', function() {
-    chai.expect(typeof UndefinedDepsResolver).to.equal('function');
+  test('Class UndefinedDepsResolver exists in NodeJS/UndefinedDepsResolver', () => {
+    chai.expect(UndefinedDepsResolver).to.be.an('function');
   });
 
-  test('Check UndefinedDepsResolver constructor throws Error for !mainDep.isMain', function() {
+  test('Check UndefinedDepsResolver constructor throws Error for !mainDep.isMain', () => {
     let error = null;
     let mainDep = new NpmDependency(name, version, false);
 
@@ -29,7 +29,7 @@ suite('NodeJS/UndefinedDepsResolver', function() {
   });
 
   test('Check UndefinedDepsResolver constructor throws Error for !mainDep.isMain',
-    function() {
+    () => {
       let error = null;
       let mainDep = new NpmDependency(name, null, true);
 
@@ -44,20 +44,20 @@ suite('NodeJS/UndefinedDepsResolver', function() {
     }
   );
 
-  test('Check constructor sets _mainDep', function() {
+  test('Check constructor sets _mainDep', () => {
     chai.expect(undefinedDepsResolver).to.be.an.instanceOf(UndefinedDepsResolver);
     chai.expect(undefinedDepsResolver.mainDep).to.equal(mainDep);
   });
 
-  test('Check constructor sets _undefinedStack', function() {
+  test('Check constructor sets _undefinedStack', () => {
     chai.expect(undefinedDepsResolver._undefinedStack).to.eql([]);
   });
 
-  test('Check constructor sets _cloneShadow', function() {
+  test('Check constructor sets _cloneShadow', () => {
     chai.expect(undefinedDepsResolver._cloneShadow).to.eql({});
   });
 
-  test('Check constructor sets _resolvedStack', function() {
+  test('Check constructor sets _resolvedStack', () => {
     chai.expect(undefinedDepsResolver._resolvedStack).to.eql({});
   });
 });

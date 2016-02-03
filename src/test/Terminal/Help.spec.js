@@ -3,8 +3,8 @@
 import chai from 'chai';
 import {Help} from '../../lib/Terminal/Help';
 
-suite('Terminal/Help', function() {
-  test('Class Help exists in Terminal/Help', function() {
-    chai.expect(typeof Help).to.equal('function');
+suite('Terminal/Help', () => {
+  test('Class Help exists in Terminal/Help', () => {
+    chai.expect(Help).to.be.an('function');
   });
 });

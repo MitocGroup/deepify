@@ -4,23 +4,23 @@ import chai from 'chai';
 import {NpmInstallLibs} from '../../lib/NodeJS/NpmInstallLibs';
 import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
 
-suite('NodeJS/NpmInstallLibs', function() {
+suite('NodeJS/NpmInstallLibs', () => {
   let libs = 'mocha isparta';
   let libsArray = ['codacy-coverage', 'istanbul'];
   let npmInstallLibs = null;
 
-  test('Class NpmInstallLibs exists in NodeJS/NpmInstallLibs', function() {
-    chai.expect(typeof NpmInstallLibs).to.equal('function');
+  test('Class NpmInstallLibs exists in NodeJS/NpmInstallLibs', () => {
+    chai.expect(NpmInstallLibs).to.be.an('function');
   });
 
-  test('Check constructor sets _libsPlain = null, global = false', function() {
+  test('Check constructor sets _libsPlain = null, global = false', () => {
     npmInstallLibs = new NpmInstallLibs();
     chai.expect(npmInstallLibs).to.be.an.instanceOf(NpmInstallLibs);
     chai.expect(npmInstallLibs.libsPlain).to.equal(null);
     chai.expect(npmInstallLibs.global).to.equal(false);
   });
 
-  test('Check _libsPlain setter', function() {
+  test('Check _libsPlain setter', () => {
     npmInstallLibs.libs = libsArray;
     chai.expect(npmInstallLibs.libsPlain).to.equal(libsArray.join(' '));
 
@@ -28,7 +28,7 @@ suite('NodeJS/NpmInstallLibs', function() {
     chai.expect(npmInstallLibs.libsPlain).to.equal(libs);
   });
 
-  test('Check global setter', function() {
+  test('Check global setter', () => {
     npmInstallLibs.global = false;
     chai.expect(npmInstallLibs.global).to.equal(false);
 
@@ -37,7 +37,7 @@ suite('NodeJS/NpmInstallLibs', function() {
     chai.expect(npmInstallLibs.dirs).to.eql([process.cwd()]);
   });
 
-  test('Check _newInstance() returns new NpmInstall instance with dirs.length = 3', function() {
+  test('Check _newInstance() returns new NpmInstall instance with dirs.length = 3', () => {
     let args = ['mocha', '-g', 'logLevel=debug'];
 
     let actualResult = npmInstallLibs._newInstance(args);
@@ -46,7 +46,7 @@ suite('NodeJS/NpmInstallLibs', function() {
     chai.expect(actualResult.libsPlain).to.equal(libs);
   });
 
-  test('Check _mainCmd getter returns valid string', function() {
+  test('Check _mainCmd getter returns valid string', () => {
     chai.expect(npmInstallLibs._mainCmd).to.includes(`npm install ${libs}`);
   });
 });

@@ -4,15 +4,15 @@ import chai from 'chai';
 import {LambdasExtractor} from '../../lib/Helpers/LambdasExtractor';
 import {Property_Instance as PropertyInstance} from 'deep-package-manager';
 
-suite('Helpers/LambdasExtractor', function () {
+suite('Helpers/LambdasExtractor', () => {
   let propertyInstance = null;
   let lambdasExtractor = null;
 
-  test('Class LambdasExtractor exists in Helpers/LambdasExtractor', function () {
-    chai.expect(typeof LambdasExtractor).to.equal('function');
+  test('Class LambdasExtractor exists in Helpers/LambdasExtractor', () => {
+    chai.expect(LambdasExtractor).to.be.an('function');
   });
 
-  test('Check _extract()', function () {
+  test('Check _extract()', () => {
     propertyInstance = new PropertyInstance('./test/TestMaterials/Property2', 'deeploy.test.json');
 
     lambdasExtractor = new LambdasExtractor(propertyInstance);
@@ -22,7 +22,7 @@ suite('Helpers/LambdasExtractor', function () {
     chai.expect(lambdasExtractor.property).to.equal(propertyInstance);
   });
 
-  test('Check _extract()', function () {
+  test('Check _extract()', () => {
     let microservices = {
       'hello.world.example': {
         'isRoot': false,
