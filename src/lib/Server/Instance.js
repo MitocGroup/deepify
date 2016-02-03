@@ -29,7 +29,7 @@ export class Instance {
    * @param {Property} property
    */
   constructor(property) {
-    if (!property instanceof Property) {
+    if (!(property instanceof Property)) {
       throw new PropertyObjectRequiredException();
     }
 
