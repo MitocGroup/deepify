@@ -19,12 +19,13 @@ module.exports = function(mainPath) {
   var ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
   var DeployConfig = require('deep-package-manager').Property_DeployConfig;
 
+  var isProd = this.opts.locate('prod').exists;
   var installSdk = this.opts.locate('aws-sdk').exists;
   var localOnly = this.opts.locate('dry-run').exists;
   var fastDeploy = this.opts.locate('fast').exists;
   var dumpCodePath = this.opts.locate('dump-local').value;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
-  var appEnv = this.opts.locate('env').value;
+  var appEnv = isProd ? 'prod' : this.opts.locate('env').value;
   var hasToPullDeps = this.opts.locate('pull-deps').exists;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
@@ -42,7 +43,7 @@ module.exports = function(mainPath) {
 
   appEnv = appEnv ? appEnv.toLowerCase() : null;
 
-  if (DeployConfig.AVAILABLE_ENV.indexOf(appEnv) === -1) {
+  if (appEnv && DeployConfig.AVAILABLE_ENV.indexOf(appEnv) === -1) {
     console.error(
       'Invalid environment "' + appEnv + '". Available environments: ' +
       DeployConfig.AVAILABLE_ENV.join(', ')
@@ -152,33 +153,39 @@ module.exports = function(mainPath) {
     propertyInstance.configObj.completeDump(cb.bind(this));
   }
 
+  function doCompileProd(propertyPath, cb) {
+    console.log('Start preparing for production');
+
+    var cmd = new Exec(
+      Bin.node,
+      this.scriptPath,
+      'compile-prod',
+      propertyPath
+    );
+
+    !fastDeploy && cmd.addArg('--remove-source');
+    microservicesToDeploy && cmd.addArg('--partial ' + microservicesToDeploy);
+    installSdk && cmd.addArg('--aws-sdk');
+
+    cmd.run(function(result) {
+      if (result.failed) {
+        console.error('Backend production preparations failed: ' + result.error);
+        this.exit(1);
+      }
+
+      cb();
+    }.bind(this), true);
+  }
+
   function prepareProduction(propertyPath, cb) {
-    if (!localOnly) {
+    if (isProd) {
+      doCompileProd.bind(this)(propertyPath, cb);
+    } else if (!localOnly) {
       var prompt = new Prompt('Prepare for production?');
 
       prompt.readConfirm(function(result) {
         if (result) {
-          console.log('Start preparing for production');
-
-          var cmd = new Exec(
-            Bin.node,
-            this.scriptPath,
-            'compile-prod',
-            propertyPath
-          );
-
-          !fastDeploy && cmd.addArg('--remove-source');
-          microservicesToDeploy && cmd.addArg('--partial ' + microservicesToDeploy);
-          installSdk && cmd.addArg('--aws-sdk');
-
-          cmd.run(function(result) {
-            if (result.failed) {
-              console.error('Backend production preparations failed: ' + result.error);
-              this.exit(1);
-            }
-
-            cb();
-          }.bind(this), true);
+          doCompileProd.bind(this)(propertyPath, cb);
 
           return;
         }
@@ -187,11 +194,9 @@ module.exports = function(mainPath) {
 
         cb();
       }.bind(this));
-
-      return;
+    } else {
+      cb();
     }
-
-    cb();
   }
 
   function doDeploy() {
