@@ -26,7 +26,6 @@ module.exports = function(mainPath) {
   var dumpCodePath = this.opts.locate('dump-local').value;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
   var appEnv = isProd ? 'prod' : this.opts.locate('env').value;
-  var hasToPullDeps = this.opts.locate('pull-deps').exists;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
   if (mainPath.indexOf(path.sep) !== 0) {
@@ -140,11 +139,7 @@ module.exports = function(mainPath) {
       }
 
       propertyInstance.runInitMsHooks(function() {
-        var deployCb = function() {
-          prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
-        };
-
-        hasToPullDeps ? pullDeps.bind(this)(deployCb) : deployCb.bind(this)();
+        prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
       }.bind(this));
     }.bind(this));
   }
@@ -288,26 +283,6 @@ module.exports = function(mainPath) {
     }));
 
     return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
-  }
-
-  function pullDeps(cb) {
-    console.log('Resolving dependencies in ' + tmpPropertyPath);
-
-    new Exec(
-      Bin.node,
-      this.scriptPath,
-      'pull-deps',
-      tmpPropertyPath
-    )
-      .avoidBufferOverflow()
-      .run(function(result) {
-        if (result.failed) {
-          console.error('Error while pulling dependencies in ' + tmpPropertyPath + ': ' + result.error);
-          this.exit(1);
-        }
-
-        cb.bind(this)();
-      }.bind(this));
   }
 
   function dumpCode() {
