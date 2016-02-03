@@ -1,9 +1,15 @@
 'use strict';
 
 import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import path from 'path';
 import {Instance} from '../../lib/Server/Instance';
 import {PropertyObjectRequiredException} from '../../lib/Server/Exception/PropertyObjectRequiredException';
 import {Property_Instance as PropertyInstance} from 'deep-package-manager';
+import {Property_Frontend as Frontend} from 'deep-package-manager';
+
+chai.use(sinonChai);
 
 suite('Server/Instance', () => {
   let server = null;
@@ -61,5 +67,53 @@ suite('Server/Instance', () => {
 
     chai.expect(actualResult).to.be.equal(localId);
     chai.expect(server._localId).to.be.equal(expectedResult);
+  });
+
+  test('Check _setup()', () => {
+    server._setup();
+
+    chai.expect(server._rootMicroservice).to.have.all.keys('frontend', 'identifier', 'lambdas', 'path');
+    chai.expect(server._defaultFrontendConfig).to.be.an('object');
+  });
+
+  test('Check buildPath > _populateBuildConfig()', () => {
+    let error = null;
+
+    try {
+      server.buildPath = path.join(__dirname, '../TestMaterials');
+    } catch (e) {
+      error = e;
+    }
+
+    console.log('error buildPath: ', error);
+  });
+
+  test('Check running returns false', () => {
+
+    chai.expect(server.running).to.equal(false);
+  });
+
+  test('Check stop() when !running', () => {
+    let spyCallback = sinon.spy();
+
+    let actualResult = server.stop(spyCallback);
+
+    chai.expect(actualResult, 'is an instance of Server').to.be.an.instanceOf(Instance);
+    chai.expect(spyCallback).to.have.been.calledWithExactly();
+  });
+
+  test('Check LAMBDA_URI static getter', () => {
+    chai.expect(Instance.LAMBDA_URI).to.equal('/_/lambda');
+  });
+
+  test('Check LAMBDA_ASYNC_URI static getter', () => {
+    chai.expect(Instance.LAMBDA_ASYNC_URI).to.equal('/_/lambda-async');
+  });
+
+  test('Check _kernelMock getter', () => {
+    let actualResult = server._kernelMock;
+
+    chai.expect(actualResult).to.be.an('object');
+    chai.expect(actualResult).to.have.all.keys('config', 'microservice');
   });
 });
