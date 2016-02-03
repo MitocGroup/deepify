@@ -36,7 +36,6 @@ module.exports = function(mainPath) {
   var property = new Property(mainPath);
   property.microservicesToUpdate = getMicroservicesToDeploy();
 
-  var microservices = property.workingMicroservices;
   var lambdas = {
     path: [],
     tmpPath: [],
@@ -330,7 +329,9 @@ module.exports = function(mainPath) {
 
   function arrayUnique(a) {
     return a.reduce(function(p, c) {
-      if (p.indexOf(c) < 0) p.push(c);
+      if (p.indexOf(c) < 0) {
+        p.push(c);
+      }
       return p;
     }, []);
   }

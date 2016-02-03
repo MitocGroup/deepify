@@ -343,9 +343,6 @@ module.exports = function(mainPath) {
       return;
     }
 
-    var lambdasVector = [];
-    var stack = lambdas.length;
-
     for (var i = 0; i < lambdas.length; i++) {
       try {
         fs.unlinkSync(lambdas[i]);
