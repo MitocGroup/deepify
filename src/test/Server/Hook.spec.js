@@ -37,4 +37,11 @@ suite('Server/Hook', () => {
   test('Check FILE_NAME static getter', () => {
     chai.expect(Hook.FILE_NAME).to.be.equal('hook.server.js');
   });
+
+  test('Check _createContext', () => {
+    chai.expect(hook._createContext('after').isAfter()).to.be.equal(true);
+    chai.expect(hook._createContext('after').isBefore()).to.be.equal(false);
+    chai.expect(hook._createContext('before').isAfter()).to.be.equal(false);
+    chai.expect(hook._createContext('before').isBefore()).to.be.equal(true);
+  });
 });
