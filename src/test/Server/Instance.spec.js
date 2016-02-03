@@ -59,6 +59,19 @@ suite('Server/Instance', () => {
     chai.expect(server.logger).to.be.equal(logger);
   });
 
+  test('Check profiling getter/setter', () => {
+    let profiling = server.profiling;
+
+    server.profiling = true;
+    chai.expect(server.profiling).to.be.equal(true);
+
+    server.profiling = false;
+    chai.expect(server.profiling).to.be.equal(false);
+
+    server.profiling = profiling;
+    chai.expect(server.profiling).to.be.equal(profiling);
+  });
+
   test('Check localId getter postincrements _localId', () => {
     let localId = server._localId;
     let expectedResult = localId + 1;
@@ -115,5 +128,18 @@ suite('Server/Instance', () => {
 
     chai.expect(actualResult).to.be.an('object');
     chai.expect(actualResult).to.have.all.keys('config', 'microservice');
+  });
+
+  test('Check _resolveMicroservice', () => {
+    let uri = 'microservice2/p/a/t/h';
+
+    let actualResult = server._resolveMicroservice(uri);
+
+    chai.expect(actualResult).to.contains('Microservice2');
+  });
+
+  //@todo - need to rework
+  test('Check listen()', () => {
+    let actualResult = server.listen();
   });
 });
