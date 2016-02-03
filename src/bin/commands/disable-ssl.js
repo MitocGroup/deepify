@@ -7,7 +7,6 @@
 
 module.exports = function(mainPath) {
   var path = require('path');
-  var fse = require('fs-extra');
   var fs = require('fs');
   var Property = require('deep-package-manager').Property_Instance;
   var ACMService = require('deep-package-manager').Provisioning_Service_ACMService;
