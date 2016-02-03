@@ -93,6 +93,10 @@ module.exports = {
       example: 'deepify deploy path/to/web_app',
       description: 'Deploy an web app',
       opts: {
+        prod: {
+          description: 'Prepare web app for production and ensure prod env is used',
+          required: false,
+        },
         env: {
           alias: 'e',
           description: 'Web app environment to be used (default fetched from deploy config)',
