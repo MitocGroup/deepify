@@ -14,15 +14,15 @@ suite('Server/Hook', () => {
     chai.expect(Hook).to.be.an('function');
   });
 
-  test('Check constructor sets correctly properties for valid property', () => {
+  test('Check constructor sets correctly server', () => {
     propertyInstance = new PropertyInstance('./test/TestMaterials/Property2', 'deeploy.test.json');
 
     server = new Instance(propertyInstance);
 
-    hook = new Hook(propertyInstance);
+    hook = new Hook(server);
 
-    chai.expect(hook).to.be.an.instanceOf(Instance);
-    chai.expect(hook.server).to.be.an.instanceOf(Instance);
+    chai.expect(hook, 'is an instance of Hook').to.be.an.instanceOf(Hook);
+    chai.expect(hook.server, 'server is an instance of Server').to.be.an.instanceOf(Instance);
     chai.expect(hook.server).to.be.equal(server);
   });
 
