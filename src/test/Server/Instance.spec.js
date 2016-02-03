@@ -17,7 +17,7 @@ suite('Server/Instance', () => {
     let error = null;
 
     try {
-      server = new Instance();
+      server = new Instance({});
     } catch(e) {
       error = e;
     }
