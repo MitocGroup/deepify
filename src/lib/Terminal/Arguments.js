@@ -39,7 +39,7 @@ export class Arguments {
    * @returns {Arguments}
    */
   merge(sibling) {
-    if (!sibling instanceof Arguments) {
+    if (!(sibling instanceof Arguments)) {
       throw new ArgumentsObjectRequiredException();
     }
 
@@ -141,7 +141,7 @@ export class Arguments {
    * @returns {Arguments}
    */
   add(argument) {
-    if (!argument instanceof Argument) {
+    if (!(argument instanceof Argument)) {
       throw new ArgumentObjectRequiredException();
     }
 
