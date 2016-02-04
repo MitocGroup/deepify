@@ -39,9 +39,16 @@ suite('Terminal/Arguments', () => {
 
   test('Check add()', () => {
     let actualResult = argumentsInstance.add(argument);
-
     chai.expect(actualResult).to.be.an.instanceOf(Arguments);
     chai.expect(argumentsInstance.list()[0]).to.be.an.instanceOf(Argument);
+  });
+
+  test('Check listValues() for !includeUnmanaged', () => {
+    argument.collect(['logLevel=debug']);
+
+    let actualResult = argumentsInstance.listValues(false);
+
+    chai.expect(actualResult[0]).to.be.equal(argument.value);
   });
 
   test('Check hasUnmanaged() returns false', () => {
