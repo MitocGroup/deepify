@@ -15,7 +15,7 @@ export class Help {
   constructor(program) {
     this._program = program;
 
-    if (!program instanceof Program) {
+    if (!(program instanceof Program)) {
       throw new ProgramInstanceRequiredException();
     }
   }
