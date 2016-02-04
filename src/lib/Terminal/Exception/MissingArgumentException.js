@@ -13,7 +13,7 @@ export class MissingArgumentException extends ValidationException {
    * @param {Argument} argument
    */
   constructor(argument) {
-    if (!argument instanceof Argument) {
+    if (!(argument instanceof Argument)) {
       throw new ArgumentObjectRequiredException();
     }
 

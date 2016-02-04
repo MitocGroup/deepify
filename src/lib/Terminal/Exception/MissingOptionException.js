@@ -13,7 +13,7 @@ export class MissingOptionException extends ValidationException {
    * @param {Option} option
    */
   constructor(option) {
-    if (!option instanceof Option) {
+    if (!(option instanceof Option)) {
       throw new OptionObjectRequiredException();
     }
 

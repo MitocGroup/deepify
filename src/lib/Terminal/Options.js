@@ -38,7 +38,7 @@ export class Options {
    * @returns {Options}
    */
   merge(sibling) {
-    if (!sibling instanceof Options) {
+    if (!(sibling instanceof Options)) {
       throw new OptionsObjectRequiredException();
     }
 
@@ -119,7 +119,7 @@ export class Options {
    * @returns {Options}
    */
   add(option) {
-    if (!option instanceof Option) {
+    if (!(option instanceof Option)) {
       throw new OptionObjectRequiredException();
     }
 

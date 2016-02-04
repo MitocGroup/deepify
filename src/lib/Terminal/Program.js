@@ -299,7 +299,7 @@ export class Program {
    * @returns {Program}
    */
   addCommand(subProgram) {
-    if (!subProgram instanceof Program) {
+    if (!(subProgram instanceof Program)) {
       throw new ProgramInstanceRequiredException();
     }
 
