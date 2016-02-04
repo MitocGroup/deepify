@@ -102,7 +102,6 @@ suite('Server/Instance', () => {
   });
 
   test('Check running returns false', () => {
-
     chai.expect(server.running).to.equal(false);
   });
 
@@ -142,4 +141,14 @@ suite('Server/Instance', () => {
   test('Check listen()', () => {
     let actualResult = server.listen();
   });
+
+  //@todo - need to rework
+  //test('Check _runLambda()', () => {
+  //  let response = {};
+  //  let lambdaConfig = {};
+  //  let payload = {};
+  //  let asyncMode = false;
+  //
+  //  let actualResult = server._runLambda(response, lambdaConfig, payload, asyncMode);
+  //});
 });
