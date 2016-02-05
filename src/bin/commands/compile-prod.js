@@ -16,7 +16,6 @@ module.exports = function(mainPath) {
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
   var NpmPrune = require('../../lib.compiled/NodeJS/NpmPrune').NpmPrune;
-  var NpmDedupe = require('../../lib.compiled/NodeJS/NpmDedupe').NpmDedupe;
   var NpmRun = require('../../lib.compiled/NodeJS/NpmRun').NpmRun;
   var NpmChain = require('../../lib.compiled/NodeJS/NpmChain').NpmChain;
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
@@ -37,7 +36,6 @@ module.exports = function(mainPath) {
   var property = new Property(mainPath);
   property.microservicesToUpdate = getMicroservicesToDeploy();
 
-  var microservices = property.workingMicroservices;
   var lambdas = {
     path: [],
     tmpPath: [],
@@ -331,7 +329,9 @@ module.exports = function(mainPath) {
 
   function arrayUnique(a) {
     return a.reduce(function(p, c) {
-      if (p.indexOf(c) < 0) p.push(c);
+      if (p.indexOf(c) < 0) {
+        p.push(c);
+      }
       return p;
     }, []);
   }

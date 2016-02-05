@@ -1,0 +1,113 @@
+{
+  "env": "dev",
+  "deployId": "5h56a8765e6159cdda87a4d11f710b46",
+  "awsRegion": "us-west-2",
+  "models": [
+    {
+      "Todo": {
+        "Title": "string",
+        "Completed": "boolean",
+        "Id": "timeUUID"
+      }
+    }
+  ],
+  "identityPoolId": "us-east-1:5hgj4567-2ba5-4af8-b89d-d46e7496e9a7",
+  "identityProviders": {
+    "www.amazon.com": "amzn1.application.3b5k2jb53252352kjh5b23kj5hb"
+  },
+  "microservices": {
+    "deep.ng.root": {
+      "isRoot": true,
+      "parameters": {},
+      "resources": {}
+    },
+    "deep.ng.todo": {
+      "isRoot": false,
+      "parameters": {},
+      "resources": {
+        "todo": {
+          "create": {
+            "type": "lambda",
+            "methods": [
+              "POST"
+            ],
+            "forceUserIdentity": true,
+            "region": "us-west-2",
+            "source": {
+              "api": "https://aass3gf5kd.execute-api.us-west-2.amazonaws.com/dev/deep-ng-todo/todo/create",
+              "original": "arn:aws:lambda:us-west-2:123456789123:function:DeepDevTodoCreate12354e1234ew"
+            }
+          },
+          "retrieve": {
+            "type": "lambda",
+            "methods": [
+              "GET"
+            ],
+            "forceUserIdentity": true,
+            "region": "us-west-2",
+            "source": {
+              "api": "https://aass3gf5kd.execute-api.us-west-2.amazonaws.com/dev/deep-ng-todo/todo/retrieve",
+              "original": "arn:aws:lambda:us-west-2:123456789123:function:DeepDevTodoRetrieve12354e1234ew"
+            }
+          },
+          "delete": {
+            "type": "lambda",
+            "methods": [
+              "DELETE"
+            ],
+            "forceUserIdentity": true,
+            "region": "us-west-2",
+            "source": {
+              "api": "https://aass3gf5kd.execute-api.us-west-2.amazonaws.com/dev/deep-ng-todo/todo/delete",
+              "original": "arn:aws:lambda:us-west-2:123456789123:function:DeepDevTodoDelete12354e1234ew"
+            }
+          },
+          "deleteCompleted": {
+            "type": "lambda",
+            "methods": [
+              "POST"
+            ],
+            "forceUserIdentity": true,
+            "region": "us-west-2",
+            "source": {
+              "api": "https://aass3gf5kd.execute-api.us-west-2.amazonaws.com/dev/deep-ng-todo/todo/deleteCompleted",
+              "original": "arn:aws:lambda:us-west-2:123456789123:function:DeepDevTodoDeleteCompleted12354e1234ew"
+            }
+          },
+          "update": {
+            "type": "lambda",
+            "methods": [
+              "PUT"
+            ],
+            "forceUserIdentity": true,
+            "region": "us-west-2",
+            "source": {
+              "api": "https://aass3gf5kd.execute-api.us-west-2.amazonaws.com/dev/deep-ng-todo/todo/update",
+              "original": "arn:aws:lambda:us-west-2:123456789123:function:DeepDevTodoUpdate12354e1234ew"
+            }
+          },
+          "markAll": {
+            "type": "lambda",
+            "methods": [
+              "POST"
+            ],
+            "forceUserIdentity": true,
+            "region": "us-west-2",
+            "source": {
+              "api": "https://aass3gf5kd.execute-api.us-west-2.amazonaws.com/dev/deep-ng-todo/todo/markAll",
+              "original": "arn:aws:lambda:us-west-2:123456789123:function:DeepDevTodoMarkAll12354e1234ew"
+            }
+          }
+        }
+      }
+    }
+  },
+  "globals": {
+    "userProviderEndpoint": "@deep.auth:user:retrieve",
+    "security": {
+      "identityProviders": {
+        "www.amazon.com": "amzn1.application.3e4r2jb12345678kjh5b23kj5hb"
+      }
+    }
+  }
+}
