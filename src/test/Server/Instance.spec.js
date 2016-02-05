@@ -1,9 +1,15 @@
 'use strict';
 
 import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import path from 'path';
 import {Instance} from '../../lib/Server/Instance';
 import {PropertyObjectRequiredException} from '../../lib/Server/Exception/PropertyObjectRequiredException';
 import {Property_Instance as PropertyInstance} from 'deep-package-manager';
+import {Property_Frontend as Frontend} from 'deep-package-manager';
+
+chai.use(sinonChai);
 
 suite('Server/Instance', () => {
   let server = null;
@@ -53,6 +59,19 @@ suite('Server/Instance', () => {
     chai.expect(server.logger).to.be.equal(logger);
   });
 
+  test('Check profiling getter/setter', () => {
+    let profiling = server.profiling;
+
+    server.profiling = true;
+    chai.expect(server.profiling).to.be.equal(true);
+
+    server.profiling = false;
+    chai.expect(server.profiling).to.be.equal(false);
+
+    server.profiling = profiling;
+    chai.expect(server.profiling).to.be.equal(profiling);
+  });
+
   test('Check localId getter postincrements _localId', () => {
     let localId = server._localId;
     let expectedResult = localId + 1;
@@ -62,4 +81,74 @@ suite('Server/Instance', () => {
     chai.expect(actualResult).to.be.equal(localId);
     chai.expect(server._localId).to.be.equal(expectedResult);
   });
+
+  test('Check _setup()', () => {
+    server._setup();
+
+    chai.expect(server._rootMicroservice).to.have.all.keys('frontend', 'identifier', 'lambdas', 'path');
+    chai.expect(server._defaultFrontendConfig).to.be.an('object');
+  });
+
+  test('Check buildPath > _populateBuildConfig()', () => {
+    let error = null;
+
+    try {
+      server.buildPath = path.join(__dirname, '../TestMaterials');
+    } catch (e) {
+      error = e;
+    }
+
+    console.log('error buildPath: ', error);
+  });
+
+  test('Check running returns false', () => {
+    chai.expect(server.running).to.equal(false);
+  });
+
+  test('Check stop() when !running', () => {
+    let spyCallback = sinon.spy();
+
+    let actualResult = server.stop(spyCallback);
+
+    chai.expect(actualResult, 'is an instance of Server').to.be.an.instanceOf(Instance);
+    chai.expect(spyCallback).to.have.been.calledWithExactly();
+  });
+
+  test('Check LAMBDA_URI static getter', () => {
+    chai.expect(Instance.LAMBDA_URI).to.equal('/_/lambda');
+  });
+
+  test('Check LAMBDA_ASYNC_URI static getter', () => {
+    chai.expect(Instance.LAMBDA_ASYNC_URI).to.equal('/_/lambda-async');
+  });
+
+  test('Check _kernelMock getter', () => {
+    let actualResult = server._kernelMock;
+
+    chai.expect(actualResult).to.be.an('object');
+    chai.expect(actualResult).to.have.all.keys('config', 'microservice');
+  });
+
+  test('Check _resolveMicroservice', () => {
+    let uri = 'microservice2/p/a/t/h';
+
+    let actualResult = server._resolveMicroservice(uri);
+
+    chai.expect(actualResult).to.contains('Microservice2');
+  });
+
+  //@todo - need to rework
+  test('Check listen()', () => {
+    let actualResult = server.listen();
+  });
+
+  //@todo - need to rework
+  //test('Check _runLambda()', () => {
+  //  let response = {};
+  //  let lambdaConfig = {};
+  //  let payload = {};
+  //  let asyncMode = false;
+  //
+  //  let actualResult = server._runLambda(response, lambdaConfig, payload, asyncMode);
+  //});
 });
