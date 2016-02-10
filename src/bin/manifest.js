@@ -254,7 +254,7 @@ module.exports = {
     },
     'migration-create': {
       example: 'deepify migration-create path/to/microservice',
-      description: 'Create migration for a certain microservice',
+      description: 'Create empty migration for a certain microservice',
       opts: {
       },
       args: {
