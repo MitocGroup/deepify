@@ -117,11 +117,6 @@ module.exports = {
           description: 'Dump built web app locally into the specified directory',
           required: false,
         },
-        'pull-deps': {
-          alias: 'p',
-          description: 'Pull dependencies from the remote repository',
-          required: false,
-        },
         partial: {
           alias: 'm',
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
@@ -305,40 +300,6 @@ module.exports = {
           required: true,
         },
       },
-    },
-    'pull-deps': {
-      example: 'deepify pull-deps path/to/web_app',
-      description: 'Pull web app microservices\' dependencies',
-      opts: {
-        'dry-run': {
-          alias: 'd',
-          description: 'Work locally, without pulling dependencies from the remote repository',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: true,
-        },
-      },
-    },
-    'push-deps': {
-      example: 'deepify push-deps path/to/web_app',
-      description: 'Publish microservices from within the given web app',
-      opts: {
-        'dry-run': {
-          alias: 'd',
-          description: 'Work locally, without pushing microservices to the remote repository',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: true,
-        },
-      },
-    },
+    }
   },
 };
