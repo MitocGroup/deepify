@@ -252,6 +252,18 @@ module.exports = {
         },
       },
     },
+    'migration-create': {
+      example: 'deepify migration-create path/to/microservice',
+      description: 'Create migration for a certain microservice',
+      opts: {
+      },
+      args: {
+        path: {
+          description: 'The path to the microservice',
+          required: true,
+        },
+      },
+    },
     'init-backend': {
       example: 'deepify init-backend path/to/web_app',
       description: 'Initialize backend',
