@@ -147,7 +147,7 @@ module.exports = function(mainPath) {
   function dumpConfig(propertyInstance, cb) {
     propertyInstance.configObj.completeDump(function() {
       if (!fastDeploy) {
-        let configFile = propertyInstance.configObj.configFile;
+        var configFile = propertyInstance.configObj.configFile;
 
         fse.copySync(configFile, path.join(mainPath, path.basename(configFile)));
       }
