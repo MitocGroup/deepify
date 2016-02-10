@@ -140,6 +140,33 @@ module.exports = {
         },
       },
     },
+    undeploy: {
+      example: 'deepify undeploy path/to/web_app',
+      description: 'Remove web app provisioning and uploaded data',
+      opts: {
+        'cfg-bucket': {
+          alias: 'b',
+          description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',
+          required: false,
+        },
+        'resource': {
+          alias: 'r',
+          description: 'An generated AWS resource name from given deploy (ex. deep.prod.system.db0c09cc)',
+          required: false,
+        },
+        dirty: {
+          alias: 'd',
+          description: 'Force cleaning up all resources if .cfg.deeploy.json file missing',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
     'enable-ssl': {
       example: 'deepify enable-ssl path/to/web_app',
       description: 'Enables SSL on a deployed web app',
@@ -161,33 +188,6 @@ module.exports = {
       example: 'deepify disable-ssl path/to/web_app',
       description: 'Disable activated SSL on a deployed web app',
       opts: {
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: true,
-        },
-      },
-    },
-    undeploy: {
-      example: 'deepify undeploy path/to/web_app',
-      description: 'Remove web app provisioning and uploaded data',
-      opts: {
-        'cfg-bucket': {
-          alias: 'b',
-          description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',
-          required: false,
-        },
-        'resource': {
-          alias: 'r',
-          description: 'An generated AWS resource name from given deploy (ex. deep.prod.system.db0c09cc)',
-          required: false,
-        },
-        dirty: {
-          alias: 'd',
-          description: 'Force cleaning up all resources if .cfg.deeploy.json file missing',
-          required: false,
-        },
       },
       args: {
         path: {
@@ -252,8 +252,8 @@ module.exports = {
         },
       },
     },
-    'migration-create': {
-      example: 'deepify migration-create path/to/microservice',
+    'create-migration': {
+      example: 'deepify create-migration path/to/microservice',
       description: 'Create empty migration for a certain microservice',
       opts: {
       },
