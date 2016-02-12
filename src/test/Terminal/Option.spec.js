@@ -21,4 +21,51 @@ suite('Terminal/Option', () => {
     expect(option.required).to.be.equal(false);
     expect(option.hidden).to.be.equal(false);
   });
+
+  test('Check required getter/setter', () => {
+    let required = option.required;
+
+    option.required = true;
+    expect(option.required).to.be.equal(true);
+
+    option.required = false;
+    expect(option.required).to.be.equal(false);
+
+    option.required = required;
+    expect(option.required).to.be.equal(required);
+  });
+
+  test('Check value getter/setter', () => {
+    let value = option.value;
+
+    option._value = true;
+    expect(option.value).to.be.equal(true);
+
+    option._value = false;
+    expect(option.value).to.be.equal(false);
+
+    option._value = value;
+    expect(option.value).to.be.equal(value);
+  });
+
+  test('Check exists getter/setter', () => {
+    let exists = option.exists;
+
+    option._exists = true;
+    expect(option.exists).to.be.equal(true);
+
+    option._exists = false;
+    expect(option.exists).to.be.equal(false);
+
+    option._exists = exists;
+    expect(option.exists).to.be.equal(exists);
+  });
+
+  test('Check _cleanupValue', () => {
+    let value = '"sfdsfdsfdsfdsfdsfdsfdsfdsfds"';
+
+    let actualResult = Option._cleanupValue(value);
+
+    expect(actualResult).to.be.equal('sfdsfdsfdsfdsfdsfdsfdsfdsfds');
+  });
 });
