@@ -1,6 +1,6 @@
 'use strict';
 
-import chai from 'chai';
+import {expect} from 'chai';
 import {UndefinedDepsResolver} from '../../lib/NodeJS/UndefinedDepsResolver';
 import {NpmDependency} from '../../lib/NodeJS/NpmDependency';
 
@@ -11,7 +11,7 @@ suite('NodeJS/UndefinedDepsResolver', () => {
   let undefinedDepsResolver = new UndefinedDepsResolver(mainDep);
 
   test('Class UndefinedDepsResolver exists in NodeJS/UndefinedDepsResolver', () => {
-    chai.expect(UndefinedDepsResolver).to.be.an('function');
+    expect(UndefinedDepsResolver).to.be.an('function');
   });
 
   test('Check UndefinedDepsResolver constructor throws Error for !mainDep.isMain', () => {
@@ -24,8 +24,8 @@ suite('NodeJS/UndefinedDepsResolver', () => {
       error = e;
     }
 
-    chai.expect(error, 'error is an instance of Error').to.be.an.instanceOf(Error);
-    chai.expect(error.message).to.equal(`Npm dependency ${mainDep.fullName} is not the deps tree root`);
+    expect(error, 'error is an instance of Error').to.be.an.instanceOf(Error);
+    expect(error.message).to.equal(`Npm dependency ${mainDep.fullName} is not the deps tree root`);
   });
 
   test('Check UndefinedDepsResolver constructor throws Error for !mainDep.isMain',
@@ -39,25 +39,25 @@ suite('NodeJS/UndefinedDepsResolver', () => {
         error = e;
       }
 
-      chai.expect(error, 'error is an instance of Error').to.be.an.instanceOf(Error);
-      chai.expect(error.message).to.equal(`Npm main dependency version have to be defined in ${mainDep.fullName}`);
+      expect(error, 'error is an instance of Error').to.be.an.instanceOf(Error);
+      expect(error.message).to.equal(`Npm main dependency version have to be defined in ${mainDep.fullName}`);
     }
   );
 
   test('Check constructor sets _mainDep', () => {
-    chai.expect(undefinedDepsResolver).to.be.an.instanceOf(UndefinedDepsResolver);
-    chai.expect(undefinedDepsResolver.mainDep).to.equal(mainDep);
+    expect(undefinedDepsResolver).to.be.an.instanceOf(UndefinedDepsResolver);
+    expect(undefinedDepsResolver.mainDep).to.equal(mainDep);
   });
 
   test('Check constructor sets _undefinedStack', () => {
-    chai.expect(undefinedDepsResolver._undefinedStack).to.eql([]);
+    expect(undefinedDepsResolver._undefinedStack).to.eql([]);
   });
 
   test('Check constructor sets _cloneShadow', () => {
-    chai.expect(undefinedDepsResolver._cloneShadow).to.eql({});
+    expect(undefinedDepsResolver._cloneShadow).to.eql({});
   });
 
   test('Check constructor sets _resolvedStack', () => {
-    chai.expect(undefinedDepsResolver._resolvedStack).to.eql({});
+    expect(undefinedDepsResolver._resolvedStack).to.eql({});
   });
 });

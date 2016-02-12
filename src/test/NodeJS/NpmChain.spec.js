@@ -1,6 +1,6 @@
 'use strict';
 
-import chai from 'chai';
+import {expect} from 'chai';
 import {NpmChain} from '../../lib/NodeJS/NpmChain';
 import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
 import {NpmLink} from '../../lib/NodeJS/NpmLink';
@@ -12,7 +12,7 @@ suite('NodeJS/NpmChain', () => {
   let npmChain = null;
 
   test('Class NpmChain exists in NodeJS/NpmChain', () => {
-    chai.expect(NpmChain).to.be.an('function');
+    expect(NpmChain).to.be.an('function');
   });
 
   test('Check constructor sets _commands', () => {
@@ -21,15 +21,15 @@ suite('NodeJS/NpmChain', () => {
     npmLink.libs = libs;
 
     npmChain = new NpmChain(npmLink);
-    chai.expect(npmChain).to.be.an.instanceOf(NpmChain);
-    chai.expect(npmChain.commands[0]).to.be.an.instanceOf(NpmInstall);
-    chai.expect(npmChain.commands).to.include(npmLink);
+    expect(npmChain).to.be.an.instanceOf(NpmChain);
+    expect(npmChain.commands[0]).to.be.an.instanceOf(NpmInstall);
+    expect(npmChain.commands).to.include(npmLink);
   });
 
   test('Check add() adds command', () => {
     npmChain.add(npmUpdate);
-    chai.expect(npmChain).to.be.an.instanceOf(NpmChain);
-    chai.expect(npmChain.commands).to.include(npmLink);
-    chai.expect(npmChain.commands).to.include(npmUpdate);
+    expect(npmChain).to.be.an.instanceOf(NpmChain);
+    expect(npmChain.commands).to.include(npmLink);
+    expect(npmChain.commands).to.include(npmUpdate);
   });
 });

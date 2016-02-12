@@ -2,12 +2,12 @@
 
 'use strict';
 
-import chai from 'chai';
+import {expect} from 'chai';
 import {ValidationSchemasSync} from '../../lib/Helpers/ValidationSchemasSync';
 
 // @todo: Add more advanced tests
 suite('Helpers/ValidationSchemasSync', function() {
   test('Class ValidationSchemasSync exists in Helpers/ValidationSchemasSync', () => {
-    chai.expect(ValidationSchemasSync).to.be.an('function');
+    expect(ValidationSchemasSync).to.be.an('function');
   });
 });

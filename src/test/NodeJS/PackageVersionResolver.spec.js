@@ -1,6 +1,6 @@
 'use strict';
 
-import chai from 'chai';
+import {expect} from 'chai';
 import {PackageVersionResolver} from '../../lib/NodeJS/PackageVersionResolver';
 
 suite('NodeJS/PackageVersionResolver', () => {
@@ -12,36 +12,36 @@ suite('NodeJS/PackageVersionResolver', () => {
 
 
   test('Class PackageVersionResolver exists in NodeJS/PackageVersionResolver', () => {
-    chai.expect(PackageVersionResolver).to.be.an('function');
+    expect(PackageVersionResolver).to.be.an('function');
   });
 
   test('Check constructor for !version', () => {
     packageVersionResolver = new PackageVersionResolver(packagePath, nameWithVersion, null);
 
-    chai.expect(packageVersionResolver).to.be.an.instanceOf(PackageVersionResolver);
+    expect(packageVersionResolver).to.be.an.instanceOf(PackageVersionResolver);
 
-    chai.expect(packageVersionResolver.packagePath).to.equal(packagePath);
-    chai.expect(packageVersionResolver.name).to.equal(name);
-    chai.expect(packageVersionResolver.version).to.equal(version);
+    expect(packageVersionResolver.packagePath).to.equal(packagePath);
+    expect(packageVersionResolver.name).to.equal(name);
+    expect(packageVersionResolver.version).to.equal(version);
   });
 
   test('Check constructor for version', () => {
     packageVersionResolver = new PackageVersionResolver(packagePath, name, version);
 
-    chai.expect(packageVersionResolver).to.be.an.instanceOf(PackageVersionResolver);
+    expect(packageVersionResolver).to.be.an.instanceOf(PackageVersionResolver);
 
-    chai.expect(packageVersionResolver.packagePath).to.equal(packagePath);
-    chai.expect(packageVersionResolver.name).to.equal(name);
-    chai.expect(packageVersionResolver.version).to.equal(version);
+    expect(packageVersionResolver.packagePath).to.equal(packagePath);
+    expect(packageVersionResolver.name).to.equal(name);
+    expect(packageVersionResolver.version).to.equal(version);
   });
 
   test('Check _command() returns valid string', () => {
-    chai.expect(packageVersionResolver._command).to.contain(
+    expect(packageVersionResolver._command).to.contain(
       `npm ls --loglevel silent --json ${packageVersionResolver._fullName}`
     );
   });
 
   test('Check _fullName() returns valid string', () => {
-    chai.expect(packageVersionResolver._fullName).to.equal(`${name}@'${version}'`);
+    expect(packageVersionResolver._fullName).to.equal(`${name}@'${version}'`);
   });
 });

@@ -1,6 +1,6 @@
 'use strict';
 
-import chai from 'chai';
+import {expect} from 'chai';
 import {LambdasExtractor} from '../../lib/Helpers/LambdasExtractor';
 import {Property_Instance as PropertyInstance} from 'deep-package-manager';
 
@@ -9,7 +9,7 @@ suite('Helpers/LambdasExtractor', () => {
   let lambdasExtractor = null;
 
   test('Class LambdasExtractor exists in Helpers/LambdasExtractor', () => {
-    chai.expect(LambdasExtractor).to.be.an('function');
+    expect(LambdasExtractor).to.be.an('function');
   });
 
   test('Check _extract()', () => {
@@ -17,9 +17,9 @@ suite('Helpers/LambdasExtractor', () => {
 
     lambdasExtractor = new LambdasExtractor(propertyInstance);
 
-    chai.expect(propertyInstance).to.be.an.instanceOf(PropertyInstance);
-    chai.expect(lambdasExtractor).to.be.an.instanceOf(LambdasExtractor);
-    chai.expect(lambdasExtractor.property).to.equal(propertyInstance);
+    expect(propertyInstance).to.be.an.instanceOf(PropertyInstance);
+    expect(lambdasExtractor).to.be.an.instanceOf(LambdasExtractor);
+    expect(lambdasExtractor.property).to.equal(propertyInstance);
   });
 
   test('Check _extract()', () => {
@@ -48,6 +48,6 @@ suite('Helpers/LambdasExtractor', () => {
 
     let actualResult = LambdasExtractor._extract(microservices);
 
-    chai.expect(actualResult).to.be.eql([]);
+    expect(actualResult).to.be.eql([]);
   });
 });

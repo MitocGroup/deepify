@@ -1,5 +1,6 @@
 'use strict';
 
+import {expect} from 'chai';
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -16,7 +17,7 @@ suite('Server/Instance', () => {
   let propertyInstance = null;
 
   test('Class Instance exists in Server/Instance', () => {
-    chai.expect(Instance).to.be.an('function');
+    expect(Instance).to.be.an('function');
   });
 
   test('Check constructor throws exception for invalid property', () => {
@@ -28,7 +29,7 @@ suite('Server/Instance', () => {
       error = e;
     }
 
-    chai.expect(error).to.be.an.instanceOf(PropertyObjectRequiredException);
+    expect(error).to.be.an.instanceOf(PropertyObjectRequiredException);
   });
 
   test('Check constructor sets correctly properties for valid property', () => {
@@ -36,14 +37,14 @@ suite('Server/Instance', () => {
 
     server = new Instance(propertyInstance);
 
-    chai.expect(server).to.be.an.instanceOf(Instance);
-    chai.expect(server.property).to.be.an.instanceOf(PropertyInstance);
-    chai.expect(server.property).to.be.equal(propertyInstance);
-    chai.expect(server.logger).to.be.an('function');
-    chai.expect(server.nativeServer).to.be.equal(null);
-    chai.expect(server.fs).to.be.equal(null);
-    chai.expect(server.host).to.be.equal(null);
-    chai.expect(server._localId).to.be.equal(0);
+    expect(server).to.be.an.instanceOf(Instance);
+    expect(server.property).to.be.an.instanceOf(PropertyInstance);
+    expect(server.property).to.be.equal(propertyInstance);
+    expect(server.logger).to.be.an('function');
+    expect(server.nativeServer).to.be.equal(null);
+    expect(server.fs).to.be.equal(null);
+    expect(server.host).to.be.equal(null);
+    expect(server._localId).to.be.equal(0);
   });
 
   test('Check logger getter/setter', () => {
@@ -53,23 +54,23 @@ suite('Server/Instance', () => {
     };
 
     server.logger = newLogger;
-    chai.expect(server.logger).to.be.equal(newLogger);
+    expect(server.logger).to.be.equal(newLogger);
 
     server.logger = logger;
-    chai.expect(server.logger).to.be.equal(logger);
+    expect(server.logger).to.be.equal(logger);
   });
 
   test('Check profiling getter/setter', () => {
     let profiling = server.profiling;
 
     server.profiling = true;
-    chai.expect(server.profiling).to.be.equal(true);
+    expect(server.profiling).to.be.equal(true);
 
     server.profiling = false;
-    chai.expect(server.profiling).to.be.equal(false);
+    expect(server.profiling).to.be.equal(false);
 
     server.profiling = profiling;
-    chai.expect(server.profiling).to.be.equal(profiling);
+    expect(server.profiling).to.be.equal(profiling);
   });
 
   test('Check localId getter postincrements _localId', () => {
@@ -78,15 +79,15 @@ suite('Server/Instance', () => {
 
     let actualResult = server.localId;
 
-    chai.expect(actualResult).to.be.equal(localId);
-    chai.expect(server._localId).to.be.equal(expectedResult);
+    expect(actualResult).to.be.equal(localId);
+    expect(server._localId).to.be.equal(expectedResult);
   });
 
   test('Check _setup()', () => {
     server._setup();
 
-    chai.expect(server._rootMicroservice).to.have.all.keys('frontend', 'identifier', 'lambdas', 'path');
-    chai.expect(server._defaultFrontendConfig).to.be.an('object');
+    expect(server._rootMicroservice).to.have.all.keys('frontend', 'identifier', 'lambdas', 'path');
+    expect(server._defaultFrontendConfig).to.be.an('object');
   });
 
   test('Check buildPath > _populateBuildConfig()', () => {
@@ -102,7 +103,7 @@ suite('Server/Instance', () => {
   });
 
   test('Check running returns false', () => {
-    chai.expect(server.running).to.equal(false);
+    expect(server.running).to.equal(false);
   });
 
   test('Check stop() when !running', () => {
@@ -110,23 +111,23 @@ suite('Server/Instance', () => {
 
     let actualResult = server.stop(spyCallback);
 
-    chai.expect(actualResult, 'is an instance of Server').to.be.an.instanceOf(Instance);
-    chai.expect(spyCallback).to.have.been.calledWithExactly();
+    expect(actualResult, 'is an instance of Server').to.be.an.instanceOf(Instance);
+    expect(spyCallback).to.have.been.calledWithExactly();
   });
 
   test('Check LAMBDA_URI static getter', () => {
-    chai.expect(Instance.LAMBDA_URI).to.equal('/_/lambda');
+    expect(Instance.LAMBDA_URI).to.equal('/_/lambda');
   });
 
   test('Check LAMBDA_ASYNC_URI static getter', () => {
-    chai.expect(Instance.LAMBDA_ASYNC_URI).to.equal('/_/lambda-async');
+    expect(Instance.LAMBDA_ASYNC_URI).to.equal('/_/lambda-async');
   });
 
   test('Check _kernelMock getter', () => {
     let actualResult = server._kernelMock;
 
-    chai.expect(actualResult).to.be.an('object');
-    chai.expect(actualResult).to.have.all.keys('config', 'microservice');
+    expect(actualResult).to.be.an('object');
+    expect(actualResult).to.have.all.keys('config', 'microservice');
   });
 
   test('Check _resolveMicroservice', () => {
@@ -134,7 +135,7 @@ suite('Server/Instance', () => {
 
     let actualResult = server._resolveMicroservice(uri);
 
-    chai.expect(actualResult).to.contains('Microservice2');
+    expect(actualResult).to.contains('Microservice2');
   });
 
   //@todo - need to rework

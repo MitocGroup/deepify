@@ -1,6 +1,6 @@
 'use strict';
 
-import chai from 'chai';
+import {expect} from 'chai';
 import path from 'path';
 import {Thread} from '../../lib/Lambda/Thread';
 import {Runtime} from '../../lib/Lambda/Runtime';
@@ -15,26 +15,26 @@ suite('Lambda/Thread', () => {
   let thread = null;
 
   test('Class Thread exists in Lambda/Thread', () => {
-    chai.expect(Thread).to.be.an('function');
+    expect(Thread).to.be.an('function');
   });
 
   test('Check constructor sets _lambda', () => {
     thread = new Thread(runtime);
 
-    chai.expect(thread).to.be.an.instanceOf(Thread);
-    chai.expect(thread.runtime).to.be.an.instanceOf(Runtime);
-    chai.expect(thread.process).to.equal(null);
+    expect(thread).to.be.an.instanceOf(Thread);
+    expect(thread.runtime).to.be.an.instanceOf(Runtime);
+    expect(thread.process).to.equal(null);
   });
 
   test('Check WRAPPER static getter', () => {
-    chai.expect(Thread.WRAPPER).to.contains('thread_wrapper.js');
+    expect(Thread.WRAPPER).to.contains('thread_wrapper.js');
   });
 
   test('Check _cleanup()', () => {
     let actualResult = thread._cleanup();
 
-    chai.expect(actualResult).to.be.an.instanceOf(Thread);
-    chai.expect(thread.process).to.equal(null);
+    expect(actualResult).to.be.an.instanceOf(Thread);
+    expect(thread.process).to.equal(null);
   });
 
   test('Check run()', () => {
@@ -59,10 +59,10 @@ suite('Lambda/Thread', () => {
     let actualResult = thread.run(event, false);
     let processKeys = Object.keys(thread.process);
 
-    chai.expect(actualResult).to.be.an.instanceOf(Thread);
+    expect(actualResult).to.be.an.instanceOf(Thread);
 
     expectedResultArray.forEach((value) => {
-      chai.expect(processKeys).to.include(value);
+      expect(processKeys).to.include(value);
     });
   });
 
