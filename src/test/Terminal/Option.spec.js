@@ -62,10 +62,54 @@ suite('Terminal/Option', () => {
   });
 
   test('Check _cleanupValue', () => {
-    let value = '"sfdsfdsfdsfdsfdsfdsfdsfdsfds"';
+    let value = '"test cleanup"';
 
     let actualResult = Option._cleanupValue(value);
 
-    expect(actualResult).to.be.equal('sfdsfdsfdsfdsfdsfdsfdsfdsfds');
+    expect(actualResult).to.be.equal('test cleanup');
+  });
+
+  test('Check _parse for option with "="', () => {
+    let inputOption = '--logLevel=info';
+    let expectedResult = {
+      name: 'logLevel',
+      value: 'info',
+    };
+
+    let actualResult = option._parse(inputOption);
+
+    expect(actualResult).to.be.eql(expectedResult);
+  });
+
+  test('Check _parse for option w/o "="', () => {
+    let inputOption = '--help';
+    let expectedResult = {
+      name: 'help',
+      value: null,
+    };
+
+    let actualResult = option._parse(inputOption);
+
+    expect(actualResult).to.be.eql(expectedResult);
+  });
+
+  test('Check _parse returns null', () => {
+    let inputOption = 'invalidOption';
+
+    let actualResult = option._parse(inputOption);
+
+    expect(actualResult).to.be.equal(null);
+  });
+
+  test('Check collect', () => {
+    let inputOption = ['--force', '-s', '--logLevel=debug',];
+
+    option = new Option('logLevel');
+
+    let actualResult = option.collect(inputOption);
+
+    expect(actualResult, 'is an instance of Option').to.be.an.instanceOf(Option);
+    expect(actualResult.exists).to.be.equal(true);
+    expect(actualResult.value).to.be.equal('debug');
   });
 });

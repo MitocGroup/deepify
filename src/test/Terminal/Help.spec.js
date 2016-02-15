@@ -296,7 +296,7 @@ suite('Terminal/Help', () => {
     let actualResult = Help._scoreSimilarWord(matchedString, word, 3);
     expect(actualResult).to.be.equal(1);
 
-    actualResult= Help._scoreSimilarWord(shortString, word, 3);
+    actualResult = Help._scoreSimilarWord(shortString, word, 3);
     expect(actualResult).to.be.above(0);
 
     let actualResultForLongString = Help._scoreSimilarWord(longString, word, 2);
