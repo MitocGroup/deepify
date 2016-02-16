@@ -117,11 +117,6 @@ module.exports = {
           description: 'Dump built web app locally into the specified directory',
           required: false,
         },
-        'pull-deps': {
-          alias: 'p',
-          description: 'Pull dependencies from the remote repository',
-          required: false,
-        },
         partial: {
           alias: 'm',
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
@@ -135,6 +130,33 @@ module.exports = {
         'aws-sdk': {
           alias: 'a',
           description: 'Force latest aws-sdk in Lambda',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
+    undeploy: {
+      example: 'deepify undeploy path/to/web_app',
+      description: 'Remove web app provisioning and uploaded data',
+      opts: {
+        'cfg-bucket': {
+          alias: 'b',
+          description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',
+          required: false,
+        },
+        'resource': {
+          alias: 'r',
+          description: 'An generated AWS resource name from given deploy (ex. deep.prod.system.db0c09cc)',
+          required: false,
+        },
+        dirty: {
+          alias: 'd',
+          description: 'Force cleaning up all resources if .cfg.deeploy.json file missing',
           required: false,
         },
       },
@@ -166,33 +188,6 @@ module.exports = {
       example: 'deepify disable-ssl path/to/web_app',
       description: 'Disable activated SSL on a deployed web app',
       opts: {
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: true,
-        },
-      },
-    },
-    undeploy: {
-      example: 'deepify undeploy path/to/web_app',
-      description: 'Remove web app provisioning and uploaded data',
-      opts: {
-        'cfg-bucket': {
-          alias: 'b',
-          description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',
-          required: false,
-        },
-        'resource': {
-          alias: 'r',
-          description: 'An generated AWS resource name from given deploy (ex. deep.prod.system.db0c09cc)',
-          required: false,
-        },
-        dirty: {
-          alias: 'd',
-          description: 'Force cleaning up all resources if .cfg.deeploy.json file missing',
-          required: false,
-        },
       },
       args: {
         path: {
@@ -257,6 +252,18 @@ module.exports = {
         },
       },
     },
+    'create-migration': {
+      example: 'deepify create-migration path/to/microservice',
+      description: 'Create empty migration for a certain microservice',
+      opts: {
+      },
+      args: {
+        path: {
+          description: 'The path to the microservice',
+          required: true,
+        },
+      },
+    },
     'init-backend': {
       example: 'deepify init-backend path/to/web_app',
       description: 'Initialize backend',
@@ -305,40 +312,6 @@ module.exports = {
           required: true,
         },
       },
-    },
-    'pull-deps': {
-      example: 'deepify pull-deps path/to/web_app',
-      description: 'Pull web app microservices\' dependencies',
-      opts: {
-        'dry-run': {
-          alias: 'd',
-          description: 'Work locally, without pulling dependencies from the remote repository',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: true,
-        },
-      },
-    },
-    'push-deps': {
-      example: 'deepify push-deps path/to/web_app',
-      description: 'Publish microservices from within the given web app',
-      opts: {
-        'dry-run': {
-          alias: 'd',
-          description: 'Work locally, without pushing microservices to the remote repository',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: true,
-        },
-      },
-    },
+    }
   },
 };
