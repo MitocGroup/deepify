@@ -1,12 +1,21 @@
 'use strict';
 
 import {expect} from 'chai';
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import {Program} from '../../lib/Terminal/Program';
+import {Option} from '../../lib/Terminal/Option';
 import {Options} from '../../lib/Terminal/Options';
 import {Arguments} from '../../lib/Terminal/Arguments';
 import {Help} from '../../lib/Terminal/Help';
 import {InvalidActionException} from '../../lib/Terminal/Exception/InvalidActionException';
 import {ProgramInstanceRequiredException} from '../../lib/Terminal/Exception/ProgramInstanceRequiredException';
+import {UnknownOptionException} from '../../lib/Terminal/Exception/UnknownOptionException';
+import {ValidationException} from '../../lib/Terminal/Exception/ValidationException';
+import DeepLog from 'deep-log';
+
+chai.use(sinonChai);
 
 suite('Terminal/Program', () => {
   let programName = 'testProgramName';
@@ -22,7 +31,9 @@ suite('Terminal/Program', () => {
   let subProgramVersion = 'testSubProgramVersion';
   let subProgramDescription = 'testSubProgramDescription';
   let subProgramExample = 'testSubProgramExample';
-  let subProgramAction = () => { return; };
+  let subProgramAction = () => {
+    return;
+  };
 
   test('Class Program exists in Terminal/Program', () => {
     expect(Program).to.be.an('function');
@@ -104,25 +115,28 @@ suite('Terminal/Program', () => {
   test('Check input() for args', () => {
     let inputArgs = ['deepify', '--resource=somevelue', 'arg1', '--',
       '-coptval3', '-b', 'optval', '--dirty', '--', 'arg2',];
-    console.log('before: ', program);
 
     let actualResult = program.input(inputArgs);
 
-    console.log('after: ', program);
     expect(actualResult, 'is an instance of Program').to.be.an.instanceOf(Program);
+    expect(actualResult.args.listUnmanaged()).to.include('deepify');
+    expect(actualResult.args.listUnmanaged()).to.include('arg1');
+    expect(actualResult.args.listUnmanaged()).to.include('arg2');
   });
 
-  test('Check defaults()', () => {
-    console.log('before default: ', defaultProgram);
+  test('Check defaults() for !hasCommands', () => {
     defaultProgram = new Program(defaultprogramName);
-
     let actualResult = defaultProgram.defaults();
 
     expect(actualResult, 'is an instance of Program').to.be.an.instanceOf(Program);
+    expect(actualResult.opts.locate('cmd-auto-complete'), 'is an instance of Program').to.be.an.instanceOf(Option);
+    expect(actualResult.opts.locate('version'), 'is an instance of Program').to.be.an.instanceOf(Option);
+    expect(actualResult.opts.locate('help'), 'is an instance of Program').to.be.an.instanceOf(Option);
+    expect(actualResult.args.locate('command')).to.equal(null);
   });
 
   test('Check hasCommands getter returns false', () => {
-   let actualResult = program.hasCommands;
+    let actualResult = program.hasCommands;
 
     expect(actualResult).to.equal(false);
   });
@@ -144,6 +158,16 @@ suite('Terminal/Program', () => {
     let actualResult = program.hasCommands;
 
     expect(actualResult).to.equal(true);
+  });
+
+  test('Check defaults() for hasCommands', () => {
+    let actualResult = program.defaults();
+
+    expect(actualResult, 'is an instance of Program').to.be.an.instanceOf(Program);
+    expect(actualResult.opts.locate('cmd-auto-complete'), 'is an instance of Program').to.be.an.instanceOf(Option);
+    expect(actualResult.opts.locate('version'), 'is an instance of Program').to.be.an.instanceOf(Option);
+    expect(actualResult.opts.locate('help'), 'is an instance of Program').to.be.an.instanceOf(Option);
+    expect(actualResult.args.locate('command')).to.not.equal(null);
   });
 
   test('Check getCommand() returns valid command', () => {
@@ -182,10 +206,10 @@ suite('Terminal/Program', () => {
 
   test('Check version getter/setter', () => {
     let version = program.version;
-    let updateVersion = 'updatedVersion';
+    let updatedVersion = 'updatedVersion';
 
-    program.version = updateVersion;
-    expect(program.version).to.equal(updateVersion);
+    program.version = updatedVersion;
+    expect(program.version).to.equal(updatedVersion);
 
     program.version = version;
     expect(program.version).to.equal(version);
@@ -193,12 +217,168 @@ suite('Terminal/Program', () => {
 
   test('Check example getter/setter', () => {
     let example = program.example;
-    let updateExample = 'updatedExample';
+    let updatedExample = 'updatedExample';
 
-    program.example = updateExample;
-    expect(program.example).to.equal(updateExample);
+    program.example = updatedExample;
+    expect(program.example).to.equal(updatedExample);
 
     program.example = example;
     expect(program.example).to.equal(example);
+  });
+
+  test('Check name getter/setter', () => {
+    let name = program.name;
+    let updatedName = 'updatedName';
+
+    program.name = updatedName;
+    expect(program.name).to.equal(updatedName);
+
+    program.name = name;
+    expect(program.name).to.equal(name);
+  });
+
+  test('Check logDriver static getter', () => {
+    let actualResult = Program._logDriver;
+
+    expect(actualResult, 'is an instance of DeepLog').to.be.an.instanceOf(DeepLog);
+  });
+
+  test('Check _outputListCommands()', () => {
+    let stub = sinon.stub(console, 'log');
+    let _subProgramName = 'second testSubProgramName2';
+    let _subProgramVersion = 'second testSubProgramVersion2';
+    let _subProgramDescription = 'second testSubProgramDescription2';
+    let _subProgramExample = 'second testSubProgramExample2';
+    let _subProgramAction = () => {
+      return;
+    };
+
+    program.command(
+      _subProgramName, _subProgramAction, _subProgramDescription, _subProgramExample, _subProgramVersion
+    );
+
+    let actualResult = program._outputListCommands();
+
+    stub.restore();
+
+    expect(actualResult, 'is an instance of Program').to.be.an.instanceOf(Program);
+    expect(stub.callCount).to.be.equal(6);
+    expect(stub.args[0].toString()).to.equal('');
+    expect(stub.args[1].toString()).to.equal('Available commands:');
+    expect(stub.args[2].toString()).to.equal('');
+    expect(stub.args[3].toString()).to.contains(`${subProgramName} - ${subProgramDescription}`);
+    expect(stub.args[4].toString()).to.contains(`${_subProgramName} - ${_subProgramDescription}`);
+    expect(stub.args[5].toString()).to.equal('');
+  });
+
+  test('Check inherit()', () => {
+    let toInheritProgramName = 'toInherit';
+    let toInheritProgramVersion = 'to inherit testSubProgramVersion';
+    let toInheritProgramDescription = 'to inherit testSubProgramDescription';
+    let toInheritProgramExample = 'to inherit testSubProgramExample2';
+    let toInheritProgramAction = () => {
+      return;
+    };
+    let inputArgs = ['server', '--silent', '--toInherit', 'optionValue',];
+
+    let toInheritProgram = new Program(
+      toInheritProgramName,
+      toInheritProgramVersion,
+      toInheritProgramDescription,
+      toInheritProgramExample,
+      toInheritProgramAction
+    );
+
+    toInheritProgram.input(inputArgs);
+
+    //act
+    let actualResult = program.inherit(toInheritProgram);
+
+    //assert
+    expect(actualResult, 'is an instance of Program').to.be.an.instanceOf(Program);
+    expect(actualResult.opts.locate('cmd-auto-complete'), 'is an instance of Program').to.be.an.instanceOf(Option);
+    expect(actualResult.opts.locate('version'), 'is an instance of Program').to.be.an.instanceOf(Option);
+    expect(actualResult.opts.locate('help'), 'is an instance of Program').to.be.an.instanceOf(Option);
+    expect(actualResult.args.listUnmanaged()).to.includes('deepify');
+    expect(actualResult.args.listUnmanaged()).to.includes('arg1');
+    expect(actualResult.args.listUnmanaged()).to.includes('arg2');
+    expect(actualResult.args.listUnmanaged()).to.includes('server');
+    expect(actualResult.unmanagedArgs).to.includes('--silent');
+    expect(actualResult.unmanagedArgs).to.includes('--toInherit=optionValue');
+  });
+
+  test('Check _validateInput() throws UnknownOptionException', () => {
+    let error = null;
+
+    try {
+      program._validateInput();
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error, 'is an instance of UnknownOptionException').to.be.an.instanceOf(UnknownOptionException);
+  });
+
+  test('Check _validateInput() throws ValidationException', () => {
+    let error = null;
+
+    program.args.locate('command').required = true;
+    program.args.locate('command')._exists = false;
+
+    try {
+      program._validateInput();
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error, 'is an instance of ValidationException').to.be.an.instanceOf(ValidationException);
+
+    //undo changes
+    program.args.locate('command').required = false;
+    program.args.locate('command')._exists = true;
+  });
+
+  test('Check _validateInput() throws ValidationException', () => {
+    let error = null;
+
+    program.args.locate('command').required = true;
+    program.args.locate('command')._exists = false;
+
+    try {
+      program._validateInput();
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error, 'is an instance of ValidationException').to.be.an.instanceOf(ValidationException);
+
+    //undo changes
+    program.args.locate('command').required = false;
+    program.args.locate('command')._exists = true;
+  });
+
+  test('Check _validateInput() for _unmanagedArgs.length = 0', () => {
+    program._unmanagedArgs = [];
+
+    let actualResult = program._validateInput();
+
+    expect(actualResult, 'is an instance of Program').to.be.an.instanceOf(Program);
+  });
+
+  //@todo - need to be clarify with Alex C, because _validateInput throws exceptions
+  test('Check run()', () => {
+    let error = null;
+    let stub = sinon.stub(console, 'log');
+    program = new Program('npm');
+    program.defaults();
+    program._unmanagedArgs = [];
+
+    try {
+      program.run(['list']);
+    } catch (e) {
+      error = e;
+    }
+
+    stub.restore();
   });
 });

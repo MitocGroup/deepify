@@ -118,9 +118,9 @@ suite('Terminal/Options', () => {
   });
 
   test('Check normalizeInputOpts()', () => {
-    let inputArgs = ['deepify', '--resource=somevelue', 'arg1', '--',
+    let inputArgs = ['deepify', '--resource=somevalue', 'arg1', '--',
       '-coptval3', '-b', 'optval', '--dirty', '--', 'arg2',];
-    let expectedResult = ['deepify', '--resource=somevelue', 'arg1',
+    let expectedResult = ['deepify', '--resource=somevalue', 'arg1',
       '--', '-c=optval3', '-b=optval', '--dirty', 'arg2',];
 
     Options.normalizeInputOpts(inputArgs);
