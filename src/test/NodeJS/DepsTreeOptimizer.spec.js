@@ -60,4 +60,6 @@ suite('NodeJS/DepsTreeOptimizer', () => {
 
     expect(actualResult).to.equal(path.join(upperPath, pkgName));
   });
+
+  //@todo - check compile-prod
 });

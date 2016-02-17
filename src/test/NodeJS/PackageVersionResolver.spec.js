@@ -1,15 +1,20 @@
 'use strict';
 
 import {expect} from 'chai';
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import {PackageVersionResolver} from '../../lib/NodeJS/PackageVersionResolver';
 
-suite('NodeJS/PackageVersionResolver', () => {
-  let name = 'mocha';
-  let version = '2.3.4';
-  let nameWithVersion = 'mocha@2.3.4';
-  let packagePath = './packagePath';
-  let packageVersionResolver = null;
+chai.use(sinonChai);
 
+suite('NodeJS/PackageVersionResolver', () => {
+  let name = 'sinon';
+  let version = '1.17';
+  let nameWithVersion = 'sinon@1.17';
+  let packagePath = './node_modules';
+  let packageVersionResolver = null;
+  let versionPattern = /\d+\.\d+\.\d+/;
 
   test('Class PackageVersionResolver exists in NodeJS/PackageVersionResolver', () => {
     expect(PackageVersionResolver).to.be.an('function');
@@ -43,5 +48,44 @@ suite('NodeJS/PackageVersionResolver', () => {
 
   test('Check _fullName() returns valid string', () => {
     expect(packageVersionResolver._fullName).to.equal(`${name}@'${version}'`);
+  });
+
+  test('Check resolve() executed successfully for !async', () => {
+    let spyCallback = sinon.spy();
+
+    let actualResult = packageVersionResolver.resolve(spyCallback, false);
+
+    let spyCallbackArgs = spyCallback.args[0];
+
+    expect(actualResult).to.be.an.instanceOf(PackageVersionResolver);
+    expect(spyCallbackArgs[0]).to.equal(null);
+    expect(versionPattern.test(spyCallbackArgs[1])).to.equal(true);
+  });
+
+  test('Check resolve() from cache', () => {
+    let spyCallback = sinon.spy();
+
+    let actualResult = packageVersionResolver.resolve(spyCallback, false);
+
+    let spyCallbackArgs = spyCallback.args[0];
+
+    expect(actualResult).to.be.an.instanceOf(PackageVersionResolver);
+    expect(spyCallbackArgs[0]).to.equal(null);
+    expect(versionPattern.test(spyCallbackArgs[1])).to.equal(true);
+  });
+
+  test('Check resolve() executed with error for !async', () => {
+    let spyCallback = sinon.spy();
+    let packagePath = './../invalidPath';
+    let nameWithVersion = 'sinon@1.16';
+    let packageVersionResolver = new PackageVersionResolver(packagePath, nameWithVersion, null);
+
+    let actualResult = packageVersionResolver.resolve(spyCallback, false);
+
+    let spyCallbackArgs = spyCallback.args[0];
+
+    expect(actualResult).to.be.an.instanceOf(PackageVersionResolver);
+    expect(spyCallbackArgs[1]).to.equal(null);
+    expect(spyCallbackArgs[0].toString()).to.include(`failed in '${packagePath}' with exit code`);
   });
 });

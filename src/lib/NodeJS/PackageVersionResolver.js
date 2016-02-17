@@ -85,6 +85,8 @@ export class PackageVersionResolver {
    * @private
    */
   _dispatch(cb, result) {
+    console.log('result: ', result);
+
     if (result.failed) {
       cb(result.error, null);
       return;
