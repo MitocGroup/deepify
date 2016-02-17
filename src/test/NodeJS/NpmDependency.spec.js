@@ -1,6 +1,7 @@
 'use strict';
 
 import {expect} from 'chai';
+import path from 'path';
 import {NpmDependency} from '../../lib/NodeJS/NpmDependency';
 
 suite('NodeJS/NpmDependency', () => {
@@ -47,5 +48,55 @@ suite('NodeJS/NpmDependency', () => {
 
   test('Check NODE_MODULES_DIR', () => {
     expect(NpmDependency.NODE_MODULES_DIR).to.equal('node_modules');
+  });
+
+  test('Check requestedVersion getter/setter', () => {
+    let requestedVersion = npmDependency.requestedVersion;
+    let testVersion = 'v0.0.1';
+
+    npmDependency.requestedVersion = testVersion;
+    expect(npmDependency.requestedVersion).to.be.equal(testVersion);
+
+    testVersion = '0.0.1';
+    npmDependency.requestedVersion = testVersion;
+    expect(npmDependency.requestedVersion).to.be.equal(testVersion);
+
+    npmDependency.requestedVersion = requestedVersion;
+    expect(npmDependency.requestedVersion).to.be.equal(requestedVersion);
+  });
+
+  test('Check defaultRootPath getter/setter', () => {
+    let defaultRootPath = npmDependency.defaultRootPath;
+    let testDefaultRootPath = path.resolve('./test');
+
+    npmDependency.defaultRootPath = testDefaultRootPath;
+    expect(npmDependency.defaultRootPath).to.be.equal(testDefaultRootPath);
+
+    npmDependency.defaultRootPath = defaultRootPath;
+    expect(npmDependency.defaultRootPath).to.be.equal(defaultRootPath);
+  });
+
+  test('Check _matchVersion returns true for !version', () => {
+    let version = null;
+    let pkgVersion = '1.0.1';
+
+    let actualResult = NpmDependency._matchVersion(version, pkgVersion);
+    expect(actualResult).to.be.equal(true);
+  });
+
+  test('Check _matchVersion returns true for version !instanceof RegExp', () => {
+    let version = '1.0.1';
+    let pkgVersion = '1.0.1';
+
+    let actualResult = NpmDependency._matchVersion(version, pkgVersion);
+    expect(actualResult).to.be.equal(true);
+  });
+
+  test('Check _matchVersion returns false for version !instanceof RegExp', () => {
+    let version = '1.0.2';
+    let pkgVersion = '1.0.1';
+
+    let actualResult = NpmDependency._matchVersion(version, pkgVersion);
+    expect(actualResult).to.be.equal(false);
   });
 });

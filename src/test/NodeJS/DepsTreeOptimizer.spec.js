@@ -33,4 +33,31 @@ suite('NodeJS/DepsTreeOptimizer', () => {
 
     expect(actualResult).to.equal(expectedResult);
   });
+
+  test('Check _findPkgUpperTheTree for !upperPath returns null', () => {
+    let upperPath = path.resolve('./test/TestMaterialss');
+    let pkgName = 'deep_modules';
+
+    let actualResult = depsTreeOptimizer._findPkgUpperTheTree(upperPath, pkgName);
+
+    expect(actualResult).to.equal(null);
+  });
+
+  test('Check _findPkgUpperTheTree returns null for upperPath  and !pkgPath', () => {
+    let upperPath = path.resolve('./test/TestMaterials');
+    let pkgName = 'deep_modules';
+
+    let actualResult = depsTreeOptimizer._findPkgUpperTheTree(upperPath, pkgName);
+
+    expect(actualResult).to.equal(null);
+  });
+
+  test('Check _findPkgUpperTheTree returns pkgPath for pkgPath', () => {
+    let upperPath = path.resolve('./test');
+    let pkgName = 'TestMaterials';
+
+    let actualResult = depsTreeOptimizer._findPkgUpperTheTree(upperPath, pkgName);
+
+    expect(actualResult).to.equal(path.join(upperPath, pkgName));
+  });
 });
