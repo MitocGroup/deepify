@@ -99,4 +99,20 @@ suite('NodeJS/NpmDependency', () => {
     let actualResult = NpmDependency._matchVersion(version, pkgVersion);
     expect(actualResult).to.be.equal(false);
   });
+
+  test('Check _matchVersion returns false for version !instanceof RegExp', () => {
+    let version = '1.0.2';
+    let pkgVersion = '1.0.1';
+
+    let actualResult = NpmDependency._matchVersion(version, pkgVersion);
+    expect(actualResult).to.be.equal(false);
+  });
+
+  test('Check _matchVersion returns false for version instanceof RegExp', () => {
+    let version = /v?(\d+\.)?(\d+\.)?\d+/g;
+    let pkgVersion = '1.0.1';
+
+    let actualResult = NpmDependency._matchVersion(version, pkgVersion);
+    expect(actualResult).to.be.equal(true);
+  });
 });
