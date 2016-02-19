@@ -26,19 +26,25 @@ module.exports = {
         },
       },
     },
-    'install': {
-      example: 'deepify install https://github.com/MitocGroup/deep-microservices-todo-app.git path/to/web_app',
-      description: 'Install an microservice from remote git repository',
+    install: {
+      example: 'deepify install github://MitocGroup/deep-microservices-todo-app',
+      description: 'Install the web app or a single microservice from the registry or GitHub',
       opts: {
+        init: {
+          alias: 'i',
+          description: 'Initialize deep web app',
+          required: false,
+        },
+        registry: {
+          alias: 'r',
+          description: 'Custom registry url (ex. https://deep.mg)',
+          required: false,
+        },
       },
       args: {
-        repository: {
-          description: 'The remote microservice git repository',
-          required: true,
-        },
-        path: {
-          description: 'The path to dump microservice into',
-          required: true,
+        dependency: {
+          description: 'The dependency you want to fetch (ex. "deep.ng.todo@^0.0.x")',
+          required: false,
         },
       },
     },
