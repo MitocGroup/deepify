@@ -10,7 +10,7 @@ module.exports = function(dependency) {
   // @todo: move it in config?
   var DEFAULT_REGISTRY_BASE_HOST = 'https://deep.mg';
 
-  var GitHubDependency = require('../../lib.compiled/Registry/GitHub/Dependency').Dependency;
+  var GitHubDependency = require('deep-package-manager').Registry_GitHub_Dependency;
   var AuthToken = require('../../lib.compiled/Registry/AuthToken').AuthToken;
   var Property = require('deep-package-manager').Property_Instance;
   var PropertyConfig = require('deep-package-manager').Property_Config;
@@ -23,6 +23,7 @@ module.exports = function(dependency) {
 
   var workingDirectory = process.cwd();
   var registryBaseHost = this.opts.locate('registry').value || DEFAULT_REGISTRY_BASE_HOST;
+  var skipGitHubDeps = this.opts.locate('skip-github-deps').exists;
   var initApp = this.opts.locate('init').exists;
   var depParts = parseDep();
   var depName = depParts[0];
@@ -37,7 +38,7 @@ module.exports = function(dependency) {
         this.exit(1);
       }
 
-      console.log(`The microservice '${depName}' has been successfully installed`);
+      console.log('The microservice \'' + depName + '\' has been successfully installed');
 
       initBackend.bind(this)();
     }.bind(this));
@@ -144,10 +145,15 @@ module.exports = function(dependency) {
           this.exit(1);
         }
 
+        if (skipGitHubDeps) {
+          cb.bind(this)();
+          return;
+        }
+
         var microservice = Microservice.create(dumpPath);
 
         createRegistry.bind(this)(function(registry) {
-          console.log(`Installing '${depObj.shortDependencyName}' dependencies`);
+          console.log('Installing \'' + depObj.shortDependencyName + '\' dependencies');
 
           registry.install(createProperty(), function(error) {
             if (error) {

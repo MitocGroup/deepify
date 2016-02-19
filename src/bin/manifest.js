@@ -40,6 +40,11 @@ module.exports = {
           description: 'Custom registry url (ex. https://deep.mg)',
           required: false,
         },
+        'skip-github-deps': {
+          alias: 's',
+          description: 'Skip fetching dependencies when working with a GitHub hosted microservice',
+          required: false,
+        },
       },
       args: {
         dependency: {
