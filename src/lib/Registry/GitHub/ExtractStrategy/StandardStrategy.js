@@ -28,9 +28,11 @@ export class StandardStrategy extends AbstractStrategy {
     }
 
     let file = path.join(this.dumpPath, StandardStrategy._normalizeFilePath(filePath));
+    let output = fse.createOutputStream(file);
 
-    stream.pipe(fse.createOutputStream(file));
-    stream.on('end', cb);
+    output.on('finish', cb);
+
+    stream.pipe(output);
   }
 
   /**

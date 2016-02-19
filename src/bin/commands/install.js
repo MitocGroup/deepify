@@ -11,11 +11,14 @@ module.exports = function(dependency) {
   var DEFAULT_REGISTRY_BASE_HOST = 'https://deep.mg';
 
   var GitHubDependency = require('../../lib.compiled/Registry/GitHub/Dependency').Dependency;
+  var AuthToken = require('../../lib.compiled/Registry/AuthToken').AuthToken;
   var Property = require('deep-package-manager').Property_Instance;
   var PropertyConfig = require('deep-package-manager').Property_Config;
   var Registry = require('deep-package-manager').Registry_Registry;
+  var RegistryAuthorizer = require('deep-package-manager').Registry_Storage_Driver_Helpers_Api_Auth_Authorizer;
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  var Microservice = require('deep-package-manager').Microservice_Instance;
   var path = require('path');
 
   var workingDirectory = process.cwd();
@@ -59,6 +62,10 @@ module.exports = function(dependency) {
     return Property.create(workingDirectory, PropertyConfig.DEFAULT_FILENAME);
   }
 
+  function getRegistryToken() {
+    return (new AuthToken()).refresh().toString();
+  }
+
   function createRegistry(cb) {
     console.log('Initializing remote registry');
 
@@ -67,6 +74,8 @@ module.exports = function(dependency) {
         console.error(error);
         this.exit(1);
       }
+
+      registry.storage.driver.authorizer = RegistryAuthorizer.createHeaderToken(getRegistryToken());
 
       cb(registry);
     }.bind(this));
@@ -125,10 +134,31 @@ module.exports = function(dependency) {
     console.log('Fetching microservice from GitHub');
 
     var depObj = new GitHubDependency(depName, depVersion);
+    var dumpPath = path.join(workingDirectory, depObj.shortDependencyName);
 
     depObj.extract(
-      path.join(workingDirectory, depObj.shortDependencyName),
-      cb.bind(this)
+      dumpPath,
+      function(error) {
+        if (error) {
+          console.error(error);
+          this.exit(1);
+        }
+
+        var microservice = Microservice.create(dumpPath);
+
+        createRegistry.bind(this)(function(registry) {
+          console.log(`Installing '${depObj.shortDependencyName}' dependencies`);
+
+          registry.install(createProperty(), function(error) {
+            if (error) {
+              console.error(error);
+              this.exit(1);
+            }
+
+            cb.bind(this)();
+          }.bind(this), [microservice.identifier]);
+        }.bind(this));
+      }.bind(this)
     );
   }
 
@@ -139,7 +169,7 @@ module.exports = function(dependency) {
       registry.installModule(
         depName,
         depVersion,
-        path.join(workingDirectory, depName),
+        workingDirectory,
         cb.bind(this),
         createProperty.bind(this)()
       );
