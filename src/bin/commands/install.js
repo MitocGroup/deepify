@@ -28,6 +28,7 @@ module.exports = function(dependency) {
 
   var workingDirectory = process.cwd();
   var skipGitHubDeps = this.opts.locate('skip-github-deps').exists;
+  var gitHubAuthPair = this.opts.locate('github-auth').value;
   var initApp = this.opts.locate('init').exists;
   var depParts = parseDep();
   var depName = depParts[0];
@@ -139,6 +140,20 @@ module.exports = function(dependency) {
     console.log('Fetching microservice from GitHub');
 
     var depObj = new GitHubDependency(depName, depVersion);
+
+    // @todo: move logic into GitHubDependency?
+    if (gitHubAuthPair) {
+      var gitHubCred = gitHubAuthPair.split(':');
+
+      if (gitHubCred.length === 1) {
+
+        // @todo: read git user followed by this fallback?
+        gitHubCred.unshift(depObj.shortDependencyName);
+      }
+
+      depObj.auth(gitHubCred[0], gitHubCred[1]);
+    }
+
     var dumpPath = path.join(workingDirectory, depObj.shortDependencyName);
 
     depObj.extract(
