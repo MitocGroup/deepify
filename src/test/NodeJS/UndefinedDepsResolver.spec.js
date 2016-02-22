@@ -1,8 +1,13 @@
 'use strict';
 
 import {expect} from 'chai';
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import {UndefinedDepsResolver} from '../../lib/NodeJS/UndefinedDepsResolver';
 import {NpmDependency} from '../../lib/NodeJS/NpmDependency';
+
+chai.use(sinonChai);
 
 suite('NodeJS/UndefinedDepsResolver', () => {
   let name, version, mainDep, undefinedDepsResolver;
@@ -95,6 +100,14 @@ suite('NodeJS/UndefinedDepsResolver', () => {
 
     expect(actualResult).to.be.an.instanceOf(UndefinedDepsResolver);
     expect(actualResult._undefinedStack.length).to.be.equal(2);
+  });
+
+  test('Check resolve() executes with error in PackageVersionResolver resolve()', () => {
+    let spyCallback = sinon.spy();
+    actualResult = undefinedDepsResolver.resolve(spyCallback);
+
+    expect(actualResult).to.be.an.instanceOf(UndefinedDepsResolver);
+    expect(spyCallback).to.not.have.been.calledWithExactly();
   });
 
   test('Check _cloneChildrenStack()', () => {

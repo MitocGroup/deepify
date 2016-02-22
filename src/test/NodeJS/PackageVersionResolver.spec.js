@@ -62,18 +62,6 @@ suite('NodeJS/PackageVersionResolver', () => {
     expect(versionPattern.test(spyCallbackArgs[1])).to.equal(true);
   });
 
-  test('Check resolve() from cache', () => {
-    let spyCallback = sinon.spy();
-
-    let actualResult = packageVersionResolver.resolve(spyCallback, false);
-
-    let spyCallbackArgs = spyCallback.args[0];
-
-    expect(actualResult).to.be.an.instanceOf(PackageVersionResolver);
-    expect(spyCallbackArgs[0]).to.equal(null);
-    expect(versionPattern.test(spyCallbackArgs[1])).to.equal(true);
-  });
-
   test('Check resolve() executed with error for !async', () => {
     let spyCallback = sinon.spy();
     let packagePath = './../invalidPath';
@@ -87,5 +75,35 @@ suite('NodeJS/PackageVersionResolver', () => {
     expect(actualResult).to.be.an.instanceOf(PackageVersionResolver);
     expect(spyCallbackArgs[1]).to.equal(null);
     expect(spyCallbackArgs[0].toString()).to.include(`failed in '${packagePath}' with exit code`);
+  });
+
+  test('Check resolve() from cache', () => {
+    let spyCallback = sinon.spy();
+
+    let actualResult = packageVersionResolver.resolve(spyCallback, false);
+
+    let spyCallbackArgs = spyCallback.args[0];
+
+    expect(actualResult).to.be.an.instanceOf(PackageVersionResolver);
+    expect(spyCallbackArgs[0]).to.equal(null);
+    expect(versionPattern.test(spyCallbackArgs[1])).to.equal(true);
+  });
+
+  test('Check resolve() executed successfully for async', (done) => {
+    let callback = (error, data) => {
+
+      expect(error).to.equal(null);
+      expect(versionPattern.test(data)).to.equal(true);
+
+      //done async
+      done();
+    };
+
+    let nameWithVersion = 'sinon@1';
+    let packageVersionResolver = new PackageVersionResolver(packagePath, nameWithVersion, null);
+
+    let actualResult = packageVersionResolver.resolve(callback);
+
+    expect(actualResult).to.be.an.instanceOf(PackageVersionResolver);
   });
 });

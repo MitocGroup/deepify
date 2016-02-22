@@ -1,10 +1,18 @@
 'use strict';
 
 import {expect} from 'chai';
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
+import {NpmListDependencies} from '../../lib/NodeJS/NpmListDependencies';
+import {NpmDependency} from '../../lib/NodeJS/NpmDependency';
+
+chai.use(sinonChai);
 
 suite('NodeJS/NpmInstall', () => {
   let npmInstall = new NpmInstall();
+  let npmListDependencies = new NpmListDependencies('./');
 
   test('Class NpmInstall exists in NodeJS/NpmInstall', () => {
     expect(NpmInstall).to.be.an('function');
@@ -77,6 +85,34 @@ suite('NodeJS/NpmInstall', () => {
     expect(actualResult).to.be.an.instanceOf(NpmInstall);
     expect(actualResult.extraArgs).to.eql([]);
     expect(actualResult.dirs).to.eql(args);
+  });
+
+  test('Check run() executes successfully in default mode', () => {
+    let args = ['./'];
+    let extraArg = 'chai@^3.2.x';
+    let spyCallback = sinon.spy();
+    let install = npmInstall._newInstance(args);
+
+    install.addExtraArg(extraArg);
+
+    let actualResult = install.run(spyCallback);
+
+    expect(actualResult).to.be.an.instanceOf(NpmInstall);
+    expect(npmListDependencies.list(0)).to.be.an.instanceOf(NpmDependency);
+  });
+
+  test('Check runChunk() > _runChunkItem() executes successfully in silent mode', () => {
+    let args = ['./'];
+    let extraArg = 'chai@^2.2.x';
+    let spyCallback = sinon.spy();
+    let install = npmInstall._newInstance(args);
+
+    install.addExtraArg(extraArg);
+
+    let actualResult = install.runChunk(spyCallback, 3, true);
+
+    expect(actualResult).to.be.an.instanceOf(NpmInstall);
+    expect(npmListDependencies.list(0)).to.be.an.instanceOf(NpmDependency);
   });
 
 });

@@ -6,7 +6,7 @@ import {NpmDependency} from '../../lib/NodeJS/NpmDependency';
 import {NpmDepsListException} from '../../lib/NodeJS/Exception/NpmDepsListException';
 
 suite('NodeJS/NpmListDependencies', () => {
-  let npmListDependencies = null
+  let npmListDependencies = null;
 
   test('Class NpmListDependencies exists in NodeJS/NpmListDependencies', () => {
     expect(NpmListDependencies).to.be.an('function');

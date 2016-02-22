@@ -99,7 +99,6 @@ suite('Server/Instance', () => {
       error = e;
     }
 
-    console.log('error buildPath: ', error);
   });
 
   test('Check running returns false', () => {
