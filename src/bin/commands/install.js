@@ -148,7 +148,7 @@ module.exports = function(dependency) {
       if (gitHubCred.length === 1) {
 
         // @todo: read git user followed by this fallback?
-        gitHubCred.unshift(depObj.shortDependencyName);
+        gitHubCred.unshift(depObj.repositoryUser);
       }
 
       depObj.auth(gitHubCred[0], gitHubCred[1]);
