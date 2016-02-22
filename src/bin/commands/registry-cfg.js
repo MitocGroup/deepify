@@ -8,14 +8,13 @@
 module.exports = function(parameter) {
   var RegistryConfig = require('../../lib.compiled/Registry/Config').Config;
 
-  this.constructor._logDriver.overrideJsConsole(false);
-
   parameter = parameter || 'unknown';
   var newValue = this.opts.locate('set').value;
   var printAvailable = this.opts.locate('print').exists;
   var config = RegistryConfig.create().refresh(parameter);
 
   if (printAvailable) {
+    resetDeepLog.bind(this)();
     console.log(Object.keys((new RegistryConfig()).varsMapper.MAPPING).join(', '));
   } else if (newValue) {
     console.log('Setting new value of parameter "' + parameter + '"');
@@ -34,6 +33,11 @@ module.exports = function(parameter) {
       this.exit(1);
     }
 
+    resetDeepLog.bind(this)();
     console.log(config.read(parameter));
+  }
+
+  function resetDeepLog() {
+    this.constructor._logDriver.overrideJsConsole(false);
   }
 };
