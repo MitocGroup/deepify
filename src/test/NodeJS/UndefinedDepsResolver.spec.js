@@ -107,7 +107,7 @@ suite('NodeJS/UndefinedDepsResolver', () => {
     actualResult = undefinedDepsResolver.resolve(spyCallback);
 
     expect(actualResult).to.be.an.instanceOf(UndefinedDepsResolver);
-    expect(spyCallback).to.not.have.been.calledWithExactly();
+    expect(spyCallback).to.not.have.been.calledWith();
   });
 
   test('Check _cloneChildrenStack()', () => {
