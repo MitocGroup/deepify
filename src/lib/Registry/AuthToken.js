@@ -25,41 +25,12 @@ export class AuthToken {
    * @returns {AuthToken}
    */
   refresh() {
-    this._token = AuthToken._fromGlobal ||
-      AuthToken._fromEnvVar ||
-      AuthToken._fromConfigFile ||
-      'ANON';
+    this._token = Config
+        .create()
+        .refresh(AuthToken.TOKEN_VAR_NAME)
+        .read(AuthToken.TOKEN_VAR_NAME) || 'ANON';
 
     return this;
-  }
-
-  /**
-   * @returns {String|null}
-   * @private
-   */
-  static get _fromEnvVar() {
-    return process.env[AuthToken.TOKEN_VAR_NAME];
-  }
-
-  /**
-   * @returns {String|null}
-   * @private
-   */
-  static get _fromGlobal() {
-    return global[AuthToken.TOKEN_VAR_NAME];
-  }
-
-  /**
-   * @returns {String|null}
-   * @private
-   */
-  static get _fromConfigFile() {
-    try {
-      let config = Config.create();
-
-      return config[AuthToken.TOKEN_VAR_NAME];
-    } catch (error) {
-    }
   }
 
   /**

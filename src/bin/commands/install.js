@@ -7,11 +7,12 @@
 
 module.exports = function(dependency) {
 
-  // @todo: move it in config?
+  // @todo: move it in some json config?
   var DEFAULT_REGISTRY_BASE_HOST = 'https://deep.mg';
 
   var GitHubDependency = require('deep-package-manager').Registry_GitHub_Dependency;
   var AuthToken = require('../../lib.compiled/Registry/AuthToken').AuthToken;
+  var RegistryConfig = require('../../lib.compiled/Registry/Config').Config;
   var Property = require('deep-package-manager').Property_Instance;
   var PropertyConfig = require('deep-package-manager').Property_Config;
   var Registry = require('deep-package-manager').Registry_Registry;
@@ -21,8 +22,11 @@ module.exports = function(dependency) {
   var Microservice = require('deep-package-manager').Microservice_Instance;
   var path = require('path');
 
+  var registryBaseHost = this.opts.locate('registry').value ||
+    RegistryConfig.create().refresh('registry').read('registry') ||
+    DEFAULT_REGISTRY_BASE_HOST;
+
   var workingDirectory = process.cwd();
-  var registryBaseHost = this.opts.locate('registry').value || DEFAULT_REGISTRY_BASE_HOST;
   var skipGitHubDeps = this.opts.locate('skip-github-deps').exists;
   var initApp = this.opts.locate('init').exists;
   var depParts = parseDep();
@@ -79,7 +83,7 @@ module.exports = function(dependency) {
       registry.storage.driver.authorizer = RegistryAuthorizer.createHeaderToken(getRegistryToken());
 
       cb(registry);
-    }.bind(this));
+    }.bind(this), true);
   }
 
   function parseDep() {

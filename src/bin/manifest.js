@@ -178,6 +178,28 @@ module.exports = {
         },
       },
     },
+    'registry-cfg': {
+      example: 'deepify registry-cfg token --set "some_custom_auth_token"',
+      description: 'Read/Set the registry configuration value (read unless called with --set)',
+      opts: {
+        set: {
+          alias: 's',
+          description: 'Set the registry parameter to the value given',
+          required: false,
+        },
+        print: {
+          alias: 'p',
+          description: 'Print available registry parameters',
+          required: false,
+        },
+      },
+      args: {
+        parameter: {
+          description: 'Registry configuration parameter name',
+          required: false,
+        },
+      },
+    },
     'enable-ssl': {
       example: 'deepify enable-ssl path/to/web_app',
       description: 'Enables SSL on a deployed web app',
