@@ -99,7 +99,6 @@ module.exports = function(microservicePath) {
     .forEach(function(lambdaPath) {
       console.log('Cleaning up backend in ' + lambdaPath);
 
-      fse.removeSync(path.join(lambdaPath, '.DS_Store')); //@todo: do we need this case covered?
       fse.removeSync(path.join(lambdaPath, 'node_modules'));
       fse.removeSync(path.join(lambdaPath, Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR));
       fse.removeSync(path.join(lambdaPath, Lambda.CONFIG_FILE));
