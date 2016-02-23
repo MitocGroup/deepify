@@ -48,7 +48,7 @@ suite('NodeJS/UndefinedDepsResolver', () => {
     expect(UndefinedDepsResolver).to.be.an('function');
   });
 
-  test('Check UndefinedDepsResolver constructor throws Error for !mainDep.isMain', () => {
+  test('Check UndefinedDepsResolver constructor throws Error for mainDep is not root', () => {
     let error = null;
     let mainDep = new NpmDependency(name, version, false);
 
@@ -104,6 +104,8 @@ suite('NodeJS/UndefinedDepsResolver', () => {
 
   test('Check resolve() executes with error in PackageVersionResolver resolve()', () => {
     let spyCallback = sinon.spy();
+    undefinedDepsResolver._resolvedStack = undefinedDepsResolver._cloneShadow;
+
     actualResult = undefinedDepsResolver.resolve(spyCallback);
 
     expect(actualResult).to.be.an.instanceOf(UndefinedDepsResolver);
@@ -134,5 +136,26 @@ suite('NodeJS/UndefinedDepsResolver', () => {
 
     expect(error).to.be.an.instanceOf(Error);
     expect(error.message).to.be.equal('Missing parent on a non deps tree root');
+  });
+
+  test('Check resolve() executes with error in resolver for _cloneShadow = {}', () => {
+    let spyCallback = sinon.spy();
+    undefinedDepsResolver = new UndefinedDepsResolver(mainDep);
+    undefinedDepsResolver._cloneShadow = {};
+
+    actualResult = undefinedDepsResolver.resolve(spyCallback);
+
+    expect(actualResult).to.be.an.instanceOf(UndefinedDepsResolver);
+  });
+
+  test('Check resolve()', () => {
+    let spyCallback = sinon.spy();
+    mainDep = new NpmDependency('chai', '2.2.x', true);
+    undefinedDepsResolver = new UndefinedDepsResolver(mainDep);
+    undefinedDepsResolver._cloneShadow = {};
+
+    actualResult = undefinedDepsResolver.resolve(spyCallback);
+
+    expect(actualResult).to.be.an.instanceOf(UndefinedDepsResolver);
   });
 });
