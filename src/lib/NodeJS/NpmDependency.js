@@ -224,7 +224,7 @@ export class NpmDependency {
       let childDep = this._children[i];
 
       if (!childDep.version || childDep.version === 'undefined') {
-        delete this._children[i];
+        this._children.splice(i, 1);
         continue;
       }
 

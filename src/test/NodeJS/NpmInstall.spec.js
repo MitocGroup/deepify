@@ -1,40 +1,48 @@
 'use strict';
 
+import {expect} from 'chai';
 import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
+import {NpmListDependencies} from '../../lib/NodeJS/NpmListDependencies';
+import {NpmDependency} from '../../lib/NodeJS/NpmDependency';
+
+chai.use(sinonChai);
 
 suite('NodeJS/NpmInstall', () => {
   let npmInstall = new NpmInstall();
+  let npmListDependencies = new NpmListDependencies('./');
 
   test('Class NpmInstall exists in NodeJS/NpmInstall', () => {
-    chai.expect(NpmInstall).to.be.an('function');
+    expect(NpmInstall).to.be.an('function');
   });
 
   test('Check DEFAULT_SILENT_STATE getter returns false', () => {
-    chai.expect(NpmInstall.DEFAULT_SILENT_STATE).to.equal(false);
+    expect(NpmInstall.DEFAULT_SILENT_STATE).to.equal(false);
   });
 
   test('Check DEFAULT_CHUNK_SIZE getter returns value above than 0', () => {
-    chai.expect(NpmInstall.DEFAULT_CHUNK_SIZE).to.above(0);
+    expect(NpmInstall.DEFAULT_CHUNK_SIZE).to.above(0);
   });
 
   test('Check _mainCmd getter returns valid string', () => {
-    chai.expect(npmInstall._mainCmd).to.includes('npm install');
+    expect(npmInstall._mainCmd).to.includes('npm install');
   });
 
   test('Check constructor sets valid value for _dirs', () => {
-    chai.expect(npmInstall).to.be.an.instanceOf(NpmInstall);
-    chai.expect(npmInstall.dirs).to.be.eql([]);
+    expect(npmInstall).to.be.an.instanceOf(NpmInstall);
+    expect(npmInstall.dirs).to.be.eql([]);
   });
 
   test('Check constructor sets valid value for _extraArgs', () => {
-    chai.expect(Array.isArray(npmInstall.extraArgs)).to.be.equal(true);
-    chai.expect(npmInstall.extraArgs).to.eql([]);
+    expect(Array.isArray(npmInstall.extraArgs)).to.be.equal(true);
+    expect(npmInstall.extraArgs).to.eql([]);
   });
 
   test('Check _execArgs getter', () => {
-    chai.expect(Array.isArray(npmInstall._execArgs)).to.be.equal(true);
-    chai.expect(npmInstall._execArgs[0]).to.includes('npm install');
+    expect(Array.isArray(npmInstall._execArgs)).to.be.equal(true);
+    expect(npmInstall._execArgs[0]).to.includes('npm install');
   });
 
   test('Check addExtraArg()', () => {
@@ -43,9 +51,9 @@ suite('NodeJS/NpmInstall', () => {
 
     let actualResult = npmInstall.addExtraArg(newArg);
 
-    chai.expect(actualResult).to.be.an.instanceOf(NpmInstall);
-    chai.expect(actualResult.extraArgs.length).to.equal(++length);
-    chai.expect(actualResult.extraArgs.pop()).to.equal(newArg);
+    expect(actualResult).to.be.an.instanceOf(NpmInstall);
+    expect(actualResult.extraArgs.length).to.equal(++length);
+    expect(actualResult.extraArgs.pop()).to.equal(newArg);
   });
 
   test('Check _chunkArray() returns valid array', () => {
@@ -55,8 +63,8 @@ suite('NodeJS/NpmInstall', () => {
 
     let actualResult = NpmInstall._chunkArray(toChunkArray, size);
 
-    chai.expect(actualResult).to.be.an.instanceOf(Array);
-    chai.expect(actualResult).to.eql(expectedResult);
+    expect(actualResult).to.be.an.instanceOf(Array);
+    expect(actualResult).to.eql(expectedResult);
   });
 
   test('Check _newInstance() returns new NpmInstall instance with dirs.length = 3', () => {
@@ -64,9 +72,9 @@ suite('NodeJS/NpmInstall', () => {
 
     let actualResult = npmInstall._newInstance(args);
 
-    chai.expect(actualResult).to.be.an.instanceOf(NpmInstall);
-    chai.expect(actualResult.extraArgs).to.eql([]);
-    chai.expect(actualResult.dirs).to.eql(args);
+    expect(actualResult).to.be.an.instanceOf(NpmInstall);
+    expect(actualResult.extraArgs).to.eql([]);
+    expect(actualResult.dirs).to.eql(args);
   });
 
   test('Check _newInstance() returns new NpmInstall instance with dirs.length = 3', () => {
@@ -74,9 +82,37 @@ suite('NodeJS/NpmInstall', () => {
 
     let actualResult = npmInstall._newInstance(args);
 
-    chai.expect(actualResult).to.be.an.instanceOf(NpmInstall);
-    chai.expect(actualResult.extraArgs).to.eql([]);
-    chai.expect(actualResult.dirs).to.eql(args);
+    expect(actualResult).to.be.an.instanceOf(NpmInstall);
+    expect(actualResult.extraArgs).to.eql([]);
+    expect(actualResult.dirs).to.eql(args);
+  });
+
+  test('Check run() executes successfully in default mode', () => {
+    let args = ['./'];
+    let extraArg = 'chai@^3.2.x';
+    let spyCallback = sinon.spy();
+    let install = npmInstall._newInstance(args);
+
+    install.addExtraArg(extraArg);
+
+    let actualResult = install.run(spyCallback);
+
+    expect(actualResult).to.be.an.instanceOf(NpmInstall);
+    expect(npmListDependencies.list(0)).to.be.an.instanceOf(NpmDependency);
+  });
+
+  test('Check runChunk() > _runChunkItem() executes successfully in silent mode', () => {
+    let args = ['./'];
+    let extraArg = 'chai@^2.2.x';
+    let spyCallback = sinon.spy();
+    let install = npmInstall._newInstance(args);
+
+    install.addExtraArg(extraArg);
+
+    let actualResult = install.runChunk(spyCallback, 3, true);
+
+    expect(actualResult).to.be.an.instanceOf(NpmInstall);
+    expect(npmListDependencies.list(0)).to.be.an.instanceOf(NpmDependency);
   });
 
 });

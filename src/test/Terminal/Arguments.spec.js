@@ -1,6 +1,6 @@
 'use strict';
 
-import chai from 'chai';
+import {expect} from 'chai';
 import {Arguments} from '../../lib/Terminal/Arguments';
 import {Argument} from '../../lib/Terminal/Argument';
 import {ArgumentObjectRequiredException} from '../../lib/Terminal/Exception/ArgumentObjectRequiredException';
@@ -13,15 +13,15 @@ suite('Terminal/Arguments', () => {
   let argument = new Argument(name);
 
   test('Class Arguments exists in Terminal/Arguments', () => {
-    chai.expect(Arguments).to.be.an('function');
+    expect(Arguments).to.be.an('function');
   });
 
   test('Check constructor sets correctly values by default', () => {
     argumentsInstance = new Arguments();
 
-    chai.expect(argumentsInstance, 'is an instance of Argument').to.be.an.instanceOf(Arguments);
-    chai.expect(argumentsInstance.list()).to.be.eql([]);
-    chai.expect(argumentsInstance.listUnmanaged()).to.be.eql([]);
+    expect(argumentsInstance, 'is an instance of Argument').to.be.an.instanceOf(Arguments);
+    expect(argumentsInstance.list()).to.be.eql([]);
+    expect(argumentsInstance.listUnmanaged()).to.be.eql([]);
   });
 
   test('Check add() throws ArgumentObjectRequiredException', () => {
@@ -33,31 +33,31 @@ suite('Terminal/Arguments', () => {
       error = e;
     }
 
-    chai.expect(
+    expect(
       error, 'is an instance of ArgumentObjectRequiredException'
     ).to.be.an.instanceOf(ArgumentObjectRequiredException);
-    chai.expect(argumentsInstance.list()).to.be.eql([]);
+    expect(argumentsInstance.list()).to.be.eql([]);
   });
 
   test('Check add()', () => {
     let actualResult = argumentsInstance.add(argument);
 
-    chai.expect(actualResult).to.be.an.instanceOf(Arguments);
-    chai.expect(argumentsInstance.list()[0]).to.be.an.instanceOf(Argument);
-    chai.expect(argumentsInstance.list()[0].name).to.be.equal(name);
+    expect(actualResult).to.be.an.instanceOf(Arguments);
+    expect(argumentsInstance.list()[0]).to.be.an.instanceOf(Argument);
+    expect(argumentsInstance.list()[0].name).to.be.equal(name);
   });
 
   test('Check locate() returns argument by name', () => {
     let actualResult = argumentsInstance.locate(name);
 
-    chai.expect(actualResult).to.be.an.instanceOf(Argument);
-    chai.expect(actualResult).to.be.equal(argument);
+    expect(actualResult).to.be.an.instanceOf(Argument);
+    expect(actualResult).to.be.equal(argument);
   });
 
   test('Check locate() returns null', () => {
     let actualResult = argumentsInstance.locate('non-existing name');
 
-    chai.expect(actualResult).to.be.equal(null);
+    expect(actualResult).to.be.equal(null);
   });
 
   test('Check listValues() for !includeUnmanaged', () => {
@@ -65,26 +65,26 @@ suite('Terminal/Arguments', () => {
 
     let actualResult = argumentsInstance.listValues(false);
 
-    chai.expect(actualResult[0]).to.be.equal(argument.value);
+    expect(actualResult[0]).to.be.equal(argument.value);
   });
 
   test('Check hasUnmanaged() returns false', () => {
-    chai.expect(argumentsInstance.hasUnmanaged).to.be.equal(false);
+    expect(argumentsInstance.hasUnmanaged).to.be.equal(false);
   });
 
   test('Check remove()', () => {
     argumentsInstance.remove(name);
 
-    chai.expect(argumentsInstance.list()).to.be.eql([]);
+    expect(argumentsInstance.list()).to.be.eql([]);
   });
 
   test('Check create()', () => {
     name = 'deploy';
     let actualResult = argumentsInstance.create(name);
 
-    chai.expect(actualResult).to.be.an.instanceOf(Arguments);
-    chai.expect(argumentsInstance.list()[0]).to.be.an.instanceOf(Argument);
-    chai.expect(argumentsInstance.list()[0].name).to.be.equal(name);
+    expect(actualResult).to.be.an.instanceOf(Arguments);
+    expect(argumentsInstance.list()[0]).to.be.an.instanceOf(Argument);
+    expect(argumentsInstance.list()[0].name).to.be.equal(name);
   });
 
   test('Check merge()', () => {
@@ -94,11 +94,11 @@ suite('Terminal/Arguments', () => {
 
     let actualResult = argumentsInstance.merge(sibling);
 
-    chai.expect(actualResult).to.be.an.instanceOf(Arguments);
-    chai.expect(argumentsInstance.list()[0]).to.be.an.instanceOf(Argument);
-    chai.expect(argumentsInstance.list()[0].name).to.be.equal(name);
-    chai.expect(argumentsInstance.list()[1]).to.be.an.instanceOf(Argument);
-    chai.expect(argumentsInstance.list()[1].name).to.be.eql(toMergeName);
+    expect(actualResult).to.be.an.instanceOf(Arguments);
+    expect(argumentsInstance.list()[0]).to.be.an.instanceOf(Argument);
+    expect(argumentsInstance.list()[0].name).to.be.equal(name);
+    expect(argumentsInstance.list()[1]).to.be.an.instanceOf(Argument);
+    expect(argumentsInstance.list()[1].name).to.be.eql(toMergeName);
   });
 
   test('Check merge() throws ArgumentObjectRequiredException', () => {
@@ -111,10 +111,10 @@ suite('Terminal/Arguments', () => {
       error = e;
     }
 
-    chai.expect(
+    expect(
       error, 'is an instance of ArgumentsObjectRequiredException'
     ).to.be.an.instanceOf(ArgumentsObjectRequiredException);
-    chai.expect(argumentsInstance.list()).to.be.eql(expectedResult);
+    expect(argumentsInstance.list()).to.be.eql(expectedResult);
   });
 
   test('Check populate()', () => {
@@ -123,10 +123,10 @@ suite('Terminal/Arguments', () => {
 
     let actualResult = argumentsInstance.populate(args);
 
-    chai.expect(actualResult).to.be.an.instanceOf(Arguments);
+    expect(actualResult).to.be.an.instanceOf(Arguments);
 
-    chai.expect(argumentsInstance.list()[0].value).to.be.equal(argumentItem);
-    chai.expect(argumentsInstance.list()[0].exists).to.be.equal(true);
+    expect(argumentsInstance.list()[0].value).to.be.equal(argumentItem);
+    expect(argumentsInstance.list()[0].exists).to.be.equal(true);
 
   });
 
@@ -136,18 +136,18 @@ suite('Terminal/Arguments', () => {
 
     let actualResult = argumentsInstance.populateUnmanaged(args);
 
-    chai.expect(actualResult).to.be.an.instanceOf(Arguments);
-    chai.expect(actualResult.listUnmanaged()).to.be.eql(args);
+    expect(actualResult).to.be.an.instanceOf(Arguments);
+    expect(actualResult.listUnmanaged()).to.be.eql(args);
   });
 
   test('Check hasUnmanaged() returns true', () => {
-    chai.expect(argumentsInstance.hasUnmanaged).to.be.equal(true);
+    expect(argumentsInstance.hasUnmanaged).to.be.equal(true);
   });
 
   test('Check validate()', () => {
     let actualResult = argumentsInstance.validate();
 
-    chai.expect(
+    expect(
       actualResult, 'is an instance of Arguments'
     ).to.be.an.instanceOf(Arguments);
   });
@@ -164,7 +164,7 @@ suite('Terminal/Arguments', () => {
       error = e;
     }
 
-    chai.expect(
+    expect(
       error, 'is an instance of MissingArgumentException'
     ).to.be.an.instanceOf(MissingArgumentException);
   });
@@ -174,6 +174,6 @@ suite('Terminal/Arguments', () => {
 
     let actualResult = argumentsInstance.listValues(true);
 
-    chai.expect(actualResult).to.eql(expectedResult);
+    expect(actualResult).to.eql(expectedResult);
   });
 });

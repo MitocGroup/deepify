@@ -1,6 +1,6 @@
 'use strict';
 
-import chai from 'chai';
+import {expect} from 'chai';
 import {NpmPrune} from '../../lib/NodeJS/NpmPrune';
 import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
 
@@ -8,12 +8,12 @@ suite('NodeJS/NpmPrune', () => {
   let npmPrune = null;
 
   test('Class NpmPrune exists in NodeJS/NpmPrune', () => {
-    chai.expect(NpmPrune).to.be.an('function');
+    expect(NpmPrune).to.be.an('function');
   });
 
   test('Check constructor sets _cmd = null', () => {
     npmPrune = new NpmPrune();
-    chai.expect(npmPrune).to.be.an.instanceOf(NpmPrune);
+    expect(npmPrune).to.be.an.instanceOf(NpmPrune);
   });
 
   test('Check _newInstance() returns new NpmInstall instance with dirs.length = 3', () => {
@@ -21,12 +21,12 @@ suite('NodeJS/NpmPrune', () => {
 
     let actualResult = npmPrune._newInstance(args);
 
-    chai.expect(actualResult).to.be.an.instanceOf(NpmInstall);
-    chai.expect(actualResult.extraArgs).to.eql([]);
-    chai.expect(actualResult.dirs).to.eql(args);
+    expect(actualResult).to.be.an.instanceOf(NpmInstall);
+    expect(actualResult.extraArgs).to.eql([]);
+    expect(actualResult.dirs).to.eql(args);
   });
 
   test('Check _mainCmd getter returns valid string', () => {
-    chai.expect(npmPrune._mainCmd).to.includes('npm prune');
+    expect(npmPrune._mainCmd).to.includes('npm prune');
   });
 });
