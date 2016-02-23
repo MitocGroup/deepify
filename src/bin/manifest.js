@@ -183,6 +183,23 @@ module.exports = {
         },
       },
     },
+    publish: {
+      example: 'deepify publish ./sample-microservice',
+      description: 'Publish microservice (may require manual approval before getting public)',
+      opts: {
+        registry: {
+          alias: 'r',
+          description: 'Custom registry url (ex. https://deep.mg)',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the microservice you want to publish',
+          required: true,
+        },
+      },
+    },
     'registry-cfg': {
       example: 'deepify registry-cfg token --set "some_custom_auth_token"',
       description: 'Read/Set the registry configuration value (read unless called with --set)',
