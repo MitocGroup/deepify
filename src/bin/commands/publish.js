@@ -21,7 +21,6 @@ module.exports = function(microservicePath) {
   };
 
   var path = require('path');
-  var fs = require('fs');
   var fse = require('fs-extra');
   var tmp = require('tmp');
   var AuthToken = require('../../lib.compiled/Registry/AuthToken').AuthToken;
