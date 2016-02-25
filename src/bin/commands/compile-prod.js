@@ -176,6 +176,11 @@ module.exports = function(mainPath) {
   }
 
   function optimizeDeps(cb, lambdas) {
+    if (lambdas.tmpPath.length <= 0) {
+      cb();
+      return;
+    }
+
     _optimizeDepsChunk(
       NpmInstall._chunkArray(lambdas.tmpPath, NpmInstall.DEFAULT_CHUNK_SIZE),
       cb,

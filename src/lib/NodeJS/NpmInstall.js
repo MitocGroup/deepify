@@ -53,6 +53,11 @@ export class NpmInstall {
    * @returns {NpmInstall}
    */
   runChunk(cb, chunkSize = NpmInstall.DEFAULT_CHUNK_SIZE, silent = NpmInstall.DEFAULT_SILENT_STATE) {
+    if (this._dirs.length <= 0) {
+      cb();
+      return this;
+    }
+
     this._runChunkItem(
       NpmInstall._chunkArray(this._dirs, chunkSize),
       silent,
