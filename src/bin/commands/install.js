@@ -5,31 +5,112 @@
 
 'use strict';
 
-module.exports = function(microserviceRepo, dumpPath) {
-  var fs = require('fs');
-  var tmp = require('tmp');
-  var path = require('path');
-  var fse = require('fs-extra');
-  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
-  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
-  var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
+module.exports = function(dependency) {
 
-  if (dumpPath.indexOf(path.sep) !== 0) {
-    dumpPath = path.join(process.cwd(), dumpPath);
+  // @todo: move it in some json config?
+  var DEFAULT_REGISTRY_BASE_HOST = 'https://deep.mg';
+
+  var GitHubDependency = require('deep-package-manager').Registry_GitHub_Dependency;
+  var AuthToken = require('../../lib.compiled/Registry/AuthToken').AuthToken;
+  var RegistryConfig = require('../../lib.compiled/Registry/Config').Config;
+  var Property = require('deep-package-manager').Property_Instance;
+  var PropertyConfig = require('deep-package-manager').Property_Config;
+  var Registry = require('deep-package-manager').Registry_Registry;
+  var RegistryAuthorizer = require('deep-package-manager').Registry_Storage_Driver_Helpers_Api_Auth_Authorizer;
+  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  var Microservice = require('deep-package-manager').Microservice_Instance;
+  var path = require('path');
+
+  var registryBaseHost = this.opts.locate('registry').value ||
+    RegistryConfig.create().refresh('registry').read('registry') ||
+    DEFAULT_REGISTRY_BASE_HOST;
+
+  var workingDirectory = process.cwd();
+  var skipGitHubDeps = this.opts.locate('skip-github-deps').exists;
+  var gitHubAuthPair = this.opts.locate('github-auth').value;
+  var initApp = this.opts.locate('init').exists;
+  var depParts = parseDep();
+  var depName = depParts[0];
+  var depVersion = depParts[1];
+
+  if (depName) {
+    var fetcher = GitHubDependency.isGitHubDependency(depName) ? fetchGitHub : fetchRepository;
+
+    fetcher.bind(this)(function(error) {
+      if (error) {
+        console.error(error);
+        this.exit(1);
+      }
+
+      console.log('The microservice \'' + depName + '\' has been successfully installed');
+
+      initBackend.bind(this)();
+    }.bind(this));
+  } else {
+    createRegistry.bind(this)(function(registry) {
+      console.log('Installing web app dependencies');
+
+      registry.install(createProperty(), function(error) {
+        if (error) {
+          console.error(error);
+          this.exit(1);
+        }
+
+        console.log('Wep app dependencies have been successfully installed');
+
+        initBackend.bind(this)();
+      }.bind(this));
+    }.bind(this));
   }
 
-  gitFetch(microserviceRepo, function(error) {
-    if (error) {
-      this.exit(1);
+  function createProperty() {
+    return Property.create(workingDirectory, PropertyConfig.DEFAULT_FILENAME);
+  }
+
+  function getRegistryToken() {
+    return (new AuthToken()).refresh().toString();
+  }
+
+  function createRegistry(cb) {
+    console.log('Initializing remote registry');
+
+    Registry.createApiRegistry(registryBaseHost, function(error, registry) {
+      if (error) {
+        console.error(error);
+        this.exit(1);
+      }
+
+      registry.storage.driver.authorizer = RegistryAuthorizer.createHeaderToken(getRegistryToken());
+
+      cb(registry);
+    }.bind(this), true);
+  }
+
+  function parseDep() {
+    var parts = (dependency || '').split('@');
+
+    if (parts.length <= 1) {
+      return [parts[0], '*'];
+    }
+
+    return [parts[0], parts[1]];
+  }
+
+  function initBackend() {
+    if (!initApp) {
       return;
     }
+
+    console.log('Start initializing backend');
 
     npmInstall('"babel@^5.x.x"', function(error) {
       if (error) {
         console.error('Error while installing babel: ' + error);
+        this.exit(1);
       }
 
-      //@todo - temporary workarround for FATAL ERROR- JS Allocation failed – process out of memory
+      //@todo - temporary workaround for FATAL ERROR- JS Allocation failed – process out of memory
       if(/^win/.test(process.platform)) {
         console.warn('The web application was successfully installed on Windows!\n');
         console.info('To initialize backend use "deepify init-backend path/to" command');
@@ -37,34 +118,88 @@ module.exports = function(microserviceRepo, dumpPath) {
         return;
       }
 
-      var prompt = new Prompt('Initialize backend?');
+      var cmd = new Exec(
+        Bin.node,
+        this.scriptPath,
+        'init-backend',
+        workingDirectory
+      );
 
-      prompt.readConfirm(function(result) {
-        if (result) {
-          console.log('Start initializing backend...');
+      cmd.run(function(result) {
+        if (result.failed) {
+          console.error(result.error);
+          this.exit(1);
+        }
 
-          var cmd = new Exec(
-            Bin.node,
-            this.scriptPath,
-            'init-backend',
-            dumpPath
-          );
+        console.log('Wep app dependencies have been successfully initialized');
+      }.bind(this), true);
+    }.bind(this));
+  }
 
-          cmd.run(function(result) {
-            if (result.failed) {
-              console.error(result.error);
-            }
+  function fetchGitHub(cb) {
+    console.log('Fetching microservice from GitHub');
 
-            console.log('The web application was successfully installed.');
-          }, true);
+    var depObj = new GitHubDependency(depName, depVersion);
 
+    // @todo: move logic into GitHubDependency?
+    if (gitHubAuthPair) {
+      var gitHubCred = gitHubAuthPair.split(':');
+
+      if (gitHubCred.length === 1) {
+
+        // @todo: read git user followed by this fallback?
+        gitHubCred.unshift(depObj.repositoryUser);
+      }
+
+      depObj.auth(gitHubCred[0], gitHubCred[1]);
+    }
+
+    var dumpPath = path.join(workingDirectory, depObj.shortDependencyName);
+
+    depObj.extract(
+      dumpPath,
+      function(error) {
+        if (error) {
+          console.error(error);
+          this.exit(1);
+        }
+
+        if (skipGitHubDeps) {
+          cb.bind(this)();
           return;
         }
 
-        console.log('The web application was successfully installed.');
-      }.bind(this));
+        var microservice = Microservice.create(dumpPath);
+
+        createRegistry.bind(this)(function(registry) {
+          console.log('Installing \'' + depObj.shortDependencyName + '\' dependencies');
+
+          registry.install(createProperty(), function(error) {
+            if (error) {
+              console.error(error);
+              this.exit(1);
+            }
+
+            cb.bind(this)();
+          }.bind(this), [microservice.identifier]);
+        }.bind(this));
+      }.bind(this)
+    );
+  }
+
+  function fetchRepository(cb) {
+    createRegistry.bind(this)(function(registry) {
+      console.log('Fetching microservice from DEEP repository');
+
+      registry.installModule(
+        depName,
+        depVersion,
+        workingDirectory,
+        cb.bind(this),
+        createProperty.bind(this)()
+      );
     }.bind(this));
-  }.bind(this));
+  }
 
   function npmInstall(repo, cb) {
     console.log('Installing ' + repo + ' via NPM globally');
@@ -81,106 +216,5 @@ module.exports = function(microserviceRepo, dumpPath) {
 
         cb(null);
       }.bind(this));
-  }
-
-  function gitFetch(repo, cb, copyFiles) {
-    copyFiles = copyFiles || {};
-
-    var tmpFolder = tmp.dirSync().name;
-
-    console.log('Cloning the ' + repo + ' into ' + tmpFolder);
-
-    var cmd = new Exec('git', 'clone', '--depth=1', repo, '.');
-    cmd.cwd = tmpFolder;
-
-    cmd
-      .avoidBufferOverflow()
-      .run(function(result) {
-        if (result.failed) {
-          console.error('Error cloning ' + repo + ' repository into ' + tmpFolder + ': ' + result.error);
-
-          fse.removeSync(tmpFolder);
-          cb(result.error);
-          return;
-        }
-
-        var srcDir = path.join(tmpFolder, 'src');
-
-        if (!fs.existsSync(srcDir)) {
-          var error = 'Missing "src" directory in ' + tmpFolder;
-
-          fse.removeSync(tmpFolder);
-          cb(new Error(error));
-          return;
-        }
-
-        cleanupDir(srcDir);
-
-        try {
-          var subdir = getSubdirName(srcDir);
-        } catch (e) {
-          fse.removeSync(srcDir);
-          cb(e);
-          return;
-        }
-
-        var sourcePath = path.join(srcDir, subdir);
-        var targetPath = path.join(dumpPath, subdir);
-
-        fse.copySync(sourcePath, targetPath, {clobber: true});
-
-        var copyFilesKeys = Object.keys(copyFiles);
-
-        for (var i in copyFilesKeys) {
-          if (!copyFilesKeys.hasOwnProperty(i)) {
-            continue;
-          }
-
-          var fSrc = copyFilesKeys[i];
-          var fDes = copyFiles[fSrc];
-
-          fse.copySync(path.join(tmpFolder, fSrc), fDes, {clobber: true});
-        }
-
-        fse.removeSync(tmpFolder);
-
-        cb(null);
-      }.bind(this));
-  }
-
-  /**
-   * @param {String} dir
-   */
-  function cleanupDir(dir) {
-    new Exec('find', dir, '-type d -name ".git" -print0 | xargs -0 rm -rf')
-      .avoidBufferOverflow()
-      .runSync();
-  }
-
-  /**
-   * @param {String} dir
-   * @returns {String}
-   */
-  function getSubdirName(dir) {
-    var dirFiles = fs.readdirSync(dir);
-
-    if (dirFiles.length <= 0) {
-      throw new Error('No sub directories in ' + dir);
-    }
-
-    for (var i in dirFiles) {
-      if (!dirFiles.hasOwnProperty(i)) {
-        continue;
-      }
-
-      var file = dirFiles[i];
-      var filePath = path.join(dir, file);
-
-      if (fs.lstatSync(filePath).isDirectory()) {
-        return file;
-      }
-    }
-
-    throw new Error('There is no directory in ' + dir);
   }
 };
