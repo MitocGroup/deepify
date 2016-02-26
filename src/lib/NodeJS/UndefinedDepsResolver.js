@@ -137,7 +137,6 @@ export class UndefinedDepsResolver {
       this._cloneChildrenStack(childDep, clonedDep);
 
       parentDep.addChild(clonedDep);
-      clonedDep.parent = parentDep;
 
       if (!clonedDep.version || clonedDep.version === 'undefined') {
         let shadowKey = `${clonedDep.name}@${clonedDep.requestedVersion}`;
