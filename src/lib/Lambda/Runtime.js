@@ -97,6 +97,13 @@ export class Runtime {
   }
 
   /**
+   * @returns {String}
+   */
+  get arnName() {
+    return this._name.replace(/\-\d+$/i, '');
+  }
+
+  /**
    * @param {String} name
    */
   set name(name) {
@@ -177,7 +184,7 @@ export class Runtime {
         invokeAsync: function (localPath, data, callback) {
           this.invoke(localPath, data, (error, result) => {
             if (error) {
-              _this._log(`Lambda ${data.lambda} async execution fail: ${error.message}`);
+              _this._log(`Lambda ${data.lambda} async execution fail`, error);
               return;
             }
 
@@ -276,12 +283,12 @@ export class Runtime {
       /** make the context Lambda alike */
       awsRequestId: '6bde10dc-a329-11e5-8f4d-55470b0a5783',
       invokeid: '6bde10dc-a329-11e5-8f4d-55470b0a5783',
-      logGroupName: `/aws/lambda/${this._name}`,
+      logGroupName: `/aws/lambda/${this.arnName}`,
       logStreamName: `${logStreamDate}/${logStreamDate}[$LATEST]e680b516b0ea402eb3ff38f10b40a264`,
-      functionName: this._name,
+      functionName: this.arnName,
       memoryLimitInMB: '128',
       functionVersion: '$LATEST',
-      invokedFunctionArn: `arn:aws:lambda:::function:${this._name}`,
+      invokedFunctionArn: `arn:aws:lambda:::function:${this.arnName}`,
 
       clientContext: {
         EnvironmentName: Runtime.ENVIRONMENT,

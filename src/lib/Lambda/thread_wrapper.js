@@ -53,6 +53,12 @@ runtime.name = rawRuntime._name;
 
   runtime.fail = (error) => {
     if (assureContextNotSent(error)) {
+      if (typeof error !== 'string') {
+        try {
+          error = JSON.parse(error);
+        } catch (e) {}
+      }
+
       process.send({
         state: 'fail',
         args: [error],

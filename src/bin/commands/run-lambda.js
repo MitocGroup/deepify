@@ -14,7 +14,6 @@ module.exports = function(lambdaPath) {
   var os = require('os');
   var Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
   var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
-  var NpmLink = require('../../lib.compiled/NodeJS/NpmLink').NpmLink;
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
 
   var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
@@ -26,7 +25,7 @@ module.exports = function(lambdaPath) {
     Autoload._skipBuild();
   }
 
-  if (lambdaPath.indexOf('/') !== 0) {
+  if (lambdaPath.indexOf(path.sep) !== 0) {
     lambdaPath = path.join(process.cwd(), lambdaPath);
   }
 
@@ -59,8 +58,6 @@ module.exports = function(lambdaPath) {
   } else {
     console.log('AWS configuration found in ' + awsConfigFile);
   }
-
-  var mainPath = path.dirname(lambdaPath);
 
   console.log('Linking aws-sdk library');
 

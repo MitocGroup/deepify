@@ -34,7 +34,7 @@ module.exports = function(mainPath) {
     }
   }
 
-  if (mainPath.indexOf('/') !== 0) {
+  if (mainPath.indexOf(path.sep) !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
@@ -68,6 +68,8 @@ module.exports = function(mainPath) {
       }
 
       if (backupConfig) {
+        console.log('Create configuration backup in ' + this.fileNameBck);
+
         matcher.bckConfigFile(function(error) {
           if (error) {
             console.error(error);

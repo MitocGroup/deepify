@@ -6,25 +6,32 @@
 'use strict';
 
 module.exports = function(dumpPath) {
-
-  // @todo: put it anywhere in a config
-  var helloWorldRepoUrl = 'https://github.com/MitocGroup/deep-microservices-helloworld.git';
-
+  var path = require('path');
+  var fse = require('fs-extra');
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+
+  if (dumpPath.indexOf(path.sep) !== 0) {
+    dumpPath = path.join(process.cwd(), dumpPath);
+  }
 
   var cmd = new Exec(
     Bin.node,
     this.scriptPath,
     'install',
-    helloWorldRepoUrl,
-    dumpPath
+    'github://MitocGroup/deep-microservices-helloworld',
+    '--init',
+    '--skip-github-deps'
   );
+
+  fse.ensureDirSync(dumpPath);
+
+  cmd.cwd = dumpPath;
 
   cmd.run(function(result) {
     if (result.failed) {
       console.error(result.error);
       this.exit(1);
     }
-  }, true);
+  }.bind(this), true);
 };

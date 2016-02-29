@@ -14,23 +14,26 @@ module.exports = function(mainPath) {
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
   var Property = require('deep-package-manager').Property_Instance;
+  var SharedAwsConfig = require('deep-package-manager').Helpers_SharedAwsConfig;
   var Config = require('deep-package-manager').Property_Config;
   var S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
   var ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
+  var DeployConfig = require('deep-package-manager').Property_DeployConfig;
 
+  var isProd = this.opts.locate('prod').exists;
   var installSdk = this.opts.locate('aws-sdk').exists;
   var localOnly = this.opts.locate('dry-run').exists;
   var fastDeploy = this.opts.locate('fast').exists;
   var dumpCodePath = this.opts.locate('dump-local').value;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
-  var hasToPullDeps = this.opts.locate('pull-deps').exists;
+  var appEnv = isProd ? 'prod' : this.opts.locate('env').value;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
-  if (mainPath.indexOf('/') !== 0) {
+  if (mainPath.indexOf(path.sep) !== 0) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
-  if (dumpCodePath && dumpCodePath.indexOf('/') !== 0) {
+  if (dumpCodePath && dumpCodePath.indexOf(path.sep) !== 0) {
     dumpCodePath = path.join(process.cwd(), dumpCodePath);
   }
 
@@ -38,12 +41,32 @@ module.exports = function(mainPath) {
   var configExists = fs.existsSync(configFile);
   var config = null;
 
+  appEnv = appEnv ? appEnv.toLowerCase() : null;
+
+  if (appEnv && DeployConfig.AVAILABLE_ENV.indexOf(appEnv) === -1) {
+    console.error(
+      'Invalid environment "' + appEnv + '". Available environments: ' +
+      DeployConfig.AVAILABLE_ENV.join(', ')
+    );
+    this.exit(1);
+  }
+
   if (!configExists) {
     config = Config.generate();
+
+    if (appEnv) {
+      config.env = appEnv;
+    }
 
     fse.outputJsonSync(configFile, config);
   } else {
     config = fse.readJsonSync(configFile);
+
+    if (appEnv) {
+      config.env = appEnv;
+
+      fse.outputJsonSync(configFile, config);
+    }
   }
 
   var propertyInstance;
@@ -108,111 +131,77 @@ module.exports = function(mainPath) {
       }.bind(this));
   }
 
-  function startDeploy() {
-    propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
-
-    propertyInstance.assureFrontendEngine(function(error) {
-      if (error) {
-        console.error('Error while assuring frontend engine: ' + error);
+  function ensureAWSProdKeys(cb) {
+    (new SharedAwsConfig()).refillPropertyConfigIfNeeded(config, function(refilled) {
+      if (refilled) {
+        fse.outputJsonSync(configFile, config);
       }
 
-      propertyInstance.runInitMsHooks(function() {
-        var deployCb = function() {
-          prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
-        };
+      cb();
+    });
+  }
 
-        hasToPullDeps ? pullDeps.bind(this)(deployCb) : deployCb.bind(this)();
+  function startDeploy() {
+    ensureAWSProdKeys(function() {
+      propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
+
+      propertyInstance.assureFrontendEngine(function(error) {
+        if (error) {
+          console.error('Error while assuring frontend engine: ' + error);
+        }
+
+        propertyInstance.runInitMsHooks(function() {
+          prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
+        }.bind(this));
       }.bind(this));
     }.bind(this));
   }
 
-  function getConfigFromS3(propertyInstance, cb) {
-    console.log('Trying to retrieve .cfg.deeploy.json from S3 ' + cfgBucket);
+  function dumpConfig(propertyInstance, cb) {
+    propertyInstance.configObj.completeDump(function() {
+      if (!fastDeploy) {
+        var configFile = propertyInstance.configObj.configFile;
 
-    var s3 = new propertyInstance.AWS.S3();
+        fse.copySync(configFile, path.join(mainPath, path.basename(configFile)));
+      }
 
-    var payload = {
-      Bucket: cfgBucket,
-      Key: '.cfg.deeploy.json',
-    };
-
-    s3.getObject(payload, function(error, data) {
-      cb.bind(this)(error, data);
+      cb.bind(this)();
     }.bind(this));
   }
 
-  function dumpConfigToS3(propertyInstance, cb) {
-    if (!propertyInstance.config || !propertyInstance.config.provisioning) {
-      cb && cb.bind(this)();
-      return;
-    }
+  function doCompileProd(propertyPath, cb) {
+    console.log('Start preparing for production');
 
-    var plainConfig = JSON.stringify(propertyInstance.config);
-    var s3 = new propertyInstance.AWS.S3();
+    var cmd = new Exec(
+      Bin.node,
+      this.scriptPath,
+      'compile-prod',
+      propertyPath
+    );
 
-    var payload = {
-      Bucket: propertyInstance.config.provisioning.s3.buckets[S3Service.SYSTEM_BUCKET].name,
-      Key: '.cfg.deeploy.json',
-      Body: plainConfig,
-    };
+    !fastDeploy && cmd.addArg('--remove-source');
+    microservicesToDeploy && cmd.addArg('--partial ' + microservicesToDeploy);
+    installSdk && cmd.addArg('--aws-sdk');
 
-    s3.putObject(payload, function(error, data) {
-      if (error) {
-        console.error('Error persisting config to S3', error);
+    cmd.run(function(result) {
+      if (result.failed) {
+        console.error('Backend production preparations failed: ' + result.error);
         this.exit(1);
       }
 
-      cb && cb.bind(this)();
-    }.bind(this));
-  }
-
-  function dumpConfig(propertyInstance, cb) {
-    if (!propertyInstance.config) {
-      cb && cb.bind(this)();
-      return;
-    }
-
-    var deepConfigFile = path.join(mainPath, '.cfg.deeploy.json');
-    var plainConfig = JSON.stringify(propertyInstance.config);
-
-    console.log('Dumping config into ' + deepConfigFile);
-
-    fs.writeFile(deepConfigFile, plainConfig, function(error) {
-      if (error) {
-        console.error('Error while dumping config into ' + deepConfigFile + ': ' + error);
-      }
-
-      dumpConfigToS3.bind(this)(propertyInstance, cb);
-    }.bind(this));
+      cb();
+    }.bind(this), true);
   }
 
   function prepareProduction(propertyPath, cb) {
-    if (!localOnly) {
+    if (isProd) {
+      doCompileProd.bind(this)(propertyPath, cb);
+    } else if (!localOnly) {
       var prompt = new Prompt('Prepare for production?');
 
       prompt.readConfirm(function(result) {
         if (result) {
-          console.log('Start preparing for production');
-
-          var cmd = new Exec(
-            Bin.node,
-            this.scriptPath,
-            'compile-prod',
-            propertyPath
-          );
-
-          !fastDeploy && cmd.addArg('--remove-source');
-          microservicesToDeploy && cmd.addArg('--partial ' + microservicesToDeploy);
-          installSdk && cmd.addArg('--aws-sdk');
-
-          cmd.run(function(result) {
-            if (result.failed) {
-              console.error('Backend production preparations failed: ' + result.error);
-              this.exit(1);
-            }
-
-            cb();
-          }.bind(this), true);
+          doCompileProd.bind(this)(propertyPath, cb);
 
           return;
         }
@@ -221,17 +210,13 @@ module.exports = function(mainPath) {
 
         cb();
       }.bind(this));
-
-      return;
+    } else {
+      cb();
     }
-
-    cb();
   }
 
   function doDeploy() {
     propertyInstance.localDeploy = localOnly;
-
-    var deepConfigFile = path.join(mainPath, '.cfg.deeploy.json');
 
     // @todo: improve it!
     // Gracefully teardown...
@@ -276,16 +261,18 @@ module.exports = function(mainPath) {
       }.bind(this));
     }.bind(this))();
 
-    var updateCfg = fs.existsSync(deepConfigFile) ? JSON.parse(fs.readFileSync(deepConfigFile)) : null;
+    propertyInstance.configObj.tryLoadConfig(function() {
+      if (propertyInstance.configObj.configExists) {
+        propertyInstance.update(function() {
+          console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
+          console.log('Website address: ' + getPublicWebsite(propertyInstance));
 
-    // @todo: rewrite this section!
-    if (!updateCfg) {
-      if (!cfgBucket) {
+          dumpConfig.bind(this)(propertyInstance, dumpCode);
+        }.bind(this), null, getMicroservicesToDeploy());
+      } else {
         if (microservicesToDeploy) {
           console.warn(' Partial deploy option is useless during first deploy...');
         }
-
-        console.log('Installing web app ' + config.appIdentifier);
 
         propertyInstance.install(function() {
           console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
@@ -293,47 +280,8 @@ module.exports = function(mainPath) {
 
           dumpConfig.bind(this)(propertyInstance, dumpCode);
         }.bind(this));
-      } else {
-        getConfigFromS3.bind(this)(propertyInstance, function(error, updateCfg) {
-          if (error) {
-            console.error('Error fetching config from AWS S3 bucket ' + cfgBucket, error);
-          }
-
-          if (!error) {
-            console.log('Updating web app ' + config.appIdentifier);
-
-            propertyInstance.update(JSON.parse(updateCfg.Body.toString()), function() {
-              console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-              console.log('Website address: ' + getPublicWebsite(propertyInstance));
-
-              dumpConfig.bind(this)(propertyInstance, dumpCode);
-            }.bind(this), getMicroservicesToDeploy());
-          } else {
-            if (microservicesToDeploy) {
-              console.warn(' Partial deploy option is useless during first deploy...');
-            }
-
-            console.log('Installing web app ' + config.appIdentifier);
-
-            propertyInstance.install(function() {
-              console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-              console.log('Website address: ' + getPublicWebsite(propertyInstance));
-
-              dumpConfig.bind(this)(propertyInstance, dumpCode);
-            }.bind(this));
-          }
-        }.bind(this));
       }
-    } else {
-      console.log('Updating web app ' + config.appIdentifier);
-
-      propertyInstance.update(updateCfg, function() {
-        console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-        console.log('Website address: ' + getPublicWebsite(propertyInstance));
-
-        dumpConfig.bind(this)(propertyInstance, dumpCode);
-      }.bind(this), getMicroservicesToDeploy());
-    }
+    }.bind(this), cfgBucket);
   }
 
   function arrayUnique(a) {
@@ -356,26 +304,6 @@ module.exports = function(mainPath) {
     }));
 
     return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
-  }
-
-  function pullDeps(cb) {
-    console.log('Resolving dependencies in ' + tmpPropertyPath);
-
-    new Exec(
-      Bin.node,
-      this.scriptPath,
-      'pull-deps',
-      tmpPropertyPath
-    )
-      .avoidBufferOverflow()
-      .run(function(result) {
-        if (result.failed) {
-          console.error('Error while pulling dependencies in ' + tmpPropertyPath + ': ' + result.error);
-          this.exit(1);
-        }
-
-        cb.bind(this)();
-      }.bind(this));
   }
 
   function dumpCode() {
@@ -516,7 +444,8 @@ module.exports = function(mainPath) {
   function getPublicWebsite(propertyInstance) {
     var config = propertyInstance.config;
     var bucketName = config.provisioning.s3.buckets[S3Service.PUBLIC_BUCKET].name;
+    var bucketRegion = propertyInstance.provisioning.s3.config.region;
 
-    return 'http://' + bucketName + '.s3-website-' + config.awsRegion + '.amazonaws.com';
+    return 'http://' + bucketName + '.s3-website-' + bucketRegion + '.amazonaws.com';
   }
 };

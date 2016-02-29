@@ -26,19 +26,35 @@ module.exports = {
         },
       },
     },
-    'install': {
-      example: 'deepify install https://github.com/MitocGroup/deep-microservices-todo-app.git path/to/web_app',
-      description: 'Install an microservice from remote git repository',
+    install: {
+      example: 'deepify install github://MitocGroup/deep-microservices-todo-app',
+      description: 'Install the web app or a single microservice from the registry or GitHub',
       opts: {
+        init: {
+          alias: 'i',
+          description: 'Initialize deep web app',
+          required: false,
+        },
+        registry: {
+          alias: 'r',
+          description: 'Custom registry url (ex. https://deep.mg)',
+          required: false,
+        },
+        'github-auth': {
+          alias: 'a',
+          description: 'GitHub credentials pair used for Basic authentication (ex. "user:token" or simply "token")',
+          required: false,
+        },
+        'skip-github-deps': {
+          alias: 's',
+          description: 'Skip fetching dependencies when working with a GitHub hosted microservice',
+          required: false,
+        },
       },
       args: {
-        repository: {
-          description: 'The remote microservice git repository',
-          required: true,
-        },
-        path: {
-          description: 'The path to dump microservice into',
-          required: true,
+        dependency: {
+          description: 'The dependency you want to fetch (ex. "deep.ng.todo@^0.0.x")',
+          required: false,
         },
       },
     },
@@ -93,6 +109,15 @@ module.exports = {
       example: 'deepify deploy path/to/web_app',
       description: 'Deploy an web app',
       opts: {
+        prod: {
+          description: 'Prepare web app for production and ensure prod env is used',
+          required: false,
+        },
+        env: {
+          alias: 'e',
+          description: 'Web app environment to be used (default fetched from deploy config)',
+          required: false,
+        },
         'cfg-bucket': {
           alias: 'b',
           description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',
@@ -106,11 +131,6 @@ module.exports = {
         'dump-local': {
           alias: 'l',
           description: 'Dump built web app locally into the specified directory',
-          required: false,
-        },
-        'pull-deps': {
-          alias: 'p',
-          description: 'Pull dependencies from the remote repository',
           required: false,
         },
         partial: {
@@ -155,6 +175,74 @@ module.exports = {
           description: 'Force cleaning up all resources if .cfg.deeploy.json file missing',
           required: false,
         },
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
+    publish: {
+      example: 'deepify publish ./sample-microservice',
+      description: 'Publish microservice (may require manual approval before getting public)',
+      opts: {
+        registry: {
+          alias: 'r',
+          description: 'Custom registry url (ex. https://deep.mg)',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the microservice you want to publish',
+          required: true,
+        },
+      },
+    },
+    'registry-cfg': {
+      example: 'deepify registry-cfg token --set "some_custom_auth_token"',
+      description: 'Read/Set the registry configuration value (read unless called with --set)',
+      opts: {
+        set: {
+          alias: 's',
+          description: 'Set the registry parameter to the value given',
+          required: false,
+        },
+        print: {
+          alias: 'p',
+          description: 'Print available registry parameters',
+          required: false,
+        },
+      },
+      args: {
+        parameter: {
+          description: 'Registry configuration parameter name',
+          required: false,
+        },
+      },
+    },
+    'enable-ssl': {
+      example: 'deepify enable-ssl path/to/web_app',
+      description: 'Enables SSL on a deployed web app',
+      opts: {
+        domain: {
+          alias: 'd',
+          description: 'The domain to create the certificate for (overrides the "deeploy.json" value)',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: true,
+        },
+      },
+    },
+    'disable-ssl': {
+      example: 'deepify disable-ssl path/to/web_app',
+      description: 'Disable activated SSL on a deployed web app',
+      opts: {
       },
       args: {
         path: {
@@ -219,6 +307,18 @@ module.exports = {
         },
       },
     },
+    'create-migration': {
+      example: 'deepify create-migration path/to/microservice',
+      description: 'Create empty migration for a certain microservice',
+      opts: {
+      },
+      args: {
+        path: {
+          description: 'The path to the microservice',
+          required: true,
+        },
+      },
+    },
     'init-backend': {
       example: 'deepify init-backend path/to/web_app',
       description: 'Initialize backend',
@@ -226,6 +326,11 @@ module.exports = {
         partial: {
           alias: 'm',
           description: 'Partial init (one or several comma separated microservices identifiers)',
+          required: false,
+        },
+        prod: {
+          alias: 'p',
+          description: 'Run npm install with --prod flag',
           required: false,
         },
       },
@@ -262,40 +367,6 @@ module.exports = {
           required: true,
         },
       },
-    },
-    'pull-deps': {
-      example: 'deepify pull-deps path/to/web_app',
-      description: 'Pull web app microservices\' dependencies',
-      opts: {
-        'dry-run': {
-          alias: 'd',
-          description: 'Work locally, without pulling dependencies from the remote repository',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: true,
-        },
-      },
-    },
-    'push-deps': {
-      example: 'deepify push-deps path/to/web_app',
-      description: 'Publish microservices from within the given web app',
-      opts: {
-        'dry-run': {
-          alias: 'd',
-          description: 'Work locally, without pushing microservices to the remote repository',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: true,
-        },
-      },
-    },
+    }
   },
 };

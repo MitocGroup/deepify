@@ -53,31 +53,39 @@ export class NpmInstall {
    * @returns {NpmInstall}
    */
   runChunk(cb, chunkSize = NpmInstall.DEFAULT_CHUNK_SIZE, silent = NpmInstall.DEFAULT_SILENT_STATE) {
-    let wait = new WaitFor();
-    let chunks = NpmInstall._chunkArray(this._dirs, chunkSize);
-    let remaining = chunks.length;
-
-    wait.push(() => {
-      return remaining <= 0;
-    });
-
-    for (let i in chunks) {
-      if (!chunks.hasOwnProperty(i)) {
-        continue;
-      }
-
-      let chunk = chunks[i];
-
-      let instance = this._newInstance(...chunk);
-
-      instance.run(() => {
-        remaining--;
-      }, silent);
+    if (this._dirs.length <= 0) {
+      cb();
+      return this;
     }
 
-    wait.ready(cb);
+    this._runChunkItem(
+      NpmInstall._chunkArray(this._dirs, chunkSize),
+      silent,
+      cb
+    );
 
     return this;
+  }
+
+  /**
+   * @param {Array} chunks
+   * @param {Boolean} silent
+   * @param {Function} cb
+   * @private
+   */
+  _runChunkItem(chunks, silent, cb) {
+    let chunk = chunks.shift();
+
+    let instance = this._newInstance(...chunk);
+
+    instance.run(() => {
+      if (chunks.length <= 0) {
+        cb();
+        return;
+      }
+
+      this._runChunkItem(chunks, silent, cb);
+    }, silent);
   }
 
   /**
@@ -184,6 +192,6 @@ export class NpmInstall {
    * @returns {Number}
    */
   static get DEFAULT_CHUNK_SIZE() {
-    return 4;
+    return 3;
   }
 }

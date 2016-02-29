@@ -142,7 +142,7 @@ export class NpmDependency {
   /**
    * @param {String} dependencyName
    * @param {String|RegExp|null} version
-   * @returns {NpmDependency|null}
+   * @returns {NpmDependency|null|*}
    */
   find(dependencyName, version = null) {
     let depObj = NpmDependency._resolveFullDepName(dependencyName);
@@ -216,6 +216,8 @@ export class NpmDependency {
    * @returns {NpmDependency}
    */
   removeUndefined() {
+    let childrenCopy = [];
+
     for (let i in this._children) {
       if (!this._children.hasOwnProperty(i)) {
         continue;
@@ -224,12 +226,14 @@ export class NpmDependency {
       let childDep = this._children[i];
 
       if (!childDep.version || childDep.version === 'undefined') {
-        delete this._children[i];
         continue;
       }
 
+      childrenCopy.push(childDep);
       childDep.removeUndefined();
     }
+
+    this._children = childrenCopy;
 
     return this;
   }
@@ -287,6 +291,10 @@ export class NpmDependency {
   addChild(child) {
     this._children.push(child);
 
+    if (child.parent !== this) {
+      child.parent = this;
+    }
+
     return this;
   }
 
@@ -309,6 +317,10 @@ export class NpmDependency {
    */
   set parent(parent) {
     this._parent = parent;
+
+    if (this._parent.children.indexOf(this) === -1) {
+      this._parent.addChild(this);
+    }
   }
 
   /**
@@ -348,7 +360,6 @@ export class NpmDependency {
         depData.name = depName;
 
         let dep = NpmDependency.createFromRawObject(depData, isMain);
-        dep.parent = mainDep;
 
         mainDep.addChild(dep);
       }
@@ -370,7 +381,7 @@ export class NpmDependency {
    */
   toString(noHeader = false) {
     let str = '';
-    let pad = '    '.repeat(this._getParentsDepth());
+    let pad = new Array(this._getParentsDepth()).join('    ');
 
     if (!noHeader) {
       str += `- ${pad}${this.fullName}${os.EOL}`;
