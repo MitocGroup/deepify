@@ -5,7 +5,7 @@
 
 'use strict';
 
-module.exports = function(dependency) {
+module.exports = function(dependency, dumpPath) {
 
   // @todo: move it in some json config?
   var DEFAULT_REGISTRY_BASE_HOST = 'https://deep.mg';
@@ -34,7 +34,18 @@ module.exports = function(dependency) {
   var depName = depParts[0];
   var depVersion = depParts[1];
 
+  if (dumpPath && dumpPath.indexOf(path.sep) !== 0) {
+    dumpPath = path.join(process.cwd(), dumpPath);
+  }
+
   if (depName) {
+
+    // @todo: remove on the next major release
+    // the following code is here for back compatibility
+    var originalDepName = depName;
+    depName = depName.replace(/^(?:https?:\/\/)github\.com\/([^\/]+\/[^\/]+)(?:\.git)$/i, 'github://$1');
+    skipGitHubDeps = skipGitHubDeps || originalDepName !== depName;
+
     var fetcher = GitHubDependency.isGitHubDependency(depName) ? fetchGitHub : fetchRepository;
 
     fetcher.bind(this)(function(error) {
@@ -154,10 +165,10 @@ module.exports = function(dependency) {
       depObj.auth(gitHubCred[0], gitHubCred[1]);
     }
 
-    var dumpPath = path.join(workingDirectory, depObj.shortDependencyName);
+    var localDumpPath = path.join(dumpPath || workingDirectory, depObj.shortDependencyName);
 
     depObj.extract(
-      dumpPath,
+      localDumpPath,
       function(error) {
         if (error) {
           console.error(error);
@@ -169,7 +180,7 @@ module.exports = function(dependency) {
           return;
         }
 
-        var microservice = Microservice.create(dumpPath);
+        var microservice = Microservice.create(localDumpPath);
 
         createRegistry.bind(this)(function(registry) {
           console.log('Installing \'' + depObj.shortDependencyName + '\' dependencies');

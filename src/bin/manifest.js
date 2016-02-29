@@ -56,6 +56,10 @@ module.exports = {
           description: 'The dependency you want to fetch (ex. "deep.ng.todo@^0.0.x")',
           required: false,
         },
+        dumpPath: {
+          description: '[DEPRECATED] The path to dump dependency into (works with GitHub only!)',
+          required: false,
+        },
       },
     },
     server: {
