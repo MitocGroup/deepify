@@ -14,6 +14,7 @@ module.exports = function(mainPath) {
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
   var Property = require('deep-package-manager').Property_Instance;
+  var SharedAwsConfig = require('deep-package-manager').Helpers_SharedAwsConfig;
   var Config = require('deep-package-manager').Property_Config;
   var S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
   var ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
@@ -130,16 +131,28 @@ module.exports = function(mainPath) {
       }.bind(this));
   }
 
-  function startDeploy() {
-    propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
-
-    propertyInstance.assureFrontendEngine(function(error) {
-      if (error) {
-        console.error('Error while assuring frontend engine: ' + error);
+  function ensureAWSProdKeys(cb) {
+    (new SharedAwsConfig()).refillPropertyConfigIfNeeded(config, function(refilled) {
+      if (refilled) {
+        fse.outputJsonSync(configFile, config);
       }
 
-      propertyInstance.runInitMsHooks(function() {
-        prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
+      cb();
+    });
+  }
+
+  function startDeploy() {
+    ensureAWSProdKeys(function() {
+      propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
+
+      propertyInstance.assureFrontendEngine(function(error) {
+        if (error) {
+          console.error('Error while assuring frontend engine: ' + error);
+        }
+
+        propertyInstance.runInitMsHooks(function() {
+          prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
+        }.bind(this));
       }.bind(this));
     }.bind(this));
   }
