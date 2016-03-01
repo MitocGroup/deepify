@@ -35,7 +35,8 @@ module.exports = function(mainPath) {
     Autoload._skipBuild();
   }
 
-  if (mainPath.indexOf(path.sep) !== 0) {
+  if ((!/^win/.test(process.platform) && mainPath.indexOf(path.sep) !== 0 ) ||
+    (/^win/.test(process.platform) && !(/^[a-z]{1}:/i.test(mainPath)))) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 

@@ -21,7 +21,8 @@ module.exports = function(mainPath) {
   var microservicesToInit = this.opts.locate('partial').value;
   var useProd = this.opts.locate('prod').exists;
 
-  if (mainPath.indexOf(path.sep) !== 0) {
+  if ((!/^win/.test(process.platform) && mainPath.indexOf(path.sep) !== 0 ) ||
+    (/^win/.test(process.platform) && !(/^[a-z]{1}:/i.test(mainPath)))) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
