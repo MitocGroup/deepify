@@ -42,9 +42,7 @@ module.exports = function(dependency, dumpPath) {
 
     // @todo: remove on the next major release
     // the following code is here for back compatibility
-    var originalDepName = depName;
     depName = depName.replace(/^(?:https?:\/\/)github\.com\/([^\/]+\/[^\/]+)(?:\.git)$/i, 'github://$1');
-    skipGitHubDeps = skipGitHubDeps || originalDepName !== depName;
 
     var fetcher = GitHubDependency.isGitHubDependency(depName) ? fetchGitHub : fetchRepository;
 
@@ -181,19 +179,22 @@ module.exports = function(dependency, dumpPath) {
         }
 
         var microservice = Microservice.create(localDumpPath);
+        var deps = microservice.config.dependencies;
 
-        createRegistry.bind(this)(function(registry) {
-          console.log('Installing \'' + depObj.shortDependencyName + '\' dependencies');
+        if (deps && Object.keys(deps).length > 0) {
+          createRegistry.bind(this)(function(registry) {
+            console.log('Installing \'' + depObj.shortDependencyName + '\' dependencies');
 
-          registry.install(createProperty(), function(error) {
-            if (error) {
-              console.error(error);
-              this.exit(1);
-            }
+            registry.install(createProperty(), function(error) {
+              if (error) {
+                console.error(error);
+                this.exit(1);
+              }
 
-            cb.bind(this)();
-          }.bind(this), [microservice.identifier]);
-        }.bind(this));
+              cb.bind(this)();
+            }.bind(this), [microservice.identifier]);
+          }.bind(this));
+        }
       }.bind(this)
     );
   }
