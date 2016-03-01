@@ -20,8 +20,7 @@ module.exports = function(dumpPath) {
     this.scriptPath,
     'install',
     'github://MitocGroup/deep-microservices-helloworld',
-    '--init',
-    '--skip-github-deps'
+    '--init'
   );
 
   fse.ensureDirSync(dumpPath);
