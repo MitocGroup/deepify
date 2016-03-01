@@ -80,7 +80,7 @@ module.exports = function (mainPath) {
   if (fastDeploy) {
 
     if (/^win/.test(process.platform)) {
-      console.warn('Fast deploy is enabled by default in Windows OS and recommended to be used');
+      console.warn('Fast deploy is enabled by default in Windows OS and recommended to be used, please accept it.');
     }
 
     var prompt = new Prompt('Fast deploy may alter the web app state! Start anyway?');
