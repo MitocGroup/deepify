@@ -44,12 +44,7 @@ module.exports = {
           alias: 'a',
           description: 'GitHub credentials pair used for Basic authentication (ex. "user:token" or simply "token")',
           required: false,
-        },
-        'skip-github-deps': {
-          alias: 's',
-          description: 'Skip fetching dependencies when working with a GitHub hosted microservice',
-          required: false,
-        },
+        }
       },
       args: {
         dependency: {

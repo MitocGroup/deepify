@@ -27,7 +27,6 @@ module.exports = function(dependency, dumpPath) {
     DEFAULT_REGISTRY_BASE_HOST;
 
   var workingDirectory = process.cwd();
-  var skipGitHubDeps = this.opts.locate('skip-github-deps').exists;
   var gitHubAuthPair = this.opts.locate('github-auth').value;
   var initApp = this.opts.locate('init').exists;
   var depParts = parseDep();
@@ -173,11 +172,6 @@ module.exports = function(dependency, dumpPath) {
           this.exit(1);
         }
 
-        if (skipGitHubDeps) {
-          cb.bind(this)();
-          return;
-        }
-
         var microservice = Microservice.create(localDumpPath);
         var deps = microservice.config.dependencies;
 
@@ -194,6 +188,8 @@ module.exports = function(dependency, dumpPath) {
               cb.bind(this)();
             }.bind(this), [microservice.identifier]);
           }.bind(this));
+        } else {
+          cb.bind(this)();
         }
       }.bind(this)
     );
