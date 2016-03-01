@@ -44,7 +44,6 @@ export class Arguments {
     }
 
     this._vector = this._vector.concat(sibling.list());
-    this._unmanagedVector = this._unmanagedVector.concat(sibling.listUnmanaged());
 
     return this;
   }
