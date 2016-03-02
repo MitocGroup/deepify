@@ -5,7 +5,7 @@
 
 'use strict';
 
-module.exports = function(mainPath) {
+module.exports = function (mainPath) {
   var path = require('path');
   var fse = require('fs-extra');
   var fs = require('fs');
@@ -29,8 +29,7 @@ module.exports = function(mainPath) {
   var installSdk = this.opts.locate('aws-sdk').exists;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
-  if ((!/^win/.test(process.platform) && mainPath.indexOf(path.sep) !== 0 ) ||
-    (/^win/.test(process.platform) && !(/^[a-z]{1}:/i.test(mainPath)))) {
+  if ((!isWindows() && mainPath.indexOf(path.sep) !== 0 ) || (isWindows() && !(/^[a-z]{1}:/i.test(mainPath)))) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 
@@ -59,18 +58,18 @@ module.exports = function(mainPath) {
     lambdas.tmpPath.push(lambdaTmpPath);
   }
 
-  prepareSources.bind(this)(function() {
+  prepareSources.bind(this)(function () {
     var chain = new NpmChain();
 
     chain.add(
       new NpmInstall(lambdas.tmpPath)
         .addExtraArg(
-          '--no-bin-links',
-          '--no-optional',
-          '--loglevel silent',
-          '--production',
-          '--save'
-        )
+        '--no-bin-links',
+        '--no-optional',
+        '--loglevel silent',
+        '--production',
+        '--save'
+      )
     );
 
     chain.add(
@@ -78,17 +77,17 @@ module.exports = function(mainPath) {
         .addExtraArg('--production')
     );
 
-    chain.runChunk(function() {
-      optimize.bind(this)(function() {
-        optimizeDeps.bind(this)(function() {
-          pack.bind(this)(function() {
-            lambdas.tmpPath.forEach(function(lambdaTmpPath) {
-              fse.removeSync(lambdaTmpPath);
+    chain.runChunk(function () {
+      optimize.bind(this)(function () {
+        optimizeDeps.bind(this)(function () {
+          pack.bind(this)(function () {
+            lambdas.tmpPath.forEach(function (lambdaTmpPath) {
+              removeSync(lambdaTmpPath);
             });
 
             if (removeSource) {
-              lambdas.path.forEach(function(lambdaPath) {
-                fse.removeSync(lambdaPath);
+              lambdas.path.forEach(function (lambdaPath) {
+                removeSync(lambdaPath);
               });
             }
 
@@ -113,17 +112,19 @@ module.exports = function(mainPath) {
       console.log('Copying Lambda sources from ' + lambdaPath + ' into ' + lambdaTmpPath);
 
       if (fs.existsSync(lambdaTmpPath)) {
-        fse.removeSync(lambdaTmpPath);
+        removeSync(lambdaTmpPath);
       }
 
       try {
+
         fse.copySync(lambdaPath, lambdaTmpPath);
 
         var nodeModules = path.join(lambdaTmpPath, 'node_modules');
 
         if (fs.existsSync(nodeModules)) {
-          fse.removeSync(nodeModules);
+          removeSync(nodeModules);
         }
+
       } catch (error) {
         console.error(error);
 
@@ -132,6 +133,22 @@ module.exports = function(mainPath) {
     }
 
     cb();
+  }
+
+  function isWindows() {
+    return /^win/.test(process.platform);
+  }
+
+  function removeSync(pathToRemove) {
+
+    if (isWindows()) {
+      var remover = new Exec('rm -r -f ' + pathToRemove);
+
+      remover.avoidBufferOverflow().runSync();
+    } else {
+      fse.removeSync(pathToRemove);
+    }
+
   }
 
   function optimize(cb, lambdas, final) {
@@ -195,7 +212,7 @@ module.exports = function(mainPath) {
     var wait = new WaitFor();
     var remaining = chunk.length;
 
-    wait.push(function() {
+    wait.push(function () {
       return remaining <= 0;
     }.bind(this));
 
@@ -211,7 +228,7 @@ module.exports = function(mainPath) {
       var depsOptimizer = new DepsTreeOptimizer(lambdaTmpPath);
 
       depsOptimizer.optimize(
-        function(lambdaTmpPath, depsFullNames) {
+        function (lambdaTmpPath, depsFullNames) {
           console.log('Flatten dependencies in ' + lambdaTmpPath + ': ' + depsFullNames.join(', '));
 
           remaining--;
@@ -219,7 +236,7 @@ module.exports = function(mainPath) {
       );
     }
 
-    wait.ready(function() {
+    wait.ready(function () {
       if (chunks.length <= 0) {
         optimize.bind(this)(cb, lambdas, true);
       } else {
@@ -234,7 +251,7 @@ module.exports = function(mainPath) {
 
     console.log(lambdas.path.length + ' Lambdas are going to be packed...');
 
-    wait.push(function() {
+    wait.push(function () {
       return remaining <= 0;
     }.bind(this));
 
@@ -258,7 +275,7 @@ module.exports = function(mainPath) {
 
       cleanupCmd
         .avoidBufferOverflow()
-        .run(function(lambdaPath, lambdaTmpPath, result) {
+        .run(function (lambdaPath, lambdaTmpPath, result) {
           if (result.failed) {
             console.error(result.error);
           } else {
@@ -271,13 +288,13 @@ module.exports = function(mainPath) {
             var npmLink = new NpmInstallLibs(lambdaTmpPath);
             npmLink.libs = 'aws-sdk';
 
-            npmLink.run(function() {
-              packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
+            npmLink.run(function () {
+              packSingle.bind(this)(lambdaPath, lambdaTmpPath, function () {
                 remaining--;
               }.bind(this));
             }.bind(this));
           } else {
-            packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
+            packSingle.bind(this)(lambdaPath, lambdaTmpPath, function () {
               remaining--;
             }.bind(this));
           }
@@ -294,7 +311,8 @@ module.exports = function(mainPath) {
 
     if (fs.existsSync(outputFile)) {
       console.log('Removing old Lambda build ' + outputFile);
-      fse.removeSync(outputFile);
+
+      removeSync(outputFile);
     }
 
     console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
@@ -311,7 +329,7 @@ module.exports = function(mainPath) {
     zip.cwd = lambdaTmpPath;
     zip.avoidBufferOverflow();
 
-    zip.run(function(result) {
+    zip.run(function (result) {
       if (result.failed) {
         console.error(result.error);
         this.exit(1);
@@ -326,7 +344,7 @@ module.exports = function(mainPath) {
       return [];
     }
 
-    var msIdentifiers = arrayUnique(microservicesToDeploy.split(',').map(function(id) {
+    var msIdentifiers = arrayUnique(microservicesToDeploy.split(',').map(function (id) {
       return id.trim();
     }));
 
@@ -334,7 +352,7 @@ module.exports = function(mainPath) {
   }
 
   function arrayUnique(a) {
-    return a.reduce(function(p, c) {
+    return a.reduce(function (p, c) {
       if (p.indexOf(c) < 0) {
         p.push(c);
       }
