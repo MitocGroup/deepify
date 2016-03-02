@@ -5,7 +5,7 @@
 
 'use strict';
 
-module.exports = function (mainPath) {
+module.exports = function(mainPath) {
   var path = require('path');
   var fs = require('fs');
   var fse = require('fs-extra');
@@ -48,7 +48,7 @@ module.exports = function (mainPath) {
 
   new Exec('cp -R', path.join(mainPath, '*'), tmpPropertyPath + '/')
     .avoidBufferOverflow()
-    .run(function (result) {
+    .run(function(result) {
       if (result.failed) {
         console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + result.error);
         this.exit(1);
@@ -56,16 +56,16 @@ module.exports = function (mainPath) {
 
       propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
 
-      propertyInstance.assureFrontendEngine(function (error) {
+      propertyInstance.assureFrontendEngine(function(error) {
         if (error) {
           console.error('Error while assuring frontend engine: ' + error);
         }
 
         // @todo: move this anywhere
-        process.on('exit', function () {
+        process.on('exit', function() {
           new Exec('rm -rf', tmpPropertyPath)
             .avoidBufferOverflow()
-            .run(function (result) {
+            .run(function(result) {
               if (result.failed) {
                 console.error(result.error);
               }
@@ -83,7 +83,7 @@ module.exports = function (mainPath) {
 
         new Exec('cp -R', path.join(frontendDumpPath, '*'), dumpPath + '/')
           .avoidBufferOverflow()
-          .run(function (result) {
+          .run(function(result) {
             if (result.failed) {
               console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + result.error);
               this.exit(1);

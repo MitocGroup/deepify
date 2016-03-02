@@ -114,6 +114,7 @@ export class DepsTreeOptimizer {
           let depLocalPath = packageObj.dependencies[depName];
 
           console.log('LINK to: ', depName);
+          console.log('resolved: ', path.resolve('..', depLocalPath));
 
           let linkCmd = new Exec('ln -s', path.resolve('..', depLocalPath), depName);
           linkCmd.cwd = nodeModulesPath;

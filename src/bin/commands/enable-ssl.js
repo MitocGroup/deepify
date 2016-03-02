@@ -59,7 +59,7 @@ module.exports = function(mainPath) {
 
     console.log('Ensure ACM certificate available for domain \'' + domain + '\'');
 
-    acmService.ensureCertificate(domain, function (error, certArn) {
+    acmService.ensureCertificate(domain, function(error, certArn) {
       if (error) {
         console.error(error);
         this.exit(1);

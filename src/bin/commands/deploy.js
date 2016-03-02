@@ -5,7 +5,7 @@
 
 'use strict';
 
-module.exports = function (mainPath) {
+module.exports = function(mainPath) {
   var path = require('path');
   var fs = require('fs');
   var fse = require('fs-extra');
@@ -85,9 +85,9 @@ module.exports = function (mainPath) {
 
     var prompt = new Prompt('Fast deploy may alter the web app state! Start anyway?');
 
-    prompt.readConfirm(function (result) {
+    prompt.readConfirm(function(result) {
       if (result) {
-        process.on('exit', function () {
+        process.on('exit', function() {
           new Exec('rm', '-rf', path.join(tmpPropertyPath, '_public'))
             .avoidBufferOverflow()
             .runSync();
@@ -117,13 +117,13 @@ module.exports = function (mainPath) {
       tmpPropertyPath + '/'
     )
       .avoidBufferOverflow()
-      .run(function (result) {
+      .run(function(result) {
         if (result.failed) {
           console.error('Error copying sources into ' + tmpPropertyPath + ': ' + result.error);
           this.exit(1);
         }
 
-        process.on('exit', function () {
+        process.on('exit', function() {
           var result = new Exec('rm', '-rf', tmpPropertyPath)
             .avoidBufferOverflow()
             .runSync();
@@ -138,7 +138,7 @@ module.exports = function (mainPath) {
   }
 
   function ensureAWSProdKeys(cb) {
-    (new SharedAwsConfig()).refillPropertyConfigIfNeeded(config, function (refilled) {
+    (new SharedAwsConfig()).refillPropertyConfigIfNeeded(config, function(refilled) {
       if (refilled) {
         fse.outputJsonSync(configFile, config);
       }
@@ -148,15 +148,15 @@ module.exports = function (mainPath) {
   }
 
   function startDeploy() {
-    ensureAWSProdKeys(function () {
+    ensureAWSProdKeys(function() {
       propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
 
-      propertyInstance.assureFrontendEngine(function (error) {
+      propertyInstance.assureFrontendEngine(function(error) {
         if (error) {
           console.error('Error while assuring frontend engine: ' + error);
         }
 
-        propertyInstance.runInitMsHooks(function () {
+        propertyInstance.runInitMsHooks(function() {
           prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
 
         }.bind(this));
@@ -165,7 +165,7 @@ module.exports = function (mainPath) {
   }
 
   function dumpConfig(propertyInstance, cb) {
-    propertyInstance.configObj.completeDump(function () {
+    propertyInstance.configObj.completeDump(function() {
       if (!fastDeploy) {
         var configFile = propertyInstance.configObj.configFile;
 
@@ -190,7 +190,7 @@ module.exports = function (mainPath) {
     microservicesToDeploy && cmd.addArg('--partial ' + microservicesToDeploy);
     installSdk && cmd.addArg('--aws-sdk');
 
-    cmd.run(function (result) {
+    cmd.run(function(result) {
       if (result.failed) {
         console.error('Backend production preparations failed: ' + result.error);
         this.exit(1);
@@ -206,7 +206,7 @@ module.exports = function (mainPath) {
     } else if (!localOnly) {
       var prompt = new Prompt('Prepare for production?');
 
-      prompt.readConfirm(function (result) {
+      prompt.readConfirm(function(result) {
         if (result) {
           doCompileProd.bind(this)(propertyPath, cb);
 
@@ -227,8 +227,8 @@ module.exports = function (mainPath) {
 
     // @todo: improve it!
     // Gracefully teardown...
-    (function () {
-      process.on('uncaughtException', function (error) {
+    (function() {
+      process.on('uncaughtException', function(error) {
         if (error instanceof ProvisioningCollisionsDetectedException) {
           console.error(
             os.EOL,
@@ -247,7 +247,7 @@ module.exports = function (mainPath) {
         }
 
         if (propertyInstance.config.provisioning) {
-          dumpConfig.bind(this)(propertyInstance, function () {
+          dumpConfig.bind(this)(propertyInstance, function() {
             this.exit(1);
           }.bind(this));
         } else {
@@ -255,11 +255,11 @@ module.exports = function (mainPath) {
         }
       }.bind(this));
 
-      process.on('SIGINT', function () {
+      process.on('SIGINT', function() {
         console.log('Gracefully shutting down from SIGINT (Ctrl-C)...');
 
         if (propertyInstance.config.provisioning) {
-          dumpConfig.bind(this)(propertyInstance, function () {
+          dumpConfig.bind(this)(propertyInstance, function() {
             this.exit(0);
           }.bind(this));
         } else {
@@ -268,9 +268,9 @@ module.exports = function (mainPath) {
       }.bind(this));
     }.bind(this))();
 
-    propertyInstance.configObj.tryLoadConfig(function () {
+    propertyInstance.configObj.tryLoadConfig(function() {
       if (propertyInstance.configObj.configExists) {
-        propertyInstance.update(function () {
+        propertyInstance.update(function() {
           console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
           console.log('Website address: ' + getPublicWebsite(propertyInstance));
 
@@ -281,7 +281,7 @@ module.exports = function (mainPath) {
           console.warn(' Partial deploy option is useless during first deploy...');
         }
 
-        propertyInstance.install(function () {
+        propertyInstance.install(function() {
           console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
           console.log('Website address: ' + getPublicWebsite(propertyInstance));
 
@@ -292,7 +292,7 @@ module.exports = function (mainPath) {
   }
 
   function arrayUnique(a) {
-    return a.reduce(function (p, c) {
+    return a.reduce(function(p, c) {
       if (p.indexOf(c) < 0) {
         p.push(c);
       }
@@ -306,7 +306,7 @@ module.exports = function (mainPath) {
       return [];
     }
 
-    var msIdentifiers = arrayUnique(microservicesToDeploy.split(',').map(function (id) {
+    var msIdentifiers = arrayUnique(microservicesToDeploy.split(',').map(function(id) {
       return id.trim();
     }));
 
@@ -330,7 +330,7 @@ module.exports = function (mainPath) {
       frontendDumpPath + '/'
     )
       .avoidBufferOverflow()
-      .run(function (result) {
+      .run(function(result) {
         if (result.failed) {
           console.error('Unable to dump _frontend code into _www: ' + result.error);
         }
@@ -401,7 +401,7 @@ module.exports = function (mainPath) {
         newLambdaPath
       )
         .avoidBufferOverflow()
-        .run(function (awsConfigFile, result) {
+        .run(function(awsConfigFile, result) {
           if (result.failed) {
             console.error(result.error);
           }
