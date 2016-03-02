@@ -29,8 +29,8 @@ module.exports = function(mainPath) {
   var appEnv = isProd ? 'prod' : this.opts.locate('env').value;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
-  if ((!/^win/.test(process.platform) && mainPath.indexOf(path.sep) !== 0 ) ||
-    (/^win/.test(process.platform) && !(/^[a-z]{1}:/i.test(mainPath)))) {
+  if ((!/^win/.test(process.platform) && mainPath.indexOf(path.sep) !== 0) ||
+      (/^win/.test(process.platform) && !(/^[a-z]{1}:/i.test(mainPath)))) {
     mainPath = path.join(process.cwd(), mainPath);
   }
 

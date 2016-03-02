@@ -11,7 +11,8 @@ module.exports = function(microservicePath) {
   var fse = require('fs-extra');
   var Microservice = require('deep-package-manager').Microservice_Instance;
 
-  if (microservicePath.indexOf(path.sep) !== 0) {
+  if ((!/^win/.test(process.platform) && microservicePath.indexOf(path.sep) !== 0) ||
+      (/^win/.test(process.platform) && !(/^[a-z]{1}:/i.test(microservicePath)))) {
     microservicePath = path.join(process.cwd(), microservicePath);
   }
 
