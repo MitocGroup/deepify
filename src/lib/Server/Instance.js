@@ -20,6 +20,7 @@ import {Property_Instance as Property} from 'deep-package-manager';
 import {Property_Frontend as Frontend} from 'deep-package-manager';
 import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
 import {Property_Config as Config} from 'deep-package-manager';
+import {Tags_Driver_RootAssetsDriver as RootAssetsDriver} from 'deep-package-manager';
 import DeepDB from 'deep-db';
 import DeepFS from 'deep-fs';
 import {Hook} from './Hook';
@@ -558,11 +559,23 @@ export class Instance {
 
           let mimeType = Mime.lookup(filename);
 
+          file = this._fileInject(filename, file);
           this._log(`Serving file ${filename} of type ${mimeType}`);
           this._send(response, file, 200, mimeType, true);
         });
       });
     });
+  }
+
+  _fileInject(filePath, content) {
+    var array = filePath.split('/');
+    var fileName = array[array.length - 1];
+    if (fileName == 'index.html') {
+      var rootAssets = new RootAssetsDriver(this.property.config.microservices);
+      content = rootAssets.inject(content);
+    }
+
+    return content;
   }
 
   /**
