@@ -594,6 +594,10 @@ export class Instance {
   dispatchEvent(eventName, event) {
     let events = this._events[eventName];
 
+    if (!events) {
+      return
+    }
+
     for (let index in events) {
       if (!events.hasOwnProperty(index)) {
         continue;
