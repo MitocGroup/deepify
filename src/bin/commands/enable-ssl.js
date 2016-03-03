@@ -16,9 +16,7 @@ module.exports = function(mainPath) {
 
   var domain = this.opts.locate('domain').value || null;
 
-  if (mainPath.indexOf(path.sep) !== 0) {
-    mainPath = path.join(process.cwd(), mainPath);
-  }
+  mainPath = this.normalizeInputPath(mainPath);
 
   var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
 

@@ -25,9 +25,7 @@ module.exports = function(lambdaPath) {
     Autoload._skipBuild();
   }
 
-  if (lambdaPath.indexOf(path.sep) !== 0) {
-    lambdaPath = path.join(process.cwd(), lambdaPath);
-  }
+  lambdaPath = this.normalizeInputPath(lambdaPath);
 
   try {
     if (fs.statSync(lambdaPath).isDirectory()) {

@@ -21,9 +21,7 @@ module.exports = function(mainPath) {
   var microservicesToInit = this.opts.locate('partial').value;
   var useProd = this.opts.locate('prod').exists;
 
-  if (mainPath.indexOf(path.sep) !== 0) {
-    mainPath = path.join(process.cwd(), mainPath);
-  }
+  mainPath = this.normalizeInputPath(mainPath);
 
   var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
 
