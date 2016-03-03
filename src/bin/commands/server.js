@@ -121,8 +121,8 @@ module.exports = function(mainPath) {
   function registerResponseEventListener() {
     server.registerResponseEventListener(function (event) {
       if (event.request.url == '/index.html' || event.request.url == '/') {
-        var rootDriver = new RootAssetsDriver(property.config.microservices);
-        event.responseContent = rootDriver.inject(event.responseContent);
+        var rootAssetsDriver = new RootAssetsDriver(property.config.microservices);
+        event.responseContent = rootAssetsDriver.inject(event.responseContent);
         event.stopPropagation();
       }
     });
