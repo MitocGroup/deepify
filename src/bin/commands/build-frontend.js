@@ -14,12 +14,10 @@ module.exports = function(mainPath) {
   var Config = require('deep-package-manager').Property_Config;
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
 
-  if (mainPath.indexOf(path.sep) !== 0) {
-    mainPath = path.join(process.cwd(), mainPath);
-  }
+  mainPath = this.normalizeInputPath(mainPath);
 
   var dumpPath = path.join(
-    this.opts.locate('output-path').value || path.join(mainPath, '_www'),
+    this.normalizeInputPath(this.opts.locate('output-path').value) || path.join(mainPath, '_www'),
     ''
   );
 

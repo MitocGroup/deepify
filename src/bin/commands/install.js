@@ -33,8 +33,8 @@ module.exports = function(dependency, dumpPath) {
   var depName = depParts[0];
   var depVersion = depParts[1];
 
-  if (dumpPath && dumpPath.indexOf(path.sep) !== 0) {
-    dumpPath = path.join(process.cwd(), dumpPath);
+  if (dumpPath) {
+    dumpPath = this.normalizeInputPath(dumpPath);
   }
 
   if (depName) {

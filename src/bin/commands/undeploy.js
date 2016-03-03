@@ -34,9 +34,7 @@ module.exports = function(mainPath) {
     }
   }
 
-  if (mainPath.indexOf(path.sep) !== 0) {
-    mainPath = path.join(process.cwd(), mainPath);
-  }
+  mainPath = this.normalizeInputPath(mainPath);
 
   var property = new Property(mainPath, Config.DEFAULT_FILENAME);
   var matcher = new ProvisioningDumpFileMatcher(property);

@@ -29,12 +29,10 @@ module.exports = function(mainPath) {
   var appEnv = isProd ? 'prod' : this.opts.locate('env').value;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
-  if (mainPath.indexOf(path.sep) !== 0) {
-    mainPath = path.join(process.cwd(), mainPath);
-  }
+  mainPath = this.normalizeInputPath(mainPath);
 
-  if (dumpCodePath && dumpCodePath.indexOf(path.sep) !== 0) {
-    dumpCodePath = path.join(process.cwd(), dumpCodePath);
+  if (dumpCodePath) {
+    dumpCodePath = this.normalizeInputPath(dumpCodePath);
   }
 
   var configFile = path.join(mainPath, Config.DEFAULT_FILENAME);
