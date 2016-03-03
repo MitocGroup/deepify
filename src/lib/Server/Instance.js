@@ -20,10 +20,10 @@ import {Property_Instance as Property} from 'deep-package-manager';
 import {Property_Frontend as Frontend} from 'deep-package-manager';
 import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
 import {Property_Config as Config} from 'deep-package-manager';
-import {Tags_Driver_RootAssetsDriver as RootAssetsDriver} from 'deep-package-manager';
 import DeepDB from 'deep-db';
 import DeepFS from 'deep-fs';
 import {Hook} from './Hook';
+import {ResponseEvent} from '../Helpers/ResponseEvent';
 
 export class Instance {
   /**
@@ -54,6 +54,9 @@ export class Instance {
 
     this._rootMicroservice = {};
     this._microservices = {};
+
+    this._events = {};
+    this._events[Instance.RESPONSE_LISTENER_EVENT] = [];
 
     this._setup();
   }
@@ -93,6 +96,14 @@ export class Instance {
    */
   get buildConfig() {
     return this._buildConfig;
+  }
+
+  /**
+   *
+   * @returns {string}
+   */
+  static get RESPONSE_LISTENER_EVENT() {
+    return 'RESPONSE_LISTENER_EVENT';
   }
 
   /**
@@ -559,23 +570,43 @@ export class Instance {
 
           let mimeType = Mime.lookup(filename);
 
-          file = this._fileInject(filename, file);
+          let event = new ResponseEvent(request, file);
+          this.dispatchEvent(Instance.RESPONSE_LISTENER_EVENT, event);
+
           this._log(`Serving file ${filename} of type ${mimeType}`);
-          this._send(response, file, 200, mimeType, true);
+          this._send(response, event.responseContent, 200, mimeType, true);
         });
       });
     });
   }
 
-  _fileInject(filePath, content) {
-    var array = filePath.split('/');
-    var fileName = array[array.length - 1];
-    if (fileName == 'index.html') {
-      var rootAssets = new RootAssetsDriver(this.property.config.microservices);
-      content = rootAssets.inject(content);
+  /**
+   * @params {Function} listener
+   */
+  registerResponseEventListener(listener) {
+    this._events[Instance.RESPONSE_LISTENER_EVENT].push(listener);
+  }
+
+  /**
+   * @params {String} eventName
+   * @params {ResponseEvent} event
+   */
+  dispatchEvent(eventName, event) {
+    if (!this._events[eventName]) {
+      return;
     }
 
-    return content;
+    for (let index in this._events[eventName]) {
+      if (!this._events[eventName].hasOwnProperty(index)) {
+        continue;
+      }
+
+      this._events[eventName][index](event);
+
+      if (event.isPropagationStopped) {
+        break;
+      }
+    }
   }
 
   /**
