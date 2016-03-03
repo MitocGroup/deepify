@@ -595,7 +595,7 @@ export class Instance {
     let events = this._events[eventName];
 
     if (!events) {
-      return
+      return;
     }
 
     for (let index in events) {
