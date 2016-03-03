@@ -123,7 +123,6 @@ module.exports = function(mainPath) {
       if (event.request.url == '/index.html' || event.request.url == '/') {
         var rootAssetsDriver = new RootAssetsDriver(property.config.microservices);
         event.responseContent = rootAssetsDriver.inject(event.responseContent);
-        event.stopPropagation();
       }
     });
   }

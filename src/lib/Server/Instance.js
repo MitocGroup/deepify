@@ -56,7 +56,7 @@ export class Instance {
     this._microservices = {};
 
     this._events = {};
-    this._events[Instance.RESPONSE_LISTENER_EVENT] = [];
+    this._events[Instance.RESPONSE_EVENT] = [];
 
     this._setup();
   }
@@ -102,8 +102,8 @@ export class Instance {
    *
    * @returns {string}
    */
-  static get RESPONSE_LISTENER_EVENT() {
-    return 'RESPONSE_LISTENER_EVENT';
+  static get RESPONSE_EVENT() {
+    return 'RESPONSE_EVENT';
   }
 
   /**
@@ -571,7 +571,7 @@ export class Instance {
           let mimeType = Mime.lookup(filename);
 
           let event = new ResponseEvent(request, file);
-          this.dispatchEvent(Instance.RESPONSE_LISTENER_EVENT, event);
+          this.dispatchEvent(Instance.RESPONSE_EVENT, event);
 
           this._log(`Serving file ${filename} of type ${mimeType}`);
           this._send(response, event.responseContent, 200, mimeType, true);
@@ -584,7 +584,7 @@ export class Instance {
    * @params {Function} listener
    */
   registerResponseEventListener(listener) {
-    this._events[Instance.RESPONSE_LISTENER_EVENT].push(listener);
+    this._events[Instance.RESPONSE_EVENT].push(listener);
   }
 
   /**
