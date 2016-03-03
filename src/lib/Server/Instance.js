@@ -592,10 +592,6 @@ export class Instance {
    * @params {ResponseEvent} event
    */
   dispatchEvent(eventName, event) {
-    if (!this._events[eventName]) {
-      return;
-    }
-
     for (let index in this._events[eventName]) {
       if (!this._events[eventName].hasOwnProperty(index)) {
         continue;
