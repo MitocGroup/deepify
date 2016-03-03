@@ -57,8 +57,8 @@ export class Program {
    * @returns {Program}
    */
   inherit(program) {
-    this._args.merge(program.args);
     this._opts.merge(program.opts);
+    this._args.merge(program.args);
 
     if (!this.hasCommands) {
       this._args.remove('command');
@@ -66,10 +66,9 @@ export class Program {
 
     this._nodeBinary = program.nodeBinary;
     this._scriptPath = this._scriptPath || program.scriptPath;
-
     this._version = this._version || program.version;
 
-    this.input(program.unmanagedArgs);
+    this.input([].concat(program.unmanagedArgs));
 
     return this;
   }
@@ -79,15 +78,15 @@ export class Program {
    * @returns {Program}
    */
   input(args = null) {
-    if (!args) {
+    if (args === null) {
       args = process.argv;
 
       // @todo: do we have to hook here?
       this._nodeBinary = args.shift(); // remove 'node'
       this._scriptPath = args.shift(); // remove 'path/to/main/script.js'
-    }
 
-    Options.normalizeInputOpts(args);
+      Options.normalizeInputOpts(args);
+    }
 
     this._opts.populate(args);
     this._args.populate(args);

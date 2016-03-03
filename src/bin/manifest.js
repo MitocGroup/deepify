@@ -44,16 +44,15 @@ module.exports = {
           alias: 'a',
           description: 'GitHub credentials pair used for Basic authentication (ex. "user:token" or simply "token")',
           required: false,
-        },
-        'skip-github-deps': {
-          alias: 's',
-          description: 'Skip fetching dependencies when working with a GitHub hosted microservice',
-          required: false,
-        },
+        }
       },
       args: {
         dependency: {
           description: 'The dependency you want to fetch (ex. "deep.ng.todo@^0.0.x")',
+          required: false,
+        },
+        dumpPath: {
+          description: '[DEPRECATED] The path to dump dependency into (works with GitHub only!)',
           required: false,
         },
       },
