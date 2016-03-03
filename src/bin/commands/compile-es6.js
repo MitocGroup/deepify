@@ -7,7 +7,6 @@
 
 module.exports = function(mainPath) {
   var path = require('path');
-  var os = require('os');
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
 
   mainPath = this.normalizeInputPath(mainPath);
