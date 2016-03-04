@@ -38,11 +38,7 @@ module.exports = function(microservicePath) {
     RegistryConfig.create().refresh('registry').read('registry') ||
     DEFAULT_REGISTRY_BASE_HOST;
 
-  if ((!/^win/.test(process.platform) && microservicePath.indexOf(path.sep) !== 0) ||
-    (/^win/.test(process.platform) && !(/^[a-z]{1}:/i.test(microservicePath)))) {
-
-    microservicePath = path.join(process.cwd(), microservicePath);
-  }
+  microservicePath = this.normalizeInputPath(microservicePath);
 
   var tmpDirObj = tmp.dirSync();
   var tmpPropertyPath = tmpDirObj.name;

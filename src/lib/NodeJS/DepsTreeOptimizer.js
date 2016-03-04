@@ -113,6 +113,7 @@ export class DepsTreeOptimizer {
 
           let depLocalPath = packageObj.dependencies[depName];
 
+          console.log('In folder: ', fs.readdirSync(path.resolve('..')).toString());
           console.log('LINK to: ', depName);
           console.log('depLocalPath: ', depLocalPath);
           console.log('resolved join: ', path.join('..', depLocalPath));
