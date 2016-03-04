@@ -53,10 +53,6 @@ suite('NodeJS/UndefinedDepsResolver', () => {
     chai.expect(undefinedDepsResolver._undefinedStack).to.eql([]);
   });
 
-  test('Check constructor sets _cloneShadow', () => {
-    chai.expect(undefinedDepsResolver._cloneShadow).to.eql({});
-  });
-
   test('Check constructor sets _resolvedStack', () => {
     chai.expect(undefinedDepsResolver._resolvedStack).to.eql({});
   });
