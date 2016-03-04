@@ -35,13 +35,10 @@ module.exports = function(mainPath) {
     Autoload._skipBuild();
   }
 
-  if ((!/^win/.test(process.platform) && mainPath.indexOf(path.sep) !== 0) ||
-      (/^win/.test(process.platform) && !(/^[a-z]{1}:/i.test(mainPath)))) {
-    mainPath = path.join(process.cwd(), mainPath);
-  }
+  mainPath = this.normalizeInputPath(mainPath);
 
-  if (buildPath && buildPath.indexOf(path.sep) !== 0) {
-    buildPath = path.join(process.cwd(), buildPath);
+  if (buildPath) {
+    buildPath = this.normalizeInputPath(buildPath);
   }
 
   var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);

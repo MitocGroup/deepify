@@ -5,18 +5,13 @@
 
 'use strict';
 
-module.exports = function (dumpPath) {
+module.exports = function(dumpPath) {
   var path = require('path');
   var fse = require('fs-extra');
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
 
-
-  if ((!/^win/.test(process.platform) && dumpPath.indexOf(path.sep) !== 0) ||
-      (/^win/.test(process.platform) && !(/^[a-z]{1}:/i.test(dumpPath)))) {
-
-    dumpPath = path.join(process.cwd(), dumpPath);
-  }
+  dumpPath = this.normalizeInputPath(dumpPath);
 
   var cmd = new Exec(
     Bin.node,

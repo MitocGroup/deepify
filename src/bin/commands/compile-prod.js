@@ -29,9 +29,7 @@ module.exports = function(mainPath) {
   var installSdk = this.opts.locate('aws-sdk').exists;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
-  if ((!isWindows() && mainPath.indexOf(path.sep) !== 0) || (isWindows() && !(/^[a-z]{1}:/i.test(mainPath)))) {
-    mainPath = path.join(process.cwd(), mainPath);
-  }
+  mainPath = this.normalizeInputPath(mainPath);
 
   var property = new Property(mainPath);
   property.microservicesToUpdate = getMicroservicesToDeploy();
@@ -64,12 +62,12 @@ module.exports = function(mainPath) {
     chain.add(
       new NpmInstall(lambdas.tmpPath)
         .addExtraArg(
-        '--no-bin-links',
-        '--no-optional',
-        '--loglevel silent',
-        '--production',
-        '--save'
-      )
+          '--no-bin-links',
+          '--no-optional',
+          '--loglevel silent',
+          '--production',
+          '--save'
+        )
     );
 
     chain.add(

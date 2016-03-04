@@ -13,6 +13,8 @@ import {InvalidActionException} from './Exception/InvalidActionException';
 import {UnknownOptionException} from './Exception/UnknownOptionException';
 import {ValidationException} from './Exception/ValidationException';
 import DeepLog from 'deep-log';
+import path from 'path';
+import os from 'os';
 
 export class Program {
   /**
@@ -448,5 +450,45 @@ export class Program {
     }
 
     return Program.__deep_log;
+  }
+
+  /**
+   * @returns {String}
+   * @private
+   */
+  get _homeDir() {
+    if (os.homedir) {
+      return os.homedir();
+    }
+
+    return process.env.HOME || path.sep;
+  }
+
+  /**
+   * @param {String} inputPath
+   * @returns {String}
+   */
+  normalizeInputPath(inputPath) {
+
+    // set current working directory if empty or no path provided
+    inputPath = inputPath || process.cwd();
+
+    // case some unresolved bash pwd
+    inputPath = inputPath.replace(/(`\s*pwd\s*`|\$\(\s*pwd\s*\))/ig, process.cwd());
+
+    // case tilda used (both ~ and ~/xxx cases)
+    if (/^~(?:(?:\/|\\).+)?$/i.test(inputPath)) {
+      inputPath = path.join(this._homeDir, (inputPath && inputPath.length >= 2) ? inputPath.substr(2) : '');
+    }
+
+    // case relative path provided
+    // check for windows full path like c:/xxx to avoid transformation
+    if (!/^(?:\/|\\)/i.test(inputPath) &&
+      !(/^win/.test(process.platform) && /^[a-z]:(?:\/|\\)/i.test(inputPath))) {
+
+      inputPath = path.join(process.cwd(), inputPath);
+    }
+
+    return path.resolve(inputPath);
   }
 }

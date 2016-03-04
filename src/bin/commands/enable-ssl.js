@@ -16,10 +16,7 @@ module.exports = function(mainPath) {
 
   var domain = this.opts.locate('domain').value || null;
 
-  if ((!/^win/.test(process.platform) && mainPath.indexOf(path.sep) !== 0) ||
-      (/^win/.test(process.platform) && !(/^[a-z]{1}:/i.test(mainPath)))) {
-    mainPath = path.join(process.cwd(), mainPath);
-  }
+  mainPath = this.normalizeInputPath(mainPath);
 
   var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
 
@@ -59,7 +56,7 @@ module.exports = function(mainPath) {
 
     console.log('Ensure ACM certificate available for domain \'' + domain + '\'');
 
-    acmService.ensureCertificate(domain, function(error, certArn) {
+    acmService.ensureCertificate(domain, function (error, certArn) {
       if (error) {
         console.error(error);
         this.exit(1);

@@ -41,6 +41,8 @@ export class DepsTreeOptimizer {
       let mainDep = NpmDependency.createFromRawObject(lockedDepsRawObject);
       mainDep.defaultRootPath = this._path;
 
+
+
       //@todo: remove when shrinkwrap dump file fixed
       new UndefinedDepsResolver(mainDep)
         .resolve(() => {
@@ -49,6 +51,8 @@ export class DepsTreeOptimizer {
           let depsFullNames = this._depsCopyFlatten(mainDep);
           let tweakedModules = {};
 
+          console.log('depsFullNames: ', depsFullNames);
+
           for (let i in depsFullNames) {
             if (!depsFullNames.hasOwnProperty(i)) {
               continue;
@@ -56,6 +60,8 @@ export class DepsTreeOptimizer {
 
             let depFullName = depsFullNames[i];
             let depsVector = mainDep.findAll(depFullName);
+
+            console.log('depsVector: ', depsVector);
 
             if (depsVector.length > 0) {
               let depFinalPath = this._getFinalPkgPath(depFullName);

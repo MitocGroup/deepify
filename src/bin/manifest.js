@@ -22,7 +22,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to dump the sample web app into',
-          required: true,
+          required: false,
         },
       },
     },
@@ -100,7 +100,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the Lambda (directory of handler itself)',
-          required: true,
+          required: false,
         },
       },
     },
@@ -151,7 +151,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -178,7 +178,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -195,7 +195,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the microservice you want to publish',
-          required: true,
+          required: false,
         },
       },
     },
@@ -234,7 +234,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -246,7 +246,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -263,7 +263,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -275,7 +275,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the lambda root',
-          required: true,
+          required: false,
         },
       },
     },
@@ -302,7 +302,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -314,7 +314,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the microservice',
-          required: true,
+          required: false,
         },
       },
     },
@@ -336,7 +336,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -363,7 +363,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the Lambda (directory of handler itself)',
-          required: true,
+          required: false,
         },
       },
     }
