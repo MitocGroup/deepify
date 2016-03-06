@@ -229,9 +229,11 @@ export class NpmDependency {
       let childDep = this._children[i];
 
       if (!childDep.version || childDep.version === 'undefined') {
+        console.log('childDep.name for undeg ver: ', childDep.name);
+        console.log('childDep.defaultRootPath: ', childDep.defaultRootPath);
 
-        if (fs.existsSync(this.defaultRootPath)) {
-          NpmDependency.removeSync(this.defaultRootPath);
+        if (fs.existsSync(childDep.defaultRootPath)) {
+          NpmDependency.removeSync(childDep.defaultRootPath);
         }
 
         continue;
