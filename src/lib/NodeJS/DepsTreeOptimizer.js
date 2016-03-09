@@ -119,17 +119,15 @@ export class DepsTreeOptimizer {
 
           let depLocalPath = packageObj.dependencies[depName];
 
-          //console.log('In folder: ', fs.readdirSync(path.resolve('..')).toString());
           console.log('LINK to: ', depName);
           console.log('depLocalPath: ', depLocalPath);
-          //console.log('resolved join: ', path.join('..', depLocalPath));
-          //console.log('resolved resolve: ', path.resolve('..', depLocalPath));
 
-          //if(depLocalPath === '^2.2.x') {
-          //  console.log('continue:');
-          //  continue;
-          //}
+          if (!fs.existsSync(path.join(nodeModulesPath, '..', depLocalPath))) {
+              console.log('continue');
+              continue;
+          }
 
+          console.log('else');
           let linkCmd = new Exec('ln -s', path.join('..', depLocalPath), depName);
           linkCmd.cwd = nodeModulesPath;
 
