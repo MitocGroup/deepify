@@ -5,7 +5,7 @@ export class ResponseEvent {
   /**
    *
    * @param {String} request
-   * @param {*} responseContent
+   * @param {String} responseContent
    */
   constructor(request, responseContent) {
     this._propagationStopped = false;
@@ -15,7 +15,7 @@ export class ResponseEvent {
 
   /**
    *
-   * @returns {*}
+   * @returns {String}
    */
   get responseContent() {
     return this._responseContent;
@@ -31,7 +31,7 @@ export class ResponseEvent {
 
   /**
    *
-   * @param {*} content
+   * @param {String} content
    */
   set responseContent(content) {
     this._responseContent = content;

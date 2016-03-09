@@ -100,7 +100,7 @@ export class Instance {
 
   /**
    *
-   * @returns {string}
+   * @returns {String}
    */
   static get RESPONSE_EVENT() {
     return 'RESPONSE_EVENT';
