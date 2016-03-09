@@ -7,5 +7,5 @@
   "env": "test",
   "awsAccountId": 123456789012,
   "appIdentifier": "generated",
-  "appName": "sample app"
+  "appName":"My Custom Test Web App generated"
 }

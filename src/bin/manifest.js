@@ -174,6 +174,11 @@ module.exports = {
           description: 'Force cleaning up all resources if .cfg.deeploy.json file missing',
           required: false,
         },
+        prod: {
+          alias: 'p',
+          description: 'Do not ask for production environment undeploy confirmation',
+          required: false,
+        },
       },
       args: {
         path: {
