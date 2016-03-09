@@ -61,12 +61,12 @@ module.exports = function(mainPath) {
 
       prompt.syncMode = true;
 
-      prompt.read((confirmation) => {
+      prompt.read(function(confirmation) {
         if ((confirmation || '').toLowerCase() !== 'yes') {
           console.log('Undeploy cancelled by user');
           this.exit(0);
         }
-      });
+      }.bind(this));
     }
 
     var undeploy = new Undeploy(
