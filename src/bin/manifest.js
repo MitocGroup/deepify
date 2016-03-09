@@ -22,7 +22,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to dump the sample web app into',
-          required: true,
+          required: false,
         },
       },
     },
@@ -100,7 +100,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the Lambda (directory of handler itself)',
-          required: true,
+          required: false,
         },
       },
     },
@@ -151,7 +151,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -174,11 +174,16 @@ module.exports = {
           description: 'Force cleaning up all resources if .cfg.deeploy.json file missing',
           required: false,
         },
+        prod: {
+          alias: 'p',
+          description: 'Do not ask for production environment undeploy confirmation',
+          required: false,
+        },
       },
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -195,7 +200,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the microservice you want to publish',
-          required: true,
+          required: false,
         },
       },
     },
@@ -234,7 +239,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -246,7 +251,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -263,7 +268,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -275,7 +280,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the lambda root',
-          required: true,
+          required: false,
         },
       },
     },
@@ -302,7 +307,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -314,7 +319,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the microservice',
-          required: true,
+          required: false,
         },
       },
     },
@@ -336,7 +341,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -363,7 +368,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the Lambda (directory of handler itself)',
-          required: true,
+          required: false,
         },
       },
     }

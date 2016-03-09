@@ -21,7 +21,7 @@ export class UndefinedDepsResolver {
 
     this._mainDep = mainDep;
     this._undefinedStack = [];
-    this._cloneShadow = {};
+    //this._cloneShadow = {};
     this._resolvedStack = {};
   }
 
@@ -47,32 +47,32 @@ export class UndefinedDepsResolver {
     });
 
     wait.ready(() => {
-      for (let shadowKey in this._cloneShadow) {
-        if (!this._cloneShadow.hasOwnProperty(shadowKey)) {
-          continue;
-        }
+      //for (let shadowKey in this._cloneShadow) {
+      //  if (!this._cloneShadow.hasOwnProperty(shadowKey)) {
+      //    continue;
+      //  }
+      //
+      //  if (!this._resolvedStack.hasOwnProperty(shadowKey)) {
+      //    continue;
+      //  }
+      //
+      //  let shadowStack = this._cloneShadow[shadowKey];
+      //
+      //  for (let i in shadowStack) {
+      //    if (!shadowStack.hasOwnProperty(i)) {
+      //      continue;
+      //    }
+      //
+      //    let shadowDep = shadowStack[i];
+      //    let suitableDep = this._mainDep.find(shadowDep.name, this._resolvedStack[shadowKey]);
+      //
+      //    // @todo: set through an setter
+      //    shadowDep._version = suitableDep.version;
+      //    this._cloneChildrenStack(suitableDep, shadowDep);
+      //  }
+      //}
 
-        if (!this._resolvedStack.hasOwnProperty(shadowKey)) {
-          continue;
-        }
-
-        let shadowStack = this._cloneShadow[shadowKey];
-
-        for (let i in shadowStack) {
-          if (!shadowStack.hasOwnProperty(i)) {
-            continue;
-          }
-
-          let shadowDep = shadowStack[i];
-          let suitableDep = this._mainDep.find(shadowDep.name, this._resolvedStack[shadowKey]);
-
-          // @todo: set through an setter
-          shadowDep._version = suitableDep.version;
-          this._cloneChildrenStack(suitableDep, shadowDep);
-        }
-      }
-
-      this._cloneShadow = {};
+      //this._cloneShadow = {};
       this._resolvedStack = {};
 
       // @todo: remove?
@@ -83,12 +83,38 @@ export class UndefinedDepsResolver {
       cb();
     });
 
+    let resolved = {};
+
     for (let i in this._undefinedStack) {
       if (!this._undefinedStack.hasOwnProperty(i)) {
         continue;
       }
 
       let undefinedDep = this._undefinedStack[i];
+      let resolveKey = `${undefinedDep.name}@${undefinedDep.requestedVersion}`;
+
+      if (resolved.hasOwnProperty(resolveKey)) {
+        let resolvedVersion = resolved[resolveKey];
+
+        let suitableDep = this._mainDep.find(undefinedDep.name, resolvedVersion);
+
+        if (!suitableDep) {
+          remaining--;
+          continue;
+        }
+
+        let shadowKey = `${undefinedDep.name}@${undefinedDep.requestedVersion}`;
+
+        // @todo: set through an setter
+        undefinedDep._version = suitableDep.version;
+        this._cloneChildrenStack(suitableDep, undefinedDep);
+
+        this._resolvedStack[shadowKey] = resolvedVersion;
+
+        remaining--;
+
+        continue;
+      }
 
       new PackageVersionResolver(this._mainDep.defaultRootPath, undefinedDep.name, undefinedDep.requestedVersion)
         .resolve((error, resolvedVersion) => {
@@ -96,6 +122,8 @@ export class UndefinedDepsResolver {
             remaining--;
             return;
           }
+
+          resolved[resolveKey] = resolvedVersion;
 
           let suitableDep = this._mainDep.find(undefinedDep.name, resolvedVersion);
 
@@ -138,15 +166,15 @@ export class UndefinedDepsResolver {
 
       parentDep.addChild(clonedDep);
 
-      if (!clonedDep.version || clonedDep.version === 'undefined') {
-        let shadowKey = `${clonedDep.name}@${clonedDep.requestedVersion}`;
-
-        if (!this._cloneShadow.hasOwnProperty(shadowKey)) {
-          this._cloneShadow[shadowKey] = [];
-        }
-
-        this._cloneShadow[shadowKey].push(clonedDep);
-      }
+      //if (!clonedDep.version || clonedDep.version === 'undefined') {
+      //  let shadowKey = `${clonedDep.name}@${clonedDep.requestedVersion}`;
+      //
+      //  if (!this._cloneShadow.hasOwnProperty(shadowKey)) {
+      //    this._cloneShadow[shadowKey] = [];
+      //  }
+      //
+      //  this._cloneShadow[shadowKey].push(clonedDep);
+      //}
     }
   }
 
