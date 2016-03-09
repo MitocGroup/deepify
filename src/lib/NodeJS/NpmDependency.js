@@ -5,7 +5,10 @@
 'use strict';
 
 import path from 'path';
+import fse from 'fs-extra';
+import fs from 'fs';
 import os from 'os';
+import {Exec} from './../Helpers/Exec';
 
 export class NpmDependency {
   /**
@@ -226,6 +229,13 @@ export class NpmDependency {
       let childDep = this._children[i];
 
       if (!childDep.version || childDep.version === 'undefined') {
+        console.log('childDep.name for undeg ver: ', childDep.name);
+        console.log('childDep.defaultRootPath: ', childDep.defaultRootPath);
+
+        if (fs.existsSync(childDep.defaultRootPath)) {
+          NpmDependency.removeSync(childDep.defaultRootPath);
+        }
+
         continue;
       }
 
@@ -420,5 +430,21 @@ export class NpmDependency {
     }
 
     return i;
+  }
+
+  static get isWindows() {
+    return /^win/.test(process.platform);
+  }
+
+  static removeSync(pathToRemove) {
+
+    if (isWindows()) {
+      var remover = new Exec('rm -r -f ' + pathToRemove);
+
+      remover.avoidBufferOverflow().runSync();
+    } else {
+      fse.removeSync(pathToRemove);
+    }
+
   }
 }

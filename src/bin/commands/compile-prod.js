@@ -80,12 +80,12 @@ module.exports = function(mainPath) {
         optimizeDeps.bind(this)(function() {
           pack.bind(this)(function() {
             lambdas.tmpPath.forEach(function(lambdaTmpPath) {
-              fse.removeSync(lambdaTmpPath);
+              removeSync(lambdaTmpPath);
             });
 
             if (removeSource) {
               lambdas.path.forEach(function(lambdaPath) {
-                fse.removeSync(lambdaPath);
+                removeSync(lambdaPath);
               });
             }
 
@@ -110,17 +110,19 @@ module.exports = function(mainPath) {
       console.log('Copying Lambda sources from ' + lambdaPath + ' into ' + lambdaTmpPath);
 
       if (fs.existsSync(lambdaTmpPath)) {
-        fse.removeSync(lambdaTmpPath);
+        removeSync(lambdaTmpPath);
       }
 
       try {
+
         fse.copySync(lambdaPath, lambdaTmpPath);
 
         var nodeModules = path.join(lambdaTmpPath, 'node_modules');
 
         if (fs.existsSync(nodeModules)) {
-          fse.removeSync(nodeModules);
+          removeSync(nodeModules);
         }
+
       } catch (error) {
         console.error(error);
 
@@ -129,6 +131,22 @@ module.exports = function(mainPath) {
     }
 
     cb();
+  }
+
+  function isWindows() {
+    return /^win/.test(process.platform);
+  }
+
+  function removeSync(pathToRemove) {
+
+    if (isWindows()) {
+      var remover = new Exec('rm -r -f ' + pathToRemove);
+
+      remover.avoidBufferOverflow().runSync();
+    } else {
+      fse.removeSync(pathToRemove);
+    }
+
   }
 
   function optimize(cb, lambdas, final) {
@@ -291,7 +309,8 @@ module.exports = function(mainPath) {
 
     if (fs.existsSync(outputFile)) {
       console.log('Removing old Lambda build ' + outputFile);
-      fse.removeSync(outputFile);
+
+      removeSync(outputFile);
     }
 
     console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');

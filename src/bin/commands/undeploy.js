@@ -75,7 +75,7 @@ module.exports = function(mainPath) {
       error ? Undeploy.DEFAULT_MATCHER : matcher
     );
 
-    undeploy.execute(function (error, results) {
+    undeploy.execute(function(error, results) {
       if (error) {
         console.error(error);
         this.exit(1);

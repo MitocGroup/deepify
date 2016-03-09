@@ -23,7 +23,7 @@ module.exports = function(mainPath) {
   var isProd = this.opts.locate('prod').exists;
   var installSdk = this.opts.locate('aws-sdk').exists;
   var localOnly = this.opts.locate('dry-run').exists;
-  var fastDeploy = this.opts.locate('fast').exists;
+  var fastDeploy = this.opts.locate('fast').exists || (/^win/.test(process.platform));
   var dumpCodePath = this.opts.locate('dump-local').value;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
   var appEnv = isProd ? 'prod' : this.opts.locate('env').value;
@@ -75,6 +75,11 @@ module.exports = function(mainPath) {
   }
 
   if (fastDeploy) {
+
+    if (/^win/.test(process.platform)) {
+      console.warn('Fast deploy is enabled by default in Windows OS and recommended to be used, please accept it.');
+    }
+
     var prompt = new Prompt('Fast deploy may alter the web app state! Start anyway?');
 
     prompt.readConfirm(function(result) {
@@ -150,6 +155,7 @@ module.exports = function(mainPath) {
 
         propertyInstance.runInitMsHooks(function() {
           prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
+
         }.bind(this));
       }.bind(this));
     }.bind(this));
