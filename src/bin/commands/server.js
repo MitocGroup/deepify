@@ -17,6 +17,7 @@ module.exports = function(mainPath) {
   var Property = require('deep-package-manager').Property_Instance;
   var Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
   var RootAssetsDriver = require('deep-package-manager').Tags_Driver_RootAssetsDriver;
+  var PageLoaderDriver = require('deep-package-manager').Tags_Driver_PageLoaderDriver;
   var fs = require('fs');
   var open = require('open');
 
@@ -118,6 +119,11 @@ module.exports = function(mainPath) {
       if (event.request.url === '/index.html' || event.request.url === '/') {
         var rootAssetsDriver = new RootAssetsDriver(property.config.microservices);
         event.responseContent = rootAssetsDriver.inject(event.responseContent);
+
+        if (property.config.globals.pageLoader && property.config.globals.pageLoader.src) {
+          var pageLoaderDriver = new PageLoaderDriver(property.config.globals.pageLoader, property.config.microservices);
+          event.responseContent = pageLoaderDriver.inject(event.responseContent);
+        }
       }
     });
   }
