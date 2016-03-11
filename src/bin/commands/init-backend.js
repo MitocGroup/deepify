@@ -19,7 +19,6 @@ module.exports = function(mainPath) {
   var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
 
   var microservicesToInit = this.opts.locate('partial').value;
-  var useProd = this.opts.locate('prod').exists;
 
   mainPath = this.normalizeInputPath(mainPath);
 
@@ -70,9 +69,7 @@ module.exports = function(mainPath) {
       '--loglevel silent'
     );
 
-    if (useProd) {
-      installCmd.addExtraArg('--prod');
-    }
+    installCmd.addExtraArg('--prod');
 
     chain.add(installCmd);
 
