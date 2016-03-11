@@ -114,27 +114,13 @@ suite('Server/Instance', () => {
     chai.expect(spyCallback).to.have.been.calledWithExactly();
   });
 
-  test('Check LAMBDA_URI static getter', () => {
-    chai.expect(Instance.LAMBDA_URI).to.equal('/_/lambda');
-  });
 
-  test('Check LAMBDA_ASYNC_URI static getter', () => {
-    chai.expect(Instance.LAMBDA_ASYNC_URI).to.equal('/_/lambda-async');
-  });
 
   test('Check _kernelMock getter', () => {
     let actualResult = server._kernelMock;
 
     chai.expect(actualResult).to.be.an('object');
     chai.expect(actualResult).to.have.all.keys('config', 'microservice');
-  });
-
-  test('Check _resolveMicroservice', () => {
-    let uri = 'microservice2/p/a/t/h';
-
-    let actualResult = server._resolveMicroservice(uri);
-
-    chai.expect(actualResult).to.contains('Microservice2');
   });
 
   //@todo - need to rework

@@ -13,20 +13,16 @@ module.exports = function(mainPath) {
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   var NpmLink = require('../../lib.compiled/NodeJS/NpmLink').NpmLink;
   var Server = require('../../lib.compiled/Server/Instance').Instance;
-  var WaitFor = require('deep-package-manager').Helpers_WaitFor;
   var Config = require('deep-package-manager').Property_Config;
   var Property = require('deep-package-manager').Property_Instance;
   var Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
-  var os = require('os');
   var fs = require('fs');
   var open = require('open');
-
   var port = this.opts.locate('port').value || '8000';
   var buildPath = this.opts.locate('build-path').value || null;
   var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   var serverAddress = 'http://localhost:' + port;
   var openBrowser = this.opts.locate('open-browser').exists;
-  var skipBuildHook = this.opts.locate('skip-build-hook').exists;
   var skipBackendBuild = this.opts.locate('skip-backend-build').exists;
   var skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
 

@@ -76,11 +76,6 @@ module.exports = {
           description: 'Skip building backend (dependencies installation in Lambdas and linking aws-sdk)',
           required: false,
         },
-        'skip-build-hook': {
-          alias: 'h',
-          description: 'Skip running build hook (hook.build.js)',
-          required: false,
-        },
         port: {
           alias: 'p',
           description: 'Port to listen to',
