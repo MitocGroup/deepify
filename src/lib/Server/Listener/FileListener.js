@@ -1,4 +1,9 @@
+/**
+ * Created by AlexanderC on 3/11/16.
+ */
+
 'use strict';
+
 import FileSystem from 'fs';
 import Path from 'path';
 import Mime from 'mime';
@@ -7,13 +12,14 @@ import {Tags_Driver_RootAssetsDriver as RootAssetsDriver} from 'deep-package-man
 import {Tags_Driver_PageLoaderDriver as PageLoaderDriver} from 'deep-package-manager';
 
 export class FileListener  extends AbstractListener {
-
-  constructor() {
-    super();
+  /**
+   * @param {*} args
+   */
+  constructor(...args) {
+    super(...args);
   }
 
   /**
-   *
    * @param {ResponseEvent} event
    */
   handler(event) {
@@ -67,7 +73,6 @@ export class FileListener  extends AbstractListener {
   }
 
   /**
-   *
    * @param {String} url
    * @param {String} content
    * @returns {String}

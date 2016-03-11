@@ -7,13 +7,14 @@ import FileSystem from 'fs';
 import Path from 'path';
 
 export class LambdaListener extends AbstractListener {
-
-  constructor() {
-    super();
+  /**
+   * @param {*} args
+   */
+  constructor(...args) {
+    super(...args);
   }
 
   /**
-   *
    * @param {ResponseEvent} event
    */
   handler(event) {
@@ -52,9 +53,15 @@ export class LambdaListener extends AbstractListener {
           FileSystemExtra.ensureSymlink(
             Path.join(lambdaConfig.buildPath, '_config.json'),
             Path.join(Path.dirname(lambdaConfig.path), '_config.json'),
-            function(error) {
-              this._runLambda(lambdaConfig, payload, isAsync);
-            }.bind(this)
+            (error) => {
+              if (error) {
+                this.server.logger(`Unable to link Lambda ${lambda} config: ${error}`);
+                event.send500(error);
+                return;
+              }
+
+              this._runLambda(event, lambdaConfig, payload, isAsync);
+            }
           );
         } else {
           let lambdaConfig = this.server.defaultLambdasConfig[lambda];

@@ -1,17 +1,24 @@
+/**
+ * Created by AlexanderC on 3/11/16.
+ */
+
+
 'use strict';
+
 import {AbstractListener} from './AbstractListener';
 import FileSystem from 'fs';
 import Path from 'path';
 import Mime from 'mime';
 
 export class ConfigListener extends AbstractListener {
-
-  constructor() {
-    super();
+  /**
+   * @param {*} args
+   */
+  constructor(...args) {
+    super(...args);
   }
 
   /**
-   *
    * @param {ResponseEvent} event
    */
   handler(event) {
@@ -24,7 +31,7 @@ export class ConfigListener extends AbstractListener {
       if (this.server.buildPath) {
         this.server.logger(`Triggering frontend config hook...`);
 
-        filename = Path.join(this.server.buildPath, '_www', uri);
+        let filename = Path.join(this.server.buildPath, '_www', uri);
 
         FileSystem.exists(filename, (exists) => {
           if (!exists) {

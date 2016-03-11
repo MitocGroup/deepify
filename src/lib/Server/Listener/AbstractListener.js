@@ -1,16 +1,21 @@
+/**
+ * Created by AlexanderC on 3/11/16.
+ */
+
 'use strict';
 
 import Url from 'url';
 import Path from 'path';
 
 export class AbstractListener {
-
-  constructor() {
-    this._server = {};
+  /**
+   * @param {Instance|Server|*} server
+   */
+  constructor(server = null) {
+    this._server = server;
   }
 
   /**
-   *
    * @returns {Instance}
    */
   get server() {
@@ -32,6 +37,7 @@ export class AbstractListener {
    */
   getUri(url) {
     let urlParts = Url.parse(url);
+
     return urlParts.pathname;
   }
 

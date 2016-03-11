@@ -1,9 +1,11 @@
+/**
+ * Created by AlexanderC on 3/11/16.
+ */
+
 'use strict';
 
 export class RequestListener {
-
   /**
-   *
    * @param {Instance} server
    */
   constructor(server) {
