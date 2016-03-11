@@ -14,6 +14,7 @@ export class RequestListener {
   /**
    * @param {ConfigListener|FileListener|LambdaListener} listener
    * @param {Number} priority
+   * @returns {RequestListener}
    */
   register(listener, priority = 0) {
     listener.server = this._server;
@@ -23,6 +24,8 @@ export class RequestListener {
     }
 
     this._listeners[priority].push(listener);
+
+    return this;
   }
 
   /**
