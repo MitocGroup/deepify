@@ -1,24 +1,26 @@
 'use strict';
 
+import OS from 'os';
+
 export class ResponseEvent {
 
   /**
    *
    * @param {String} request
-   * @param {String} responseContent
+   * @param {String} response
    */
-  constructor(request, responseContent) {
+  constructor(request, response) {
     this._propagationStopped = false;
     this._request = request;
-    this._responseContent = responseContent;
+    this._response = response;
   }
 
   /**
    *
    * @returns {String}
    */
-  get responseContent() {
-    return this._responseContent;
+  get response() {
+    return this._response;
   }
 
   /**
@@ -31,10 +33,10 @@ export class ResponseEvent {
 
   /**
    *
-   * @param {String} content
+   * @param {String} response
    */
-  set responseContent(content) {
-    this._responseContent = content;
+  set response(response) {
+    this._response = response;
   }
 
   stopPropagation() {
@@ -47,5 +49,42 @@ export class ResponseEvent {
    */
   get isPropagationStopped() {
     return this._propagationStopped;
+  }
+
+  /**
+   * @param {String} error
+   * @private
+   */
+  send500(error) {
+    this.send(`${error}${OS.EOL}`, 500);
+    this.stopPropagation();
+  }
+
+  /**
+   * @param {String} message
+   * @private
+   */
+  send404(message = null) {
+    this.send(message || `404 Not Found${OS.EOL}`, 404);
+    this.stopPropagation();
+  }
+
+  /**
+   * @param {String} content
+   * @param {Number} code
+   * @param {String} contentType
+   * @param {Boolean} isBinary
+   * @private
+   */
+  send(content, code = 200, contentType = 'text/plain', isBinary = false) {
+    this.response.writeHead(code, {'Content-Type': contentType});
+
+    if (isBinary) {
+      this.response.write(content, 'binary');
+    } else {
+      this.response.write(content);
+    }
+
+    this.response.end();
   }
 }

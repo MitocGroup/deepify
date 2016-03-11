@@ -7,14 +7,9 @@
 import {PropertyObjectRequiredException} from './Exception/PropertyObjectRequiredException';
 import Http from 'http';
 import Path from 'path';
-import FileSystem from 'fs';
-import FileSystemExtra from 'fs-extra';
 import Url from 'url';
 import {FailedToStartServerException} from './Exception/FailedToStartServerException';
-import OS from 'os';
-import Mime from 'mime';
 import JsonFile from 'jsonfile';
-import {Runtime as LambdaRuntime} from '../Lambda/Runtime';
 import QueryString from 'querystring';
 import {Property_Instance as Property} from 'deep-package-manager';
 import {Property_Frontend as Frontend} from 'deep-package-manager';
@@ -24,6 +19,10 @@ import DeepDB from 'deep-db';
 import DeepFS from 'deep-fs';
 import {Hook} from './Hook';
 import {ResponseEvent} from '../Helpers/ResponseEvent';
+import {Listener} from './Listener/Listener';
+import {ConfigRequestListener} from './Listener/ConfigRequestListener';
+import {FileRequestListener} from './Listener/FileRequestListener';
+import {LambdaRequestListener} from './Listener/LambdaRequestListener';
 
 export class Instance {
   /**
@@ -59,6 +58,10 @@ export class Instance {
     this._events[Instance.RESPONSE_EVENT] = [];
 
     this._setup();
+    this._listener = new Listener();
+    new ConfigRequestListener(this);
+    new FileRequestListener(this);
+    new LambdaRequestListener(this);
   }
 
   /**
@@ -99,12 +102,43 @@ export class Instance {
   }
 
   /**
-   *
-   * @returns {String}
+   * @returns {Object}
    */
-  static get RESPONSE_EVENT() {
-    return 'RESPONSE_EVENT';
+  get defaultLambdasConfig() {
+    return this._defaultLambdasConfig;
   }
+
+  /**
+   * @returns {Object}
+   */
+  get defaultFrontendConfig() {
+    return this._defaultFrontendConfig;
+  }
+
+  /**
+   *
+   * @returns {Listener}
+   */
+  get listener () {
+    return this._listener;
+  }
+
+  /**
+   *
+   * @returns {Object}
+   */
+  get microservices() {
+    return this._microservices;
+  }
+
+  /**
+   *
+   * @returns {Object}
+   */
+  get rootMicroservice() {
+    return this._rootMicroservice;
+  }
+
 
   /**
    * @private
@@ -388,65 +422,6 @@ export class Instance {
   }
 
   /**
-   * @param {Http.ServerResponse} response
-   * @param {Object} lambdaConfig
-   * @param {Object} payload
-   * @param {Boolean} asyncMode
-   * @private
-   */
-  _runLambda(response, lambdaConfig, payload, asyncMode) {
-    let lambda = LambdaRuntime.createLambda(
-      lambdaConfig.path,
-      lambdaConfig.buildPath ? Path.join(lambdaConfig.buildPath, '.aws.json') : null
-    );
-
-    lambda.name = `${lambdaConfig.name}-${this.localId}`;
-
-    let successCb = (result) => {
-      let plainResult = JSON.stringify(result);
-
-      if (!asyncMode) {
-        this._log(`Serving result for Lambda ${lambdaConfig.name}: ${plainResult}`);
-        this._send(response, plainResult, 200, 'application/json', false);
-      } else {
-        this._log(`Result for Lambda ${lambdaConfig.name} async call: ${plainResult}`);
-      }
-    };
-
-    lambda.succeed = successCb;
-
-    lambda.fail = (error) => {
-      let errorObj = error;
-
-      if (typeof error === 'object' && error instanceof Error) {
-        errorObj = {
-          errorType: error.name,
-          errorMessage: error.message,
-          errorStack: error.stack
-        };
-
-        if (error.validationErrors) {
-          errorObj.validationErrors = error.validationErrors;
-        }
-      }
-
-      if (!asyncMode) {
-        this._log(`Lambda ${lambdaConfig.name} execution fail`, errorObj.errorMessage);
-
-        successCb(errorObj);
-      } else {
-        this._log(`Lambda ${lambdaConfig.name} async execution fail`, errorObj.errorMessage);
-      }
-    };
-
-    lambda.runForked(payload);
-
-    if (asyncMode) {
-      this._send(response, JSON.stringify(null), 202, 'application/json', false);
-    }
-  }
-
-  /**
    * @param {Http.IncomingMessage} request
    * @param {Http.ServerResponse} response
    * @private
@@ -454,246 +429,9 @@ export class Instance {
   _handler(request, response) {
     let urlParts = Url.parse(request.url);
     let uri = urlParts.pathname;
-    let queryObject = QueryString.parse(urlParts.query);
 
     this._log(`Request ${request.url} -> ${uri}`);
-
-    let filename = this._resolveMicroservice(uri);
-
-    if (uri === '/_config.json') {
-      if (this.buildPath) {
-        this._log(`Triggering frontend config hook...`);
-
-        filename = Path.join(this.buildPath, '_www', uri);
-      } else {
-        this._send(response, JSON.stringify(this._defaultFrontendConfig), 200, 'application/json');
-        return;
-      }
-    } else if (uri === Instance.LAMBDA_URI || uri === Instance.LAMBDA_ASYNC_URI) {
-      let isAsync = uri === Instance.LAMBDA_ASYNC_URI;
-
-      this._readRequestData(request, function(rawData) {
-        let data = JSON.parse(rawData);
-
-        if (!data) {
-          this._log(`Broken Lambda payload: ${rawData}`);
-          this._send500(response, 'Error while parsing JSON request payload');
-          return;
-        }
-
-        let lambda = data.lambda;
-        let payload = data.payload;
-
-        this._log(
-          `Running Lambda ${lambda} with payload ${JSON.stringify(payload)}${isAsync ? ' in async mode' : ''}`
-        );
-
-        if (this.buildPath) {
-          let lambdaConfig = this._buildConfig.lambdas[lambda];
-
-          if (!lambdaConfig) {
-            this._log(`Missing Lambda ${lambda} built config`);
-            this._send404(response, `Unknown Lambda ${lambda}`);
-            return;
-          }
-
-          FileSystemExtra.ensureSymlink(
-            Path.join(lambdaConfig.buildPath, '_config.json'),
-            Path.join(Path.dirname(lambdaConfig.path), '_config.json'),
-            function(error) {
-              this._runLambda(response, lambdaConfig, payload, isAsync);
-            }.bind(this)
-          );
-        } else {
-          let lambdaConfig = this._defaultLambdasConfig[lambda];
-
-          if (!lambdaConfig) {
-            this._log(`Missing Lambda ${lambda} config`);
-            this._send404(response, `Unknown Lambda ${lambda}`);
-            return;
-          }
-
-          let lambdaConfigFile = Path.join(Path.dirname(lambdaConfig.path), '_config.json');
-
-          FileSystemExtra.outputJson(
-            lambdaConfigFile,
-            lambdaConfig,
-            (error) => {
-              if (error) {
-                this._log(`Unable to persist fake Lambda ${lambda} config: ${error}`);
-                this._send500(response, error);
-                return;
-              }
-
-              this._runLambda(response, lambdaConfig, payload, isAsync);
-            }
-          );
-        }
-      }.bind(this));
-
-      return;
-    }
-
-    FileSystem.exists(filename, (exists) => {
-      if (!exists) {
-        if (this._fs.public.existsSync(uri)) {
-          filename = Path.join(this._fs.public._rootFolder, uri);
-
-          this._log(`{LFS} ${uri} resolved into ${filename}`);
-        } else {
-          this._log(`File ${filename} not found`);
-          this._send404(response);
-
-          return;
-        }
-      }
-
-      FileSystem.stat(filename, (error, stats) => {
-        if (error) {
-          this._log(`Unable to stat file ${filename}: ${error}`);
-          this._send500(response, error);
-          return;
-        }
-
-        if (stats.isDirectory()) {
-          this._log(`Resolving ${filename} into ${filename}/index.html`);
-
-          filename = Path.join(filename, 'index.html');
-        }
-
-        FileSystem.readFile(filename, 'binary', (error, file) => {
-          if (error) {
-            this._log(`Unable to read file ${filename}: ${error}`);
-            this._send500(response, error);
-            return;
-          }
-
-          let mimeType = Mime.lookup(filename);
-
-          let event = new ResponseEvent(request, file);
-          this.dispatchEvent(Instance.RESPONSE_EVENT, event);
-
-          this._log(`Serving file ${filename} of type ${mimeType}`);
-          this._send(response, event.responseContent, 200, mimeType, true);
-        });
-      });
-    });
-  }
-
-  /**
-   * @params {Function} listener
-   */
-  registerResponseEventListener(listener) {
-    this._events[Instance.RESPONSE_EVENT].push(listener);
-  }
-
-  /**
-   * @params {String} eventName
-   * @params {ResponseEvent} event
-   */
-  dispatchEvent(eventName, event) {
-    let events = this._events[eventName];
-
-    if (!events) {
-      return;
-    }
-
-    for (let index in events) {
-      if (!events.hasOwnProperty(index)) {
-        continue;
-      }
-
-      events[index](event);
-
-      if (event.isPropagationStopped) {
-        break;
-      }
-    }
-  }
-
-  /**
-   * @param {Http.IncomingMessage} request
-   * @param {Function} callback
-   */
-  _readRequestData(request, callback) {
-    if (request.method === 'POST') {
-      let rawData = '';
-
-      request.on('data', function(chunk) {
-        rawData += chunk.toString();
-      });
-
-      request.on('end', function() {
-        callback(rawData);
-      });
-    } else {
-      callback(null);
-    }
-  }
-
-  /**
-   * @param {String} uri
-   * @returns {String}
-   * @private
-   */
-  _resolveMicroservice(uri) {
-    let parts = uri.replace(/^\/(.+)$/, '$1').split('/');
-
-    if (parts.length > 0) {
-      for (let identifier in this._microservices) {
-        if (!this._microservices.hasOwnProperty(identifier)) {
-          continue;
-        }
-
-        if (identifier === parts[0]) {
-          let microservice = this._microservices[identifier];
-
-          parts.shift();
-
-          return Path.join(microservice.frontend, ...parts);
-        }
-      }
-    }
-
-    return Path.join(this._rootMicroservice.frontend, ...parts);
-  }
-
-  /**
-   * @param {Http.ServerResponse} response
-   * @param {String} error
-   * @private
-   */
-  _send500(response, error) {
-    this._send(response, `${error}${OS.EOL}`, 500);
-  }
-
-  /**
-   * @param {Http.ServerResponse} response
-   * @param {String} message
-   * @private
-   */
-  _send404(response, message = null) {
-    this._send(response, message || `404 Not Found${OS.EOL}`, 404);
-  }
-
-  /**
-   * @param {Http.ServerResponse} response
-   * @param {String} content
-   * @param {Number} code
-   * @param {String} contentType
-   * @param {Boolean} isBinary
-   * @private
-   */
-  _send(response, content, code = 200, contentType = 'text/plain', isBinary = false) {
-    response.writeHead(code, {'Content-Type': contentType});
-
-    if (isBinary) {
-      response.write(content, 'binary');
-    } else {
-      response.write(content);
-    }
-
-    response.end();
+    this.listener.dispatchEvent(new ResponseEvent(request, response));
   }
 
   /**
@@ -702,19 +440,5 @@ export class Instance {
    */
   _log(...args) {
     this._logger(...args);
-  }
-
-  /**
-   * @returns {String}
-   */
-  static get LAMBDA_ASYNC_URI() {
-    return '/_/lambda-async';
-  }
-
-  /**
-   * @returns {String}
-   */
-  static get LAMBDA_URI() {
-    return '/_/lambda';
   }
 }
