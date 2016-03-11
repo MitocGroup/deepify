@@ -1,0 +1,52 @@
+'use strict';
+
+export class RequestListener {
+
+  /**
+   *
+   * @param {Instance} server
+   */
+  constructor(server) {
+    this._listeners = [];
+    this._server = server;
+  }
+
+  /**
+   * @param {ConfigListener|FileListener|LambdaListener} listener
+   * @param {Number} priority
+   */
+  register(listener, priority = 0) {
+    listener.server = this._server;
+
+    if (!this._listeners[priority]) {
+      this._listeners[priority] = [];
+    }
+
+    this._listeners[priority].push(listener);
+  }
+
+  /**
+   *
+   * @params {ResponseEvent} event
+   */
+  dispatchEvent(event) {
+    for (let priority in this._listeners) {
+      if (!this._listeners.hasOwnProperty(priority)) {
+        continue;
+      }
+
+      let listeners = this._listeners[priority];
+      for (let index in listeners) {
+        if (!listeners.hasOwnProperty(index)) {
+          continue;
+        }
+
+        listeners[index].handler(event);
+
+        if (event.isPropagationStopped) {
+          return;
+        }
+      }
+    }
+  }
+}

@@ -6,8 +6,8 @@ export class ResponseEvent {
 
   /**
    *
-   * @param {String} request
-   * @param {String} response
+   * @param {Http.IncomingMessage} request
+   * @param {Http.ServerResponse} response
    */
   constructor(request, response) {
     this._propagationStopped = false;
@@ -17,7 +17,7 @@ export class ResponseEvent {
 
   /**
    *
-   * @returns {String}
+   * @returns {Http.ServerResponse}
    */
   get response() {
     return this._response;
@@ -25,7 +25,7 @@ export class ResponseEvent {
 
   /**
    *
-   * @returns {String}
+   * @returns {Http.IncomingMessage}
    */
   get request() {
     return this._request;
@@ -33,12 +33,15 @@ export class ResponseEvent {
 
   /**
    *
-   * @param {String} response
+   * @param {Http.ServerResponse} response
    */
   set response(response) {
     this._response = response;
   }
 
+  /**
+   * Stop event propagation
+   */
   stopPropagation() {
     this._propagationStopped = true;
   }
@@ -52,12 +55,11 @@ export class ResponseEvent {
   }
 
   /**
-   * @param {String} error
+   * @param {Error|String} error
    * @private
    */
   send500(error) {
     this.send(`${error}${OS.EOL}`, 500);
-    this.stopPropagation();
   }
 
   /**
@@ -66,7 +68,6 @@ export class ResponseEvent {
    */
   send404(message = null) {
     this.send(message || `404 Not Found${OS.EOL}`, 404);
-    this.stopPropagation();
   }
 
   /**
@@ -86,5 +87,6 @@ export class ResponseEvent {
     }
 
     this.response.end();
+    this.stopPropagation();
   }
 }

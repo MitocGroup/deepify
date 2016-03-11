@@ -19,10 +19,10 @@ import DeepDB from 'deep-db';
 import DeepFS from 'deep-fs';
 import {Hook} from './Hook';
 import {ResponseEvent} from '../Helpers/ResponseEvent';
-import {Listener} from './Listener/Listener';
-import {ConfigRequestListener} from './Listener/ConfigRequestListener';
-import {FileRequestListener} from './Listener/FileRequestListener';
-import {LambdaRequestListener} from './Listener/LambdaRequestListener';
+import {RequestListener} from './Listener/RequestListener';
+import {ConfigListener} from './Listener/ConfigListener';
+import {FileListener} from './Listener/FileListener';
+import {LambdaListener} from './Listener/LambdaListener';
 
 export class Instance {
   /**
@@ -58,10 +58,11 @@ export class Instance {
     this._events[Instance.RESPONSE_EVENT] = [];
 
     this._setup();
-    this._listener = new Listener();
-    new ConfigRequestListener(this);
-    new FileRequestListener(this);
-    new LambdaRequestListener(this);
+
+    this._listener = new RequestListener(this);
+    this._listener.register(new ConfigListener(), 0);
+    this._listener.register(new FileListener(), 2);
+    this._listener.register(new LambdaListener(), 1);
   }
 
   /**

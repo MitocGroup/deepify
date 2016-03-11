@@ -1,11 +1,11 @@
 'use strict';
-import {AbstractRequestListener} from './AbstractRequestListener';
+import {AbstractListener} from './AbstractListener';
 import {Runtime as LambdaRuntime} from '../../Lambda/Runtime';
 import FileSystemExtra from 'fs-extra';
 import FileSystem from 'fs';
 import Path from 'path';
 
-export class LambdaRequestListener extends AbstractRequestListener {
+export class LambdaListener extends AbstractListener {
 
   /**
    *
@@ -13,29 +13,25 @@ export class LambdaRequestListener extends AbstractRequestListener {
    */
   constructor(...args) {
     super(...args);
-
-    this._server.listener.registerLambdaRequestListener((...args) => {
-      this._handler(...args);
-    });
   }
 
   /**
    *
    * @param {ResponseEvent} event
-   * @private
    */
-  _handler(event) {
+  handler(event) {
     let request = event.request;
-
     let uri = this.getUri(request.url);
-    if (this.isLambdaRequest(uri)) {
-      let isAsync = uri === LambdaRequestListener.LAMBDA_ASYNC_URI;
 
-      this._readRequestData(request, function(rawData) {
+    if (uri === LambdaListener.LAMBDA_URI || uri === LambdaListener.LAMBDA_ASYNC_URI) {
+      let isAsync = uri === LambdaListener.LAMBDA_ASYNC_URI;
+      event.stopPropagation(); // lambda runs async. stop other listeners
+
+      this._readRequestData(request, (rawData) => {
         let data = JSON.parse(rawData);
 
         if (!data) {
-          this._server.logger(`Broken Lambda payload: ${rawData}`);
+          this.server.logger(`Broken Lambda payload: ${rawData}`);
           event.send500('Error while parsing JSON request payload');
           return;
         }
@@ -43,15 +39,15 @@ export class LambdaRequestListener extends AbstractRequestListener {
         let lambda = data.lambda;
         let payload = data.payload;
 
-        this._server.logger(
+        this.server.logger(
           `Running Lambda ${lambda} with payload ${JSON.stringify(payload)}${isAsync ? ' in async mode' : ''}`
         );
 
-        if (this._server.buildPath) {
-          let lambdaConfig = this._server.buildConfig.lambdas[lambda];
+        if (this.server.buildPath) {
+          let lambdaConfig = this.server.buildConfig.lambdas[lambda];
 
           if (!lambdaConfig) {
-            this._server.logger(`Missing Lambda ${lambda} built config`);
+            this.server.logger(`Missing Lambda ${lambda} built config`);
             event.send404(`Unknown Lambda ${lambda}`);
             return;
           }
@@ -64,10 +60,10 @@ export class LambdaRequestListener extends AbstractRequestListener {
             }.bind(this)
           );
         } else {
-          let lambdaConfig = this._server.defaultLambdasConfig[lambda];
+          let lambdaConfig = this.server.defaultLambdasConfig[lambda];
 
           if (!lambdaConfig) {
-            this._server.logger(`Missing Lambda ${lambda} config`);
+            this.server.logger(`Missing Lambda ${lambda} config`);
             event.send404(`Unknown Lambda ${lambda}`);
             return;
           }
@@ -79,7 +75,7 @@ export class LambdaRequestListener extends AbstractRequestListener {
             lambdaConfig,
             (error) => {
               if (error) {
-                this._server.logger(`Unable to persist fake Lambda ${lambda} config: ${error}`);
+                this.server.logger(`Unable to persist fake Lambda ${lambda} config: ${error}`);
                 event.send500(error);
                 return;
               }
@@ -88,7 +84,7 @@ export class LambdaRequestListener extends AbstractRequestListener {
             }
           );
         }
-      }.bind(this));
+      });
     }
   }
 
@@ -126,16 +122,16 @@ export class LambdaRequestListener extends AbstractRequestListener {
       lambdaConfig.buildPath ? Path.join(lambdaConfig.buildPath, '.aws.json') : null
     );
 
-    lambda.name = `${lambdaConfig.name}-${this._server.localId}`;
+    lambda.name = `${lambdaConfig.name}-${this.server.localId}`;
 
     let successCb = (result) => {
       let plainResult = JSON.stringify(result);
 
       if (!asyncMode) {
-        this._server.logger(`Serving result for Lambda ${lambdaConfig.name}: ${plainResult}`);
+        this.server.logger(`Serving result for Lambda ${lambdaConfig.name}: ${plainResult}`);
         event.send(plainResult, 200, 'application/json', false);
       } else {
-        this._server.logger(`Result for Lambda ${lambdaConfig.name} async call: ${plainResult}`);
+        this.server.logger(`Result for Lambda ${lambdaConfig.name} async call: ${plainResult}`);
       }
     };
 
@@ -157,11 +153,11 @@ export class LambdaRequestListener extends AbstractRequestListener {
       }
 
       if (!asyncMode) {
-        this._server.logger(`Lambda ${lambdaConfig.name} execution fail`, errorObj.errorMessage);
+        this.server.logger(`Lambda ${lambdaConfig.name} execution fail`, errorObj.errorMessage);
 
         successCb(errorObj);
       } else {
-        this._server.logger(`Lambda ${lambdaConfig.name} async execution fail`, errorObj.errorMessage);
+        this.server.logger(`Lambda ${lambdaConfig.name} async execution fail`, errorObj.errorMessage);
       }
     };
 
@@ -170,5 +166,19 @@ export class LambdaRequestListener extends AbstractRequestListener {
     if (asyncMode) {
       event.send(JSON.stringify(null), 202, 'application/json', false);
     }
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get LAMBDA_ASYNC_URI() {
+    return '/_/lambda-async';
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get LAMBDA_URI() {
+    return '/_/lambda';
   }
 }
