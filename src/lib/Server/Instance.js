@@ -60,9 +60,10 @@ export class Instance {
     this._setup();
 
     this._listener = new RequestListener(this);
-    this._listener.register(new ConfigListener(), 0);
-    this._listener.register(new LambdaListener(), 1);
-    this._listener.register(new FileListener(), 2);
+    this._listener
+      .register(new ConfigListener(), 0)
+  .register(new LambdaListener(), 1)
+  .register(new FileListener(), 2);
   }
 
   /**

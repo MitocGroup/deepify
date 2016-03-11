@@ -1,4 +1,5 @@
 'use strict';
+
 import {AbstractListener} from './AbstractListener';
 import {Runtime as LambdaRuntime} from '../../Lambda/Runtime';
 import FileSystemExtra from 'fs-extra';
