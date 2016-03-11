@@ -6,7 +6,7 @@ import Path from 'path';
 export class AbstractListener {
 
   constructor() {
-    this._server = null;
+    this._server = {};
   }
 
   /**

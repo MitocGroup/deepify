@@ -6,12 +6,8 @@ import Mime from 'mime';
 
 export class ConfigListener extends AbstractListener {
 
-  /**
-   *
-   * @param {Array} args
-   */
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super();
   }
 
   /**

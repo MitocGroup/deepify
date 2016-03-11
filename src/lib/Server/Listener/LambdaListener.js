@@ -7,12 +7,8 @@ import Path from 'path';
 
 export class LambdaListener extends AbstractListener {
 
-  /**
-   *
-   * @param {Array} args
-   */
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super();
   }
 
   /**

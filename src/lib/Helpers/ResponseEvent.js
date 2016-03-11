@@ -48,7 +48,7 @@ export class ResponseEvent {
 
   /**
    *
-   * @returns {boolean}
+   * @returns {Boolean}
    */
   get isPropagationStopped() {
     return this._propagationStopped;

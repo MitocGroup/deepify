@@ -8,12 +8,8 @@ import {Tags_Driver_PageLoaderDriver as PageLoaderDriver} from 'deep-package-man
 
 export class FileListener  extends AbstractListener {
 
-  /**
-   *
-   * @param {Array} args
-   */
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super();
   }
 
   /**
