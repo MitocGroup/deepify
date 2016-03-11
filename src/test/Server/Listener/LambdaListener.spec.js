@@ -12,10 +12,10 @@ suite('Server/Listener/LambdaListener', function() {
   });
 
   test('Check LAMBDA_URI static getter', () => {
-    chai.expect(AbstractRequestListener.LAMBDA_URI).to.equal('/_/lambda');
+    chai.expect(LambdaListener.LAMBDA_URI).to.equal('/_/lambda');
   });
 
   test('Check LAMBDA_ASYNC_URI static getter', () => {
-    chai.expect(AbstractRequestListener.LAMBDA_ASYNC_URI).to.equal('/_/lambda-async');
+    chai.expect(LambdaListener.LAMBDA_ASYNC_URI).to.equal('/_/lambda-async');
   });
 });

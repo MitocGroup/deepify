@@ -11,7 +11,8 @@ import {Property_Instance as PropertyInstance} from 'deep-package-manager'
 suite('Server/Listener/AbstractListener', function() {
   let propertyInstance = new PropertyInstance('./test/TestMaterials/Property2', 'deeploy.test.json');
   let server = new Instance(propertyInstance);
-  let abstractRequest = new AbstractRequestListener(server);
+  let abstractRequest = new AbstractListener();
+  abstractRequest.server = server;
 
   test('Class AbstractListener exists in Server/Listener/AbstractListener', () => {
     chai.expect(AbstractListener).to.be.an('function');
