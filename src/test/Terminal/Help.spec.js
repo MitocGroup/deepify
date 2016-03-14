@@ -6,7 +6,7 @@ import {Program} from '../../lib/Terminal/Program';
 import {ProgramInstanceRequiredException} from '../../lib/Terminal/Exception/ProgramInstanceRequiredException';
 
 suite('Terminal/Help', () => {
-  let programName = 'testProgramName';
+  let programName = 'testprogramname';
   let programVersion = 'testProgramVersion';
   let programDescription = 'testProgramDescription';
   let programExample = 'testProgramExample';

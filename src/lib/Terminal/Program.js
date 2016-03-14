@@ -24,14 +24,15 @@ export class Program {
    * @param {String} example
    */
   constructor(name = null, version = null, description = null, example = null) {
-    this._name = name;
+    this._name = name.toLowerCase();
     this._version = version;
     this._example = example;
     this._description = description;
+
     this._commands = [];
     this._inputParsed = false;
     this._unmanagedArgs = [];
-    this._action = function() {};
+    this._action = () => {};
 
     this._opts = new Options();
     this._args = new Arguments();
@@ -110,7 +111,7 @@ export class Program {
     this._opts.create('help', 'h', 'Prints command help');
 
     if (this.hasCommands) {
-      this._args.create('command', 'Command to run');
+      this._args.create('command', 'Command to run', false, false, (cmd) => !!this.getCommand(cmd));
     }
 
     return this;
@@ -259,10 +260,12 @@ export class Program {
   }
 
   /**
-   * @param name
-   * @returns {*}
+   * @param {String} name
+   * @returns {Program|*}
    */
   getCommand(name) {
+    name = name.toLowerCase();
+
     for (let i in this._commands) {
       if (!this._commands.hasOwnProperty(i)) {
         continue;
@@ -401,7 +404,7 @@ export class Program {
    * @param {String} value
    */
   set name(value) {
-    this._name = value;
+    this._name = value.toLowerCase();
   }
 
   /**
