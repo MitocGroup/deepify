@@ -8,10 +8,10 @@ import Path from 'path';
 import AWS from 'aws-sdk';
 import JsonFile from 'jsonfile';
 import RequireProxy from 'proxyquire';
-import {Helpers_Hash as Hash} from 'deep-package-manager';
 import {Thread} from './Thread';
 import {Timer} from './Timer';
 import {ForksManager} from './ForksManager';
+import {Property_Lambda as Lambda} from 'deep-package-manager';
 
 /**
  * Lambda runtime
@@ -33,7 +33,7 @@ export class Runtime {
     this._timer = null;
 
     this._silent = false;
-    this._name = Hash.pseudoRandomId(this);
+    this._name = null;
     this._lambdaPath = lambdaPath;
     this._awsConfigFile = null;
   }
@@ -100,7 +100,22 @@ export class Runtime {
    * @returns {String}
    */
   get arnName() {
-    return this._name.replace(/\-\d+$/i, '');
+    let name = this._name || this._extractLambdaNameFromConfig() || '';
+
+    return name.replace(/\-\d+$/i, '');
+  }
+
+  /**
+   * @returns {String}
+   */
+  _extractLambdaNameFromConfig() {
+    let configFile = this._awsConfigFile || Path.join(Path.dirname(this._lambdaPath), Lambda.CONFIG_FILE);
+
+    try {
+      return JsonFile.readFileSync(configFile).name;
+    } catch (error) {
+      return null;
+    }
   }
 
   /**
