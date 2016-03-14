@@ -8,7 +8,7 @@ import os from 'os';
 import path from 'path';
 
 suite('Terminal/Program', () => {
-  let programName = 'testProgramName';
+  let programName = 'testprogramname';
   let programVersion = 'testProgramVersion';
   let programDescription = 'testProgramDescription';
   let programExample = 'testProgramExample';
