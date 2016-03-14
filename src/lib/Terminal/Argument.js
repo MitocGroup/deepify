@@ -10,12 +10,14 @@ export class Argument {
    * @param {String} description
    * @param {Boolean} required
    * @param {Boolean} hidden
+   * @param {Function} validator
    */
-  constructor(name, description = null, required = false, hidden = false) {
+  constructor(name, description = null, required = false, hidden = false, validator = null) {
     this._name = name;
     this._description = description;
     this._required = required;
     this._hidden = hidden;
+    this._validator = validator;
 
     this._value = undefined;
     this._exists = false;
@@ -41,7 +43,7 @@ export class Argument {
 
       let arg = args[i];
 
-      if (Argument._matchNonOption(arg)) {
+      if (Argument._matchNonOption(arg) && this._validateValue(arg)) {
         this._value = arg;
         this._exists = true;
 
@@ -52,6 +54,29 @@ export class Argument {
     }
 
     return this;
+  }
+
+  /**
+   * @param {*} arg
+   * @returns {Boolean}
+   * @private
+   */
+  _validateValue(arg) {
+    return !this._validator || this._validator(arg);
+  }
+
+  /**
+   * @returns {Function}
+   */
+  get validator() {
+    return this._validator;
+  }
+
+  /**
+   * @param {Function} validator
+   */
+  set validator(validator) {
+    this._validator = validator;
   }
 
   /**
