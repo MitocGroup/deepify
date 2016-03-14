@@ -19,10 +19,10 @@ suite('Terminal/Program', () => {
   });
 
   test('Check constructor sets correctly values by default', () => {
-    program = new Program();
+    program = new Program(programName);
 
     chai.expect(program, 'is an instance of Program').to.be.an.instanceOf(Program);
-    chai.expect(program.name).to.be.equal(null);
+    chai.expect(program.name).to.be.equal(programName);
     chai.expect(program.version).to.be.equal(null);
     chai.expect(program.description).to.be.equal(null);
     chai.expect(program.example).to.be.equal(null);
