@@ -42,7 +42,6 @@ module.exports = function(mainPath) {
   }
 
   var property = new Property(mainPath);
-  var server = new Server(property);
 
   if (skipBackendBuild) {
     property.assureFrontendEngine(function(error) {
@@ -51,7 +50,7 @@ module.exports = function(mainPath) {
       }
 
       property.runInitMsHooks(function() {
-        startServer();
+        startServer(new Server(property));
       }.bind(this));
     }.bind(this));
   } else {
@@ -69,11 +68,11 @@ module.exports = function(mainPath) {
         this.exit(1);
       }
 
-      startServer();
+      startServer(new Server(property));
     }.bind(this), true);
   }
 
-  function startServer() {
+  function startServer(server) {
     if (buildPath) {
       server.buildPath = buildPath;
     }
