@@ -68,7 +68,8 @@
     "aws-api-gw-client": "^0.1.x",
     "mime": "^1.3.x",
     "gather-dependencies": "^1.0.x",
-    "aws-sdk": "^2.2.x"
+    "aws-sdk": "^2.2.x",
+    "semver": "^5.1.x"
   },
   "devDependencies": {
     "chai": "^3.2.x",

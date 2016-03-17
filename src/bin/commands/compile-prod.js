@@ -11,6 +11,7 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
+  var LodashOptimizer = require('../../lib.compiled/Helpers/LodashOptimizer').LodashOptimizer;
   var ValidationSchemasSync = require('../../lib.compiled/Helpers/ValidationSchemasSync').ValidationSchemasSync;
   var DepsTreeOptimizer = require('../../lib.compiled/NodeJS/DepsTreeOptimizer').DepsTreeOptimizer;
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
@@ -262,22 +263,26 @@ module.exports = function(mainPath) {
             console.log('Cleanup Lambda sources in ' + lambdaTmpPath);
           }
 
-          if (installSdk) {
-            console.log('Installing latest aws-sdk into ' + lambdaTmpPath);
+          // @todo: get rid of this optimizer?
+          new LodashOptimizer(lambdaTmpPath)
+            .optimize(function() {
+              if (installSdk) {
+                console.log('Installing latest aws-sdk into ' + lambdaTmpPath);
 
-            var npmLink = new NpmInstallLibs(lambdaTmpPath);
-            npmLink.libs = 'aws-sdk';
+                var npmLink = new NpmInstallLibs(lambdaTmpPath);
+                npmLink.libs = 'aws-sdk';
 
-            npmLink.run(function() {
-              packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
-                remaining--;
-              }.bind(this));
-            }.bind(this));
-          } else {
-            packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
-              remaining--;
-            }.bind(this));
-          }
+                npmLink.run(function() {
+                  packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
+                    remaining--;
+                  }.bind(this));
+                }.bind(this));
+              } else {
+                packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
+                  remaining--;
+                }.bind(this));
+              }
+            });
         }.bind(this, lambdaPath, lambdaTmpPath));
     }
   }
