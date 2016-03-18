@@ -13,9 +13,11 @@ import fse from 'fs-extra';
 export class LodashOptimizer {
   /**
    * @param {String} lambdaPath
+   * @param {Boolean} quiet
    */
-  constructor(lambdaPath) {
+  constructor(lambdaPath, quiet = true) {
     this._lambdaPath = lambdaPath;
+    this._quiet = quiet;
   }
 
   /**
@@ -23,6 +25,13 @@ export class LodashOptimizer {
    */
   get lambdaPath() {
     return this._lambdaPath;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  get quiet() {
+    return this._quiet;
   }
 
   /**
@@ -43,43 +52,64 @@ export class LodashOptimizer {
         return;
       }
 
-      var prompt = new Prompt(LodashOptimizer.getPromptMsg(versions));
+      this._confirm(
+        LodashOptimizer.getPromptMsg(versions),
+        () => {
+          let mainVersion = versions.shift();
+          let basePath = path.dirname(lodashObj[mainVersion]);
 
-      prompt.readConfirm((result) => {
-        if (!result) {
+          versions.forEach((version) => {
+            let lodashPath = lodashObj[version];
+
+            try {
+              fse.removeSync(lodashPath);
+            } catch (error) {
+              console.error(error);
+            }
+
+            let linkCmd = new Exec(
+              `ln -s ./${LodashOptimizer.LODASH}@${mainVersion} ${LodashOptimizer.LODASH}@${version}`
+            );
+            linkCmd.cwd = basePath;
+
+            let result = linkCmd.runSync();
+
+            if (result.failed) {
+              console.error(result.error);
+            }
+          });
+
           cb(null);
-          return;
+        },
+        () => {
+          cb(null);
         }
-
-        let mainVersion = versions.shift();
-        let basePath = path.dirname(lodashObj[mainVersion]);
-
-        versions.forEach((version) => {
-          let lodashPath = lodashObj[version];
-
-          try {
-            fse.removeSync(lodashPath);
-          } catch (error) {
-            console.error(error);
-          }
-
-          let linkCmd = new Exec(
-            `ln -s ./${LodashOptimizer.LODASH}@${mainVersion} ${LodashOptimizer.LODASH}@${version}`
-          );
-          linkCmd.cwd = basePath;
-
-          let result = linkCmd.runSync();
-
-          if (result.failed) {
-            console.error(result.error);
-          }
-        });
-
-        cb(null);
-      });
+      );
     });
 
     return this;
+  }
+
+  /**
+   * @param {String} msg
+   * @param {Function} onConfirmCb
+   * @param {Function} onCancelCb
+   * @private
+   */
+  _confirm(msg, onConfirmCb, onCancelCb) {
+    if (this._quiet) {
+      onConfirmCb();
+      return;
+    }
+
+    new Prompt(msg).readConfirm((result) => {
+      if (!result) {
+        onCancelCb();
+        return;
+      }
+
+      onConfirmCb();
+    });
   }
 
   /**
@@ -91,7 +121,7 @@ export class LodashOptimizer {
 
     let mainVersion = versionsCopy.shift();
 
-    return `Would you to merge ${LodashOptimizer.LODASH}@${mainVersion} in ${this._lambdaPath}` +
+    return `Would you like to merge ${LodashOptimizer.LODASH}@${mainVersion} in ${this._lambdaPath}` +
       ` with the following older versions: ${versionsCopy.join(', ')}?`;
   }
 
