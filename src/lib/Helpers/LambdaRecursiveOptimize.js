@@ -198,9 +198,6 @@ export class LambdaRecursiveOptimize {
       parse: {
         strict: false,
       },
-      output: {
-        ie_proof: false,
-      },
     };
   }
 
