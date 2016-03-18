@@ -14,11 +14,31 @@ import {Spinner} from 'cli-spinner';
 export class LambdaRecursiveOptimize {
   /**
    * @param {String} lambdaPath
+   * @param {Boolean} spinner
+   * @param {Boolean} singleInstanceOnly
    */
-  constructor(lambdaPath) {
+  constructor(lambdaPath, spinner = true, singleInstanceOnly = true) {
     this._lambdaPath = lambdaPath;
+    this._spinner = spinner;
+    this._singleInstanceOnly = singleInstanceOnly;
 
-    this._spinner = null;
+    this._spinnerObj = null;
+
+    LambdaRecursiveOptimize._inUse = LambdaRecursiveOptimize._inUse || false;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  get singleInstanceOnly() {
+    return this._singleInstanceOnly;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  get spinner() {
+    return this._spinner;
   }
 
   /**
@@ -33,17 +53,56 @@ export class LambdaRecursiveOptimize {
    * @returns {LambdaRecursiveOptimize}
    */
   run(cb) {
-    this._runChunks(this._jsFilesChunks, () => {
+    this._waitUntilUnlocked(() => {
+      this
+        ._lock()
+        ._runChunks(this._jsFilesChunks, () => {
+          if (this._spinnerObj) {
+            this._spinnerObj.stop(true);
+            this._spinnerObj = null;
+          }
 
-      if (this._spinner) {
-        this._spinner.stop();
-        this._spinner = null;
-      }
+          this._unlock();
 
-      cb();
+          cb();
+        });
     });
 
     return this;
+  }
+
+  /**
+   * @returns {LambdaRecursiveOptimize}
+   * @private
+   */
+  _unlock() {
+    LambdaRecursiveOptimize._inUse = false;
+
+    return this;
+  }
+
+  /**
+   * @returns {LambdaRecursiveOptimize}
+   * @private
+   */
+  _lock() {
+    LambdaRecursiveOptimize._inUse = true;
+
+    return this;
+  }
+
+  /**
+   * @param {Function} cb
+   * @private
+   */
+  _waitUntilUnlocked(cb) {
+    let wait = new WaitFor();
+
+    wait.push(() => {
+      return !this._singleInstanceOnly || !LambdaRecursiveOptimize._inUse;
+    });
+
+    wait.ready(cb);
   }
 
   /**
@@ -51,16 +110,20 @@ export class LambdaRecursiveOptimize {
    * @private
    */
   _updateSpinner(chunks) {
-    let title = `%s ${chunks.length} chunks remaining...`;
-
     if (!this._spinner) {
-      this._spinner = new Spinner(title);
-    } else {
-      this._spinner.setSpinnerTitle(title);
+      return;
     }
 
-    if (!this._spinner.isSpinning()) {
-      this._spinner.start();
+    let title = `%s ${chunks.length} chunks remaining...`;
+
+    if (!this._spinnerObj) {
+      this._spinnerObj = new Spinner(title);
+    } else {
+      this._spinnerObj.setSpinnerTitle(title);
+    }
+
+    if (!this._spinnerObj.isSpinning()) {
+      this._spinnerObj.start();
     }
   }
 
@@ -137,29 +200,6 @@ export class LambdaRecursiveOptimize {
       },
       output: {
         ie_proof: false,
-        beautify: false,
-        comments: false,
-      },
-      compress: {
-        sequences: true,
-        properties: true,
-        dead_code: true,
-        drop_debugger: true,
-        unsafe: false,
-        conditionals: true,
-        comparisons: true,
-        evaluate: true,
-        hoist_funs: true,
-        hoist_vars: false,
-        booleans: true,
-        loops: true,
-        unused: true,
-        if_return: true,
-        join_vars: true,
-        cascade: true,
-        warnings: false,
-        keep_fargs: true,
-        keep_fnames: true,
       },
     };
   }
