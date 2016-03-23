@@ -10,7 +10,6 @@ module.exports = function(mainPath) {
   var Undeploy = require('deep-package-manager').Provisioning_Undeploy;
   var ProvisioningDumpFileMatcher = require('deep-package-manager').Provisioning_UndeployMatcher_ProvisioningDumpFileMatcher;
   var AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
-  var path = require('path');
   var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
 
   var dirtyMode = this.opts.locate('dirty').exists;
