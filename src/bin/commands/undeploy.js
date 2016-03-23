@@ -10,9 +10,10 @@ module.exports = function(mainPath) {
   var Undeploy = require('deep-package-manager').Provisioning_Undeploy;
   var ProvisioningDumpFileMatcher = require('deep-package-manager').Provisioning_UndeployMatcher_ProvisioningDumpFileMatcher;
   var AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
-  var path = require('path');
+  var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
 
   var dirtyMode = this.opts.locate('dirty').exists;
+  var forceProd = this.opts.locate('prod').exists;
   var cfgBucket = this.opts.locate('cfg-bucket').value;
   var rawResource = this.opts.locate('resource').value;
 
@@ -34,9 +35,7 @@ module.exports = function(mainPath) {
     }
   }
 
-  if (mainPath.indexOf(path.sep) !== 0) {
-    mainPath = path.join(process.cwd(), mainPath);
-  }
+  mainPath = this.normalizeInputPath(mainPath);
 
   var property = new Property(mainPath, Config.DEFAULT_FILENAME);
   var matcher = new ProvisioningDumpFileMatcher(property);
@@ -51,6 +50,23 @@ module.exports = function(mainPath) {
     }
 
     var backupConfig = !error;
+
+    // @todo: confirm prod env undeploy
+    if (!error && !resource && !dirtyMode && matcher.property.env.toLowerCase() === 'prod' && !forceProd) {
+      var prompt = new Prompt(
+        'You are about to undeploy production environment.\n' +
+        'Please type "YES" in order to confirm the undeploy.'
+      );
+
+      prompt.syncMode = true;
+
+      prompt.read(function(confirmation) {
+        if ((confirmation || '').toLowerCase() !== 'yes') {
+          console.log('Undeploy cancelled by user');
+          this.exit(0);
+        }
+      }.bind(this));
+    }
 
     var undeploy = new Undeploy(
       property,

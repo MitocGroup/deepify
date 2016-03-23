@@ -5,7 +5,7 @@
 
 'use strict';
 
-module.exports = function(dependency) {
+module.exports = function(dependency, dumpPath) {
 
   // @todo: move it in some json config?
   var DEFAULT_REGISTRY_BASE_HOST = 'https://deep.mg';
@@ -27,14 +27,22 @@ module.exports = function(dependency) {
     DEFAULT_REGISTRY_BASE_HOST;
 
   var workingDirectory = process.cwd();
-  var skipGitHubDeps = this.opts.locate('skip-github-deps').exists;
   var gitHubAuthPair = this.opts.locate('github-auth').value;
   var initApp = this.opts.locate('init').exists;
   var depParts = parseDep();
   var depName = depParts[0];
   var depVersion = depParts[1];
 
+  if (dumpPath) {
+    dumpPath = this.normalizeInputPath(dumpPath);
+  }
+
   if (depName) {
+
+    // @todo: remove on the next major release
+    // the following code is here for back compatibility
+    depName = depName.replace(/^(?:https?:\/\/)github\.com\/([^\/]+\/[^\/]+)(?:\.git)$/i, 'github://$1');
+
     var fetcher = GitHubDependency.isGitHubDependency(depName) ? fetchGitHub : fetchRepository;
 
     fetcher.bind(this)(function(error) {
@@ -154,35 +162,35 @@ module.exports = function(dependency) {
       depObj.auth(gitHubCred[0], gitHubCred[1]);
     }
 
-    var dumpPath = path.join(workingDirectory, depObj.shortDependencyName);
+    var localDumpPath = path.join(dumpPath || workingDirectory, depObj.shortDependencyName);
 
     depObj.extract(
-      dumpPath,
+      localDumpPath,
       function(error) {
         if (error) {
           console.error(error);
           this.exit(1);
         }
 
-        if (skipGitHubDeps) {
+        var microservice = Microservice.create(localDumpPath);
+        var deps = microservice.config.dependencies;
+
+        if (deps && Object.keys(deps).length > 0) {
+          createRegistry.bind(this)(function(registry) {
+            console.log('Installing \'' + depObj.shortDependencyName + '\' dependencies');
+
+            registry.install(createProperty(), function(error) {
+              if (error) {
+                console.error(error);
+                this.exit(1);
+              }
+
+              cb.bind(this)();
+            }.bind(this), [microservice.identifier]);
+          }.bind(this));
+        } else {
           cb.bind(this)();
-          return;
         }
-
-        var microservice = Microservice.create(dumpPath);
-
-        createRegistry.bind(this)(function(registry) {
-          console.log('Installing \'' + depObj.shortDependencyName + '\' dependencies');
-
-          registry.install(createProperty(), function(error) {
-            if (error) {
-              console.error(error);
-              this.exit(1);
-            }
-
-            cb.bind(this)();
-          }.bind(this), [microservice.identifier]);
-        }.bind(this));
       }.bind(this)
     );
   }

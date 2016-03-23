@@ -11,17 +11,14 @@ module.exports = function(dumpPath) {
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
 
-  if (dumpPath.indexOf(path.sep) !== 0) {
-    dumpPath = path.join(process.cwd(), dumpPath);
-  }
+  dumpPath = this.normalizeInputPath(dumpPath);
 
   var cmd = new Exec(
     Bin.node,
     this.scriptPath,
     'install',
     'github://MitocGroup/deep-microservices-helloworld',
-    '--init',
-    '--skip-github-deps'
+    '--init'
   );
 
   fse.ensureDirSync(dumpPath);

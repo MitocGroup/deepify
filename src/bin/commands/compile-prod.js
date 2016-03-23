@@ -11,6 +11,8 @@ module.exports = function(mainPath) {
   var fs = require('fs');
   var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
+  var LodashOptimizer = require('../../lib.compiled/Helpers/LodashOptimizer').LodashOptimizer;
+  var LambdaRecursiveOptimize = require('../../lib.compiled/Helpers/LambdaRecursiveOptimize').LambdaRecursiveOptimize;
   var ValidationSchemasSync = require('../../lib.compiled/Helpers/ValidationSchemasSync').ValidationSchemasSync;
   var DepsTreeOptimizer = require('../../lib.compiled/NodeJS/DepsTreeOptimizer').DepsTreeOptimizer;
   var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
@@ -29,9 +31,7 @@ module.exports = function(mainPath) {
   var installSdk = this.opts.locate('aws-sdk').exists;
   var microservicesToDeploy = this.opts.locate('partial').value;
 
-  if (mainPath.indexOf(path.sep) !== 0) {
-    mainPath = path.join(process.cwd(), mainPath);
-  }
+  mainPath = this.normalizeInputPath(mainPath);
 
   var property = new Property(mainPath);
   property.microservicesToUpdate = getMicroservicesToDeploy();
@@ -255,31 +255,57 @@ module.exports = function(mainPath) {
 
       cleanupCmd.cwd = lambdaTmpPath;
 
+      console.log('Cleanup Lambda sources in ' + lambdaTmpPath);
+
       cleanupCmd
         .avoidBufferOverflow()
         .run(function(lambdaPath, lambdaTmpPath, result) {
           if (result.failed) {
             console.error(result.error);
-          } else {
-            console.log('Cleanup Lambda sources in ' + lambdaTmpPath);
           }
 
-          if (installSdk) {
-            console.log('Installing latest aws-sdk into ' + lambdaTmpPath);
+          // @todo: move it somewhere...
+          var cleanupCmd = new Exec('find . -type l -exec sh -c \'for x; do [ -e "$x" ] || rm "$x"; done\' _ {} +');
 
-            var npmLink = new NpmInstallLibs(lambdaTmpPath);
-            npmLink.libs = 'aws-sdk';
+          cleanupCmd.cwd = lambdaTmpPath;
 
-            npmLink.run(function() {
-              packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
-                remaining--;
-              }.bind(this));
+          console.log('Fix broken links in ' + lambdaTmpPath);
+
+          cleanupCmd
+            .avoidBufferOverflow()
+            .run(function(result) {
+              if (result.failed) {
+                console.error(result.error);
+              }
+
+              console.log('Running lodash optimizer');
+
+              // @todo: get rid of this optimizer?
+              new LodashOptimizer(lambdaTmpPath)
+                .optimize(function() {
+                  console.log('Running .js optimizer');
+
+                  new LambdaRecursiveOptimize(lambdaTmpPath)
+                    .run(function() {
+                      if (installSdk) {
+                        console.log('Installing latest aws-sdk into ' + lambdaTmpPath);
+
+                        var npmLink = new NpmInstallLibs(lambdaTmpPath);
+                        npmLink.libs = 'aws-sdk';
+
+                        npmLink.run(function() {
+                          packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
+                            remaining--;
+                          }.bind(this));
+                        }.bind(this));
+                      } else {
+                        packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
+                          remaining--;
+                        }.bind(this));
+                      }
+                    }.bind(this));
+                }.bind(this));
             }.bind(this));
-          } else {
-            packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
-              remaining--;
-            }.bind(this));
-          }
         }.bind(this, lambdaPath, lambdaTmpPath));
     }
   }

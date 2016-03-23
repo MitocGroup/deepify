@@ -13,6 +13,8 @@ import {InvalidActionException} from './Exception/InvalidActionException';
 import {UnknownOptionException} from './Exception/UnknownOptionException';
 import {ValidationException} from './Exception/ValidationException';
 import DeepLog from 'deep-log';
+import path from 'path';
+import os from 'os';
 
 export class Program {
   /**
@@ -22,14 +24,15 @@ export class Program {
    * @param {String} example
    */
   constructor(name = null, version = null, description = null, example = null) {
-    this._name = name;
+    this._name = name.toLowerCase();
     this._version = version;
     this._example = example;
     this._description = description;
+
     this._commands = [];
     this._inputParsed = false;
     this._unmanagedArgs = [];
-    this._action = function() {};
+    this._action = () => {};
 
     this._opts = new Options();
     this._args = new Arguments();
@@ -57,8 +60,8 @@ export class Program {
    * @returns {Program}
    */
   inherit(program) {
-    this._args.merge(program.args);
     this._opts.merge(program.opts);
+    this._args.merge(program.args);
 
     if (!this.hasCommands) {
       this._args.remove('command');
@@ -66,10 +69,9 @@ export class Program {
 
     this._nodeBinary = program.nodeBinary;
     this._scriptPath = this._scriptPath || program.scriptPath;
-
     this._version = this._version || program.version;
 
-    this.input(program.unmanagedArgs);
+    this.input([].concat(program.unmanagedArgs));
 
     return this;
   }
@@ -79,15 +81,15 @@ export class Program {
    * @returns {Program}
    */
   input(args = null) {
-    if (!args) {
+    if (args === null) {
       args = process.argv;
 
       // @todo: do we have to hook here?
       this._nodeBinary = args.shift(); // remove 'node'
       this._scriptPath = args.shift(); // remove 'path/to/main/script.js'
-    }
 
-    Options.normalizeInputOpts(args);
+      Options.normalizeInputOpts(args);
+    }
 
     this._opts.populate(args);
     this._args.populate(args);
@@ -109,7 +111,7 @@ export class Program {
     this._opts.create('help', 'h', 'Prints command help');
 
     if (this.hasCommands) {
-      this._args.create('command', 'Command to run');
+      this._args.create('command', 'Command to run', false, false, (cmd) => !!this.getCommand(cmd));
     }
 
     return this;
@@ -258,10 +260,12 @@ export class Program {
   }
 
   /**
-   * @param name
-   * @returns {*}
+   * @param {String} name
+   * @returns {Program|*}
    */
   getCommand(name) {
+    name = name.toLowerCase();
+
     for (let i in this._commands) {
       if (!this._commands.hasOwnProperty(i)) {
         continue;
@@ -400,7 +404,7 @@ export class Program {
    * @param {String} value
    */
   set name(value) {
-    this._name = value;
+    this._name = value.toLowerCase();
   }
 
   /**
@@ -449,5 +453,45 @@ export class Program {
     }
 
     return Program.__deep_log;
+  }
+
+  /**
+   * @returns {String}
+   * @private
+   */
+  get _homeDir() {
+    if (os.homedir) {
+      return os.homedir();
+    }
+
+    return process.env.HOME || path.sep;
+  }
+
+  /**
+   * @param {String} inputPath
+   * @returns {String}
+   */
+  normalizeInputPath(inputPath) {
+
+    // set current working directory if empty or no path provided
+    inputPath = inputPath || process.cwd();
+
+    // case some unresolved bash pwd
+    inputPath = inputPath.replace(/(`\s*pwd\s*`|\$\(\s*pwd\s*\))/ig, process.cwd());
+
+    // case tilda used (both ~ and ~/xxx cases)
+    if (/^~(?:(?:\/|\\).+)?$/i.test(inputPath)) {
+      inputPath = path.join(this._homeDir, (inputPath && inputPath.length >= 2) ? inputPath.substr(2) : '');
+    }
+
+    // case relative path provided
+    // check for windows full path like c:/xxx to avoid transformation
+    if (!/^(?:\/|\\)/i.test(inputPath) &&
+      !(/^win/.test(process.platform) && /^[a-z]:(?:\/|\\)/i.test(inputPath))) {
+
+      inputPath = path.join(process.cwd(), inputPath);
+    }
+
+    return path.resolve(inputPath);
   }
 }

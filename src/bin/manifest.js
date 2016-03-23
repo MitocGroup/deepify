@@ -22,7 +22,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to dump the sample web app into',
-          required: true,
+          required: false,
         },
       },
     },
@@ -44,16 +44,15 @@ module.exports = {
           alias: 'a',
           description: 'GitHub credentials pair used for Basic authentication (ex. "user:token" or simply "token")',
           required: false,
-        },
-        'skip-github-deps': {
-          alias: 's',
-          description: 'Skip fetching dependencies when working with a GitHub hosted microservice',
-          required: false,
-        },
+        }
       },
       args: {
         dependency: {
           description: 'The dependency you want to fetch (ex. "deep.ng.todo@^0.0.x")',
+          required: false,
+        },
+        dumpPath: {
+          description: '[DEPRECATED] The path to dump dependency into (works with GitHub only!)',
           required: false,
         },
       },
@@ -77,11 +76,6 @@ module.exports = {
           description: 'Skip building backend (dependencies installation in Lambdas and linking aws-sdk)',
           required: false,
         },
-        'skip-build-hook': {
-          alias: 'h',
-          description: 'Skip running build hook (hook.build.js)',
-          required: false,
-        },
         port: {
           alias: 'p',
           description: 'Port to listen to',
@@ -101,7 +95,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the Lambda (directory of handler itself)',
-          required: true,
+          required: false,
         },
       },
     },
@@ -152,7 +146,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -175,11 +169,16 @@ module.exports = {
           description: 'Force cleaning up all resources if .cfg.deeploy.json file missing',
           required: false,
         },
+        prod: {
+          alias: 'p',
+          description: 'Do not ask for production environment undeploy confirmation',
+          required: false,
+        },
       },
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -196,7 +195,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the microservice you want to publish',
-          required: true,
+          required: false,
         },
       },
     },
@@ -235,7 +234,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -247,7 +246,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -264,7 +263,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -276,7 +275,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the lambda root',
-          required: true,
+          required: false,
         },
       },
     },
@@ -303,7 +302,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -315,7 +314,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the microservice',
-          required: true,
+          required: false,
         },
       },
     },
@@ -328,16 +327,11 @@ module.exports = {
           description: 'Partial init (one or several comma separated microservices identifiers)',
           required: false,
         },
-        prod: {
-          alias: 'p',
-          description: 'Run npm install with --prod flag',
-          required: false,
-        },
       },
       args: {
         path: {
           description: 'The path to the web app',
-          required: true,
+          required: false,
         },
       },
     },
@@ -364,7 +358,7 @@ module.exports = {
       args: {
         path: {
           description: 'The path to the Lambda (directory of handler itself)',
-          required: true,
+          required: false,
         },
       },
     }

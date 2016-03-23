@@ -13,8 +13,6 @@ module.exports = function(lambdaPath) {
   var fs = require('fs');
   var os = require('os');
   var Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
-  var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
-  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
 
   var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   var event = this.opts.locate('event').value;
@@ -25,9 +23,7 @@ module.exports = function(lambdaPath) {
     Autoload._skipBuild();
   }
 
-  if (lambdaPath.indexOf(path.sep) !== 0) {
-    lambdaPath = path.join(process.cwd(), lambdaPath);
-  }
+  lambdaPath = this.normalizeInputPath(lambdaPath);
 
   try {
     if (fs.statSync(lambdaPath).isDirectory()) {
@@ -59,24 +55,7 @@ module.exports = function(lambdaPath) {
     console.log('AWS configuration found in ' + awsConfigFile);
   }
 
-  console.log('Linking aws-sdk library');
-
-  if (!Bin.npmModuleInstalled('aws-sdk', true)) {
-    var awsSdkGlobalCmd = new NpmInstallLibs();
-    awsSdkGlobalCmd.libs = 'aws-sdk';
-    awsSdkGlobalCmd.global = true;
-
-    awsSdkGlobalCmd.run(function(result) {
-      if (result.failed) {
-        console.error('Failed to install aws-sdk globally: ' + result.error);
-        this.exit(1);
-      }
-
-      startServer.bind(this)();
-    }.bind(this));
-  } else {
-    startServer.bind(this)();
-  }
+  startServer.bind(this)();
 
   function startServer() {
     console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
