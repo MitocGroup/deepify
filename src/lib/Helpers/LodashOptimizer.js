@@ -45,7 +45,10 @@ export class LodashOptimizer {
         return;
       }
 
-      let versions = Object.keys(lodashObj).sort(semver.rcompare);
+      let versions = Object
+        .keys(lodashObj)
+        .sort(semver.rcompare)
+        .filter((v) => semver.satisfies(v, LodashOptimizer.ALLOWED_VERSION_EXPR));
 
       if (versions.length <= 1) {
         cb(null);
@@ -168,6 +171,13 @@ export class LodashOptimizer {
    */
   static get LODASH() {
     return 'lodash';
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get ALLOWED_VERSION_EXPR() {
+    return '>=2.x.x';
   }
 
   /**
