@@ -47,7 +47,7 @@
     "url": "https://github.com/MitocGroup/deepify.git"
   },
   "scripts": {
-    "preinstall": "npm run compile",
+    "preinstall": "bash node-bin/assure-deps.sh && npm run compile",
     "postinstall": "bash hooks/autocomplete_deepify.sh",
     "test": "bash node-bin/test.sh",
     "compile": "bash node-bin/compile.sh",
