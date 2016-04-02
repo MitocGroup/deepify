@@ -2,7 +2,7 @@
 
 babel=$(which babel)
 
-if [ -z ${babel} ]; then
+if [ "$TRAVIS" != "true" ] && [ -z ${babel} ]; then
     echo "Seems like babel is not installed! Installing babel v5 as default transpiler..."
     echo ""
     npm install babel@5.x -g
