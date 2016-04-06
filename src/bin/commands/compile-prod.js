@@ -41,7 +41,9 @@ module.exports = function(mainPath) {
     tmpPath: [],
   };
 
-  var lambdasObj = new LambdaExtractor(property, getMicroservicesToCompile()).extract(LambdaExtractor.NPM_PACKAGE_FILTER);
+  var lambdasObj = new LambdaExtractor(property, getMicroservicesToCompile())
+    .extract(LambdaExtractor.NPM_PACKAGE_FILTER, LambdaExtractor.EXTRACT_OBJECT);
+
   lambdas.path = arrayUnique(objectValues(lambdasObj));
 
   console.log('Sync validation schemas into ' + lambdas.path.length + ' Lambdas');

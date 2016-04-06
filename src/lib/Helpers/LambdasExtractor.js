@@ -13,11 +13,9 @@ export class LambdasExtractor {
    * @param {Property} property
    * @param {String[]|null} patternsToExtract
    */
-  constructor(property, patternsToExtract = null) {
+  constructor(property, patternsToExtract = []) {
     this._property = property;
-    this._regExpVector = patternsToExtract ?
-      patternsToExtract.map(LambdasExtractor.patternToRegExp) : 
-      null;
+    this._regExpVector = patternsToExtract.map(LambdasExtractor.patternToRegExp);
   }
 
   /**
@@ -45,7 +43,7 @@ export class LambdasExtractor {
    * @private
    */
   _hasToExtract(actionIdentifier) {
-    if (!this._regExpVector || this._regExpVector.length === 0) {
+    if (this._regExpVector.length === 0) {
       return true;
     }
 
@@ -75,9 +73,10 @@ export class LambdasExtractor {
 
   /**
    * @param {Function|null} filter
+   * @param {Number} extractMode
    * @returns {Object}
    */
-  extract(filter = null) {
+  extract(filter = null, extractMode = LambdasExtractor.EXTRACT_ARRAY) {
     let microservices = this._property.microservices;
     let lambdas = {};
 
@@ -115,7 +114,39 @@ export class LambdasExtractor {
       }
     }
 
-    return lambdas;
+    switch (extractMode) {
+      case LambdasExtractor.EXTRACT_ARRAY:
+        return this._objectValues(lambdas);
+      case LambdasExtractor.EXTRACT_OBJECT:
+        return lambdas;
+    }
+    
+    throw new Error(`Unknown extract mode: ${extractMode}`);
+  }
+
+  /**
+   * @param {Object} object
+   * @returns {Object[]}
+   * @private
+   */
+  _objectValues(object) {
+    return Object.keys(object).map(function(key) {
+      return object[key];
+    });
+  }
+
+  /**
+   * @returns {Number}
+   */
+  static get EXTRACT_ARRAY() {
+    return 0x001;
+  }
+
+  /**
+   * @returns {Number}
+   */
+  static get EXTRACT_OBJECT() {
+    return 0x002;
   }
 
   /**

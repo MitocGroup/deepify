@@ -92,7 +92,7 @@ module.exports = function(microservicePath) {
   fse.removeSync(path.join(microservicePath, 'Tests'));
 
   (new LambdaExtractor(property))
-    .extractWorking(LambdaExtractor.NPM_PACKAGE_FILTER)
+    .extract(LambdaExtractor.NPM_PACKAGE_FILTER)
     .forEach(function(lambdaPath) {
       console.log('Cleaning up backend in ' + lambdaPath);
 
