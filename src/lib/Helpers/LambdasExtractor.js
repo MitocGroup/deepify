@@ -11,9 +11,51 @@ import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
 export class LambdasExtractor {
   /**
    * @param {Property} property
+   * @param {String[]|null} patternsToExtract
    */
-  constructor(property) {
+  constructor(property, patternsToExtract = null) {
     this._property = property;
+    this._regExpVector = patternsToExtract ?
+      patternsToExtract.map(LambdasExtractor.patternToRegExp) : 
+      null;
+  }
+
+  /**
+   * @param {String} instanceStr
+   * @returns {RegExp}
+   */
+  static patternToRegExp(instanceStr) {
+    let escapePart = function(part) {
+      return part ?
+        part.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') :
+        '[a-zA-Z\\d+\\-_\\.]+'
+    };
+
+    let parts = instanceStr.split(':');
+    let microservice = escapePart(parts[0]);
+    let resource = escapePart(parts[1]);
+    let action = escapePart(parts[2]);
+
+    return new RegExp(`^\\s*${microservice}:${resource}:${action}\\s*$`);
+  }
+
+  /**
+   * @param {String} actionIdentifier
+   * @returns {Boolean}
+   * @private
+   */
+  _hasToExtract(actionIdentifier) {
+    if (!this._regExpVector || this._regExpVector.length === 0) {
+      return true;
+    }
+
+    for (let i in this._regExpVector) {
+      if (this._regExpVector.hasOwnProperty(i) && this._regExpVector[i].test(actionIdentifier)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -33,33 +75,11 @@ export class LambdasExtractor {
 
   /**
    * @param {Function|null} filter
-   * @returns {String[]}
-   */
-  extractWorking(filter = null) {
-    return LambdasExtractor._extract(
-      this._property.workingMicroservices,
-      filter
-    );
-  }
-
-  /**
-   * @param {Function|null} filter
-   * @returns {String[]}
+   * @returns {Object}
    */
   extract(filter = null) {
-    return LambdasExtractor._extract(
-      this._property.microservices,
-      filter
-    );
-  }
-
-  /**
-   * @param {Object} microservices
-   * @param {Function|null} filter
-   * @returns {String[]}
-   */
-  static _extract(microservices, filter = null) {
-    let lambdas = [];
+    let microservices = this._property.microservices;
+    let lambdas = {};
 
     for (let i in microservices) {
       if (!microservices.hasOwnProperty(i)) {
@@ -73,6 +93,13 @@ export class LambdasExtractor {
           continue;
         }
 
+        let action = microservice.resources.actions[j];
+        let identifier = `${microservice.identifier}:${action.resourceName}:${action.name}`;
+
+        if(!this._hasToExtract(identifier)) {
+          continue;
+        }
+
         let microserviceRoute = microservice.resources.actions[j];
 
         if (microserviceRoute.type === Action.LAMBDA) {
@@ -81,14 +108,14 @@ export class LambdasExtractor {
             microserviceRoute.source
           );
 
-          lambdas.push(lambdaPath);
+          if (!filter || filter(lambdaPath)) {
+            lambdas[identifier] = lambdaPath;
+          }
         }
       }
     }
 
-    return filter
-      ? lambdas.filter(filter)
-      : lambdas;
+    return lambdas;
   }
 
   /**

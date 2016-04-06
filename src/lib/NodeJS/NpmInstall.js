@@ -7,6 +7,7 @@
 import {Bin} from './Bin';
 import {Exec} from '../Helpers/Exec';
 import {Helpers_WaitFor as WaitFor} from 'deep-package-manager';
+import OS from 'os';
 
 export class NpmInstall {
   /**
@@ -192,6 +193,6 @@ export class NpmInstall {
    * @returns {Number}
    */
   static get DEFAULT_CHUNK_SIZE() {
-    return 3;
+    return OS.cpus().length * 2;
   }
 }

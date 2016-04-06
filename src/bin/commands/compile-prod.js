@@ -29,19 +29,20 @@ module.exports = function(mainPath) {
 
   var removeSource = this.opts.locate('remove-source').exists;
   var installSdk = this.opts.locate('aws-sdk').exists;
-  var microservicesToDeploy = this.opts.locate('partial').value;
+  var microservicesToCompile = this.opts.locate('partial').value;
+  var parallel =  this.opts.locate('parallel').exists;
 
   mainPath = this.normalizeInputPath(mainPath);
 
   var property = new Property(mainPath);
-  property.microservicesToUpdate = getMicroservicesToDeploy();
 
   var lambdas = {
     path: [],
     tmpPath: [],
   };
 
-  lambdas.path = arrayUnique(new LambdaExtractor(property).extractWorking(LambdaExtractor.NPM_PACKAGE_FILTER));
+  var lambdasObj = new LambdaExtractor(property, getMicroservicesToCompile()).extract(LambdaExtractor.NPM_PACKAGE_FILTER);
+  lambdas.path = arrayUnique(objectValues(lambdasObj));
 
   console.log('Sync validation schemas into ' + lambdas.path.length + ' Lambdas');
 
@@ -58,45 +59,95 @@ module.exports = function(mainPath) {
     lambdas.tmpPath.push(lambdaTmpPath);
   }
 
-  prepareSources.bind(this)(function() {
-    var chain = new NpmChain();
+  /**
+   * @todo: Implement some multithreading class
+   */
+  if (parallel) {
+    var maxProcessCount = NpmInstall.DEFAULT_CHUNK_SIZE;
+    var processCount = 0;
 
-    chain.add(
-      new NpmInstall(lambdas.tmpPath)
-        .addExtraArg(
-          '--no-bin-links',
-          '--no-optional',
-          '--loglevel silent',
-          '--production',
-          '--save'
-        )
+    var createCommand = function() {
+      var cmd = new Exec(
+        Bin.node,
+        this.scriptPath,
+        'compile-prod',
+        mainPath
+      );
+
+      if (removeSource) {
+        cmd.addArg('--remove-source');
+      }
+
+      if (installSdk) {
+        cmd.addArg('--aws-sdk');
+      }
+
+      return cmd;
+    }.bind(this);
+
+    var doAdjust = function(lambdaIdentifiers) {
+      if (lambdaIdentifiers.length === 0 && processCount === 0) {
+        process.exit(0);
+      }
+
+      while (lambdaIdentifiers.length > 0 && processCount < maxProcessCount) {
+        var identifier = lambdaIdentifiers.shift();
+        var cmd = createCommand();
+
+        cmd.addArg('--partial="' + identifier + '"');
+        cmd.run(function () {
+          processCount--;
+        }, true);
+
+        processCount++;
+      }
+    };
+
+    setInterval(
+      doAdjust.bind(this, Object.keys(lambdasObj)),
+      1000
     );
+  } else {
+    prepareSources.bind(this)(function () {
+      var chain = new NpmChain();
 
-    chain.add(
-      new NpmPrune(lambdas.tmpPath)
-        .addExtraArg('--production')
-    );
+      chain.add(
+        new NpmInstall(lambdas.tmpPath)
+          .addExtraArg(
+            '--no-bin-links',
+            '--no-optional',
+            '--loglevel silent',
+            '--production',
+            '--save'
+          )
+      );
 
-    chain.runChunk(function() {
-      optimize.bind(this)(function() {
-        optimizeDeps.bind(this)(function() {
-          pack.bind(this)(function() {
-            lambdas.tmpPath.forEach(function(lambdaTmpPath) {
-              fse.removeSync(lambdaTmpPath);
-            });
+      chain.add(
+        new NpmPrune(lambdas.tmpPath)
+          .addExtraArg('--production')
+      );
 
-            if (removeSource) {
-              lambdas.path.forEach(function(lambdaPath) {
-                fse.removeSync(lambdaPath);
+      chain.runChunk(function () {
+        optimize.bind(this)(function () {
+          optimizeDeps.bind(this)(function () {
+            pack.bind(this)(function () {
+              lambdas.tmpPath.forEach(function (lambdaTmpPath) {
+                fse.removeSync(lambdaTmpPath);
               });
-            }
 
-            console.log(lambdas.path.length + ' Lambdas were successfully prepared for production');
+              if (removeSource) {
+                lambdas.path.forEach(function (lambdaPath) {
+                  fse.removeSync(lambdaPath);
+                });
+              }
+
+              console.log(lambdas.path.length + ' Lambdas were successfully prepared for production');
+            }.bind(this), lambdas);
           }.bind(this), lambdas);
         }.bind(this), lambdas);
-      }.bind(this), lambdas);
-    }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE);
-  }.bind(this), lambdas);
+      }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE);
+    }.bind(this), lambdas);
+  }
 
   function prepareSources(cb, lambdas) {
     console.log(lambdas.path.length + ' Lambdas sources are going to be copied...');
@@ -346,12 +397,12 @@ module.exports = function(mainPath) {
     }.bind(this));
   }
 
-  function getMicroservicesToDeploy() {
-    if (!microservicesToDeploy) {
+  function getMicroservicesToCompile() {
+    if (!microservicesToCompile) {
       return [];
     }
 
-    var msIdentifiers = arrayUnique(microservicesToDeploy.split(',').map(function(id) {
+    var msIdentifiers = arrayUnique(microservicesToCompile.split(',').map(function(id) {
       return id.trim();
     }));
 
@@ -365,5 +416,11 @@ module.exports = function(mainPath) {
       }
       return p;
     }, []);
+  }
+
+  function objectValues(object) {
+    return Object.keys(object).map(function(key) {
+      return object[key];
+    });
   }
 };

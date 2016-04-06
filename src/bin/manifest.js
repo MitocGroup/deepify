@@ -298,6 +298,10 @@ module.exports = {
           description: 'Force latest aws-sdk in Lambda',
           required: false,
         },
+        'parallel': {
+          description: 'Compile prod lambdas parallel',
+          required: false,
+        }
       },
       args: {
         path: {
