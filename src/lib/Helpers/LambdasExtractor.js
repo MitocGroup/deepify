@@ -130,9 +130,7 @@ export class LambdasExtractor {
    * @private
    */
   _objectValues(object) {
-    return Object.keys(object).map(function(key) {
-      return object[key];
-    });
+    return Object.keys(object).map(key => object[key]);
   }
 
   /**
