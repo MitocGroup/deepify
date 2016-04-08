@@ -29,7 +29,6 @@ module.exports = function(mainPath) {
   }
 
   var property = new Property(mainPath);
-  property.microservicesToUpdate = getMicroservicesToInit();
 
   property.assureFrontendEngine(function(error) {
     if (error) {
@@ -61,7 +60,7 @@ module.exports = function(mainPath) {
   }.bind(this));
 
   function initProperty(property, cb) {
-    var lambdaPaths = new LambdaExtractor(property).extractWorking(LambdaExtractor.NPM_PACKAGE_FILTER);
+    var lambdaPaths = new LambdaExtractor(property, getMicroservicesToInit()).extract(LambdaExtractor.NPM_PACKAGE_FILTER);
 
     var chain = new NpmChain();
     var installCmd = new NpmInstall(lambdaPaths)

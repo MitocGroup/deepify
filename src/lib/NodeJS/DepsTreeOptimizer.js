@@ -152,6 +152,7 @@ export class DepsTreeOptimizer {
 
     if (!this._packageCache.hasOwnProperty(depPackagePath)) {
       packageObj = fse.readJsonSync(depPackagePath);
+      packageObj.requestedDependencies = Object.assign({}, packageObj.dependencies); // clone
 
       this._packageCache[depPackagePath] = packageObj;
     } else {

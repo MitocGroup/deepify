@@ -298,6 +298,14 @@ module.exports = {
           description: 'Force latest aws-sdk in Lambda',
           required: false,
         },
+        'linear': {
+          description: 'Compile lambdas linerar',
+          required: false,
+        },
+        'skip-cache': {
+          description: 'Skip loading lambda dependencies from cache',
+          required: false,
+        }
       },
       args: {
         path: {
