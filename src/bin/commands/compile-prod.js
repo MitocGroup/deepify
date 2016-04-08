@@ -33,6 +33,7 @@ module.exports = function(mainPath) {
   var microservicesToCompile = this.opts.locate('partial').value;
   var linear =  this.opts.locate('linear').exists;
   var skipCache = this.opts.locate('skip-cache').exists;
+  var invalidateCache = this.opts.locate('invalidate-cache').exists;
   var deepDepsCache = new DeepDepsCache(DeepDepsCache.DEFAULT_CACHE_DIRECTORY, installSdk ? {'aws-sdk': 'latest'} : {});
 
   mainPath = this.normalizeInputPath(mainPath);
@@ -51,6 +52,10 @@ module.exports = function(mainPath) {
   var lambdasObj = new LambdaExtractor(property, getMicroservicesToCompile())
     .extract(LambdaExtractor.NPM_PACKAGE_FILTER, LambdaExtractor.EXTRACT_OBJECT);
   lambdas.path = arrayUnique(objectValues(lambdasObj));
+  
+  if (invalidateCache) {
+    deepDepsCache.flush();
+  }
 
   if (linear) {
     console.log('Sync validation schemas into ' + lambdas.path.length + ' Lambdas');
@@ -232,13 +237,14 @@ module.exports = function(mainPath) {
       }
 
       try {
-        fse.copySync(lambdaPath, lambdaTmpPath);
-
-        var nodeModules = path.join(lambdaTmpPath, 'node_modules');
-
-        if (fs.existsSync(nodeModules)) {
-          fse.removeSync(nodeModules);
-        }
+        new Exec(
+          'rsync',
+          '-ar',
+          '--exclude node_modules',
+          '--exclude deep_modules',
+          path.join(lambdaPath, '/'),
+          lambdaTmpPath
+        ).runSync();
       } catch (error) {
         console.error(error);
 

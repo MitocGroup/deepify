@@ -303,9 +303,15 @@ module.exports = {
           required: false,
         },
         'skip-cache': {
+          alias: 'sc',
           description: 'Skip loading lambda dependencies from cache',
           required: false,
-        }
+        },
+        'invalidate-cache': {
+          alias: 'ic',
+          description: 'Invalidate deep dependencies cache',
+          required: false,
+        },
       },
       args: {
         path: {
