@@ -27,7 +27,6 @@ module.exports = function(mainPath) {
   var Property = require('deep-package-manager').Property_Instance;
   var WaitFor = require('deep-package-manager').Helpers_WaitFor;
   var tmp = require('tmp');
-  var os = require('os');
 
   var removeSource = this.opts.locate('remove-source').exists;
   var installSdk = this.opts.locate('aws-sdk').exists;
