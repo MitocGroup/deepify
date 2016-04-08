@@ -21,33 +21,4 @@ suite('Helpers/LambdasExtractor', () => {
     chai.expect(lambdasExtractor).to.be.an.instanceOf(LambdasExtractor);
     chai.expect(lambdasExtractor.property).to.equal(propertyInstance);
   });
-
-  test('Check _extract()', () => {
-    let microservices = {
-      'hello.world.example': {
-        isRoot: false,
-        parameters: {},
-        resources: {
-          sample: {
-            'say-hello': {
-              type: 'lambda',
-              methods: [
-                'POST',
-              ],
-              forceUserIdentity: true,
-              region: 'us-west-2',
-              source: {
-                api: 'https://1zf47jpvxd.execute-api.us-west-2.amazonaws.com/dev/hello-world-example/sample/say-hello',
-                original: 'arn:aws:lambda:us-west-2:389615756922:function:DeepDevSampleSayHello64232f3705a',
-              },
-            },
-          },
-        },
-      },
-    };
-
-    let actualResult = LambdasExtractor._extract(microservices);
-
-    chai.expect(actualResult).to.be.eql([]);
-  });
 });
