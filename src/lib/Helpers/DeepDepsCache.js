@@ -146,6 +146,15 @@ export class DeepDepsCache {
   }
 
   /**
+   * Flush cache
+   */
+  flush() {
+    if (fs.existsSync(this._directory)) {
+      fse.removeSync(this._directory);
+    }
+  }
+
+  /**
    * @param {Object} dependencies
    * @returns {Object}
    * @private
