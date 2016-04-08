@@ -33,9 +33,7 @@ module.exports = function(mainPath) {
   var microservicesToCompile = this.opts.locate('partial').value;
   var linear =  this.opts.locate('linear').exists;
   var skipCache = this.opts.locate('skip-cache').exists;
-  var deepDepsCache = installSdk ?
-    new DeepDepsCache(DeepDepsCache.DEFAULT_CACHE_DIRECTORY, {'aws-sdk': 'latest'}) :
-    new DeepDepsCache(DeepDepsCache.DEFAULT_CACHE_DIRECTORY);
+  var deepDepsCache = new DeepDepsCache(DeepDepsCache.DEFAULT_CACHE_DIRECTORY, installSdk ? {'aws-sdk': 'latest'} : {});
 
   mainPath = this.normalizeInputPath(mainPath);
 
