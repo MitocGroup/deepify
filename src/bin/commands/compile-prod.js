@@ -240,6 +240,8 @@ module.exports = function(mainPath) {
         new Exec(
           'rsync',
           '-ar',
+          '--update',
+          '--delete',
           '--exclude node_modules',
           '--exclude deep_modules',
           path.join(lambdaPath, '/'),
