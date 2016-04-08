@@ -171,16 +171,26 @@ module.exports = function(mainPath) {
         return;
       }
 
-      deepDepsCache.loadInto(lambdaTmpPath, function(error) {
-        if (!error) {
-          var run = new NpmRun(lambdaTmpPath);
-          run.cmd = 'postinstall';
-          run.addExtraArg(
-            '-loglevel silent',
-            '--production'
-          );
+      deepDepsCache.hasFor(lambdaTmpPath, function(error, has) {
+        if (!has) {
+          doInstall(++lambdaIdx);
+          return;
+        }
 
-          run.run(function() {
+        var run = new NpmRun(lambdaTmpPath);
+        run.cmd = 'postinstall';
+        run.addExtraArg(
+          '-loglevel silent',
+          '--production'
+        );
+
+        run.run(function() {
+          deepDepsCache.loadInto(lambdaTmpPath, function(error) {
+            if (error) {
+              doInstall(++lambdaIdx);
+              return;
+            }
+
             var cleanupCmd = new Exec('find . -type f -iname "*.es6" -print0 | xargs -0 rm -rf');
             cleanupCmd.cwd = lambdaTmpPath;
             cleanupCmd.runSync();
@@ -197,11 +207,7 @@ module.exports = function(mainPath) {
                 });
               });
           });
-
-          return;
-        }
-
-        doInstall(++lambdaIdx);
+        });
       });
     };
 

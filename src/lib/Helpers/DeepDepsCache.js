@@ -78,30 +78,30 @@ export class DeepDepsCache {
    * @private
    */
   _copyDeps(fromPath, toPath, callback) {
-    let modulesDir = DeepDepsCache.MODULES_DIR;
+    let resources = DeepDepsCache.DEP_RESOURCES;
 
-    let doCopy = (moduleIdx = 0) => {
-      let moduleDir = modulesDir[moduleIdx];
-      let fromDir = path.join(fromPath, moduleDir);
-      let toDir = path.join(toPath, moduleDir);
+    let doCopy = (resourceIdx = 0) => {
+      let resource = resources[resourceIdx];
+      let fromResource = path.join(fromPath, resource);
+      let toResource = path.join(toPath, resource);
 
-      if (!fs.existsSync(fromDir)) {
-        callback(new MissingDependencyFolderException(fromDir));
+      if (!fs.existsSync(fromResource)) {
+        callback(new MissingDependencyFolderException(fromResource));
         return;
       }
 
-      fse.copy(fromDir, toDir, (err) => {
+      fse.copy(fromResource, toResource, (err) => {
         if (err) {
           callback(err);
           return;
         }
 
-        if (++moduleIdx === modulesDir.length) {
+        if (++resourceIdx === resources.length) {
           callback(null);
           return;
         }
 
-        doCopy(moduleIdx);
+        doCopy(resourceIdx);
       });
     };
 
@@ -186,10 +186,11 @@ export class DeepDepsCache {
   /**
    * @returns {String[]}
    */
-  static get MODULES_DIR() {
+  static get DEP_RESOURCES() {
     return [
       'node_modules',
       'deep_modules',
+      'package.json',
     ]
   }
 }
