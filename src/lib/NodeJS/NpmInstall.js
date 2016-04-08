@@ -193,6 +193,6 @@ export class NpmInstall {
    * @returns {Number}
    */
   static get DEFAULT_CHUNK_SIZE() {
-    return OS.cpus().length * 2;
+    return OS.cpus().length;
   }
 }
