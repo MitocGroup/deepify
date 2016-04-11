@@ -78,21 +78,21 @@ export class FileListener  extends AbstractListener {
   _tagInjector(url, content) {
     if (url === '/index.html' || url === '/') {
       let config = this.server.property.config;
-      var rootAssetsDriver = new RootAssetsDriver(config.microservices);
+      let rootAssetsDriver = new RootAssetsDriver(config.microservices);
       content = rootAssetsDriver.inject(content);
 
       if (config.globals.pageLoader && config.globals.pageLoader.src) {
-        var pageLoaderDriver = new PageLoaderDriver(config.globals.pageLoader, config.microservices);
+        let pageLoaderDriver = new PageLoaderDriver(config.globals.pageLoader, config.microservices);
         content = pageLoaderDriver.inject(content);
       }
 
       if (config.globals.favicon) {
-        var faviconDriver = new FaviconDriver(config.globals.favicon, config.microservices);
+        let faviconDriver = new FaviconDriver(config.globals.favicon, config.microservices);
         content = faviconDriver.inject(content);
       }
 
       if (config.globals.version) {
-        var versionDriver = new FaviconDriver(config.globals.version);
+        let versionDriver = new VersionDriver(config.globals.version);
         content = versionDriver.inject(content);
       }
     }
