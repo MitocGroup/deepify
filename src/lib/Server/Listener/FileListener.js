@@ -5,6 +5,8 @@ import Mime from 'mime';
 import {AbstractListener} from './AbstractListener';
 import {Tags_Driver_RootAssetsDriver as RootAssetsDriver} from 'deep-package-manager';
 import {Tags_Driver_PageLoaderDriver as PageLoaderDriver} from 'deep-package-manager';
+import {Tags_Driver_FaviconDriver as FaviconDriver} from 'deep-package-manager';
+import {Tags_Driver_VersionDriver as VersionDriver} from 'deep-package-manager';
 
 export class FileListener  extends AbstractListener {
 
@@ -82,6 +84,16 @@ export class FileListener  extends AbstractListener {
       if (config.globals.pageLoader && config.globals.pageLoader.src) {
         var pageLoaderDriver = new PageLoaderDriver(config.globals.pageLoader, config.microservices);
         content = pageLoaderDriver.inject(content);
+      }
+
+      if (config.globals.favicon) {
+        var faviconDriver = new FaviconDriver(config.globals.favicon, config.microservices);
+        content = faviconDriver.inject(content);
+      }
+
+      if (config.globals.version) {
+        var versionDriver = new FaviconDriver(config.globals.version);
+        content = versionDriver.inject(content);
       }
     }
 
