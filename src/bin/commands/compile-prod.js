@@ -201,7 +201,9 @@ module.exports = function(mainPath) {
             cleanupCmd.runSync();
 
             new LambdaRecursiveOptimize(lambdaTmpPath)
-              .addFilter((path) => !/\/(deep_modules|node_modules)/i.test(path))
+              .addFilter(function(path) {
+                return !/\/(deep_modules|node_modules)/i.test(path);
+              })
               .run(function() {
                 packSingle(lambdaPath, lambdaTmpPath, function() {
                   lambdas.path.splice(lambdaIdx, 1);
