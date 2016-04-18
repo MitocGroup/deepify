@@ -21,7 +21,7 @@ env:
     #CODACY_PROJECT_TOKEN =[secured]
     - secure: JHOBtvwzO2GYXh/qxryOry58driXb3s/aJ0MiozCn9ZvLkWvw5+45dEzr4iB8LYGfOgXVJ1cMF/yWoIXNZCeXnhaNlo9xPf7zzpX3co82zZufjOK430A5D07aQ3lrHCsLRuwS5m06/yvGwBw/2NLThibX5XHZ6e23xkSuYGefAaMqa9wS5QMmc1wyBNRE982BmxZIYhEBqUpLUnCpKLreDWXDIsRM6/VoIDEEZOFSVDI8AAFU4RBDopO1E4Y8lsDBVB9Ifa/w4ooEs+qp0Ewabv7wPCnmVJLPnlJckbazsMZ3iW4npSlYl7P75l3ChFEionkQdaUukkQ65PZ2sSstess3qXDwZp7XysQj97XB+0h1wWJm1zd3cATloZGzseflBxTQeC6NVnp0vKD06MCLNP4LtdFDfL3aDZRe5536ZsC3AF6Ge2IKIy71OvwJqlBKvq9uJoqA+GJ7Wpb+NwQfVXzCc0YKpc9s9WGRrq9TAQ0S3exmtYJ2aJyNBKuJ4wYdowG7OCMC6NGqJF8HmL1Hff+ldDSbDA61I3HgbcKjCDqFXB91gv9l7H0qrBB2jIBD0zMylei2SnLLVhoewpUFwV96ntE2YKicYmja9tK9u/9bhrJ8JVZyXng/Ftl81zSu/IqSZSVtC09ooYHeJv7bS33UaLEHufsmgfUavspreo=
 before_install:
-  - npm install -g babel@5.8.x
+  - npm install -g babel-cli@6.x.x
   - npm install -g browserify@11.2.x
   - npm install -g mocha@2.3.x
   - npm install -g istanbul@0.3.x
