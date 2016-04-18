@@ -5,7 +5,7 @@
 
 'use strict';
 
-module.exports = (mainPath) => {
+module.exports = function(mainPath) {
   let path = require('path');
   let fs = require('fs');
   let fse = require('fs-extra');
