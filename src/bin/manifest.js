@@ -271,6 +271,24 @@ module.exports = {
       example: 'deepify compile-es6 path/to/lambda',
       description: 'Compile ES6 scripts to ES5 using babel (matched by *.es6)',
       opts: {
+        'extension': {
+          alias: 'x',
+          description: 'Extensions to compile',
+          required: false,
+        },
+        'out-dir': {
+          alias: 'd',
+          description: 'Compile an input directory of modules into an output directory',
+          required: false,
+        },
+        'es5': {
+          description: 'Compile using es5 preset, instead of the node4 compatible',
+          required: false,
+        },
+        'source': {
+          description: 'Compile from source instead of directory',
+          required: false,
+        },
       },
       args: {
         path: {
