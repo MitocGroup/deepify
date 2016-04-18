@@ -17,9 +17,9 @@ module.exports = function(microservicePath) {
   let migrationsPath = ms.autoload.migration;
 
   let migrationTpl = fs.readFileSync(path.join(__dirname, 'assets', 'migration_tpl.txt')).toString();
-  let migrationFile = path.join(migrationsPath, 'Version' + (new Date()).getTime() + '.js');
+  let migrationFile = path.join(migrationsPath, `Version${new Date().getTime()}.js`);
 
-  console.log('Creating migration in ' + migrationFile);
+  console.log(`Creating migration in ${migrationFile}`);
 
   fse.outputFileSync(
     migrationFile,

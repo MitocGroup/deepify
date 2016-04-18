@@ -66,7 +66,7 @@ module.exports = function(lambdaPath) {
 
       let lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
 
-      lambda.complete = (error, response) => {
+      lambda.complete = (error/*, response*/) => {
         console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
 
         if (error) {

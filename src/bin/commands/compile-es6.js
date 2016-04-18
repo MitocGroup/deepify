@@ -7,8 +7,6 @@
 
 module.exports = function(mainPath) {
   let path = require('path');
-  let fs = require('fs');
-  let Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
   let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
 
   mainPath = this.normalizeInputPath(mainPath);
