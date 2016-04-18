@@ -6,18 +6,18 @@
 'use strict';
 
 module.exports = function(microservicePath) {
-  var path = require('path');
-  var fs = require('fs');
-  var fse = require('fs-extra');
-  var Microservice = require('deep-package-manager').Microservice_Instance;
+  let path = require('path');
+  let fs = require('fs');
+  let fse = require('fs-extra');
+  let Microservice = require('deep-package-manager').Microservice_Instance;
 
   microservicePath = this.normalizeInputPath(microservicePath);
 
-  var ms = Microservice.create(microservicePath);
-  var migrationsPath = ms.autoload.migration;
+  let ms = Microservice.create(microservicePath);
+  let migrationsPath = ms.autoload.migration;
 
-  var migrationTpl = fs.readFileSync(path.join(__dirname, 'assets', 'migration_tpl.txt')).toString();
-  var migrationFile = path.join(migrationsPath, 'Version' + (new Date()).getTime() + '.js');
+  let migrationTpl = fs.readFileSync(path.join(__dirname, 'assets', 'migration_tpl.txt')).toString();
+  let migrationFile = path.join(migrationsPath, 'Version' + (new Date()).getTime() + '.js');
 
   console.log('Creating migration in ' + migrationFile);
 

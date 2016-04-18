@@ -17,20 +17,7 @@ module.exports = function(mainPath) {
   let compileEs5 = this.opts.locate('es5').exists;
   let pipeSource = this.opts.locate('source').exists;
 
-  assureBabel6.bind(this)(() => {
-    if (!pipeSource) {
-      console.log(`Start compiling *${extension}`);
-    }
-
-    let babelCompile = babelCompileCommand();
-    babelCompile.run((result) => {
-      if (result.failed) {
-        console.error(result.error);
-      }
-    }, true);
-  });
-
-  function assureBabel6(callback) {
+  let assureBabel6 = (callback) => {
     let cmd = new Exec('babel -V');
     cmd.runSync();
 
@@ -39,7 +26,7 @@ module.exports = function(mainPath) {
       installBabelCmd.run(callback, true);
       return;
     }
-    
+
     let babelVersion = cmd.result;
 
     if (!/^6\.\d/.test(babelVersion)) {
@@ -49,9 +36,9 @@ module.exports = function(mainPath) {
     }
 
     callback();
-  }
+  };
 
-  function babelCompileCommand() {
+  let babelCompileCommand = () => {
     let presets = [path.join(__dirname, `../../node_modules/babel-preset-es2015${ compileEs5 ? '' : '-node4' }`)];
     let plugins = [
       path.join(__dirname, '../../node_modules/babel-plugin-transform-es2015-classes'),
@@ -68,5 +55,18 @@ module.exports = function(mainPath) {
     }
 
     return cmd;
-  }
+  };
+
+  assureBabel6(() => {
+    if (!pipeSource) {
+      console.log(`Start compiling *${extension}`);
+    }
+
+    let babelCompile = babelCompileCommand();
+    babelCompile.run((result) => {
+      if (result.failed) {
+        console.error(result.error);
+      }
+    }, true);
+  });
 };

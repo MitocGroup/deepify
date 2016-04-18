@@ -6,64 +6,64 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  var path = require('path');
-  var Property = require('deep-package-manager').Property_Instance;
-  var Config = require('deep-package-manager').Property_Config;
-  var fs = require('fs');
-  var fse = require('fs-extra');
-  var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
-  var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
-  var NpmLink = require('../../lib.compiled/NodeJS/NpmLink').NpmLink;
-  var NpmChain = require('../../lib.compiled/NodeJS/NpmChain').NpmChain;
-  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
-  var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
+  let path = require('path');
+  let Property = require('deep-package-manager').Property_Instance;
+  let Config = require('deep-package-manager').Property_Config;
+  let fs = require('fs');
+  let fse = require('fs-extra');
+  let NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
+  let NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
+  let NpmLink = require('../../lib.compiled/NodeJS/NpmLink').NpmLink;
+  let NpmChain = require('../../lib.compiled/NodeJS/NpmChain').NpmChain;
+  let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  let LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
 
-  var microservicesToInit = this.opts.locate('partial').value;
+  let microservicesToInit = this.opts.locate('partial').value;
 
   mainPath = this.normalizeInputPath(mainPath);
 
-  var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
+  let propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
 
   if (!fs.existsSync(propertyConfigFile)) {
     fse.outputJsonSync(propertyConfigFile, Config.generate());
   }
 
-  var property = new Property(mainPath);
+  let property = new Property(mainPath);
 
-  property.assureFrontendEngine(function(error) {
+  property.assureFrontendEngine((error) => {
     if (error) {
       console.error('Error while assuring frontend engine: ' + error);
     }
 
-    property.runInitMsHooks(function() {
+    property.runInitMsHooks(() => {
       if (!Bin.npmModuleInstalled('aws-sdk', true)) {
-        var awsSdkGlobalCmd = new NpmInstallLibs();
+        let awsSdkGlobalCmd = new NpmInstallLibs();
         awsSdkGlobalCmd.libs = 'aws-sdk';
         awsSdkGlobalCmd.global = true;
 
-        awsSdkGlobalCmd.run(function(result) {
+        awsSdkGlobalCmd.run((result) => {
           if (result.failed) {
             console.error('Failed to install aws-sdk globally: ' + result.error);
             this.exit(1);
           }
 
-          initProperty.bind(this)(property, function() {
+          initProperty(property, () => {
             console.log('The backend had been successfully initialized.');
           });
-        }.bind(this));
+        });
       } else {
-        initProperty.bind(this)(property, function() {
+        initProperty(property, () => {
           console.log('The backend had been successfully initialized.');
         });
       }
-    }.bind(this));
-  }.bind(this));
+    });
+  });
 
-  function initProperty(property, cb) {
-    var lambdaPaths = new LambdaExtractor(property, getMicroservicesToInit()).extract(LambdaExtractor.NPM_PACKAGE_FILTER);
+  let initProperty = (property, cb) => {
+    let lambdaPaths = new LambdaExtractor(property, getMicroservicesToInit()).extract(LambdaExtractor.NPM_PACKAGE_FILTER);
 
-    var chain = new NpmChain();
-    var installCmd = new NpmInstall(lambdaPaths)
+    let chain = new NpmChain();
+    let installCmd = new NpmInstall(lambdaPaths)
       .addExtraArg(
       '--loglevel silent'
     );
@@ -72,22 +72,22 @@ module.exports = function(mainPath) {
 
     chain.add(installCmd);
 
-    var linkCmd = new NpmLink(lambdaPaths);
+    let linkCmd = new NpmLink(lambdaPaths);
     linkCmd.libs = 'aws-sdk';
 
     chain.add(linkCmd);
 
-    chain.runChunk(function() {
-      var lambdasConfig = property.fakeBuild();
+    chain.runChunk(() => {
+      let lambdasConfig = property.fakeBuild();
 
-      for (var lambdaArn in lambdasConfig) {
+      for (let lambdaArn in lambdasConfig) {
         if (!lambdasConfig.hasOwnProperty(lambdaArn)) {
           continue;
         }
 
-        var lambdaConfig = lambdasConfig[lambdaArn];
-        var lambdaPath = path.dirname(lambdaConfig.path);
-        var lambdaConfigPath = path.join(lambdaPath, '_config.json');
+        let lambdaConfig = lambdasConfig[lambdaArn];
+        let lambdaPath = path.dirname(lambdaConfig.path);
+        let lambdaConfigPath = path.join(lambdaPath, '_config.json');
 
         if (fs.existsSync(lambdaConfigPath)) {
           console.log('An old Lambda(' + lambdaArn + ') config found in ' + lambdaPath + '. Removing...');
@@ -99,23 +99,21 @@ module.exports = function(mainPath) {
       }
 
       cb();
-    }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE);
-  }
+    }, NpmInstall.DEFAULT_CHUNK_SIZE);
+  };
 
-  function getMicroservicesToInit() {
+  let getMicroservicesToInit = () => {
     if (!microservicesToInit) {
       return [];
     }
 
-    var msIdentifiers = arrayUnique(microservicesToInit.split(',').map(function(id) {
-      return id.trim();
-    }));
+    let msIdentifiers = arrayUnique(microservicesToInit.split(',').map(id => id.trim()));
 
     return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
-  }
+  };
 
-  function arrayUnique(a) {
-    return a.reduce(function(p, c) {
+  let arrayUnique = (a) => {
+    return a.reduce((p, c) => {
       if (p.indexOf(c) < 0) p.push(c);
       return p;
     }, []);

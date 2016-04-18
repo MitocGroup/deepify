@@ -5,25 +5,25 @@
 
 'use strict';
 
-module.exports = function(mainPath) {
-  var path = require('path');
-  var fs = require('fs');
-  var fse = require('fs-extra');
-  var os = require('os');
-  var Property = require('deep-package-manager').Property_Instance;
-  var Config = require('deep-package-manager').Property_Config;
-  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+module.exports = (mainPath) => {
+  let path = require('path');
+  let fs = require('fs');
+  let fse = require('fs-extra');
+  let os = require('os');
+  let Property = require('deep-package-manager').Property_Instance;
+  let Config = require('deep-package-manager').Property_Config;
+  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
 
   mainPath = this.normalizeInputPath(mainPath);
 
-  var dumpPath = path.join(
+  let dumpPath = path.join(
     this.normalizeInputPath(this.opts.locate('output-path').value) || path.join(mainPath, '_www'),
     ''
   );
 
-  var configFile = path.join(mainPath, Config.DEFAULT_FILENAME);
-  var configExists = fs.existsSync(configFile);
-  var config = null;
+  let configFile = path.join(mainPath, Config.DEFAULT_FILENAME);
+  let configExists = fs.existsSync(configFile);
+  let config = null;
 
   if (!configExists) {
     config = Config.generate();
@@ -35,17 +35,17 @@ module.exports = function(mainPath) {
 
   console.log('Dumping frontend into ' + dumpPath);
 
-  var tmpDir = os.tmpdir();
-  var tmpPropertyPath = path.join(tmpDir, path.basename(mainPath));
+  let tmpDir = os.tmpdir();
+  let tmpPropertyPath = path.join(tmpDir, path.basename(mainPath));
   tmpPropertyPath += '_' + (new Date()).getTime();
 
-  var propertyInstance;
+  let propertyInstance;
 
   fse.ensureDirSync(tmpPropertyPath);
 
   new Exec('cp -R', path.join(mainPath, '*'), tmpPropertyPath + '/')
     .avoidBufferOverflow()
-    .run(function(result) {
+    .run((result) => {
       if (result.failed) {
         console.error('Error while creating working directory ' + tmpPropertyPath + ': ' + result.error);
         this.exit(1);
@@ -53,16 +53,16 @@ module.exports = function(mainPath) {
 
       propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
 
-      propertyInstance.assureFrontendEngine(function(error) {
+      propertyInstance.assureFrontendEngine((error) => {
         if (error) {
           console.error('Error while assuring frontend engine: ' + error);
         }
 
         // @todo: move this anywhere
-        process.on('exit', function() {
+        process.on('exit', () => {
           new Exec('rm -rf', tmpPropertyPath)
             .avoidBufferOverflow()
-            .run(function(result) {
+            .run((result) => {
               if (result.failed) {
                 console.error(result.error);
               }
@@ -72,7 +72,7 @@ module.exports = function(mainPath) {
         propertyInstance.fakeBuild();
         propertyInstance.buildFrontend();
 
-        var frontendDumpPath = path.join(tmpPropertyPath, '_public');
+        let frontendDumpPath = path.join(tmpPropertyPath, '_public');
 
         console.log('Copying built sources into ' + dumpPath);
 
@@ -80,14 +80,14 @@ module.exports = function(mainPath) {
 
         new Exec('cp -R', path.join(frontendDumpPath, '*'), dumpPath + '/')
           .avoidBufferOverflow()
-          .run(function(result) {
+          .run((result) => {
             if (result.failed) {
               console.error('Error while copying ' + frontendDumpPath + ' into ' + dumpPath + ': ' + result.error);
               this.exit(1);
             }
 
             console.log('Frontend dumped successfully');
-          }.bind(this));
-      }.bind(this));
-    }.bind(this));
+          });
+      });
+    });
 };
