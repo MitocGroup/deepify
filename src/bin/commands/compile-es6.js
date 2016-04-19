@@ -64,6 +64,7 @@ module.exports = function(mainPath) {
     babelCompile.run((result) => {
       if (result.failed) {
         console.error(result.error);
+        this.exit(1);
       }
     }, true);
   });
