@@ -6,17 +6,17 @@
 'use strict';
 
 module.exports = function(lambdaPath) {
-  var Runtime = require('../../lib.compiled/Lambda/Runtime').Runtime;
-  var ForksManager = require('../../lib.compiled/Lambda/ForksManager').ForksManager;
-  var DeepDB = require('deep-db');
-  var path = require('path');
-  var fs = require('fs');
-  var os = require('os');
-  var Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
+  let Runtime = require('../../lib.compiled/Lambda/Runtime').Runtime;
+  let ForksManager = require('../../lib.compiled/Lambda/ForksManager').ForksManager;
+  let DeepDB = require('deep-db');
+  let path = require('path');
+  let fs = require('fs');
+  let os = require('os');
+  let Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
 
-  var dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
-  var event = this.opts.locate('event').value;
-  var skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
+  let dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
+  let event = this.opts.locate('event').value;
+  let skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
 
   // @todo: implement it in a better way
   if (skipFrontendBuild) {
@@ -47,7 +47,7 @@ module.exports = function(lambdaPath) {
     event = {};
   }
 
-  var awsConfigFile = path.join(path.dirname(lambdaPath), '.aws.json');
+  let awsConfigFile = path.join(path.dirname(lambdaPath), '.aws.json');
 
   if (!fs.existsSync(awsConfigFile)) {
     awsConfigFile = false;
@@ -55,20 +55,18 @@ module.exports = function(lambdaPath) {
     console.log('AWS configuration found in ' + awsConfigFile);
   }
 
-  startServer.bind(this)();
-
-  function startServer() {
+  let startServer = () => {
     console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
 
-    DeepDB.startLocalDynamoDBServer(function(error) {
+    DeepDB.startLocalDynamoDBServer((error) => {
       if (error) {
         console.error('Failed to start DynamoDB server: ' + error);
         this.exit(1);
       }
 
-      var lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
+      let lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
 
-      lambda.complete = function(error, response) {
+      lambda.complete = (error/*, response*/) => {
         console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
 
         if (error) {
@@ -77,7 +75,7 @@ module.exports = function(lambdaPath) {
 
         // assure invokeAsync()s are executed!
         process.kill(process.pid);
-      }.bind(this);
+      };
 
       console.log('Starting Lambda.', os.EOL);
 
@@ -92,6 +90,8 @@ module.exports = function(lambdaPath) {
         console.error(e);
         this.exit(1);
       }
-    }.bind(this), dbServer);
-  }
+    }, dbServer);
+  };
+
+  startServer();
 };

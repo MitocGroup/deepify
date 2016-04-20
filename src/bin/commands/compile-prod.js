@@ -6,169 +6,32 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  var path = require('path');
-  var fse = require('fs-extra');
-  var fs = require('fs');
-  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
-  var LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
-  var LodashOptimizer = require('../../lib.compiled/Helpers/LodashOptimizer').LodashOptimizer;
-  var LambdaRecursiveOptimize = require('../../lib.compiled/Helpers/LambdaRecursiveOptimize').LambdaRecursiveOptimize;
-  var ValidationSchemasSync = require('../../lib.compiled/Helpers/ValidationSchemasSync').ValidationSchemasSync;
-  var DepsTreeOptimizer = require('../../lib.compiled/NodeJS/DepsTreeOptimizer').DepsTreeOptimizer;
-  var NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
-  var NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
-  var NpmPrune = require('../../lib.compiled/NodeJS/NpmPrune').NpmPrune;
-  var NpmRun = require('../../lib.compiled/NodeJS/NpmRun').NpmRun;
-  var NpmChain = require('../../lib.compiled/NodeJS/NpmChain').NpmChain;
-  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
-  var NpmListDependencies = require('../../lib.compiled/NodeJS/NpmListDependencies').NpmListDependencies;
-  var DeepDepsCache = require('../../lib.compiled/Helpers/DeepDepsCache').DeepDepsCache;
-  var Hash = require('deep-package-manager').Helpers_Hash;
-  var Property = require('deep-package-manager').Property_Instance;
-  var WaitFor = require('deep-package-manager').Helpers_WaitFor;
-  var tmp = require('tmp');
+  let path = require('path');
+  let fse = require('fs-extra');
+  let fs = require('fs');
+  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  let LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
+  let LodashOptimizer = require('../../lib.compiled/Helpers/LodashOptimizer').LodashOptimizer;
+  let LambdaRecursiveOptimize = require('../../lib.compiled/Helpers/LambdaRecursiveOptimize').LambdaRecursiveOptimize;
+  let ValidationSchemasSync = require('../../lib.compiled/Helpers/ValidationSchemasSync').ValidationSchemasSync;
+  let DepsTreeOptimizer = require('../../lib.compiled/NodeJS/DepsTreeOptimizer').DepsTreeOptimizer;
+  let NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
+  let NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
+  let NpmPrune = require('../../lib.compiled/NodeJS/NpmPrune').NpmPrune;
+  let NpmRun = require('../../lib.compiled/NodeJS/NpmRun').NpmRun;
+  let NpmChain = require('../../lib.compiled/NodeJS/NpmChain').NpmChain;
+  let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  let NpmListDependencies = require('../../lib.compiled/NodeJS/NpmListDependencies').NpmListDependencies;
+  let DeepDepsCache = require('../../lib.compiled/Helpers/DeepDepsCache').DeepDepsCache;
+  let Hash = require('deep-package-manager').Helpers_Hash;
+  let Property = require('deep-package-manager').Property_Instance;
+  let WaitFor = require('deep-package-manager').Helpers_WaitFor;
+  let tmp = require('tmp');
 
-  var removeSource = this.opts.locate('remove-source').exists;
-  var installSdk = this.opts.locate('aws-sdk').exists;
-  var microservicesToCompile = this.opts.locate('partial').value;
-  var linear =  this.opts.locate('linear').exists;
-  var skipCache = this.opts.locate('skip-cache').exists;
-  var invalidateCache = this.opts.locate('invalidate-cache').exists;
-  var deepDepsCache = new DeepDepsCache(DeepDepsCache.DEFAULT_CACHE_DIRECTORY, installSdk ? {'aws-sdk': 'latest'} : {});
-
-  mainPath = this.normalizeInputPath(mainPath);
-
-  var property = new Property(mainPath);
-
-  var lambdas = {
-    path: [],
-    tmpPath: [],
-    loadedFromCache: 0,
-    count: function() {
-      return this.path.length + this.loadedFromCache;
-    }
-  };
-
-  var lambdasObj = new LambdaExtractor(property, getMicroservicesToCompile())
-    .extract(LambdaExtractor.NPM_PACKAGE_FILTER, LambdaExtractor.EXTRACT_OBJECT);
-  lambdas.path = arrayUnique(objectValues(lambdasObj));
-  
-  if (invalidateCache) {
-    deepDepsCache.flush();
-  }
-
-  if (linear) {
-    console.log('Sync validation schemas into ' + lambdas.path.length + ' Lambdas');
-
-    new ValidationSchemasSync(property).syncWorking(ValidationSchemasSync.NPM_PACKAGE_FILTER);
-
-    for (var i in lambdas.path) {
-      if (!lambdas.path.hasOwnProperty(i)) {
-        continue;
-      }
-
-      var lambdaPath = lambdas.path[i];
-      var lambdaTmpPath = path.join(tmp.dirSync().name, Hash.md5(lambdaPath) + '_' + new Date().getTime());
-
-      lambdas.tmpPath.push(lambdaTmpPath);
-    }
-
-    prepareSources.bind(this)(installFromCache.bind(this, lambdas, function () {
-      var chain = new NpmChain();
-
-      chain.add(
-        new NpmInstall(lambdas.tmpPath)
-          .addExtraArg(
-            '--no-bin-links',
-            '--no-optional',
-            '--loglevel silent',
-            '--production',
-            '--save'
-          )
-      );
-
-      chain.add(
-        new NpmPrune(lambdas.tmpPath)
-          .addExtraArg('--production')
-      );
-
-      chain.runChunk(function () {
-        optimize.bind(this)(function () {
-          optimizeDeps.bind(this)(function () {
-            pack.bind(this)(function () {
-              lambdas.tmpPath.forEach(function (lambdaTmpPath) {
-                fse.removeSync(lambdaTmpPath);
-              });
-
-              if (removeSource) {
-                lambdas.path.forEach(function (lambdaPath) {
-                  fse.removeSync(lambdaPath);
-                });
-              }
-
-              console.log(lambdas.count() + ' Lambdas were successfully prepared for production');
-            }.bind(this), lambdas);
-          }.bind(this), lambdas);
-        }.bind(this), lambdas);
-      }.bind(this), NpmInstall.DEFAULT_CHUNK_SIZE);
-    }.bind(this)), lambdas);
-  } else { // @todo: Implement some multithreading class
-    var maxProcessCount = NpmInstall.DEFAULT_CHUNK_SIZE;
-    var processCount = 0;
-
-    var createCommand = function() {
-      var cmd = new Exec(
-        Bin.node,
-        this.scriptPath,
-        'compile-prod',
-        mainPath
-      );
-
-      if (removeSource) {
-        cmd.addArg('--remove-source');
-      }
-
-      if (installSdk) {
-        cmd.addArg('--aws-sdk');
-      }
-
-      if (skipCache) {
-        cmd.addArg('--skip-cache');
-      }
-
-      cmd.addArg('--linear');
-
-      return cmd;
-    }.bind(this);
-
-    var refreshProcessList = function(lambdaIdentifiers) {
-      if (lambdaIdentifiers.length === 0 && processCount === 0) {
-        process.exit(0);
-      }
-
-      while (lambdaIdentifiers.length > 0 && processCount < maxProcessCount) {
-        var identifier = lambdaIdentifiers.shift();
-        var cmd = createCommand();
-
-        cmd.addArg('--partial="' + identifier + '"'); // is not working without quotes
-        cmd.run(function () {
-          processCount--;
-        }, true);
-
-        processCount++;
-      }
-    };
-
-    setInterval(
-      refreshProcessList.bind(this, Object.keys(lambdasObj)),
-      1000
-    );
-  }
-
-  function installFromCache(lambdas, callback) {
-    var doInstall = function(lambdaIdx) {
-      var lambdaPath = lambdas.path[lambdaIdx];
-      var lambdaTmpPath = lambdas.tmpPath[lambdaIdx];
+  let installFromCache = (lambdas, callback) => {
+    let doInstall = (lambdaIdx) => {
+      let lambdaPath = lambdas.path[lambdaIdx];
+      let lambdaTmpPath = lambdas.tmpPath[lambdaIdx];
 
       if (!lambdaTmpPath || skipCache) {
         console.log(lambdas.loadedFromCache + ' lambdas dependencies have been loaded from cache.');
@@ -176,36 +39,34 @@ module.exports = function(mainPath) {
         return;
       }
 
-      deepDepsCache.hasFor(lambdaTmpPath, function(error, has) {
+      deepDepsCache.hasFor(lambdaTmpPath, (error, has) => {
         if (!has) {
           doInstall(++lambdaIdx);
           return;
         }
 
-        var run = new NpmRun(lambdaTmpPath);
+        let run = new NpmRun(lambdaTmpPath);
         run.cmd = 'postinstall';
         run.addExtraArg(
           '-loglevel silent',
           '--production'
         );
 
-        run.run(function() {
-          deepDepsCache.loadInto(lambdaTmpPath, function(error) {
+        run.run(() => {
+          deepDepsCache.loadInto(lambdaTmpPath, (error) => {
             if (error) {
               doInstall(++lambdaIdx);
               return;
             }
 
-            var cleanupCmd = new Exec('find . -type f -iname "*.es6" -print0 | xargs -0 rm -rf');
+            let cleanupCmd = new Exec('find . -type f -iname "*.es6" -print0 | xargs -0 rm -rf');
             cleanupCmd.cwd = lambdaTmpPath;
             cleanupCmd.runSync();
 
             new LambdaRecursiveOptimize(lambdaTmpPath)
-              .addFilter(function(path) {
-                return !/\/(deep_modules|node_modules)/i.test(path);
-              })
-              .run(function() {
-                packSingle(lambdaPath, lambdaTmpPath, function() {
+              .addFilter((path) => !/\/(deep_modules|node_modules)/i.test(path))
+              .run(() => {
+                packSingle(lambdaPath, lambdaTmpPath, () => {
                   lambdas.path.splice(lambdaIdx, 1);
                   lambdas.tmpPath.splice(lambdaIdx, 1);
                   lambdas.loadedFromCache++;
@@ -219,18 +80,18 @@ module.exports = function(mainPath) {
     };
 
     doInstall(0);
-  }
+  };
 
-  function prepareSources(cb, lambdas) {
+  let prepareSources = (cb, lambdas) => {
     console.log(lambdas.path.length + ' Lambdas sources are going to be copied...');
 
-    for (var i in lambdas.path) {
+    for (let i in lambdas.path) {
       if (!lambdas.path.hasOwnProperty(i)) {
         continue;
       }
 
-      var lambdaPath = lambdas.path[i];
-      var lambdaTmpPath = lambdas.tmpPath[i];
+      let lambdaPath = lambdas.path[i];
+      let lambdaTmpPath = lambdas.tmpPath[i];
 
       console.log('Copying Lambda sources from ' + lambdaPath + ' into ' + lambdaTmpPath);
 
@@ -257,32 +118,32 @@ module.exports = function(mainPath) {
     }
 
     cb();
-  }
+  };
 
-  function optimize(cb, lambdas, final) {
-    var frameworkPaths = [];
+  let optimize = (cb, lambdas, final) => {
+    let frameworkPaths = [];
 
-    for (var i in lambdas.tmpPath) {
+    for (let i in lambdas.tmpPath) {
       if (!lambdas.tmpPath.hasOwnProperty(i)) {
         continue;
       }
 
-      var lambdaTmpPath = lambdas.tmpPath[i];
+      let lambdaTmpPath = lambdas.tmpPath[i];
 
       console.log('Optimizing Lambda code in ' + lambdaTmpPath);
 
-      var depsLister = new NpmListDependencies(lambdaTmpPath);
-      var depsObj = depsLister.list();
+      let depsLister = new NpmListDependencies(lambdaTmpPath);
+      let depsObj = depsLister.list();
 
-      var frameworkVector = depsObj.findAll('deep-framework');
+      let frameworkVector = depsObj.findAll('deep-framework');
 
-      for (var j in frameworkVector) {
+      for (let j in frameworkVector) {
         if (!frameworkVector.hasOwnProperty(j)) {
           continue;
         }
 
-        var depObj = frameworkVector[j];
-        var depPath = depObj.getPath(lambdaTmpPath);
+        let depObj = frameworkVector[j];
+        let depPath = depObj.getPath(lambdaTmpPath);
 
         console.log('Optimizing deep-framework in ' + depPath);
 
@@ -295,13 +156,13 @@ module.exports = function(mainPath) {
       return;
     }
 
-    var run = new NpmRun(frameworkPaths);
+    let run = new NpmRun(frameworkPaths);
     run.cmd = final ? 'final-prepare-production' : 'prepare-production';
 
     run.runChunk(cb, NpmInstall.DEFAULT_CHUNK_SIZE);
-  }
+  };
 
-  function optimizeDeps(cb, lambdas) {
+  let optimizeDeps = (cb, lambdas) => {
     if (lambdas.tmpPath.length <= 0) {
       cb();
       return;
@@ -312,28 +173,26 @@ module.exports = function(mainPath) {
       cb,
       lambdas
     );
-  }
+  };
 
-  function _optimizeDepsChunk(chunks, cb, lambdas) {
-    var chunk = chunks.shift();
+  let _optimizeDepsChunk = (chunks, cb, lambdas) => {
+    let chunk = chunks.shift();
 
-    var wait = new WaitFor();
-    var remaining = chunk.length;
+    let wait = new WaitFor();
+    let remaining = chunk.length;
 
-    wait.push(function() {
-      return remaining <= 0;
-    }.bind(this));
+    wait.push(() => remaining <= 0);
 
-    for (var i in chunk) {
+    for (let i in chunk) {
       if (!chunk.hasOwnProperty(i)) {
         continue;
       }
 
-      var lambdaTmpPath = chunk[i];
+      let lambdaTmpPath = chunk[i];
 
       console.log('Optimizing Lambda dependencies in ' + lambdaTmpPath);
 
-      var depsOptimizer = new DepsTreeOptimizer(lambdaTmpPath);
+      let depsOptimizer = new DepsTreeOptimizer(lambdaTmpPath);
 
       depsOptimizer.optimize(
         function(lambdaTmpPath, depsFullNames) {
@@ -344,37 +203,34 @@ module.exports = function(mainPath) {
       );
     }
 
-    wait.ready(function() {
+    wait.ready(() => {
       if (chunks.length <= 0) {
-        optimize.bind(this)(cb, lambdas, true);
+        optimize(cb, lambdas, true);
       } else {
         _optimizeDepsChunk(chunks, cb, lambdas);
       }
-    }.bind(this));
-  }
+    });
+  };
 
-  function pack(cb, lambdas) {
-    var wait = new WaitFor();
-    var remaining = lambdas.path.length;
+  let pack = (cb, lambdas) => {
+    let wait = new WaitFor();
+    let remaining = lambdas.path.length;
 
     console.log(lambdas.path.length + ' Lambdas are going to be optimized...');
 
-    wait.push(function() {
-      return remaining <= 0;
-    }.bind(this));
-
+    wait.push(() => remaining <= 0);
     wait.ready(cb);
 
-    for (var i in lambdas.path) {
+    for (let i in lambdas.path) {
       if (!lambdas.path.hasOwnProperty(i)) {
         continue;
       }
 
-      var lambdaPath = lambdas.path[i];
-      var lambdaTmpPath = lambdas.tmpPath[i];
+      let lambdaPath = lambdas.path[i];
+      let lambdaTmpPath = lambdas.tmpPath[i];
 
       // @todo: move it somewhere...
-      var cleanupCmd = new Exec(
+      let cleanupCmd = new Exec(
         'find . -type d -iname "aws-sdk*" -print0 | xargs -0 rm -rf;',
         'find . -type f -iname "*.es6" -print0 | xargs -0 rm -rf'
       );
@@ -391,7 +247,7 @@ module.exports = function(mainPath) {
           }
 
           // @todo: move it somewhere...
-          var cleanupCmd = new Exec('find . -type l -exec sh -c \'for x; do [ -e "$x" ] || rm "$x"; done\' _ {} +');
+          let cleanupCmd = new Exec('find . -type l -exec sh -c \'for x; do [ -e "$x" ] || rm "$x"; done\' _ {} +');
 
           cleanupCmd.cwd = lambdaTmpPath;
 
@@ -399,7 +255,7 @@ module.exports = function(mainPath) {
 
           cleanupCmd
             .avoidBufferOverflow()
-            .run(function(result) {
+            .run((result) => {
               if (result.failed) {
                 console.error(result.error);
               }
@@ -408,40 +264,38 @@ module.exports = function(mainPath) {
 
               // @todo: get rid of this optimizer?
               new LodashOptimizer(lambdaTmpPath)
-                .optimize(function() {
+                .optimize(() => {
                   console.log('Running .js optimizer');
 
                   new LambdaRecursiveOptimize(lambdaTmpPath)
-                    .run(function() {
+                    .run(() => {
                       if (installSdk) {
                         console.log('Installing latest aws-sdk into ' + lambdaTmpPath);
 
-                        var npmLink = new NpmInstallLibs(lambdaTmpPath);
+                        let npmLink = new NpmInstallLibs(lambdaTmpPath);
                         npmLink.libs = 'aws-sdk';
 
-                        npmLink.run(function() {
-                          cacheDeepDeps(lambdaTmpPath, function() {
-                            packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
-                              remaining--;
-                            }.bind(this));
-                          }.bind(this));
-                        }.bind(this));
+                        npmLink.run(() => {
+                          cacheDeepDeps(lambdaTmpPath, () => {
+                            packSingle(lambdaPath, lambdaTmpPath, () => remaining--);
+                          });
+                        });
                       } else {
-                        cacheDeepDeps(lambdaTmpPath, function() {
-                          packSingle.bind(this)(lambdaPath, lambdaTmpPath, function() {
+                        cacheDeepDeps(lambdaTmpPath, () => {
+                          packSingle(lambdaPath, lambdaTmpPath, () => {
                             remaining--;
-                          }.bind(this));
-                        }.bind(this));
+                          });
+                        });
                       }
-                    }.bind(this));
-                }.bind(this));
-            }.bind(this));
+                    });
+                });
+            });
         }.bind(this, lambdaPath, lambdaTmpPath));
     }
-  }
+  };
 
-  function packSingle(lambdaPath, lambdaTmpPath, cb) {
-    var outputFile = path.join(
+  let packSingle = (lambdaPath, lambdaTmpPath, cb) => {
+    let outputFile = path.join(
       lambdaPath,
       '..',
       path.basename(lambdaPath) + '.zip'
@@ -455,7 +309,7 @@ module.exports = function(mainPath) {
     console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
 
     // @todo: replace this with a node native
-    var zip = new Exec(
+    let zip = new Exec(
       Bin.resolve('zip'),
       '-y',
       '-r',
@@ -466,44 +320,171 @@ module.exports = function(mainPath) {
     zip.cwd = lambdaTmpPath;
     zip.avoidBufferOverflow();
 
-    zip.run(function(result) {
+    zip.run((result) => {
       if (result.failed) {
         console.error(result.error);
         this.exit(1);
       }
 
       cb();
-    }.bind(this));
-  }
+    });
+  };
 
-  function cacheDeepDeps(lambdaPath, callback) {
+  let cacheDeepDeps = (lambdaPath, callback) => {
     deepDepsCache.cacheFrom(lambdaPath, 86400 * 3, callback); // cache deps for 3 days
-  }
+  };
 
-  function getMicroservicesToCompile() {
+  let getMicroservicesToCompile = () => {
     if (!microservicesToCompile) {
       return [];
     }
 
-    var msIdentifiers = arrayUnique(microservicesToCompile.split(',').map(function(id) {
-      return id.trim();
-    }));
+    let msIdentifiers = arrayUnique(microservicesToCompile.split(',').map(id => id.trim()));
 
     return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
-  }
+  };
 
-  function arrayUnique(a) {
-    return a.reduce(function(p, c) {
+  let arrayUnique = (a) => {
+    return a.reduce((p, c) => {
       if (p.indexOf(c) < 0) {
         p.push(c);
       }
       return p;
     }, []);
+  };
+
+  let objectValues = object => Object.keys(object).map(key => object[key]);
+  
+  let removeSource = this.opts.locate('remove-source').exists;
+  let installSdk = this.opts.locate('aws-sdk').exists;
+  let microservicesToCompile = this.opts.locate('partial').value;
+  let linear =  this.opts.locate('linear').exists;
+  let skipCache = this.opts.locate('skip-cache').exists;
+  let invalidateCache = this.opts.locate('invalidate-cache').exists;
+  let deepDepsCache = new DeepDepsCache(DeepDepsCache.DEFAULT_CACHE_DIRECTORY, installSdk ? {'aws-sdk': 'latest'} : {});
+
+  mainPath = this.normalizeInputPath(mainPath);
+  let property = new Property(mainPath);
+  let lambdas = {
+    path: [],
+    tmpPath: [],
+    loadedFromCache: 0,
+    count: function() {
+      return this.path.length + this.loadedFromCache; // do not replace with arrow function
+    }
+  };
+
+  let lambdasObj = new LambdaExtractor(property, getMicroservicesToCompile())
+    .extract(LambdaExtractor.NPM_PACKAGE_FILTER, LambdaExtractor.EXTRACT_OBJECT);
+  lambdas.path = arrayUnique(objectValues(lambdasObj));
+
+  if (invalidateCache) {
+    deepDepsCache.flush();
   }
 
-  function objectValues(object) {
-    return Object.keys(object).map(function(key) {
-      return object[key];
-    });
+  if (linear) {
+    console.log('Sync validation schemas into ' + lambdas.path.length + ' Lambdas');
+
+    new ValidationSchemasSync(property).syncWorking(ValidationSchemasSync.NPM_PACKAGE_FILTER);
+
+    for (let i in lambdas.path) {
+      if (!lambdas.path.hasOwnProperty(i)) {
+        continue;
+      }
+
+      let lambdaPath = lambdas.path[i];
+      let lambdaTmpPath = path.join(tmp.dirSync().name, Hash.md5(lambdaPath) + '_' + new Date().getTime());
+
+      lambdas.tmpPath.push(lambdaTmpPath);
+    }
+
+    prepareSources(installFromCache.bind(this, lambdas, function () {
+      let chain = new NpmChain();
+
+      chain.add(
+        new NpmInstall(lambdas.tmpPath)
+          .addExtraArg(
+            '--no-bin-links',
+            '--no-optional',
+            '--loglevel silent',
+            '--production',
+            '--save'
+          )
+      );
+
+      chain.add(
+        new NpmPrune(lambdas.tmpPath)
+          .addExtraArg('--production')
+      );
+
+      chain.runChunk(() => {
+        optimize(() => {
+          optimizeDeps(() => {
+            pack(() => {
+              lambdas.tmpPath.forEach((lambdaTmpPath) => {
+                fse.removeSync(lambdaTmpPath);
+              });
+
+              if (removeSource) {
+                lambdas.path.forEach((lambdaPath) => {
+                  fse.removeSync(lambdaPath);
+                });
+              }
+
+              console.log(lambdas.count() + ' Lambdas were successfully prepared for production');
+            }, lambdas);
+          }, lambdas);
+        }, lambdas);
+      }, NpmInstall.DEFAULT_CHUNK_SIZE);
+    }), lambdas);
+  } else { // @todo: Implement some multithreading class
+    let maxProcessCount = NpmInstall.DEFAULT_CHUNK_SIZE;
+    let processCount = 0;
+
+    let createCommand = () => {
+      let cmd = new Exec(
+        Bin.node,
+        this.scriptPath,
+        'compile-prod',
+        mainPath
+      );
+
+      if (removeSource) {
+        cmd.addArg('--remove-source');
+      }
+
+      if (installSdk) {
+        cmd.addArg('--aws-sdk');
+      }
+
+      if (skipCache) {
+        cmd.addArg('--skip-cache');
+      }
+
+      cmd.addArg('--linear');
+
+      return cmd;
+    };
+
+    let refreshProcessList = (lambdaIdentifiers) => {
+      if (lambdaIdentifiers.length === 0 && processCount === 0) {
+        process.exit(0);
+      }
+
+      while (lambdaIdentifiers.length > 0 && processCount < maxProcessCount) {
+        let identifier = lambdaIdentifiers.shift();
+        let cmd = createCommand();
+
+        cmd.addArg('--partial="' + identifier + '"'); // is not working without quotes
+        cmd.run(() => processCount--, true);
+
+        processCount++;
+      }
+    };
+
+    setInterval(
+      refreshProcessList.bind(this, Object.keys(lambdasObj)),
+      1000
+    );
   }
 };

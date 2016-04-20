@@ -5,24 +5,21 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  var Property = require('deep-package-manager').Property_Instance;
-  var Config = require('deep-package-manager').Property_Config;
-  var Undeploy = require('deep-package-manager').Provisioning_Undeploy;
-  var ProvisioningDumpFileMatcher = require('deep-package-manager').Provisioning_UndeployMatcher_ProvisioningDumpFileMatcher;
-  var AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
-  var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
+  let Property = require('deep-package-manager').Property_Instance;
+  let Config = require('deep-package-manager').Property_Config;
+  let Undeploy = require('deep-package-manager').Provisioning_Undeploy;
+  let ProvisioningDumpFileMatcher = require('deep-package-manager').Provisioning_UndeployMatcher_ProvisioningDumpFileMatcher;
+  let AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
+  let Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
 
-  var dirtyMode = this.opts.locate('dirty').exists;
-  var forceProd = this.opts.locate('prod').exists;
-  var cfgBucket = this.opts.locate('cfg-bucket').value;
-  var rawResource = this.opts.locate('resource').value;
-
-  var resource = null;
-  var skipDirtyCheck = false;
+  let dirtyMode = this.opts.locate('dirty').exists;
+  let forceProd = this.opts.locate('prod').exists;
+  let cfgBucket = this.opts.locate('cfg-bucket').value;
+  let rawResource = this.opts.locate('resource').value;
+  let resource = null;
 
   if (rawResource) {
     resource = AbstractService.extractBaseHashFromResourceName(rawResource);
-    skipDirtyCheck = true;
 
     if (!resource) {
       // in case the hash is provided
@@ -37,10 +34,10 @@ module.exports = function(mainPath) {
 
   mainPath = this.normalizeInputPath(mainPath);
 
-  var property = new Property(mainPath, Config.DEFAULT_FILENAME);
-  var matcher = new ProvisioningDumpFileMatcher(property);
+  let property = new Property(mainPath, Config.DEFAULT_FILENAME);
+  let matcher = new ProvisioningDumpFileMatcher(property);
 
-  matcher.read(function(error) {
+  matcher.read((error) => {
     if (error && !resource && !dirtyMode) {
       console.error(error);
       console.log('You may want to add "--dirty" flag to delete all account resources');
@@ -49,32 +46,32 @@ module.exports = function(mainPath) {
       return;
     }
 
-    var backupConfig = !error;
+    let backupConfig = !error;
 
     // @todo: confirm prod env undeploy
     if (!error && !resource && !dirtyMode && matcher.property.env.toLowerCase() === 'prod' && !forceProd) {
-      var prompt = new Prompt(
+      let prompt = new Prompt(
         'You are about to undeploy production environment.\n' +
         'Please type "YES" in order to confirm the undeploy.'
       );
 
       prompt.syncMode = true;
 
-      prompt.read(function(confirmation) {
+      prompt.read((confirmation) => {
         if ((confirmation || '').toLowerCase() !== 'yes') {
           console.log('Undeploy cancelled by user');
           this.exit(0);
         }
-      }.bind(this));
+      });
     }
 
-    var undeploy = new Undeploy(
+    let undeploy = new Undeploy(
       property,
       true,
       error ? Undeploy.DEFAULT_MATCHER : matcher
     );
 
-    undeploy.execute(function (error, results) {
+    undeploy.execute((error, results) => {
       if (error) {
         console.error(error);
         this.exit(1);
@@ -86,7 +83,7 @@ module.exports = function(mainPath) {
       if (backupConfig) {
         console.log('Create configuration backup in ' + this.fileNameBck);
 
-        matcher.bckConfigFile(function(error) {
+        matcher.bckConfigFile((error) => {
           if (error) {
             console.error(error);
 
@@ -95,12 +92,12 @@ module.exports = function(mainPath) {
           }
 
           this.exit(0);
-        }.bind(this));
+        });
 
         return;
       }
 
       this.exit(0);
-    }.bind(this), resource = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP);
-  }.bind(this), cfgBucket);
+    }, resource = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP);
+  }, cfgBucket);
 };

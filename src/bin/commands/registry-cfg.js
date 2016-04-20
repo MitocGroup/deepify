@@ -6,38 +6,35 @@
 'use strict';
 
 module.exports = function(parameter) {
-  var RegistryConfig = require('../../lib.compiled/Registry/Config').Config;
+  let RegistryConfig = require('../../lib.compiled/Registry/Config').Config;
 
   parameter = parameter || 'unknown';
-  var newValue = this.opts.locate('set').value;
-  var printAvailable = this.opts.locate('print').exists;
-  var config = RegistryConfig.create().refresh(parameter);
+  let newValue = this.opts.locate('set').value;
+  let printAvailable = this.opts.locate('print').exists;
+  let config = RegistryConfig.create().refresh(parameter);
+  let resetDeepLog = () => this.constructor._logDriver.overrideJsConsole(false);
 
   if (printAvailable) {
-    resetDeepLog.bind(this)();
+    resetDeepLog();
     console.log(Object.keys((new RegistryConfig()).varsMapper.MAPPING).join(', '));
   } else if (newValue) {
-    console.log('Setting new value of parameter "' + parameter + '"');
+    console.log(`Setting new value of parameter "${parameter}"`);
 
     config.add(parameter, newValue);
 
     try {
       config.persist();
     } catch (error) {
-      console.error('Failed to set new value of parameter "' + parameter + '": ' + error);
+      console.error(`Failed to set new value of parameter "${parameter}": ${error}`);
       this.exit(1);
     }
   } else {
     if (!config.has(parameter)) {
-      console.error('Missing parameter "' + parameter + '" in config');
+      console.error(`Missing parameter "${parameter}" in config`);
       this.exit(1);
     }
 
-    resetDeepLog.bind(this)();
+    resetDeepLog();
     console.log(config.read(parameter));
-  }
-
-  function resetDeepLog() {
-    this.constructor._logDriver.overrideJsConsole(false);
   }
 };

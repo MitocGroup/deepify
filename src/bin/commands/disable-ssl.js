@@ -6,48 +6,48 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  var path = require('path');
-  var fs = require('fs');
-  var Property = require('deep-package-manager').Property_Instance;
-  var ACMService = require('deep-package-manager').Provisioning_Service_ACMService;
-  var CloudFrontService = require('deep-package-manager').Provisioning_Service_CloudFrontService;
-  var Config = require('deep-package-manager').Property_Config;
+  let path = require('path');
+  let fs = require('fs');
+  let Property = require('deep-package-manager').Property_Instance;
+  let ACMService = require('deep-package-manager').Provisioning_Service_ACMService;
+  let CloudFrontService = require('deep-package-manager').Provisioning_Service_CloudFrontService;
+  let Config = require('deep-package-manager').Property_Config;
 
   mainPath = this.normalizeInputPath(mainPath);
 
-  var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
+  let propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
 
   if (!fs.existsSync(propertyConfigFile)) {
     console.error('You should have the application configured');
     this.exit(1);
   }
 
-  var property = new Property(mainPath);
+  let property = new Property(mainPath);
 
-  property.configObj.tryLoadConfig(function() {
+  property.configObj.tryLoadConfig(() => {
     if (!property.configObj.configExists) {
       console.error('You should have the application deployed');
       this.exit(1);
     }
 
-    var domain = property.config.domain;
+    let domain = property.config.domain;
 
     if (!domain) {
-      console.error('Please add a domain to \'' + Config.DEFAULT_FILENAME + '\' config file in order to deactivate SSL!');
+      console.error(`Please add a domain to '${Config.DEFAULT_FILENAME}' config file in order to deactivate SSL!`);
     }
 
-    var acmService = property.provisioning.services.find(ACMService);
-    var cfService = property.provisioning.services.find(CloudFrontService);
+    let acmService = property.provisioning.services.find(ACMService);
+    let cfService = property.provisioning.services.find(CloudFrontService);
 
-    console.log('Looking for ACM certificate available of the domain \'' + domain + '\'');
+    console.log(`Looking for ACM certificate available of the domain '${domain}'`);
 
-    acmService.getDomainCertificateArn(domain, function(certArn) {
+    acmService.getDomainCertificateArn(domain, (certArn) => {
       if (!certArn) {
-        console.error('There is no certificate available for the domain \'' + domain + '\'');
+        console.error(`There is no certificate available for the domain '${domain}'`);
         this.exit(1);
       }
 
-      var configChanges = {
+      let configChanges = {
         DefaultCacheBehavior: {
           ViewerProtocolPolicy: 'allow-all',
         },
@@ -62,18 +62,16 @@ module.exports = function(mainPath) {
         },
       };
 
-      console.log('Deactivating ACM certificate \'' + certArn + '\' for domain \'' + domain + '\'');
+      console.log(`Deactivating ACM certificate '${certArn}' for domain '${domain}'`);
 
-      cfService.updateDistribution(configChanges, function(error) {
+      cfService.updateDistribution(configChanges, (error) => {
         if (error) {
           console.error(error);
           this.exit(1);
         }
 
-        console.log(
-          'Certificate \'' + certArn + '\' have been successfully unassigned from the CloudFront distribution'
-        );
-      }.bind(this));
-    }.bind(this));
-  }.bind(this));
+        console.log(`Certificate '${certArn}' have been successfully unassigned from the CloudFront distribution`);
+      });
+    });
+  });
 };
