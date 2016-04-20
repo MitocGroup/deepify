@@ -3,7 +3,7 @@
 babel=$(which babel)
 
 if [ -z ${babel} ]; then
-    echo "Seems like babel is not installed! Installing babel v5 as default transpiler..."
+    echo "Seems like babel is not installed! Installing babel v6 as default transpiler..."
     echo ""
     npm install babel-cli@6.x -g
     npm install babel-preset-es2015 -g
