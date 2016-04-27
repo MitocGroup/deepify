@@ -16,6 +16,7 @@ module.exports = function(lambdaPath) {
 
   let dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   let event = this.opts.locate('event').value;
+  let context = this.opts.locate('context').value;
   let skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
 
   // @todo: implement it in a better way
@@ -37,15 +38,22 @@ module.exports = function(lambdaPath) {
     this.exit(1);
   }
 
-  if (event) {
-    if (fs.existsSync(path.normalize(event))) {
-      event = require(event);
+  let parseParamData = (rawParam) => {
+    if (rawParam) {
+      if (fs.existsSync(path.normalize(rawParam))) {
+        rawParam = require(rawParam);
+      } else {
+        rawParam = JSON.parse(rawParam);
+      }
     } else {
-      event = JSON.parse(event);
+      rawParam = {};
     }
-  } else {
-    event = {};
-  }
+
+    return rawParam;
+  };
+
+  event = parseParamData(event);
+  context = parseParamData(context);
 
   let awsConfigFile = path.join(path.dirname(lambdaPath), '.aws.json');
 
@@ -64,7 +72,7 @@ module.exports = function(lambdaPath) {
         this.exit(1);
       }
 
-      let lambda = Runtime.createLambda(lambdaPath, awsConfigFile);
+      let lambda = Runtime.createLambda(lambdaPath, awsConfigFile, context);
 
       lambda.complete = (error/*, response*/) => {
         console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
