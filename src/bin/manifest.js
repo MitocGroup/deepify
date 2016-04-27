@@ -374,6 +374,11 @@ module.exports = {
           description: 'JSON string used as the Lambda payload',
           required: false,
         },
+        context: {
+          alias: 'c',
+          description: 'JSON string used as the Lambda context',
+          required: false,
+        },
         'skip-frontend-build': {
           alias: 'f',
           description: 'Skip picking up _build path from the microservices Frontend',
