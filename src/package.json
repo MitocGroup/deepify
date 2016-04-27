@@ -75,7 +75,8 @@
     "aws-sdk": "^2.2.x",
     "semver": "^5.1.x",
     "uglify-js": "^2.6.x",
-    "cli-spinner": "^0.2.x"
+    "cli-spinner": "^0.2.x",
+    "object-merge": "^2.5.x"
   },
   "devDependencies": {
     "chai": "^3.2.x",

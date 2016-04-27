@@ -25,6 +25,7 @@ export class LambdaListener extends AbstractListener {
       let isAsync = uri === LambdaListener.LAMBDA_ASYNC_URI;
       event.stopPropagation(); // lambda runs async. stop other listeners
 
+      // @here - rawData passed from deep-security
       this._readRequestData(request, (rawData) => {
         let data = JSON.parse(rawData);
 
