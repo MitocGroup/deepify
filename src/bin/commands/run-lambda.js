@@ -89,7 +89,7 @@ module.exports = function(lambdaPath) {
           console.log(JSON.stringify(result));
         };
 
-        lambda.complete = (error) => {
+        lambda.complete = () => {
 
           // assure invokeAsync()s are executed!
           process.kill(process.pid);
