@@ -389,6 +389,11 @@ module.exports = {
           description: 'Local DynamoDB server implementation (ex. LocalDynamo, Dynalite)',
           required: false,
         },
+        'plain': {
+          alias: 'p',
+          description: 'Show only result in JSON without additional logs',
+          required: false,
+        }
       },
       args: {
         path: {

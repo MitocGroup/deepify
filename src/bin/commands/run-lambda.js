@@ -18,6 +18,7 @@ module.exports = function(lambdaPath) {
   let event = this.opts.locate('event').value;
   let context = this.opts.locate('context').value;
   let skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
+  let plain = this.opts.locate('plain').exists;
 
   // @todo: implement it in a better way
   if (skipFrontendBuild) {
@@ -64,7 +65,8 @@ module.exports = function(lambdaPath) {
   }
 
   let startServer = () => {
-    console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
+    if(!plain)
+      console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
 
     DeepDB.startLocalDynamoDBServer((error) => {
       if (error) {
@@ -74,18 +76,36 @@ module.exports = function(lambdaPath) {
 
       let lambda = Runtime.createLambda(lambdaPath, awsConfigFile, context);
 
-      lambda.complete = (error/*, response*/) => {
-        console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
+      if(plain) {
+        lambda.silent = true;
 
-        if (error) {
-          console.error(error);
-        }
+        lambda.succeed = (result) => {
+          console.log(result);
+        };
 
-        // assure invokeAsync()s are executed!
-        process.kill(process.pid);
-      };
+        lambda.fail = (result) => {
+          console.log(result);
+        };
 
-      console.log('Starting Lambda.', os.EOL);
+        lambda.complete = (error) => {
+
+          // assure invokeAsync()s are executed!
+          process.kill(process.pid);
+        };
+      } else {
+        lambda.complete = (error/*, response*/) => {
+          console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
+
+          if (error) {
+            console.error(error);
+          }
+
+          // assure invokeAsync()s are executed!
+          process.kill(process.pid);
+        };
+
+        console.log('Starting Lambda.', os.EOL);
+      }
 
       try {
         process.chdir(path.dirname(lambdaPath));
