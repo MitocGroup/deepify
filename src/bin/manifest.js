@@ -391,7 +391,7 @@ module.exports = {
         },
         'plain': {
           alias: 'p',
-          description: 'Output the result only',
+          description: 'Output JSON stringified result only',
           required: false,
         }
       },
