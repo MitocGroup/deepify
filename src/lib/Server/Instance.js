@@ -235,7 +235,7 @@ export class Instance {
       }
     }
 
-    this._defaultFrontendConfig = Frontend.createConfig(this._property.config);
+    this._defaultFrontendConfig = Frontend.createConfig(this._property.config, true);
   }
 
   /**
