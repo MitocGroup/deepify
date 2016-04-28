@@ -65,6 +65,7 @@ module.exports = function(lambdaPath) {
   }
 
   let startServer = () => {
+    let overridenConsoleLog = console.log;
 
     if(!plain) {
       console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
@@ -79,6 +80,8 @@ module.exports = function(lambdaPath) {
       let lambda = Runtime.createLambda(lambdaPath, awsConfigFile, context);
 
       if(plain) {
+        delete console.log;
+
         lambda.silent = true;
 
         lambda.succeed = lambda.fail = (result) => {
@@ -89,6 +92,8 @@ module.exports = function(lambdaPath) {
 
           // assure invokeAsync()s are executed!
           process.kill(process.pid);
+
+          console.log = overridenConsoleLog;
         };
       } else {
         lambda.complete = (error/*, response*/) => {
