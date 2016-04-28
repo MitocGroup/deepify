@@ -82,11 +82,11 @@ module.exports = function(lambdaPath) {
         lambda.silent = true;
 
         lambda.succeed = (result) => {
-          console.log(result);
+          console.log(JSON.stringify(result));
         };
 
         lambda.fail = (result) => {
-          console.log(result);
+          console.log(JSON.stringify(result));
         };
 
         lambda.complete = (error) => {
