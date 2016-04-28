@@ -93,6 +93,7 @@ module.exports = function(lambdaPath) {
           if(error.validationErrors){
             _result.validationErrors = error.validationErrors;
           }
+
           console.log(JSON.stringify(_result));
         };
 
