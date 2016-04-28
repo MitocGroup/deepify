@@ -84,7 +84,16 @@ module.exports = function(lambdaPath) {
         };
 
         lambda.fail = (result) => {
-          console.log(result);
+          let error = JSON.parse(result);
+
+          let _result = {
+            errorType: error.errorType,
+          };
+
+          if(error.validationErrors){
+            _result.validationErrors = error.validationErrors;
+          }
+          console.log(JSON.stringify(_result));
         };
 
         lambda.complete = (error) => {
