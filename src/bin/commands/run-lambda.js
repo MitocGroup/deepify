@@ -81,11 +81,7 @@ module.exports = function(lambdaPath) {
       if(plain) {
         lambda.silent = true;
 
-        lambda.succeed = (result) => {
-          console.log(JSON.stringify(result));
-        };
-
-        lambda.fail = (result) => {
+        lambda.succeed = lambda.fail = (result) => {
           console.log(JSON.stringify(result));
         };
 
