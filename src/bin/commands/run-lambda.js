@@ -65,8 +65,10 @@ module.exports = function(lambdaPath) {
   }
 
   let startServer = () => {
-    if(!plain)
+
+    if(!plain) {
       console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
+    }
 
     DeepDB.startLocalDynamoDBServer((error) => {
       if (error) {
@@ -84,17 +86,7 @@ module.exports = function(lambdaPath) {
         };
 
         lambda.fail = (result) => {
-          let error = JSON.parse(result);
-
-          let _result = {
-            errorType: error.errorType,
-          };
-
-          if(error.validationErrors){
-            _result.validationErrors = error.validationErrors;
-          }
-
-          console.log(JSON.stringify(_result));
+          console.log(result);
         };
 
         lambda.complete = (error) => {

@@ -391,7 +391,7 @@ module.exports = {
         },
         'plain': {
           alias: 'p',
-          description: 'Show only result in JSON without additional logs',
+          description: 'Output the result only',
           required: false,
         }
       },
