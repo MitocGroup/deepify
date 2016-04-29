@@ -401,6 +401,12 @@ module.exports = {
           required: false,
         },
       },
+    },
+    'generate-microapp': {
+      example: 'deepify generate-microapp /target/path/'
+    },
+    'generate-model': {
+      example: 'deepify generate-model /path/to/microapp'
     }
   },
 };
