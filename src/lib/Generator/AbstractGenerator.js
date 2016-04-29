@@ -21,7 +21,7 @@ export class AbstractGenerator extends Core.OOP.Interface {
    * @param {String} skeletonsDirectory
    */
   constructor(templatingEngine = AbstractGenerator.MUSTACHE_TEMPLATING,
-              skeletonsDirectory = '/home/ccristi/mitocgroup/deep-microservices-skeleton/src/DeepSkeleton') {
+              skeletonsDirectory = '/Users/ccristi/mitocgroup/deep-microservices-skeleton/src/DeepSkeleton') {
     super('validationSchema', '_generate');
 
     this._templatingEngine = templatingEngine;
@@ -65,6 +65,12 @@ export class AbstractGenerator extends Core.OOP.Interface {
    */
   render(template, params = {}) {
     let templatePath = path.join(this._skeletonsDirectory, template);
+
+    if (!FS.existsSync(templatePath)) {
+      console.error(`${template} doesn't exists`);
+      return;
+    }
+
     let templateContent = FS.readFileSync(templatePath).toString();
 
     return this.templatingEngine.render(templateContent, params);
@@ -104,7 +110,7 @@ export class AbstractGenerator extends Core.OOP.Interface {
     });
 
     if (validationResult.error) {
-      cb(InvalidGenerationSchema(this.constructor.name, validationResult.error));
+      cb(new InvalidGenerationSchema(this.constructor.name, validationResult.error));
       return;
     }
 

@@ -23,7 +23,7 @@ export class ModelGenerator extends AbstractGenerator {
     this.renderFile(
       'Data/Models/model.json',
       path.join(microservice.basePath, 'Data/Models', `${modelName}.json`),
-      fields
+      templateArgs
     );
 
     cb();
@@ -36,10 +36,10 @@ export class ModelGenerator extends AbstractGenerator {
     return Joi.object().keys({
       microservice: Joi.object().type(Microservice),
       modelName: Joi.string().required().alphanum().min(3),
-      fields: Joi.object().keys({
+      fields: Joi.array().min(1).items(Joi.object().keys({
         name: Joi.string().required().alphanum().min(3),
         type: Joi.string().required().allow(ModelGenerator.TYPES)
-      })
+      }))
     });
   }
 

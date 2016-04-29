@@ -29,21 +29,21 @@ export class MicroserviceGenerator extends AbstractGenerator {
 
     // @todo: move this?
     if (FS.existsSync(path.join(this.skeletonsDirectory, engineDir))) {
-      FSe.copySync(
-        path.join(this.skeletonsDirectory, engineDir),
-        path.join(this.targetPath, engineDir)
-      );
-
-      let targetEngineDir = path.join(this.targetPath, engineDir, 'index.js');
+      let targetEngineDir = path.join(this.targetPath, engineDir);
 
       if (FS.existsSync(targetEngineDir)) {
         cb(new Error(`${targetEngineDir} directory already exists`));
         return;
       }
 
+      FSe.copySync(
+        path.join(this.skeletonsDirectory, engineDir),
+        targetEngineDir
+      );
+
       this.renderFile(
         path.join(engineDir, 'index.js'),
-        path.join(this.targetPath, engineDir, 'index.js'),
+        path.join(targetEngineDir, 'index.js'),
         templateParams
       );
     }
