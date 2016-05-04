@@ -5,7 +5,6 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  let path = require('path');
   let inquirer = require('inquirer');
   let MicroserviceGenerator = require('../../lib.compiled/Generator/MicroserviceGenerator').MicroserviceGenerator;
 

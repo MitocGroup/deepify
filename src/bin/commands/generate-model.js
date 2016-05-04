@@ -7,7 +7,6 @@
 module.exports = function(mainPath) {
   let path = require('path');
   let inquirer = require('inquirer');
-  let FS = require('fs');
   let ModelGenerator = require('../../lib.compiled/Generator/ModelGenerator').ModelGenerator;
   let Property = require('deep-package-manager').Property_Instance;
 
@@ -60,9 +59,11 @@ This command helps you generate the model.
           type: result.type
         });
 
-        result.continue ?
-          prompModelField() :
+        if (result.continue) {
+          prompModelField()
+        } else {
           generateModel(schema);
+        }
       })
     };
 
