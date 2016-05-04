@@ -8,9 +8,9 @@ import FS from 'fs';
 import Core from 'deep-core';
 import path from 'path';
 import Joi from 'joi';
-import {InvalidGenerationSchema} from './Exception/InvalidGenerationSchema';
-import FSe from 'fs-extra';
 import {MustacheEngine} from './TemplatingEngine/MustacheEngine';
+import {InvalidGenerationSchema} from './Exception/InvalidGenerationSchema';
+import {MissingTemplateException} from './Exception/MissingTemplateException';
 
 /**
  * Abstract Generator
@@ -21,7 +21,7 @@ export class AbstractGenerator extends Core.OOP.Interface {
    * @param {String} skeletonsDirectory
    */
   constructor(templatingEngine = AbstractGenerator.MUSTACHE_TEMPLATING,
-              skeletonsDirectory = '/Users/ccristi/mitocgroup/deep-microservices-skeleton/src/DeepSkeleton') {
+              skeletonsDirectory = AbstractGenerator.DEFAULT_SKELETONS_DIR) {
     super('validationSchema', '_generate');
 
     this._templatingEngine = templatingEngine;
@@ -59,18 +59,16 @@ export class AbstractGenerator extends Core.OOP.Interface {
   }
 
   /**
-   * @param {Object} template
+   * @param {String} template
    * @param {Object} params
    * @returns {Object}
    */
   render(template, params = {}) {
-    let templatePath = path.join(this._skeletonsDirectory, template);
-
-    if (!FS.existsSync(templatePath)) {
-      console.error(`${template} doesn't exists`);
-      return;
+    if (!this.templateExists(template)) {
+      throw new MissingTemplateException(template);
     }
 
+    let templatePath = path.join(this._skeletonsDirectory, template);
     let templateContent = FS.readFileSync(templatePath).toString();
 
     return this.templatingEngine.render(templateContent, params);
@@ -78,7 +76,7 @@ export class AbstractGenerator extends Core.OOP.Interface {
 
   /**
    * @param {String} targetFile
-   * @param {Object} template
+   * @param {String} template
    * @param {Object} params
    */
   renderFile(template, targetFile, params = {}) {
@@ -86,15 +84,6 @@ export class AbstractGenerator extends Core.OOP.Interface {
       targetFile,
       this.render(template, params)
     );
-  }
-
-  /**
-   * @param dirList
-   */
-  ensureTargetDir(...dirList) {
-    dirList.forEach((dir) => {
-      FSe.ensureDirSync(path.join(this._targetPath, dir));
-    });
   }
 
   /**
@@ -121,9 +110,26 @@ export class AbstractGenerator extends Core.OOP.Interface {
   }
 
   /**
+   * @param {String} template
+   * @returns {Boolean}
+   */
+  templateExists(template) {
+    let fullPath = path.join(this._skeletonsDirectory, template);
+
+    return FS.existsSync(fullPath) && FS.lstatSync(fullPath).isFile();
+  }
+
+  /**
    * @returns {MustacheEngine}
    */
   static get MUSTACHE_TEMPLATING() {
     return new MustacheEngine();
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get DEFAULT_SKELETONS_DIR() {
+    return path.join(__dirname, '../../resources/skeletons');
   }
 }

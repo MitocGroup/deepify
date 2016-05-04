@@ -11,14 +11,15 @@ module.exports = function(mainPath) {
   let ModelGenerator = require('../../lib.compiled/Generator/ModelGenerator').ModelGenerator;
   let Property = require('deep-package-manager').Property_Instance;
 
+  mainPath = this.normalizeInputPath(mainPath);
+  let property = new Property(mainPath);
+  let name = this.opts.locate('name').value;
+
   console.log(`
 Welcome to Deepify Model generator
 
 This command helps you generate the model.
 `);
-
-  mainPath = this.normalizeInputPath(mainPath);
-  let property = new Property(mainPath);
 
   inquirer.prompt([
     {
@@ -29,9 +30,10 @@ This command helps you generate the model.
     },
     {
       type: 'input',
-      name: 'modelName',
+      name: 'name',
       message: 'Enter the model name: ',
-      validate: alphanumerical
+      validate: alphanumericalNotEmpty,
+      default: name
     }
   ]).then((schema) => {
     schema.microservice = property.microservice(schema.msIdentifier);
@@ -42,7 +44,7 @@ This command helps you generate the model.
         type: 'input',
         name: 'name',
         message: 'Enter field name: ',
-        validate: alphanumerical
+        validate: alphanumericalNotEmpty
       }, {
         type: 'list',
         name: 'type',
@@ -64,31 +66,31 @@ This command helps you generate the model.
       })
     };
 
-    console.log('\nYou have to add at least 1 fields to your model\n');
+    console.log('\nYou have to add at least 1 field to your model\n');
+
     prompModelField();
   });
   
   let generateModel = (modelSchema) => {
     let modelGenerator = new ModelGenerator();
 
-    console.log('starting');
-    
-    modelGenerator.generate(mainPath, modelSchema, (error) => {
+    modelGenerator.generate(mainPath, modelSchema, (error, created) => {
       if (error) {
         console.error(`An error has occurred while generating the microapp: ${error}`);
         this.exit(1);
       }
 
-      console.log(`'${schema.name}' model has been successfully generated.`)
+      if (created) {
+        console.log(`'${modelSchema.name}' model has been successfully generated is ${path} .`);
+      }
     });
   };
-  
 
-  function alphanumerical(value) {
+  function alphanumericalNotEmpty(value) {
     if (!/^[a-zA-Z0-9_\-]{2,}$/.test(value)) {
-      return '[a-zA-Z0-9_-] are allowed only ';
+      return 'Stirng should contain only [a-zA-Z0-9_-]';
     }
 
     return true;
-  };
+  }
 };

@@ -8,6 +8,9 @@ import {EngineInterface} from './EngineInterface';
 import Mustache from 'mustache';
 
 export class MustacheEngine extends EngineInterface {
+  /**
+   * Call parent constructor
+   */
   constructor() {
     super();
   }

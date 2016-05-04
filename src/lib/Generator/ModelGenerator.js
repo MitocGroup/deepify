@@ -8,6 +8,7 @@ import Joi from 'joi';
 import path from 'path';
 import {Microservice_Instance as Microservice} from 'deep-package-manager';
 import {AbstractGenerator} from './AbstractGenerator';
+import inquirer  from 'inquirer';
 
 export class ModelGenerator extends AbstractGenerator {
   /**
@@ -19,23 +20,43 @@ export class ModelGenerator extends AbstractGenerator {
     let fields = this.generationSchema.fields;
     fields[fields.length - 1].last = true;
     let templateArgs = {fields};
+    let targetPath = path.join(microservice.basePath, 'Data/Models', `${modelName}.json`);
+    let doGenerate = () => {
+      this.renderFile(
+        'Data/Models/model.json',
+        targetPath,
+        templateArgs
+      );
 
-    this.renderFile(
-      'Data/Models/model.json',
-      path.join(microservice.basePath, 'Data/Models', `${modelName}.json`),
-      templateArgs
-    );
+      cb(null, targetPath);
+    };
+    
+    if (FS.existsSync(targetPath) && FS.lstatSync(targetPath).isFile()) {
+      inquirer.prompt([{
+        type: 'confirm',
+        name: 'doOverwrite',
+        message: `'${modelName}' model already exists. Do you want to overwrite it?`,
+      }], (response) => {
+        if (response.doOverwrite) {
+          doGenerate();
+        }
 
-    cb();
+        cb(null, null);
+      });
+      
+      return;
+    }
+
+    doGenerate();
   }
 
   /**
-   * @returns {*}
+   * @returns {Object}
    */
   validationSchema() {
     return Joi.object().keys({
-      microservice: Joi.object().type(Microservice),
-      modelName: Joi.string().required().alphanum().min(3),
+      microservice: Joi.object().type(Microservice).required(),
+      name: Joi.string().required().alphanum().min(3),
       fields: Joi.array().min(1).items(Joi.object().keys({
         name: Joi.string().required().alphanum().min(3),
         type: Joi.string().required().allow(ModelGenerator.TYPES)
@@ -50,17 +71,17 @@ export class ModelGenerator extends AbstractGenerator {
     return [
       // 'uuid',
       // 'timeUUID',
-      'stringSet',
-      'numberSet',
-      'binarySet',
-      'binary',
-      'number',
       'string',
+      'number',
       'boolean',
+      'binary',
       'email',
       'website',
       'map',
       'mapSet',
+      'stringSet',
+      'numberSet',
+      'binarySet',
     ]
   }
 }

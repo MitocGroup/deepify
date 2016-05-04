@@ -10,7 +10,10 @@ import Core from 'deep-core'
  * Engine Interface
  */
 export class EngineInterface extends Core.OOP.Interface {
+  /**
+   * Assure render method
+   */
   constructor() {
-    super('render')
+    super('render');
   }
 }

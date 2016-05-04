@@ -5,10 +5,13 @@
 'use strict';
 
 import {AbstractGenerator} from './AbstractGenerator';
+import {AngularFrontendGenerator} from './AngularFrontendGenerator';
+import {VanillaFrontendGenerator} from './VanillaFrontendGenerator';
+import {EngineNotSupportedException} from './Exception/EngineNotSupportedException';
+import {Microservice_Instance as Microservice} from 'deep-package-manager';
 import Joi from 'joi';
 import path from 'path';
 import FSe from 'fs-extra';
-import FS from 'fs';
 
 export class MicroserviceGenerator extends AbstractGenerator {
   /**
@@ -19,55 +22,67 @@ export class MicroserviceGenerator extends AbstractGenerator {
     let name = this.generationSchema.name;
     let identifier = MicroserviceGenerator.identifier(name);
     let engine = this.generationSchema.engine;
-    let engineDir = `Frontend/js/app/${engine}`;
-    let engineBootstrap = `Frontend/${engine}_bootstrap.js`;
+    let frontendGenerator = this._createFrontendGenerator(engine);
+    let targetMsPath = path.join(this.targetPath, identifier);
     let templateParams = {
       engine: engine,
       name: name,
       identifier: identifier,
     };
 
-    // @todo: move this?
-    if (FS.existsSync(path.join(this.skeletonsDirectory, engineDir))) {
-      let targetEngineDir = path.join(this.targetPath, engineDir);
+    this._ensureTargetDirs(targetMsPath);
 
-      if (FS.existsSync(targetEngineDir)) {
-        cb(new Error(`${targetEngineDir} directory already exists`));
+    frontendGenerator.generate(this.targetPath, {name, identifier}, (error) => {
+      if (error) {
+        cb(error);
+        
         return;
       }
 
-      FSe.copySync(
-        path.join(this.skeletonsDirectory, engineDir),
-        targetEngineDir
-      );
+      MicroserviceGenerator.RESOURCES.forEach((resource) => {
+        this.renderFile(resource, path.join(targetMsPath, resource), templateParams);
+      });
 
-      this.renderFile(
-        path.join(engineDir, 'index.js'),
-        path.join(targetEngineDir, 'index.js'),
-        templateParams
-      );
-    }
-
-    this.ensureTargetDir(...this._dirList(identifier));
-    this.renderFile('Backend/resources.json', path.join(this.targetPath, identifier, 'Backend/resources.json'));
-    this.renderFile(engineBootstrap, path.join(this.targetPath, identifier, 'Frontend/bootstrap.js'));
-    this.renderFile('deepkg.json', path.join(this.targetPath, identifier, 'deepkg.json'), templateParams);
-
-    cb();
+      cb(null, targetMsPath);
+    });
   }
 
   /**
-   * @param {String} parentDir
-   * @returns {Array}
+   * @param {String} frontendEngine
+   * @return {AbstractGenerator}
    * @private
    */
-  _dirList(parentDir) {
-    return [
+  _createFrontendGenerator(frontendEngine) {
+    let GeneratorClass = null;
+    
+    switch (frontendEngine) {
+      case 'angular':
+        GeneratorClass = AngularFrontendGenerator;
+        break;
+      case 'vanilla':
+        GeneratorClass = VanillaFrontendGenerator;
+        break;
+      default:
+        throw new EngineNotSupportedException(frontendEngine);
+    }
+
+    return new GeneratorClass(this.templatingEngine, this.skeletonsDirectory);
+  }
+
+  /**
+   * @param {String} targetMsPath
+   */
+  _ensureTargetDirs(targetMsPath) {
+    let dirList = [
       'Backend',
       'Frontend',
       'Data/Models',
       'Data/Validation'
-    ].map(dir => path.join(parentDir, dir));
+    ];
+
+    dirList.forEach((dir) => {
+      FSe.ensureDirSync(path.join(targetMsPath, dir));
+    });
   }
 
   /**
@@ -96,5 +111,16 @@ export class MicroserviceGenerator extends AbstractGenerator {
       'angular',
       'vanilla',
     ];
+  }
+
+  /**
+   * @returns {String[]}
+   */
+  static get RESOURCES() {
+    return [
+      `Backend/${Microservice.RESOURCES_FILE}`,
+      Microservice.CONFIG_FILE,
+      Microservice.PARAMS_FILE,
+    ]
   }
 }

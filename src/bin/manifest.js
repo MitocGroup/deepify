@@ -402,11 +402,29 @@ module.exports = {
         },
       },
     },
-    'generate-microapp': {
-      example: 'deepify generate-microapp /target/path/'
+    'generate:microapp': {
+      example: 'deepify generate-microapp /target/path/',
+      description: 'Helps to generate microapp boilerplace',
+      opts: {
+        name: {
+          alias: 'n',
+          description: 'Default microapp name to use',
+          required: false
+        }
+      },
+      args: {},
     },
-    'generate-model': {
-      example: 'deepify generate-model /path/to/microapp'
+    'generate:model': {
+      example: 'deepify generate-model /path/to/microapp',
+      description: 'Helps generate a model',
+      opts: {
+        name: {
+          alias: 'n',
+          description: 'Default model name to use',
+          required: false
+        }
+      },
+      args: {},
     }
   },
 };

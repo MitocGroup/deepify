@@ -9,26 +9,23 @@ module.exports = function(mainPath) {
   let inquirer = require('inquirer');
   let MicroserviceGenerator = require('../../lib.compiled/Generator/MicroserviceGenerator').MicroserviceGenerator;
 
+  mainPath = this.normalizeInputPath(mainPath);
+  let name = this.opts.locate('name').value;
+
   console.log(`
 Welcome to Deepify Microapp generator
 
 This command helps you generate microapp skeleton.
 We recomment to use a microservice name convention like (SkeletonMicroApp).
   `);
-  mainPath = this.normalizeInputPath(mainPath);
 
   inquirer.prompt([
     {
       type: 'input',
       name: 'name',
       message: 'Enter the microservice name: ',
-      validate: (name) => {
-        if (!/^[a-zA-Z0-9_\-]{3,}$/.test(name)) {
-          return 'Microservice name should contain only [a-zA-Z0-9_-]';
-        } 
-        
-        return true;
-      }
+      validate: alphanumericalNotEmpty,
+      default: name
     },
     {
       type: 'list',
@@ -48,3 +45,11 @@ We recomment to use a microservice name convention like (SkeletonMicroApp).
     });
   })
 };
+
+function alphanumericalNotEmpty(value) {
+  if (!/^[a-zA-Z0-9_\-]{3,}$/.test(value)) {
+    return 'Microservice name should contain only [a-zA-Z0-9_-]';
+  }
+
+  return true;
+}

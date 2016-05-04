@@ -4,10 +4,13 @@
 
 'use strict';
 
-/**
- * Invalid Generator Schema
- */
-export class InvalidGenerationSchema extends Error {
+import {Exception} from '../../Exception/Exception';
+
+export class InvalidGenerationSchema extends Exception {
+  /**
+   * @param {String} generatorName
+   * @param {String[]} errors
+   */
   constructor(generatorName, errors) {
     super(`Got invalid generation schema for '${generatorName}': ${errors}`);
   }
