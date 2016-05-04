@@ -35,13 +35,13 @@ We recomment to use a microservice name convention like (SkeletonMicroApp).
     }
   ]).then((schema) => {
     let generator = new MicroserviceGenerator();
-    generator.generate(mainPath, schema, (error) => {
+    generator.generate(mainPath, schema, (error, path) => {
       if (error) {
         console.error(`An error has occurred while generating the microapp: ${error}`);
         this.exit(1);
       }
-      
-      console.log(`'${schema.name}' microapp has been successfully generated.`);
+
+      console.log(`'${schema.name}' microapp has been successfully generated in ${path}`);
     });
   })
 };

@@ -74,13 +74,13 @@ This command helps you generate the model.
   let generateModel = (modelSchema) => {
     let modelGenerator = new ModelGenerator();
 
-    modelGenerator.generate(mainPath, modelSchema, (error, created) => {
+    modelGenerator.generate(mainPath, modelSchema, (error, path) => {
       if (error) {
         console.error(`An error has occurred while generating the microapp: ${error}`);
         this.exit(1);
       }
 
-      if (created) {
+      if (path) {
         console.log(`'${modelSchema.name}' model has been successfully generated is ${path} .`);
       }
     });
