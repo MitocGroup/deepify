@@ -11,6 +11,6 @@ export class EngineNotSupportedException extends Exception {
    * @param {String} engine
    */
   constructor(engine) {
-    super(`'${engine}' is not supported yet.`);
+    super(`'${engine}' is not supported yet`);
   }
 }

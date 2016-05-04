@@ -49,7 +49,7 @@ export class MicroserviceGenerator extends AbstractGenerator {
 
   /**
    * @param {String} frontendEngine
-   * @return {AbstractGenerator}
+   * @returns {AbstractGenerator}
    * @private
    */
   _createFrontendGenerator(frontendEngine) {

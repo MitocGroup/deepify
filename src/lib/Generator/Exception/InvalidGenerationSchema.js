@@ -12,6 +12,6 @@ export class InvalidGenerationSchema extends Exception {
    * @param {String[]} errors
    */
   constructor(generatorName, errors) {
-    super(`Got invalid generation schema for '${generatorName}': ${errors}`);
+    super(`Invalid generation schema for '${generatorName}': ${errors}`);
   }
 }

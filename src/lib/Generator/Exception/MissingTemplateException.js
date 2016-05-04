@@ -9,6 +9,6 @@ export class MissingTemplateException extends Exception {
    * @param {String} template
    */
   constructor(template) {
-    super(`'${template}' doesn't exits`);
+    super(`'${template}' doesn't exists`);
   }
 }
