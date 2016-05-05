@@ -66,23 +66,23 @@ module.exports = function(mainPath) {
       case 'Create':
         lambdaSchema.methods = ['PUT'];
         lambdaSchema.action = 'Create';
-        cb();
-        return;
+        break;
       case 'Retrieve':
         lambdaSchema.methods = ['GET'];
         lambdaSchema.action = 'Retrieve';
-        cb();
-        return;
+        break;
       case 'Update':
         lambdaSchema.methods = ['POST'];
         lambdaSchema.action = 'Update';
-        cb();
-        return;
+        break;
       case 'Delete':
         lambdaSchema.methods = ['DELETE'];
         lambdaSchema.action = 'Delete';
-        cb();
-        return;
+        break;
+    }
+
+    if (lambdaSchema.crud !== 'Custom') {
+      return cb();
     }
 
     inquirer.prompt([{
