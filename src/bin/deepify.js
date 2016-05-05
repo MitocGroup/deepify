@@ -24,7 +24,7 @@ for (var cmdName in manifest.commands) {
 
   var cmd = cli.command(
     cmdName,
-    require('./' + path.join(manifest.commandsPath, cmdName)),
+    require('./' + path.join(manifest.commandsPath, escapeCmdName(cmdName))),
     cmdDesc,
     cmdEx
   );
@@ -51,6 +51,10 @@ for (var cmdName in manifest.commands) {
       .create(argName, argData.description, argData.required);
   }
 }
+
+function escapeCmdName(name) {
+  return name.replace(/[^a-zA-Z0-9_\-]/g, '-');
+} 
 
 try {
   cli.defaults().run();

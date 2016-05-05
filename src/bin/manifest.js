@@ -401,6 +401,72 @@ module.exports = {
           required: false,
         },
       },
-    }
+    },
+    'generate:microapp': {
+      example: 'deepify generate:microapp /target/path/',
+      description: 'Helps to generate microapp boilerplace',
+      opts: {
+        name: {
+          alias: 'n',
+          description: 'Microapp name to use',
+          required: false,
+        },
+        engine: {
+          alias: 'e',
+          description: 'Frontend engine to use',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path where to generate the microapp',
+          required: false,
+        },
+      },
+    },
+    'generate:model': {
+      example: 'deepify generate:model /path/to/microapp',
+      description: 'Helps to generate a model',
+      opts: {
+        name: {
+          alias: 'n',
+          description: 'Default model name to use',
+          required: false,
+        },
+        microapp: {
+          alias: 'm',
+          description: 'Microapplication identifier to use',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the application',
+          required: false,
+        },
+      },
+    },
+    'generate:lambda': {
+      example: 'deepify generate:lamdba /path/to/microapp',
+      description: 'Helps to generate a lamdba',
+      opts: {
+        microapp: {
+          alias: 'm',
+          description: 'Microapplication identifier to use',
+          required: false,
+        },
+        resource: {
+          alias: 'r',
+          description: 'Resource name to use',
+          required: false,
+        },
+      },
+      args: {
+        path: {
+          description: 'The path to the application',
+          required: false,
+        },
+      },
+    },
   },
 };
