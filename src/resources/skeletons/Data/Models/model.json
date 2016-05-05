@@ -1,5 +1,0 @@
-{
-  {{#fields}}
-  "{{name}}": "{{type}}"{{^last}},{{/last}}
-  {{/fields}}
-}

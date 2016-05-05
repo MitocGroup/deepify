@@ -8,89 +8,150 @@ module.exports = function(mainPath) {
   let inquirer = require('inquirer');
   let ModelGenerator = require('../../lib.compiled/Generator/ModelGenerator').ModelGenerator;
   let Property = require('deep-package-manager').Property_Instance;
+  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  let OS = require('os');
+  let alphanumericalNotEmpty = require('./helper/inquirer-validators').alphanumericalNotEmpty;
 
   mainPath = this.normalizeInputPath(mainPath);
   let property = new Property(mainPath);
   let name = this.opts.locate('name').value;
+  let microservice = this.opts.locate('microapp').value;
+  let modelSchema = {fields: []};
 
-  console.log(`
-Welcome to Deepify Model generator
+  let promptModelSchema = (cb) => {
+    let questionList = [];
+    let microservices = property.microservices.map(m => m.identifier);
 
-This command helps you generate the model.
-`);
-
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'msIdentifier',
-      message: 'Select the microservice: ',
-      choices: property.microservices.map(m => m.identifier),
-    },
-    {
-      type: 'input',
-      name: 'name',
-      message: 'Enter the model name: ',
-      validate: alphanumericalNotEmpty,
-      default: name
+    if (microservice && microservices.indexOf(microservice) !== -1) {
+      modelSchema.microservice = property.microservice(microservice);
+    } else {
+      questionList.push({
+        type: 'list',
+        name: 'microservice',
+        message: 'Select the microservice: ',
+        choices: microservices,
+      });
     }
-  ]).then((schema) => {
-    schema.microservice = property.microservice(schema.msIdentifier);
-    schema.fields = [];
 
-    let prompModelField = () => {
-      inquirer.prompt([{
+    if (name && alphanumericalNotEmpty(name) === true) {
+      modelSchema.name = name;
+    } else {
+      questionList.push({
         type: 'input',
         name: 'name',
-        message: 'Enter field name: ',
-        validate: alphanumericalNotEmpty
-      }, {
-        type: 'list',
-        name: 'type',
-        message: 'Select field type: ',
-        choices: ModelGenerator.TYPES
-      }, {
-        type: 'confirm',
-        name: 'continue',
-        message: 'Do you want to add another field?'
-      }]).then((result) => {
-        schema.fields.push({
-          name: result.name,
-          type: result.type
-        });
+        message: 'Enter the model name: ',
+        validate: alphanumericalNotEmpty,
+        default: name
+      });
+    }
 
-        if (result.continue) {
-          prompModelField()
-        } else {
-          generateModel(schema);
+    if (questionList.length > 0) {
+      inquirer.prompt(questionList).then((schema) => {
+        if (schema.microservice) {
+          schema.microservice = property.microservice(schema.microservice);
         }
-      })
-    };
 
-    console.log('\nYou have to add at least 1 field to your model\n');
+        Object.assign(modelSchema, schema);
+        cb();
+      });
+    } else {
+      cb();
+    }
+  };
 
-    prompModelField();
-  });
-  
-  let generateModel = (modelSchema) => {
-    let modelGenerator = new ModelGenerator();
+  let promptModelFields = (cb) => {
+    inquirer.prompt([{
+      type: 'input',
+      name: 'name',
+      message: 'Enter field name: ',
+      validate: alphanumericalNotEmpty,
+    }, {
+      type: 'list',
+      name: 'type',
+      message: 'Select field type: ',
+      choices: ModelGenerator.TYPES,
+    }, {
+      type: 'confirm',
+      name: 'continue',
+      message: 'Do you want to add another field?',
+    }]).then((result) => {
+      modelSchema.fields.push({
+        name: result.name,
+        type: result.type
+      });
 
-    modelGenerator.generate(mainPath, modelSchema, (error, path) => {
-      if (error) {
-        console.error(`An error has occurred while generating the microapp: ${error}`);
+      if (result.continue) {
+        promptModelFields(cb);
+      } else {
+        cb();
+      }
+    })
+  };
+
+  let prepareLambdas = (cb) => {
+    inquirer.prompt([{
+      type: 'confirm',
+      name: 'yes',
+      message: `Do you want to generate a ${modelSchema.name} lambda action? `,
+    }]).then((response) => {
+      if (response.yes) {
+        doGenerateLambda(cb);
+        return;
+      }
+
+      cb();
+    })
+  };
+
+  let doGenerateLambda = (cb) => {
+    let cmd = new Exec(
+      Bin.node,
+      this.scriptPath,
+      'generate:lambda',
+      mainPath,
+      `-m=${modelSchema.microservice.identifier}`,
+      `-r=${modelSchema.name}`
+    );
+
+    cmd.run((result) => {
+      if (result.failed) {
+        console.error(`deepify generate:lambda failed with: ${result.error}`);
         this.exit(1);
       }
 
-      if (path) {
-        console.log(`'${modelSchema.name}' model has been successfully generated is ${path} .`);
-      }
-    });
+      inquirer.prompt([{
+        type: 'confirm',
+        name: 'yes',
+        message: `Do you want to generate another ${modelSchema.name} lambda action? `,
+      }]).then((response) => {
+        if (response.yes) {
+          doGenerateLambda(cb);
+          return;
+        }
+
+        cb && cb();
+      })
+    }, true);
   };
 
-  function alphanumericalNotEmpty(value) {
-    if (!/^[a-zA-Z0-9_\-]{2,}$/.test(value)) {
-      return 'Stirng should contain only [a-zA-Z0-9_-]';
-    }
+  promptModelSchema(() => {
+    console.log(`${OS.EOL}You have to add at least 1 field to your model${OS.EOL}`);
 
-    return true;
-  }
+    promptModelFields(() => {
+      new ModelGenerator()
+        .generate(mainPath, modelSchema, (error, path) => {
+          if (error) {
+            console.error(`Error while generating the model: ${error}`);
+            return;
+          }
+
+          if (path) {
+            console.log(`'${modelSchema.name}' model has been successfully generated in ${path}.`);
+            
+            prepareLambdas();
+          }
+        });
+    });
+  });
 };

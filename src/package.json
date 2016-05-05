@@ -79,6 +79,7 @@
     "proxyquire": "^1.5.x",
     "semver": "^5.1.x",
     "tmp": "^0.0.x",
+    "twig": "^0.8.9",
     "uglify-js": "^2.6.x"
   },
   "devDependencies": {

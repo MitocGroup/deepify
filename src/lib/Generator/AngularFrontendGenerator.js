@@ -6,10 +6,17 @@
 
 import {AbstractGenerator} from './AbstractGenerator';
 import Joi from 'joi';
-import FSe from 'fs-extra';
+import FSExtra from 'fs-extra';
 import path from 'path';
 
 export class AngularFrontendGenerator extends AbstractGenerator {
+  /**
+   * @param {Object[]} args
+   */
+  constructor(...args) {
+    super(...args);
+  }
+
   /**
    * @param {Function} cb
    * @private
@@ -18,7 +25,7 @@ export class AngularFrontendGenerator extends AbstractGenerator {
     let identifier = this.generationSchema.identifier;
     let targetDir = path.join(this.targetPath, identifier, AngularFrontendGenerator.TPL_DIR);
 
-    FSe.ensureDirSync(targetDir);
+    FSExtra.ensureDirSync(targetDir);
 
     ['index.js', 'name.js', 'module.js'].forEach((resource) => {
       this.renderFile(
@@ -31,7 +38,7 @@ export class AngularFrontendGenerator extends AbstractGenerator {
     this.renderFile(
       'Frontend/angular_bootstrap.js',
       path.join(this.targetPath, identifier, 'Frontend/bootstrap.js'),
-      this.generationSchema
+      {identifier}
     );
 
     cb(null, targetDir);

@@ -9,6 +9,7 @@ import Core from 'deep-core';
 import path from 'path';
 import Joi from 'joi';
 import {MustacheEngine} from './TemplatingEngine/MustacheEngine';
+import {TwigEngine} from './TemplatingEngine/TwigEngine';
 import {InvalidGenerationSchema} from './Exception/InvalidGenerationSchema';
 import {MissingTemplateException} from './Exception/MissingTemplateException';
 
@@ -20,7 +21,7 @@ export class AbstractGenerator extends Core.OOP.Interface {
    * @param {Object} templatingEngine
    * @param {String} skeletonsDirectory
    */
-  constructor(templatingEngine = AbstractGenerator.MUSTACHE_TEMPLATING,
+  constructor(templatingEngine = AbstractGenerator.TWIG_TEMPLATING,
               skeletonsDirectory = AbstractGenerator.DEFAULT_SKELETONS_DIR) {
     super('validationSchema', '_generate');
 
@@ -68,8 +69,9 @@ export class AbstractGenerator extends Core.OOP.Interface {
       throw new MissingTemplateException(template);
     }
 
-    let templatePath = path.join(this._skeletonsDirectory, template);
-    let templateContent = FS.readFileSync(templatePath).toString();
+    let templateContent = FS
+      .readFileSync(this.templatePath(template))
+      .toString();
 
     return this.templatingEngine.render(templateContent, params);
   }
@@ -111,12 +113,27 @@ export class AbstractGenerator extends Core.OOP.Interface {
 
   /**
    * @param {String} template
+   * @returns {String}
+   */
+  templatePath(template) {
+    return path.join(this._skeletonsDirectory, `${template}${this._templatingEngine.extension()}`);
+  }
+
+  /**
+   * @param {String} template
    * @returns {Boolean}
    */
   templateExists(template) {
-    let fullPath = path.join(this._skeletonsDirectory, template);
+    let fullPath = this.templatePath(template);
 
     return FS.existsSync(fullPath) && FS.lstatSync(fullPath).isFile();
+  }
+
+  /**
+   * @returns {TwigEngine}
+   */
+  static get TWIG_TEMPLATING() {
+    return new TwigEngine();
   }
 
   /**

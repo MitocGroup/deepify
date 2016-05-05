@@ -9,11 +9,20 @@ import {AngularFrontendGenerator} from './AngularFrontendGenerator';
 import {VanillaFrontendGenerator} from './VanillaFrontendGenerator';
 import {EngineNotSupportedException} from './Exception/EngineNotSupportedException';
 import {Microservice_Instance as Microservice} from 'deep-package-manager';
+import {Property_Config as Config} from 'deep-package-manager';
 import Joi from 'joi';
 import path from 'path';
-import FSe from 'fs-extra';
+import FSExtra from 'fs-extra';
+import FS from 'fs';
 
 export class MicroserviceGenerator extends AbstractGenerator {
+  /**
+   * @param {Object[]} args
+   */
+  constructor(...args) {
+    super(...args);
+  }
+
   /**
    * @param {Function} cb
    * @private
@@ -21,30 +30,53 @@ export class MicroserviceGenerator extends AbstractGenerator {
   _generate(cb) {
     let name = this.generationSchema.name;
     let identifier = MicroserviceGenerator.identifier(name);
-    let engine = this.generationSchema.engine;
-    let frontendGenerator = this._createFrontendGenerator(engine);
+    let engines = this.generationSchema.engines;
     let targetMsPath = path.join(this.targetPath, identifier);
     let templateParams = {
-      engine: engine,
+      engines: engines,
       name: name,
       identifier: identifier,
     };
 
+    this._ensureAppConfig();
     this._ensureTargetDirs(targetMsPath);
 
-    frontendGenerator.generate(this.targetPath, {name, identifier}, (error) => {
-      if (error) {
-        cb(error);
-        
-        return;
-      }
-
-      MicroserviceGenerator.RESOURCES.forEach((resource) => {
-        this.renderFile(resource, path.join(targetMsPath, resource), templateParams);
-      });
-
-      cb(null, targetMsPath);
+    MicroserviceGenerator.MS_RESOURCES.forEach((resource) => {
+      this.renderFile(resource, path.join(targetMsPath, resource), templateParams);
     });
+
+    let generateEngineFrontend = (engineIndex = 0) => {
+      let engine = engines[engineIndex];
+      let frontendGenerator = this._createFrontendGenerator(engine);
+
+      frontendGenerator.generate(this.targetPath, {name, identifier}, (error) => {
+        if (error) {
+          cb(error);
+          return;
+        }
+
+        engineIndex++;
+
+        if (engineIndex < engines.length) {
+          generateEngineFrontend(engineIndex);
+        } else {
+          cb(null, targetMsPath);
+        }
+      });
+    };
+
+    generateEngineFrontend();
+  }
+
+  /**
+   * @private
+   */
+  _ensureAppConfig() {
+    let propertyConfigFile = path.join(this.targetPath, Config.DEFAULT_FILENAME);
+
+    if (!FS.existsSync(propertyConfigFile)) {
+      FSExtra.outputJsonSync(propertyConfigFile, Config.generate());
+    }
   }
 
   /**
@@ -70,6 +102,7 @@ export class MicroserviceGenerator extends AbstractGenerator {
   }
 
   /**
+   * @todo: import autoload dir from deepkg.schema.js
    * @param {String} targetMsPath
    */
   _ensureTargetDirs(targetMsPath) {
@@ -77,11 +110,11 @@ export class MicroserviceGenerator extends AbstractGenerator {
       'Backend',
       'Frontend',
       'Data/Models',
-      'Data/Validation'
+      'Data/Validation',
     ];
 
     dirList.forEach((dir) => {
-      FSe.ensureDirSync(path.join(targetMsPath, dir));
+      FSExtra.ensureDirSync(path.join(targetMsPath, dir));
     });
   }
 
@@ -91,7 +124,9 @@ export class MicroserviceGenerator extends AbstractGenerator {
   validationSchema() {
     return Joi.object().keys({
       name: Joi.string().required().regex(/^[a-zA-Z0-9_\-]{3,}$/),
-      engine: Joi.string().required().allow(MicroserviceGenerator.ALLOWED_ENGINES)
+      engines: Joi.array().items(Joi.string().only(
+        MicroserviceGenerator.ALLOWED_ENGINES)
+      ).required().min(1),
     });
   }
 
@@ -116,7 +151,7 @@ export class MicroserviceGenerator extends AbstractGenerator {
   /**
    * @returns {String[]}
    */
-  static get RESOURCES() {
+  static get MS_RESOURCES() {
     return [
       `Backend/${Microservice.RESOURCES_FILE}`,
       Microservice.CONFIG_FILE,

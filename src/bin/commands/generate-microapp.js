@@ -7,48 +7,107 @@
 module.exports = function(mainPath) {
   let inquirer = require('inquirer');
   let MicroserviceGenerator = require('../../lib.compiled/Generator/MicroserviceGenerator').MicroserviceGenerator;
+  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  let OS = require('os');
+  let alphanumericalNotEmpty = require('./helper/inquirer-validators').alphanumericalNotEmpty;
 
   mainPath = this.normalizeInputPath(mainPath);
   let name = this.opts.locate('name').value;
+  let engine = this.opts.locate('engine').value;
+  let appSchema = {};
 
-  console.log(`
-Welcome to Deepify Microapp generator
+  let promptAppSchema = (cb) => {
+    let questionList = [];
 
-This command helps you generate microapp skeleton.
-We recomment to use a microservice name convention like (SkeletonMicroApp).
-  `);
-
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'name',
-      message: 'Enter the microservice name: ',
-      validate: alphanumericalNotEmpty,
-      default: name
-    },
-    {
-      type: 'list',
-      name: 'engine',
-      message: 'Select the frontend engine you\'d like to use: ',
-      choices: MicroserviceGenerator.ALLOWED_ENGINES
+    if (name && alphanumericalNotEmpty(name) === true) {
+      appSchema.name = name;
+    } else {
+      questionList.push({
+        type: 'input',
+        name: 'name',
+        message: 'Enter the microapp name: ',
+        validate: alphanumericalNotEmpty,
+      });
     }
-  ]).then((schema) => {
-    let generator = new MicroserviceGenerator();
-    generator.generate(mainPath, schema, (error, path) => {
-      if (error) {
-        console.error(`An error has occurred while generating the microapp: ${error}`);
+
+    if (engine && MicroserviceGenerator.ALLOWED_ENGINES.indexOf(engine) !== -1) {
+      appSchema.engine = engine;
+    } else {
+      questionList.push({
+        type: 'checkbox',
+        name: 'engines',
+        message: 'Select the frontend engines you\'d like to use: ',
+        choices: MicroserviceGenerator.ALLOWED_ENGINES.map(e => ({name: e, checked: e === 'angular'})),
+      });
+    }
+
+    if (questionList.length > 0) {
+      inquirer.prompt(questionList).then((schema) => {
+        Object.assign(appSchema, schema);
+
+        cb();
+      });
+    } else {
+      cb();
+    }
+  };
+
+  let prepareModels = (cb) => {
+    inquirer.prompt([{
+      type: 'confirm',
+      name: 'yes',
+      message: 'Do you want to generate a model? ',
+    }]).then((response) => {
+      if (response.yes) {
+        doGenerateModel(cb);
+        return;
+      }
+
+      cb();
+    })
+  };
+
+  let doGenerateModel = (cb) => {
+    let cmd = new Exec(
+      Bin.node,
+      this.scriptPath,
+      'generate:model',
+      mainPath,
+      `-m=${MicroserviceGenerator.identifier(appSchema.name)}`
+    );
+
+    cmd.run((result) => {
+      if (result.failed) {
+        console.error(`deepify generate:model failed with: ${result.error}`);
         this.exit(1);
       }
 
-      console.log(`'${schema.name}' microapp has been successfully generated in ${path}`);
-    });
-  })
+      inquirer.prompt([{
+        type: 'confirm',
+        name: 'yes',
+        message: 'Do you want to generate another model? ',
+      }]).then((response) => {
+        if (response.yes) {
+          doGenerateModel(cb);
+          return;
+        }
+
+        cb && cb();
+      })
+    }, true);
+  };
+
+  promptAppSchema(() => {
+   new MicroserviceGenerator()
+      .generate(mainPath, appSchema, (error, path) => {
+        if (error) {
+          console.error(`An error has occurred while generating the microapp: ${error}`);
+          this.exit(1);
+        }
+
+        console.log(`'${appSchema.name}' microapp has been successfully generated in ${path}${OS.EOL}`);
+        prepareModels();
+      });
+  });
 };
-
-function alphanumericalNotEmpty(value) {
-  if (!/^[a-zA-Z0-9_\-]{3,}$/.test(value)) {
-    return 'Microservice name should contain only [a-zA-Z0-9_-]';
-  }
-
-  return true;
-}

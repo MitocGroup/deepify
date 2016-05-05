@@ -16,4 +16,11 @@ export class EngineInterface extends Core.OOP.Interface {
   constructor() {
     super('render');
   }
+
+  /**
+   * @returns {String}
+   */
+  extension() {
+    return '';
+  }
 }

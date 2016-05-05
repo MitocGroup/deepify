@@ -10,6 +10,13 @@ import path from 'path';
 
 export class VanillaFrontendGenerator extends AbstractGenerator {
   /**
+   * @param {Object[]} args
+   */
+  constructor(...args) {
+    super(...args);
+  }
+
+  /**
    * @param {Function} cb
    */
   _generate(cb) {

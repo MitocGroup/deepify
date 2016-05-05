@@ -11,8 +11,8 @@ export class MustacheEngine extends EngineInterface {
   /**
    * Call parent constructor
    */
-  constructor() {
-    super();
+  constructor(...args) {
+    super(...args);
   }
 
   /**
@@ -21,5 +21,12 @@ export class MustacheEngine extends EngineInterface {
    */
   render(...args) {
     return Mustache.render(...args);
+  }
+
+  /**
+   * @returns {String}
+   */
+  extension() {
+    return '';
   }
 }

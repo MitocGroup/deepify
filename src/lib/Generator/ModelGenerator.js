@@ -4,6 +4,7 @@
 
 'use strict';
 
+import FS from 'fs';
 import Joi from 'joi';
 import path from 'path';
 import {Microservice_Instance as Microservice} from 'deep-package-manager';
@@ -12,15 +13,22 @@ import inquirer  from 'inquirer';
 
 export class ModelGenerator extends AbstractGenerator {
   /**
+   * @param {Object[]} args
+   */
+  constructor(...args) {
+    super(...args);
+  }
+
+  /**
    * @param {Function} cb
    */
   _generate(cb) {
     let microservice = this.generationSchema.microservice;
-    let modelName = this.generationSchema.modelName;
+    let modelName = this.generationSchema.name;
     let fields = this.generationSchema.fields;
-    fields[fields.length - 1].last = true;
     let templateArgs = {fields};
-    let targetPath = path.join(microservice.basePath, 'Data/Models', `${modelName}.json`);
+    let autoload = microservice.autoload;
+    let targetPath = path.join(autoload.models, `${modelName}.json`);
     let doGenerate = () => {
       this.renderFile(
         'Data/Models/model.json',
@@ -30,15 +38,16 @@ export class ModelGenerator extends AbstractGenerator {
 
       cb(null, targetPath);
     };
-    
+
     if (FS.existsSync(targetPath) && FS.lstatSync(targetPath).isFile()) {
       inquirer.prompt([{
         type: 'confirm',
-        name: 'doOverwrite',
+        name: 'yes',
         message: `'${modelName}' model already exists. Do you want to overwrite it?`,
-      }], (response) => {
-        if (response.doOverwrite) {
+      }]).then((response) => {
+        if (response.yes) {
           doGenerate();
+          return;
         }
 
         cb(null, null);
@@ -69,8 +78,6 @@ export class ModelGenerator extends AbstractGenerator {
    */
   static get TYPES() {
     return [
-      // 'uuid',
-      // 'timeUUID',
       'string',
       'number',
       'boolean',
@@ -78,6 +85,8 @@ export class ModelGenerator extends AbstractGenerator {
       'email',
       'website',
       'map',
+      'uuid',
+      'timeUUID',
       'mapSet',
       'stringSet',
       'numberSet',
