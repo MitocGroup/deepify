@@ -8,7 +8,6 @@ import FS from 'fs';
 import Core from 'deep-core';
 import path from 'path';
 import Joi from 'joi';
-import {MustacheEngine} from './TemplatingEngine/MustacheEngine';
 import {TwigEngine} from './TemplatingEngine/TwigEngine';
 import {InvalidGenerationSchema} from './Exception/InvalidGenerationSchema';
 import {MissingTemplateException} from './Exception/MissingTemplateException';
@@ -134,13 +133,6 @@ export class AbstractGenerator extends Core.OOP.Interface {
    */
   static get TWIG_TEMPLATING() {
     return new TwigEngine();
-  }
-
-  /**
-   * @returns {MustacheEngine}
-   */
-  static get MUSTACHE_TEMPLATING() {
-    return new MustacheEngine();
   }
 
   /**

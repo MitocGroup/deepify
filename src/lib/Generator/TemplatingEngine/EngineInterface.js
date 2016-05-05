@@ -14,13 +14,6 @@ export class EngineInterface extends Core.OOP.Interface {
    * Assure render method
    */
   constructor() {
-    super('render');
-  }
-
-  /**
-   * @returns {String}
-   */
-  extension() {
-    return '';
+    super('render', 'extension');
   }
 }
