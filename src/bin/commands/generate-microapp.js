@@ -93,7 +93,9 @@ module.exports = function(mainPath) {
           return;
         }
 
-        cb && cb();
+        if (cb) {
+          cb();
+        }
       })
     }, true);
   };
