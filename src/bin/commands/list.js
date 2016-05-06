@@ -76,10 +76,9 @@ module.exports = function(mainPath) {
       console.error(new ProvisioningCollisionsListingException(listingResult.errors).message);
       this.exit(1);
     } else if (listingResult.matchedResources <= 0) {
-      console.log('There are no DEEP resource on your AWS account.');
+      console.log(`There are no DEEP resource on your AWS account ${resource ? `matching '${resource}' hash` : ''}.`);
       this.exit(1);
     } else {
-      console.log(listingResult.resources);
       console.log(stringifyResourcesObj(listingResult.resources));
     }
   }, servicesToList(service));
