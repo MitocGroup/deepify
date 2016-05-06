@@ -20,19 +20,34 @@ module.exports = function(mainPath) {
   let promptAppSchema = (cb) => {
     let questionList = [];
 
-    if (name && alphanumericalNotEmpty(name) === true) {
+    if (name) {
+      let validationResult = alphanumericalNotEmpty(name);
+      if (validationResult !== true) {
+        console.error(validationResult);
+        this.exit(1);
+      }
+
       appSchema.name = name;
     } else {
       questionList.push({
         type: 'input',
         name: 'name',
-        message: 'Enter the microapp name: ',
+        message: 'Enter the microapp name (e.g. DeepTestMicroservice): ',
         validate: alphanumericalNotEmpty,
       });
     }
 
-    if (engine && MicroserviceGenerator.ALLOWED_ENGINES.indexOf(engine) !== -1) {
-      appSchema.engine = engine;
+    if (engine) {
+      if (MicroserviceGenerator.ALLOWED_ENGINES.indexOf(engine) === -1) {
+        console.error(
+          `'${engine}' frontend engine is not supported yet. ` +
+          `Available engines: ${MicroserviceGenerator.ALLOWED_ENGINES.join(',')}`
+        );
+        
+        this.exit(1);
+      }
+      
+      appSchema.engines = [engine];
     } else {
       questionList.push({
         type: 'checkbox',

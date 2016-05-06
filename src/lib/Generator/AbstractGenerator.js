@@ -141,4 +141,11 @@ export class AbstractGenerator extends Core.OOP.Interface {
   static get DEFAULT_SKELETONS_DIR() {
     return path.join(__dirname, '../../resources/skeletons');
   }
+
+  /**
+   * @returns {RegExp}
+   */
+  static get DEEP_NAME_REGEXP() {
+    return /^[a-zA-Z0-9_\-]{2,}$/;
+  }
 }

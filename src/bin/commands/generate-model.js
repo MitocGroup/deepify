@@ -23,7 +23,12 @@ module.exports = function(mainPath) {
     let questionList = [];
     let microservices = property.microservices.map(m => m.identifier);
 
-    if (microservice && microservices.indexOf(microservice) !== -1) {
+    if (microservice) {
+      if (microservices.indexOf(microservice) === -1) {
+        console.log(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
+        this.exit(1);
+      }
+      
       modelSchema.microservice = property.microservice(microservice);
     } else {
       questionList.push({
@@ -40,7 +45,7 @@ module.exports = function(mainPath) {
       questionList.push({
         type: 'input',
         name: 'name',
-        message: 'Enter the model name: ',
+        message: 'Enter the model name (e.g. User): ',
         validate: alphanumericalNotEmpty,
         default: name
       });
@@ -64,7 +69,7 @@ module.exports = function(mainPath) {
     inquirer.prompt([{
       type: 'input',
       name: 'name',
-      message: 'Enter field name: ',
+      message: 'Enter field name (e.g. name): ',
       validate: alphanumericalNotEmpty,
     }, {
       type: 'list',
@@ -89,14 +94,14 @@ module.exports = function(mainPath) {
     })
   };
 
-  let prepareLambdas = (cb) => {
+  let prepareActions = (cb) => {
     inquirer.prompt([{
       type: 'confirm',
       name: 'yes',
-      message: `Do you want to generate a ${modelSchema.name} lambda action? `,
+      message: `Do you want to generate a ${modelSchema.name} resource action? `,
     }]).then((response) => {
       if (response.yes) {
-        doGenerateLambda(cb);
+        doGenerateAction(cb);
         return;
       }
 
@@ -104,11 +109,11 @@ module.exports = function(mainPath) {
     })
   };
 
-  let doGenerateLambda = (cb) => {
+  let doGenerateAction = (cb) => {
     let cmd = new Exec(
       Bin.node,
       this.scriptPath,
-      'generate:lambda',
+      'generate:action',
       mainPath,
       `-m=${modelSchema.microservice.identifier}`,
       `-r=${modelSchema.name}`
@@ -116,17 +121,17 @@ module.exports = function(mainPath) {
 
     cmd.run((result) => {
       if (result.failed) {
-        console.error(`deepify generate:lambda failed with: ${result.error}`);
+        console.error(`deepify generate:action failed with: ${result.error}`);
         this.exit(1);
       }
 
       inquirer.prompt([{
         type: 'confirm',
         name: 'yes',
-        message: `Do you want to generate another ${modelSchema.name} lambda action? `,
+        message: `Do you want to generate another ${modelSchema.name} resource action? `,
       }]).then((response) => {
         if (response.yes) {
-          doGenerateLambda(cb);
+          doGenerateAction(cb);
           return;
         }
 
@@ -151,7 +156,7 @@ module.exports = function(mainPath) {
           if (path) {
             console.log(`'${modelSchema.name}' model has been successfully generated in ${path}.`);
             
-            prepareLambdas();
+            prepareActions();
           }
         });
     });

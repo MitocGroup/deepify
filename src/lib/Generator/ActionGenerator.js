@@ -14,7 +14,7 @@ import path from 'path';
 import FSExtra from 'fs-extra';
 import FS from 'fs';
 
-export class LambdaGenerator extends AbstractGenerator {
+export class ActionGenerator extends AbstractGenerator {
   /**
    * @param {Object[]} args
    */
@@ -124,9 +124,9 @@ export class LambdaGenerator extends AbstractGenerator {
   validationSchema() {
     return Joi.object().keys({
       microservice: Joi.object().type(Microservice).required(),
-      resource: Joi.string().required().alphanum().min(2),
-      action: Joi.string().required().alphanum().min(2),
-      crud: Joi.string().required().only(LambdaGenerator.CRUDS),
+      resource: Joi.string().required().regex(AbstractGenerator.DEEP_NAME_REGEXP),
+      action: Joi.string().required().regex(AbstractGenerator.DEEP_NAME_REGEXP),
+      crud: Joi.string().required().only(ActionGenerator.CRUDS),
       methods: Joi.array().required().items(Joi.string().only(Action.HTTP_VERBS)).min(1),
     });
   }

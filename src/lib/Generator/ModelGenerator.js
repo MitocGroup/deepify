@@ -65,9 +65,9 @@ export class ModelGenerator extends AbstractGenerator {
   validationSchema() {
     return Joi.object().keys({
       microservice: Joi.object().type(Microservice).required(),
-      name: Joi.string().required().alphanum().min(3),
+      name: Joi.string().required().regex(AbstractGenerator.DEEP_NAME_REGEXP),
       fields: Joi.array().min(1).items(Joi.object().keys({
-        name: Joi.string().required().alphanum().min(3),
+        name: Joi.string().required().regex(AbstractGenerator.DEEP_NAME_REGEXP),
         type: Joi.string().required().allow(ModelGenerator.TYPES)
       }))
     });

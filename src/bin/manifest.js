@@ -404,7 +404,7 @@ module.exports = {
     },
     'generate:microapp': {
       example: 'deepify generate:microapp /target/path/',
-      description: 'Helps to generate microapp boilerplace',
+      description: 'Helps to generate microapp skeleton',
       opts: {
         name: {
           alias: 'n',
@@ -446,9 +446,9 @@ module.exports = {
         },
       },
     },
-    'generate:lambda': {
-      example: 'deepify generate:lamdba /path/to/microapp',
-      description: 'Helps to generate a lamdba',
+    'generate:action': {
+      example: 'deepify generate:action /path/to/microapp',
+      description: 'Helps to generate a action',
       opts: {
         microapp: {
           alias: 'm',
@@ -470,7 +470,7 @@ module.exports = {
     },
     'list': {
       example: 'deepify list /path/to/microapp',
-      description: 'Helps to generate a lamdba',
+      description: 'List resources created by DEEP',
       opts: {
         resource: {
           alias: 'r',
