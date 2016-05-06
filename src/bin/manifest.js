@@ -468,5 +468,22 @@ module.exports = {
         },
       },
     },
+    'list': {
+      example: 'deepify list /path/to/microapp',
+      description: 'Helps to generate a lamdba',
+      opts: {
+        resource: {
+          alias: 'r',
+          description: 'An generated AWS resource name from given deploy (ex. deep.prod.system.db0c09cc)',
+          required: false,
+        },
+        service: {
+          alias: 's',
+          description: 'Service for which to list resources',
+          required: false,
+        },
+      },
+      args: {},
+    },
   },
 };
