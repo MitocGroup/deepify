@@ -27,7 +27,7 @@ module.exports = function(mainPath) {
 
     servicesRaw.split(',').forEach((service) => {
       if (Listing.SERVICES.indexOf(service) === -1) {
-        console.error(`Unkown service: ${service}. Available services: ${Listing.SERVICES.join(',')}`);
+        console.error(`Unknown service: ${service}. Available services: ${Listing.SERVICES.join(',')}`);
         this.exit(1);
       }
     });

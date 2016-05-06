@@ -479,7 +479,7 @@ module.exports = {
         },
         service: {
           alias: 's',
-          description: 'Service for which to list resources',
+          description: 'Comma separated list of services for which to list resources',
           required: false,
         },
       },
