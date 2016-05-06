@@ -69,6 +69,7 @@ module.exports = function(mainPath) {
     }
   }
 
+  let serviceList = servicesToList(service);
   lister.hash = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP;
 
   lister.list((listingResult) => {
@@ -81,5 +82,5 @@ module.exports = function(mainPath) {
     } else {
       console.log(stringifyResourcesObj(listingResult.resources));
     }
-  }, servicesToList(service));
+  }, serviceList);
 };
