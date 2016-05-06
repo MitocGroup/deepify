@@ -11,6 +11,7 @@ import Joi from 'joi';
 import {TwigEngine} from './TemplatingEngine/TwigEngine';
 import {InvalidGenerationSchema} from './Exception/InvalidGenerationSchema';
 import {MissingTemplateException} from './Exception/MissingTemplateException';
+import {Exec} from '../Helpers/Exec';
 
 /**
  * Abstract Generator
@@ -107,7 +108,43 @@ export class AbstractGenerator extends Core.OOP.Interface {
     this._targetPath = targetDir;
     this._generationSchema = validationResult.value;
 
-    this._generate(cb);
+    this._ensureTemplatesMicroservice((error) => {
+      if (error) {
+        return cb(error);
+      }
+
+      this._generate(cb);
+    });
+  }
+
+  /**
+   * @param {Function} callback
+   * @private
+   */
+  _ensureTemplatesMicroservice(callback) {
+    if (!FS.existsSync(this._skeletonsDirectory)) {
+      new Exec(
+        'deepify',
+        'install',
+        AbstractGenerator.TEMPLATE_MICROSERVICE_REPOSITORY,
+        this._skeletonsDirectory
+      ).run((result) => {
+        if (result.failed) {
+          return callback(result.error);
+        }
+
+        this._skeletonsDirectory = path.join(
+          this._skeletonsDirectory,
+          AbstractGenerator.TEMPLATE_MICROSERVICE
+        );
+
+        callback(null);
+      });
+
+      return;
+    }
+
+    callback(null);
   }
 
   /**
@@ -147,5 +184,19 @@ export class AbstractGenerator extends Core.OOP.Interface {
    */
   static get DEEP_NAME_REGEXP() {
     return /^[a-zA-Z0-9_\-]{2,}$/;
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get TEMPLATE_MICROSERVICE_REPOSITORY() {
+    return `github://CCristi/${AbstractGenerator.TEMPLATE_MICROSERVICE}`;
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get TEMPLATE_MICROSERVICE() {
+    return 'DeepTemplateMicroservice';
   }
 }
