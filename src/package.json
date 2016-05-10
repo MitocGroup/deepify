@@ -48,7 +48,7 @@
   },
   "scripts": {
     "preinstall": "bash node-bin/assure-deps.sh && npm run compile",
-    "postinstall": "bash hooks/autocomplete_deepify.sh",
+    "postinstall": "bash hooks/autocomplete_deepify.sh && bash hooks/install_templates.sh",
     "test": "bash node-bin/test.sh",
     "compile": "bash node-bin/compile.sh",
     "obfuscate-compiled": "bash node-bin/obfuscate-compiled.sh",
