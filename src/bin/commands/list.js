@@ -85,14 +85,14 @@ module.exports = function(mainPath) {
       console.log(`There are no DEEP resource on your AWS account ${resource ? `matching '${resource}' hash.` : '.'}`);
       this.exit(1);
     } else {
-      let formatterMethod = `${format}Formatter`;
+      let formatter = `${format}Formatter`;
 
-      if (!this.hasOwnProperty(formatterMethod)) {
+      if (!this.hasOwnProperty(formatter)) {
         console.error(`'${format}' formatter is not supported`);
         this.exit(1);
       }
 
-      console.log(this[formatterMethod](listingResult.resources));
+      console.log(this[formatter](listingResult.resources));
     }
   }, serviceList);
 };
