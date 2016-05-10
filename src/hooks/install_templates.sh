@@ -3,7 +3,7 @@
 SCRIPT_PATH=$(cd $(dirname $0); pwd -P);
 INSTALL_PATH=${SCRIPT_PATH}/../resources/skeletons;
 
-[ -d ${MS_PATH} ] && rm -rf MS_PATH
+[ -d ${INSTALL_PATH} ] && rm -rf INSTALL_PATH
 
 echo "Installing DeepMicroservicesSkeleton in '${MS_PATH}'"
 
