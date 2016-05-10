@@ -7,7 +7,7 @@
 module.exports = {
   alphanumericalNotEmpty: (value) => {
     if (!/^[a-zA-Z0-9_\-]{2,}$/.test(value)) {
-      return 'String should contain only [a-zA-Z0-9_-]';
+      return 'String should contain only [a-zA-Z0-9_-] and have at least 2 characters.';
     }
 
     return true;

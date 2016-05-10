@@ -6,7 +6,7 @@
 
 module.exports = function(mainPath) {
   let inquirer = require('inquirer');
-  let LambdaGenerator = require('../../lib.compiled/Generator/LambdaGenerator').LambdaGenerator;
+  let ActionGenerator = require('../../lib.compiled/Generator/ActionGenerator').ActionGenerator;
   let MicroserviceGenerator = require('../../lib.compiled/Generator/MicroserviceGenerator').MicroserviceGenerator;
   let Property = require('deep-package-manager').Property_Instance;
   let Action = require('deep-package-manager').Microservice_Metadata_Action;
@@ -22,7 +22,12 @@ module.exports = function(mainPath) {
     let questionList = [];
     let microservices = property.microservices.map(m => m.identifier);
 
-    if (microservice && microservices.indexOf(microservice) !== -1) {
+    if (microservice) {
+      if (microservices.indexOf(microservice) === -1) {
+        console.log(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
+        this.exit(1);
+      }
+
       lambdaSchema.microservice = property.microservice(microservice);
     } else {
       questionList.push({
@@ -33,13 +38,19 @@ module.exports = function(mainPath) {
       });
     }
 
-    if (resource && alphanumericalNotEmpty(resource) === true) {
+    if (resource) {
+      let validationResult = alphanumericalNotEmpty(resource);
+      if (validationResult !== true) {
+        console.error(validationResult);
+        this.exit(1);
+      }
+
       lambdaSchema.resource = resource;
     } else {
       questionList.push({
         type: 'input',
         name: 'resource',
-        message: 'Enter the resource name: ',
+        message: 'Enter the resource name (e.g. User): ',
         validate: alphanumericalNotEmpty,
       });
     }
@@ -48,7 +59,7 @@ module.exports = function(mainPath) {
       type: 'list',
       name: 'crud',
       message: 'Select the crud you\'d like to use: ',
-      choices: LambdaGenerator.CRUDS,
+      choices: ActionGenerator.CRUDS,
     });
 
     inquirer.prompt(questionList).then((schema) => {
@@ -88,7 +99,7 @@ module.exports = function(mainPath) {
     inquirer.prompt([{
       type: 'input',
       name: 'action',
-      message: 'Enter the action name: ',
+      message: 'Enter the action name (e.g. Create): ',
       validate: alphanumericalNotEmpty,
     }, {
       type: 'checkbox',
@@ -104,10 +115,10 @@ module.exports = function(mainPath) {
 
   promptLambdaSchema(() => {
     promptLambdaMethods(() => {
-      new LambdaGenerator()
+      new ActionGenerator()
         .generate(mainPath, lambdaSchema, (error, path) => {
           if (error) {
-            console.error(`Error while generating the lambda: ${error}`);
+            console.error(`Error while generating the action: ${error}`);
             return;
           }
 
@@ -115,7 +126,7 @@ module.exports = function(mainPath) {
             `'@${lambdaSchema.microservice.identifier}` + 
             `:${MicroserviceGenerator.identifier(lambdaSchema.resource)}` + 
             `:${MicroserviceGenerator.identifier(lambdaSchema.action)}' ` +
-            `lambda has been successfully generated in '${path}'`
+            `action has been successfully generated in '${path}'`
           );
         });
     });

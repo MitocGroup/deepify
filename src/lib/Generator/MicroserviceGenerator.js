@@ -123,7 +123,7 @@ export class MicroserviceGenerator extends AbstractGenerator {
    */
   validationSchema() {
     return Joi.object().keys({
-      name: Joi.string().required().regex(/^[a-zA-Z0-9_\-]{3,}$/),
+      name: Joi.string().required().regex(AbstractGenerator.DEEP_NAME_REGEXP),
       engines: Joi.array().items(Joi.string().only(
         MicroserviceGenerator.ALLOWED_ENGINES)
       ).required().min(1),
