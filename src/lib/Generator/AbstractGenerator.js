@@ -140,7 +140,7 @@ export class AbstractGenerator extends Core.OOP.Interface {
    * @returns {String}
    */
   static get DEFAULT_SKELETONS_DIR() {
-    return path.join(__dirname, '../../resources/skeletons/DeepTemplateMicroservice');
+    return path.join(__dirname, '../../resources/skeletons');
   }
 
   /**
