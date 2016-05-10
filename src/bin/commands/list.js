@@ -36,11 +36,11 @@ module.exports = function(mainPath) {
     return services;
   };
 
-  let jsonFormatter = (resourceObj) => {
+  this.jsonFormatter = (resourceObj) => {
     return JSON.stringify(resourceObj, null, '  ');
   };
 
-  let textFormatter = (resourcesObj) => {
+  this.textFormatter = (resourcesObj) => {
     let output = OS.EOL;
     let TAB = '  ';
 
@@ -58,18 +58,6 @@ module.exports = function(mainPath) {
     }
 
     return output;
-  };
-
-  let formatter = (format) => {
-    switch (format) {
-      case 'text':
-        return textFormatter;
-      case 'json':
-        return jsonFormatter;
-    }
-
-    console.error(`'${format}' formatter is not supported`);
-    this.exit(1);
   };
 
   if (rawResource) {
@@ -97,7 +85,14 @@ module.exports = function(mainPath) {
       console.log(`There are no DEEP resource on your AWS account ${resource ? `matching '${resource}' hash.` : '.'}`);
       this.exit(1);
     } else {
-      console.log(formatter(format)(listingResult.resources));
+      let formatterMethod = `${format}Formatter`;
+
+      if (!this.hasOwnProperty(formatterMethod)) {
+        console.error(`'${format}' formatter is not supported`);
+        this.exit(1);
+      }
+
+      console.log(this[formatterMethod](listingResult.resources));
     }
   }, serviceList);
 };
