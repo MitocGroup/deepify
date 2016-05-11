@@ -407,72 +407,6 @@ module.exports = {
         },
       },
     },
-    'generate:microapp': {
-      example: 'deepify generate:microapp /target/path/',
-      description: 'Helps to generate microapp skeleton',
-      opts: {
-        name: {
-          alias: 'n',
-          description: 'Microapp name to use',
-          required: false,
-        },
-        engine: {
-          alias: 'e',
-          description: 'Frontend engine to use',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path where to generate the microapp',
-          required: false,
-        },
-      },
-    },
-    'generate:model': {
-      example: 'deepify generate:model /path/to/microapp',
-      description: 'Helps to generate a model',
-      opts: {
-        name: {
-          alias: 'n',
-          description: 'Default model name to use',
-          required: false,
-        },
-        microapp: {
-          alias: 'm',
-          description: 'Microapplication identifier to use',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the application',
-          required: false,
-        },
-      },
-    },
-    'generate:action': {
-      example: 'deepify generate:action /path/to/microapp',
-      description: 'Helps to generate a action',
-      opts: {
-        microapp: {
-          alias: 'm',
-          description: 'Microapplication identifier to use',
-          required: false,
-        },
-        resource: {
-          alias: 'r',
-          description: 'Resource name to use',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the application',
-          required: false,
-        },
-      },
-    },
     'list': {
       example: 'deepify list /path/to/microapp',
       description: 'List resources created by DEEP',
@@ -497,6 +431,78 @@ module.exports = {
         path: {
           description: 'The path to the web app',
           required: false,
+        },
+      },
+    },
+    'generate': {
+      commandsPath: './commands/generate',
+      description: 'Deepify Generator Command',
+      commands: {
+        'microapp': {
+          example: 'deepify generate microapp /target/path/',
+          description: 'Helps to generate microapp skeleton',
+          opts: {
+            name: {
+              alias: 'n',
+              description: 'Microapp name to use',
+              required: false,
+            },
+            engine: {
+              alias: 'e',
+              description: 'Frontend engine to use',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path where to generate the microapp',
+              required: false,
+            },
+          },
+        },
+        'model': {
+          example: 'deepify generate model /path/to/microapp',
+          description: 'Helps to generate a model',
+          opts: {
+            name: {
+              alias: 'n',
+              description: 'Default model name to use',
+              required: false,
+            },
+            microapp: {
+              alias: 'm',
+              description: 'Microapplication identifier to use',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the application',
+              required: false,
+            },
+          },
+        },
+        'action': {
+          example: 'deepify generate action /path/to/microapp',
+          description: 'Helps to generate a action',
+          opts: {
+            microapp: {
+              alias: 'm',
+              description: 'Microapplication identifier to use',
+              required: false,
+            },
+            resource: {
+              alias: 'r',
+              description: 'Resource name to use',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the application',
+              required: false,
+            },
+          },
         },
       },
     },

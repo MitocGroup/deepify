@@ -5,56 +5,75 @@
 
 'use strict';
 
-var Program = require('../lib.compiled/Terminal/Program').Program;
-var ValidationException = require('../lib.compiled/Terminal/Exception/ValidationException').ValidationException;
-var path = require('path');
+let Program = require('../lib.compiled/Terminal/Program').Program;
+let ValidationException = require('../lib.compiled/Terminal/Exception/ValidationException').ValidationException;
+let path = require('path');
 
-var manifest = require('./manifest');
+let manifest = require('./manifest');
+let cli = new Program('deepify', manifest.version, manifest.description);
 
-var cli = new Program('deepify', manifest.version, manifest.description);
+registerCommands(cli, manifest);
 
-for (var cmdName in manifest.commands) {
-  if (!manifest.commands.hasOwnProperty(cmdName)) {
-    continue;
-  }
-
-  var cmdData = manifest.commands[cmdName];
-  var cmdDesc = cmdData.description;
-  var cmdEx = cmdData.example;
-
-  var cmd = cli.command(
-    cmdName,
-    require('./' + path.join(manifest.commandsPath, escapeCmdName(cmdName))),
-    cmdDesc,
-    cmdEx
-  );
-
-  for (var optName in cmdData.opts) {
-    if (!cmdData.opts.hasOwnProperty(optName)) {
+function registerCommands(programObj, programManifest) {
+  for (let cmdName in programManifest.commands) {
+    if (!programManifest.commands.hasOwnProperty(cmdName)) {
       continue;
     }
 
-    var optData = cmdData.opts[optName];
+    let cmdManifest = programManifest.commands[cmdName];
+    let cmdDesc = cmdManifest.description;
+    let cmdEx = cmdManifest.example;
+    let cmdSubCommands = cmdManifest['commands'];
+    let cmdAction = cmdSubCommands ?
+      printHelpAction :
+      require('./' + path.join(programManifest.commandsPath, escapeCmdName(cmdName)));
 
-    cmd.opts
-      .create(optName, optData.alias, optData.description, optData.required);
-  }
+    let cmd = programObj.command(
+      cmdName,
+      cmdAction,
+      cmdDesc,
+      cmdEx
+    );
 
-  for (var argName in cmdData.args) {
-    if (!cmdData.args.hasOwnProperty(argName)) {
-      continue;
+    for (let optName in cmdManifest.opts) {
+      if (!cmdManifest.opts.hasOwnProperty(optName)) {
+        continue;
+      }
+
+      let optData = cmdManifest.opts[optName];
+
+      cmd.opts
+        .create(optName, optData.alias, optData.description, optData.required);
     }
 
-    var argData = cmdData.args[argName];
+    for (let argName in cmdManifest.args) {
+      if (!cmdManifest.args.hasOwnProperty(argName)) {
+        continue;
+      }
 
-    cmd.args
-      .create(argName, argData.description, argData.required);
+      let argData = cmdManifest.args[argName];
+
+      cmd.args
+        .create(argName, argData.description, argData.required);
+    }
+
+    if (cmdSubCommands) {
+      registerCommands(cmd, cmdManifest);
+    }
+
+    cmd.defaults();
   }
 }
 
 function escapeCmdName(name) {
   return name.replace(/[^a-zA-Z0-9_\-]/g, '-');
-} 
+}
+
+function printHelpAction() {
+  this.help.print();
+
+  this.exit(0);
+}
 
 try {
   cli.defaults().run();

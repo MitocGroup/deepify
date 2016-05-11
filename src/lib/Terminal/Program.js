@@ -60,8 +60,9 @@ export class Program {
    * @returns {Program}
    */
   inherit(program) {
+    // @todo: merge args as well?
+    // this._args.merge(program.args);
     this._opts.merge(program.opts);
-    this._args.merge(program.args);
 
     if (!this.hasCommands) {
       this._args.remove('command');
@@ -173,17 +174,6 @@ export class Program {
     let help = this._opts.locate('help');
     let command = this._args.locate('command');
 
-    // @todo: add it for commands as well
-    if (showAutoCompletion && showAutoCompletion.exists) {
-      Program._logDriver.overrideJsConsole(false, false);
-
-      this.help.printAutoCompletion(
-        (this.hasCommands && command) ? command.value : ''
-      );
-
-      this.exit(0);
-    }
-
     if (this.hasCommands && command && command.exists) {
       let subProgram = this.getCommand(command.value);
 
@@ -198,6 +188,16 @@ export class Program {
       subProgram.inherit(this).run();
 
       return;
+    }
+
+    if (showAutoCompletion && showAutoCompletion.exists) {
+      Program._logDriver.overrideJsConsole(false, false);
+
+      this.help.printAutoCompletion(
+        (this.hasCommands && command) ? command.value : ''
+      );
+
+      this.exit(0);
     }
 
     if (help.exists) {

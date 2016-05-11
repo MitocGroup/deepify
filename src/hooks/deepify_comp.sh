@@ -7,13 +7,11 @@ __deepify_comp() {
 
     PREV_WORD="${COMP_WORDS[COMP_CWORD-1]}"
     CUR_WORD="${COMP_WORDS[COMP_CWORD]}"
+    COMPREPLY=($("${SCRIPT_PATH}"/../bin/deepify.js --cmd-auto-complete -- "${COMP_WORDS[@]:1}"))
 
-    if [ "$PREV_WORD" != "deepify" ]; then
-        COMPREPLY=($(compgen -f ${CUR_WORD}))
-        return 0
+    if [ ${#COMPREPLY[@]} -eq 0 ]; then
+     COMPREPLY=($(compgen -f ${CUR_WORD}));
     fi
-
-    COMPREPLY=($("${SCRIPT_PATH}"/../bin/deepify.js --cmd-auto-complete -- "$CUR_WORD"))
 
     return 0
 }
