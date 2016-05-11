@@ -379,6 +379,11 @@ module.exports = {
           description: 'JSON string used as the Lambda context',
           required: false,
         },
+        auth: {
+          alias: 'a',
+          description: 'Authorize the user in backend',
+          required: false,
+        },
         'skip-frontend-build': {
           alias: 'f',
           description: 'Skip picking up _build path from the microservices Frontend',

@@ -12,11 +12,13 @@ module.exports = function(lambdaPath) {
   let path = require('path');
   let fs = require('fs');
   let os = require('os');
+  let extend = require('util')._extend;
   let Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
 
   let dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   let event = this.opts.locate('event').value;
   let context = this.opts.locate('context').value;
+  let auth = this.opts.locate('auth').exists;
   let skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
   let plain = this.opts.locate('plain').exists;
 
@@ -55,6 +57,16 @@ module.exports = function(lambdaPath) {
 
   event = parseParamData(event);
   context = parseParamData(context);
+
+  if (auth) {
+    context = extend(context, {
+      identity: {
+        cognitoIdentityPoolId: 'us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xx0123456789',
+        cognitoIdentityId: 'us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        isAnonymous: true,
+      },
+    });
+  }
 
   let awsConfigFile = path.join(path.dirname(lambdaPath), '.aws.json');
 
