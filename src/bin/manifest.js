@@ -221,35 +221,6 @@ module.exports = {
         },
       },
     },
-    'enable-ssl': {
-      example: 'deepify enable-ssl path/to/web_app',
-      description: 'Enables SSL on a deployed web app',
-      opts: {
-        domain: {
-          alias: 'd',
-          description: 'The domain to create the certificate for (overrides the "deeploy.json" value)',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: false,
-        },
-      },
-    },
-    'disable-ssl': {
-      example: 'deepify disable-ssl path/to/web_app',
-      description: 'Disable activated SSL on a deployed web app',
-      opts: {
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: false,
-        },
-      },
-    },
     'build-frontend': {
       example: 'deepify build-frontend path/to/web_app',
       description: 'Build frontend of a web app',
@@ -506,5 +477,40 @@ module.exports = {
         },
       },
     },
+    'ssl': {
+      commandsPath: './commands/ssl',
+      description: 'Deepify Generator Command',
+      commands: {
+        'enable': {
+          example: 'deepify enable-ssl path/to/web_app',
+          description: 'Enables SSL on a deployed web app',
+          opts: {
+            domain: {
+              alias: 'd',
+              description: 'The domain to create the certificate for (overrides the "deeploy.json" value)',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the web app',
+              required: false,
+            },
+          },
+        },
+        'disable': {
+          example: 'deepify disable-ssl path/to/web_app',
+          description: 'Disable activated SSL on a deployed web app',
+          opts: {
+          },
+          args: {
+            path: {
+              description: 'The path to the web app',
+              required: false,
+            },
+          },
+        },
+      },
+    }
   },
 };
