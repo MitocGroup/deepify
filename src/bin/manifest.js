@@ -482,8 +482,18 @@ module.exports = {
           description: 'Comma separated list of services for which to list resources',
           required: false,
         },
+        format: {
+          alias: 'f',
+          description: 'Output format',
+          required: false,
+        },
       },
-      args: {},
+      args: {
+        path: {
+          description: 'The path to the web app',
+          required: false,
+        },
+      },
     },
   },
 };

@@ -136,6 +136,7 @@ export class AbstractGenerator extends Core.OOP.Interface {
   }
 
   /**
+   * @note: If you want to change this update hooks/install_templates.sh also
    * @returns {String}
    */
   static get DEFAULT_SKELETONS_DIR() {
