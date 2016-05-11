@@ -7,6 +7,7 @@ cache:
   directories:
     - "$(npm root -g)"
     - node_modules
+    - $(npm config get prefix)/bin
 notifications:
   email:
     - devs-deep@mitocgroup.com
