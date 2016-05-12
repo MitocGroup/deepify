@@ -17,7 +17,11 @@ export class MigrationGenerator extends AbstractGenerator {
   constructor(...args) {
     super(...args);
   }
-  
+
+  /**
+   * @param {Function} cb
+   * @private
+   */
   _generate(cb) {
     let microservice = this.generationSchema.microservice;
     let cmdName = this.generationSchema.cmdName;
@@ -29,10 +33,8 @@ export class MigrationGenerator extends AbstractGenerator {
       version: cmdVersion
     };
 
-    console.log('migrationFolder', migrationFolder);
-
     FSExtra.ensureDirSync(migrationFolder);
-    
+
     this.renderFile(
       'Data/Migration/migration.js',
       migrationPath,

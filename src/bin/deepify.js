@@ -27,12 +27,7 @@ function registerCommands(programObj, programManifest) {
     let requirePath = cmdManifest.actionPath || (`./${path.join(programManifest.commandsPath, escapeCmdName(cmdName))}`);
     let cmdAction = cmdSubCommands ? printHelpAction : require(requirePath);
 
-    let cmd = programObj.command(
-      cmdName,
-      cmdAction, 
-      cmdDesc, 
-      cmdEx
-    );
+    let cmd = programObj.command(cmdName, cmdAction, cmdDesc, cmdEx);
 
     for (let optName in cmdManifest.opts) {
       if (!cmdManifest.opts.hasOwnProperty(optName)) {
