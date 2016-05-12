@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Created on 05/12/2016 11:38:46 AM
+# Created on 05/12/2016 12:25:27 PM
 __deepify_comp() {
     local PREV_WORD
     local CUR_WORD
@@ -9,7 +9,55 @@ __deepify_comp() {
 
     
           if [ "${COMP_WORDS[0]}" = "deepify" ]; then
-                        if [ "${COMP_WORDS[1]}" = "generate" ]; then
+                        if [ "${COMP_WORDS[1]}" = "registry" ]; then
+                          
+        if [ "${COMP_CWORD}" -eq "2" ]; then
+          WORDS=( "publish"  "config" )
+
+          if [ "${CUR_WORD}" = "registry" ]; then
+            COMPREPLY=WORDS;
+
+            return 0;
+          fi;
+
+          for WORD in ${WORDS[@]}; do
+            if [[ ${WORD} == "${CUR_WORD}"* ]]; then
+              COMPREPLY+=(${WORD});
+            fi
+          done;
+        fi
+
+        if [ ${#COMPREPLY[@]} -eq 0 ]; then
+          COMPREPLY=($(compgen -f ${CUR_WORD}))
+        fi
+
+        return 0;
+      fi
+          if [ "${COMP_WORDS[1]}" = "compile" ]; then
+                          
+        if [ "${COMP_CWORD}" -eq "2" ]; then
+          WORDS=( "frontend"  "es6"  "prod" )
+
+          if [ "${CUR_WORD}" = "compile" ]; then
+            COMPREPLY=WORDS;
+
+            return 0;
+          fi;
+
+          for WORD in ${WORDS[@]}; do
+            if [[ ${WORD} == "${CUR_WORD}"* ]]; then
+              COMPREPLY+=(${WORD});
+            fi
+          done;
+        fi
+
+        if [ ${#COMPREPLY[@]} -eq 0 ]; then
+          COMPREPLY=($(compgen -f ${CUR_WORD}))
+        fi
+
+        return 0;
+      fi
+          if [ "${COMP_WORDS[1]}" = "generate" ]; then
                           
         if [ "${COMP_CWORD}" -eq "2" ]; then
           WORDS=( "microapp"  "model"  "action"  "migration" )
@@ -59,7 +107,7 @@ __deepify_comp() {
       fi
             
         if [ "${COMP_CWORD}" -eq "1" ]; then
-          WORDS=( "helloworld"  "install"  "server"  "deploy"  "undeploy"  "publish"  "registry-cfg"  "build-frontend"  "compile-es6"  "compile-prod"  "create-migration"  "init-backend"  "run-lambda"  "list"  "generate"  "ssl" )
+          WORDS=( "helloworld"  "install"  "server"  "deploy"  "undeploy"  "registry"  "compile"  "build-frontend"  "compile-es6"  "compile-prod"  "init-backend"  "lambda"  "list"  "generate"  "ssl" )
 
           if [ "${CUR_WORD}" = "deepify" ]; then
             COMPREPLY=WORDS;
