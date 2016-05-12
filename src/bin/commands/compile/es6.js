@@ -7,7 +7,7 @@
 
 module.exports = function(mainPath) {
   let path = require('path');
-  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  let Exec = require('../../../lib.compiled/Helpers/Exec').Exec;
 
   mainPath = this.normalizeInputPath(mainPath);
   let extension = this.opts.locate('extension').value || '.es6';

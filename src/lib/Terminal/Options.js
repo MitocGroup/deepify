@@ -42,6 +42,18 @@ export class Options {
       throw new OptionsObjectRequiredException();
     }
 
+    sibling.list().forEach((opt) => {
+      let selfOpt = this.locate(opt.name);
+
+      if (selfOpt) {
+        let selfIdx = this._vector.indexOf(selfOpt);
+
+        this._vector[selfIdx] = opt;
+      } else {
+        this.add(opt);
+      }
+    });
+
     this._vector = this._vector.concat(sibling.list());
 
     return this;

@@ -52,7 +52,7 @@
     "test": "bash node-bin/test.sh",
     "compile": "bash node-bin/compile.sh",
     "obfuscate-compiled": "bash node-bin/obfuscate-compiled.sh",
-    "prepublish": "npm run obfuscate-compiled"
+    "prepublish": "node hooks/dump_comp.js && npm run obfuscate-compiled"
   },
   "dependencies": {
     "aws-api-gw-client": "^0.1.x",

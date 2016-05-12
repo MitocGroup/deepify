@@ -12,7 +12,7 @@ module.exports = function(mainPath) {
   let os = require('os');
   let Property = require('deep-package-manager').Property_Instance;
   let Config = require('deep-package-manager').Property_Config;
-  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  let Exec = require('../../../lib.compiled/Helpers/Exec').Exec;
 
   mainPath = this.normalizeInputPath(mainPath);
 

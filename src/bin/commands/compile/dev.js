@@ -11,12 +11,12 @@ module.exports = function(mainPath) {
   let Config = require('deep-package-manager').Property_Config;
   let fs = require('fs');
   let fse = require('fs-extra');
-  let NpmInstall = require('../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
-  let NpmInstallLibs = require('../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
-  let NpmLink = require('../../lib.compiled/NodeJS/NpmLink').NpmLink;
-  let NpmChain = require('../../lib.compiled/NodeJS/NpmChain').NpmChain;
-  let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
-  let LambdaExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
+  let NpmInstall = require('../../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
+  let NpmInstallLibs = require('../../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
+  let NpmLink = require('../../../lib.compiled/NodeJS/NpmLink').NpmLink;
+  let NpmChain = require('../../../lib.compiled/NodeJS/NpmChain').NpmChain;
+  let Bin = require('../../../lib.compiled/NodeJS/Bin').Bin;
+  let LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
 
   let microservicesToInit = this.opts.locate('partial').value;
 
