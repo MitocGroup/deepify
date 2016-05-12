@@ -27,31 +27,45 @@ function registerCommands(programObj, programManifest) {
     let requirePath = cmdManifest.actionPath || (`./${path.join(programManifest.commandsPath, escapeCmdName(cmdName))}`);
     let cmdAction = cmdSubCommands ? printHelpAction : require(requirePath);
 
-    let cmd = programObj.command(cmdName, cmdAction, cmdDesc, cmdEx);
+    let cmd = programObj.command(
+      cmdName,
+      cmdAction,
+      cmdDesc,
+      cmdEx
+    );
 
-    for (let optName in cmdManifest.opts) {
-      if (!cmdManifest.opts.hasOwnProperty(optName)) {
-        continue;
-      }
-
-      let optData = cmdManifest.opts[optName];
-      cmd.opts.create(optName, optData.alias, optData.description, optData.required);
-    }
-
-    for (let argName in cmdManifest.args) {
-      if (!cmdManifest.args.hasOwnProperty(argName)) {
-        continue;
-      }
-
-      let argData = cmdManifest.args[argName];
-      cmd.args.create(argName, argData.description, argData.required);
-    }
+    registerCommandOpts(cmd, cmdManifest);
+    registerCommandArgs(cmd, cmdManifest);
 
     if (cmdSubCommands) {
       registerCommands(cmd, cmdManifest);
     }
 
     cmd.defaults();
+  }
+}
+
+function registerCommandOpts(cmdObj, cmdManifest) {
+  for (let optName in cmdManifest.opts) {
+    if (!cmdManifest.opts.hasOwnProperty(optName)) {
+      continue;
+    }
+
+    let optData = cmdManifest.opts[optName];
+
+    cmdObj.opts.create(optName, optData.alias, optData.description, optData.required);
+  }
+}
+
+function registerCommandArgs(cmdObj, cmdManifest) {
+  for (let argName in cmdManifest.args) {
+    if (!cmdManifest.args.hasOwnProperty(argName)) {
+      continue;
+    }
+
+    let argData = cmdManifest.args[argName];
+
+    cmdObj.args.create(argName, argData.description, argData.required);
   }
 }
 
