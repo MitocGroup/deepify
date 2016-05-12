@@ -475,6 +475,23 @@ module.exports = {
             },
           },
         },
+        'migration': {
+          example: 'deepify generate migration path/to/app',
+          description: 'Create empty migration for a certain microservice',
+          opts: {
+            microapp: {
+              alias: 'm',
+              description: 'Microapplication identifier to use',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the microservice',
+              required: false,
+            },
+          },
+        },
       },
     },
     'ssl': {

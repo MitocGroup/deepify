@@ -30,8 +30,8 @@ function registerCommands(programObj, programManifest) {
 
     let cmd = programObj.command(
       cmdName,
-      cmdAction,
-      cmdDesc,
+      cmdAction, 
+      cmdDesc, 
       cmdEx
     );
 
@@ -41,9 +41,7 @@ function registerCommands(programObj, programManifest) {
       }
 
       let optData = cmdManifest.opts[optName];
-
-      cmd.opts
-        .create(optName, optData.alias, optData.description, optData.required);
+      cmd.opts.create(optName, optData.alias, optData.description, optData.required);
     }
 
     for (let argName in cmdManifest.args) {
@@ -52,9 +50,7 @@ function registerCommands(programObj, programManifest) {
       }
 
       let argData = cmdManifest.args[argName];
-
-      cmd.args
-        .create(argName, argData.description, argData.required);
+      cmd.args.create(argName, argData.description, argData.required);
     }
 
     if (cmdSubCommands) {
