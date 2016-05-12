@@ -1,7 +1,5 @@
-
-# Created on Thu May 12 2016 11:34:45 GMT+0300 (EEST)
 #!/usr/bin/env bash
-# Created on [object Object] }}
+# Created on 05/12/2016 11:38:46 AM
 __deepify_comp() {
     local PREV_WORD
     local CUR_WORD
@@ -88,4 +86,3 @@ __deepify_comp() {
 }
 
 complete -F __deepify_comp deepify 2>/dev/null
-
