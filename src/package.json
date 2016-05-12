@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.7.43",
+  "version": "1.7.44",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -47,12 +47,12 @@
     "url": "https://github.com/MitocGroup/deepify.git"
   },
   "scripts": {
-    "preinstall": "bash node-bin/assure-deps.sh && npm run compile",
+    "preinstall": "bash node-bin/assure-deps.sh && bash node-bin/compile.sh",
     "postinstall": "bash hooks/autocomplete_deepify.sh && bash hooks/install_templates.sh",
     "test": "bash node-bin/test.sh",
     "compile": "bash node-bin/compile.sh",
     "obfuscate-compiled": "bash node-bin/obfuscate-compiled.sh",
-    "prepublish": "node hooks/dump_comp.js && npm run obfuscate-compiled"
+    "prepublish": "node hooks/dump_comp.js && bash node-bin/obfuscate-compiled.sh"
   },
   "dependencies": {
     "aws-api-gw-client": "^0.1.x",
