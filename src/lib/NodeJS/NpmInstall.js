@@ -199,5 +199,6 @@ export class NpmInstall {
     );
 
     return (calculatedChunkSize > 8) ? 8 : (calculatedChunkSize < 2) ? 2 : calculatedChunkSize;
+
   }
 }
