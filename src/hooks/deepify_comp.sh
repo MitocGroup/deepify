@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Created on 05/12/2016 02:18:14 PM
+# Created on 05/12/2016 02:19:48 PM
 __deepify_comp() {
+    local CUR_WORD
+
     CUR_WORD="${COMP_WORDS[COMP_CWORD]}"
 
     
