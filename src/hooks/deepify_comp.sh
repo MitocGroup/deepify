@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Created on 05/12/2016 02:19:48 PM
+# Created on 05/12/2016 03:04:54 PM
 __deepify_comp() {
     local CUR_WORD
 
@@ -7,8 +7,8 @@ __deepify_comp() {
 
     
           if [ "${COMP_WORDS[0]}" = "deepify" ]; then
-                        if [ "${COMP_WORDS[1]}" = "registry" ]; then
-                          
+              if [ "${COMP_WORDS[1]}" = "registry" ]; then
+        
         if [ "${COMP_CWORD}" -eq "2" ]; then
           WORDS=( "publish"  "config" )
 
@@ -32,9 +32,9 @@ __deepify_comp() {
         return 0;
       fi
           if [ "${COMP_WORDS[1]}" = "compile" ]; then
-                          
+        
         if [ "${COMP_CWORD}" -eq "2" ]; then
-          WORDS=( "frontend"  "es6"  "prod" )
+          WORDS=( "frontend"  "es6"  "prod"  "dev" )
 
           if [ "${CUR_WORD}" = "compile" ]; then
             COMPREPLY=WORDS;
@@ -56,7 +56,7 @@ __deepify_comp() {
         return 0;
       fi
           if [ "${COMP_WORDS[1]}" = "generate" ]; then
-                          
+        
         if [ "${COMP_CWORD}" -eq "2" ]; then
           WORDS=( "microapp"  "model"  "action"  "migration" )
 
@@ -80,7 +80,7 @@ __deepify_comp() {
         return 0;
       fi
           if [ "${COMP_WORDS[1]}" = "ssl" ]; then
-                          
+        
         if [ "${COMP_CWORD}" -eq "2" ]; then
           WORDS=( "enable"  "disable" )
 
@@ -103,7 +103,7 @@ __deepify_comp() {
 
         return 0;
       fi
-            
+    
         if [ "${COMP_CWORD}" -eq "1" ]; then
           WORDS=( "helloworld"  "install"  "server"  "deploy"  "undeploy"  "registry"  "compile"  "build-frontend"  "compile-es6"  "compile-prod"  "init-backend"  "lambda"  "list"  "generate"  "ssl" )
 

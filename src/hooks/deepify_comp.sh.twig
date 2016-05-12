@@ -9,13 +9,11 @@ __deepify_comp() {
 
     {% macro cmdComplete(cmdName, cmdDepth, cmdManifest) %}
       if [ "${COMP_WORDS[{{ cmdDepth }}]}" = "{{ cmdName }}" ]; then
-        {% if cmdManifest.commands %}
-          {% for subCmdName, subCmdManifest in cmdManifest.commands  %}
-            {%- if subCmdManifest.commands -%}
-              {{ _self.cmdComplete(subCmdName, cmdDepth + 1, subCmdManifest) }}
-            {%- endif -%}
-          {% endfor %}
-        {% endif %}
+        {% for subCmdName, subCmdManifest in cmdManifest.commands  %}
+          {%- if subCmdManifest.commands -%}
+            {{ _self.cmdComplete(subCmdName, cmdDepth + 1, subCmdManifest) }}
+          {%- endif -%}
+        {% endfor %}
 
         if [ "${COMP_CWORD}" -eq "{{ cmdDepth + 1 }}" ]; then
           WORDS=({% for key, value in cmdManifest.commands %} "{{ key }}" {% endfor %})

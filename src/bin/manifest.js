@@ -17,6 +17,7 @@ module.exports = {
     'helloworld': {
       example: 'deepify helloworld path/to/web_app',
       description: 'Dump the "Hello World" sample web app',
+      section: 'Prepare your local environment',
       opts: {
       },
       args: {
@@ -29,6 +30,7 @@ module.exports = {
     'install': {
       example: 'deepify install github://MitocGroup/deep-microservices-todo-app',
       description: 'Install any DEEP microservice or microapplication from DEEP registry or GitHub repository',
+      section: 'Prepare your local environment',
       opts: {
         init: {
           alias: 'i',
@@ -60,6 +62,7 @@ module.exports = {
     'server': {
       example: 'deepify server path/to/web_app -o',
       description: 'Run local development server',
+      section: 'Develop on your local environment',
       opts: {
         'build-path': {
           alias: 'b',
@@ -102,6 +105,7 @@ module.exports = {
     'deploy': {
       example: 'deepify deploy path/to/web_app',
       description: 'Deploy microserice(s) or microapplication(s) as custom web app(s)',
+      section: 'Run in the cloud',
       opts: {
         prod: {
           description: 'Prepare web app for production and ensure prod env is used',
@@ -153,6 +157,7 @@ module.exports = {
     'undeploy': {
       example: 'deepify undeploy path/to/web_app',
       description: 'Remove custom web app (provisioned resources, code and data)',
+      section: 'Run in the cloud',
       opts: {
         'cfg-bucket': {
           alias: 'b',
@@ -185,6 +190,7 @@ module.exports = {
     'registry': {
       description: 'Manage registry configuration and publish microservice(s) or microapplication(s) to DEEP registry',
       commandsPath: './commands/registry',
+      section: 'Prepare your local environment',
       commands: {
         'publish': {
           example: 'deepify registry publish ./sample-microservice',
@@ -230,6 +236,7 @@ module.exports = {
     'compile': {
       description: 'Compile code for local or cloud execution',
       commandsPath: './commands/compile',
+      section: 'Develop on your local environment',
       commands: {
         'frontend': {
           example: 'deepify compile frontend path/to/web_app',
@@ -317,12 +324,30 @@ module.exports = {
             },
           },
         },
+        'dev': {
+          example: 'deepify init-backend path/to/web_app',
+          description: 'Initialize backend',
+          opts: {
+            partial: {
+              alias: 'm',
+              description: 'Partial init (one or several comma separated microservices identifiers)',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the web app',
+              required: false,
+            },
+          }
+        },
       },
     },
     'build-frontend': {
       example: 'deepify build-frontend path/to/web_app',
       description: 'Build frontend of a web app',
       actionPath: './commands/compile/frontend',
+      section: 'Deprecated',
       opts: {
         'output-path': {
           alias: 'o',
@@ -341,6 +366,7 @@ module.exports = {
       example: 'deepify compile-es6 path/to/lambda',
       description: 'Compile ES6 scripts to ES5 using babel (matched by *.es6)',
       actionPath: './commands/compile/es6',
+      section: 'Deprecated',
       opts: {
         'extension': {
           alias: 'x',
@@ -372,6 +398,7 @@ module.exports = {
       example: 'deepify compile-prod path/to/web_app',
       description: 'Compile lambdas for production',
       actionPath: './commands/compile/prod',
+      section: 'Deprecated',
       opts: {
         'remove-source': {
           alias: 's',
@@ -411,6 +438,8 @@ module.exports = {
     'init-backend': {
       example: 'deepify init-backend path/to/web_app',
       description: 'Initialize backend',
+      actionPath: './commands/compile/dev',
+      section: 'Deprecated',
       opts: {
         partial: {
           alias: 'm',
@@ -428,6 +457,7 @@ module.exports = {
     'lambda': {
       example: 'deepify lambda path/to/the/lambda -e=\'{"Name":"John Doe"}\'',
       description: 'Run AWS Lambda function(s) locally',
+      section: 'Develop on your local environment',
       opts: {
         event: {
           alias: 'e',
@@ -470,6 +500,7 @@ module.exports = {
     'list': {
       example: 'deepify list /path/to/microapp',
       description: 'List cloud resources provisioned for your web app(s)',
+      section: 'Run in the cloud',
       opts: {
         resource: {
           alias: 'r',
@@ -497,6 +528,7 @@ module.exports = {
     'generate': {
       commandsPath: './commands/generate',
       description: 'Generate microapplication component(s)',
+      section: 'Develop on your local environment',
       commands: {
         'microapp': {
           example: 'deepify generate microapp /target/path/',
@@ -586,6 +618,7 @@ module.exports = {
     'ssl': {
       commandsPath: './commands/ssl',
       description: 'Enable or disable SSL certificate(s) on your custom web app(s)',
+      section: 'Run in the cloud',
       commands: {
         'enable': {
           example: 'deepify enable-ssl path/to/web_app',
