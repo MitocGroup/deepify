@@ -13,9 +13,11 @@ module.exports = function(mainPath) {
   var ACMService = require('deep-package-manager').Provisioning_Service_ACMService;
   var CloudFrontService = require('deep-package-manager').Provisioning_Service_CloudFrontService;
   var Config = require('deep-package-manager').Property_Config;
+  let validateNodeVersion = require('../helper/validate-node-version');
 
   var domain = this.opts.locate('domain').value || null;
 
+  validateNodeVersion.call(this);
   mainPath = this.normalizeInputPath(mainPath);
 
   var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);

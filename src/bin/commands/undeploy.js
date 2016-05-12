@@ -11,12 +11,15 @@ module.exports = function(mainPath) {
   let ProvisioningDumpFileMatcher = require('deep-package-manager').Provisioning_UndeployMatcher_ProvisioningDumpFileMatcher;
   let AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
   let Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
+  let validateNodeVersion = require('./helper/validate-node-version');
 
   let dirtyMode = this.opts.locate('dirty').exists;
   let forceProd = this.opts.locate('prod').exists;
   let cfgBucket = this.opts.locate('cfg-bucket').value;
   let rawResource = this.opts.locate('resource').value;
   let resource = null;
+
+  validateNodeVersion.call(this);
 
   if (rawResource) {
     resource = AbstractService.extractBaseHashFromResourceName(rawResource);
