@@ -15,7 +15,6 @@ module.exports = function(mainPath) {
   var Config = require('deep-package-manager').Property_Config;
 
   var domain = this.opts.locate('domain').value || null;
-
   mainPath = this.normalizeInputPath(mainPath);
 
   var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);

@@ -27,6 +27,9 @@ module.exports = function(mainPath) {
   let Property = require('deep-package-manager').Property_Instance;
   let WaitFor = require('deep-package-manager').Helpers_WaitFor;
   let tmp = require('tmp');
+  let validateNodeVersion = require('../helper/validate-node-version');
+  
+  validateNodeVersion.call(this);
 
   let installFromCache = (lambdas, callback) => {
     let doInstall = (lambdaIdx) => {

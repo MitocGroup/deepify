@@ -28,7 +28,9 @@ module.exports = function(mainPath) {
   let cfgBucket = this.opts.locate('cfg-bucket').value;
   let appEnv = isProd ? 'prod' : this.opts.locate('env').value;
   let microservicesToDeploy = this.opts.locate('partial').value;
+  let validateNodeVersion = require('./helper/validate-node-version');
 
+  validateNodeVersion.call(this);
   mainPath = this.normalizeInputPath(mainPath);
 
   if (dumpCodePath) {
