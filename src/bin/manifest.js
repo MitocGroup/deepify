@@ -322,6 +322,7 @@ module.exports = {
     'build-frontend': {
       example: 'deepify build-frontend path/to/web_app',
       description: 'Build frontend of a web app',
+      actionPath: './commands/compile/frontend',
       opts: {
         'output-path': {
           alias: 'o',
@@ -339,6 +340,7 @@ module.exports = {
     'compile-es6': {
       example: 'deepify compile-es6 path/to/lambda',
       description: 'Compile ES6 scripts to ES5 using babel (matched by *.es6)',
+      actionPath: './commands/compile/es6',
       opts: {
         'extension': {
           alias: 'x',
@@ -369,6 +371,7 @@ module.exports = {
     'compile-prod': {
       example: 'deepify compile-prod path/to/web_app',
       description: 'Compile lambdas for production',
+      actionPath: './commands/compile/prod',
       opts: {
         'remove-source': {
           alias: 's',

@@ -23,10 +23,9 @@ function registerCommands(programObj, programManifest) {
     let cmdManifest = programManifest.commands[cmdName];
     let cmdDesc = cmdManifest.description;
     let cmdEx = cmdManifest.example;
-    let cmdSubCommands = cmdManifest['commands'];
-    let cmdAction = cmdSubCommands ?
-      printHelpAction :
-      require('./' + path.join(programManifest.commandsPath, escapeCmdName(cmdName)));
+    let cmdSubCommands = cmdManifest.commands;
+    let requirePath = cmdManifest.actionPath || (`./${path.join(programManifest.commandsPath, escapeCmdName(cmdName))}`);
+    let cmdAction = cmdSubCommands ? printHelpAction : require(requirePath);
 
     let cmd = programObj.command(
       cmdName,
