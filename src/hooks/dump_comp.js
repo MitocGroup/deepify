@@ -15,9 +15,9 @@ let Twig = require('../lib.compiled/Generator/AbstractGenerator').AbstractGenera
 let path = require('path');
 let FS = require('fs');
 let manifest = require('../bin/manifest');
-let templateRaw = FS.readFileSync(path.join(__dirname, './deepify_comp.sh.twig')).toString();
+let templateRaw = FS.readFileSync(path.join(__dirname, 'deepify_comp.sh.twig')).toString();
 let scriptRaw = Twig.render(templateRaw, {manifest});
-let scriptPath = path.join(__dirname, './deepify_comp.sh');
+let scriptPath = path.join(__dirname, 'deepify_comp.sh');
 
 FS.writeFileSync(scriptPath, scriptRaw, {
   mode: 0o755
