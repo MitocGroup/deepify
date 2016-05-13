@@ -1,0 +1,47 @@
+{{ '#' }}!/usr/bin/env bash
+{{ '#' }} Created on {{ 'now'|date('m/d/Y h:i:s A') }}
+__deepify_comp() {
+    local CUR_WORD
+
+    CUR_WORD="${COMP_WORDS[COMP_CWORD]}"
+
+    {% import _self as this %}
+
+    {% macro cmdComplete(cmdName, cmdDepth, cmdManifest) %}
+      if [ "${COMP_WORDS[{{ cmdDepth }}]}" = "{{ cmdName }}" ]; then
+        {% for subCmdName, subCmdManifest in cmdManifest.commands  %}
+          {%- if subCmdManifest.commands -%}
+            {{ _self.cmdComplete(subCmdName, cmdDepth + 1, subCmdManifest) }}
+          {%- endif -%}
+        {% endfor %}
+
+        if [ "${COMP_CWORD}" -eq "{{ cmdDepth + 1 }}" ]; then
+          WORDS=({% for key, value in cmdManifest.commands %} "{{ key }}" {% endfor %})
+
+          if [ "${CUR_WORD}" = "{{ cmdName }}" ]; then
+            COMPREPLY=WORDS;
+
+            return 0;
+          fi;
+
+          for WORD in ${WORDS[@]}; do
+            if [[ ${WORD} == "${CUR_WORD}"* ]]; then
+              COMPREPLY+=(${WORD});
+            fi
+          done;
+        fi
+
+        if [ ${{ '{#' }}COMPREPLY[@]} -eq 0 ]; then
+          COMPREPLY=($(compgen -f ${CUR_WORD}))
+        fi
+
+        return 0;
+      fi
+    {% endmacro %}
+
+    {{ this.cmdComplete('deepify', 0, manifest) }}
+
+    return 0
+}
+
+complete -F __deepify_comp deepify 2>/dev/null

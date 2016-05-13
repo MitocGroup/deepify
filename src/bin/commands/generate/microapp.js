@@ -6,11 +6,11 @@
 
 module.exports = function(mainPath) {
   let inquirer = require('inquirer');
-  let MicroserviceGenerator = require('../../lib.compiled/Generator/MicroserviceGenerator').MicroserviceGenerator;
-  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
-  let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  let MicroserviceGenerator = require('../../../lib.compiled/Generator/MicroserviceGenerator').MicroserviceGenerator;
+  let Exec = require('../../../lib.compiled/Helpers/Exec').Exec;
+  let Bin = require('../../../lib.compiled/NodeJS/Bin').Bin;
   let OS = require('os');
-  let alphanumericalNotEmpty = require('./helper/inquirer-validators').alphanumericalNotEmpty;
+  let alphanumericalNotEmpty = require('../helper/inquirer-validators').alphanumericalNotEmpty;
 
   mainPath = this.normalizeInputPath(mainPath);
   let name = this.opts.locate('name').value;
@@ -87,14 +87,15 @@ module.exports = function(mainPath) {
     let cmd = new Exec(
       Bin.node,
       this.scriptPath,
-      'generate:model',
+      'generate',
+      'model',
       mainPath,
       `-m=${MicroserviceGenerator.identifier(appSchema.name)}`
     );
 
     cmd.run((result) => {
       if (result.failed) {
-        console.error(`deepify generate:model failed with: ${result.error}`);
+        console.error(`deepify generate model failed with: ${result.error}`);
         this.exit(1);
       }
 

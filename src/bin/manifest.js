@@ -14,9 +14,10 @@ module.exports = {
   description: 'DEEP CLI',
   commandsPath: './commands',
   commands: {
-    helloworld: {
+    'helloworld': {
       example: 'deepify helloworld path/to/web_app',
       description: 'Dump the "Hello World" sample web app',
+      section: 'Prepare your local environment',
       opts: {
       },
       args: {
@@ -26,9 +27,10 @@ module.exports = {
         },
       },
     },
-    install: {
+    'install': {
       example: 'deepify install github://MitocGroup/deep-microservices-todo-app',
-      description: 'Install the web app or a single microservice from the registry or GitHub',
+      description: 'Install any DEEP microservice or microapplication from DEEP registry or GitHub repository',
+      section: 'Prepare your local environment',
       opts: {
         init: {
           alias: 'i',
@@ -57,9 +59,10 @@ module.exports = {
         },
       },
     },
-    server: {
+    'server': {
       example: 'deepify server path/to/web_app -o',
       description: 'Run local development server',
+      section: 'Develop on your local environment',
       opts: {
         'build-path': {
           alias: 'b',
@@ -99,9 +102,10 @@ module.exports = {
         },
       },
     },
-    deploy: {
+    'deploy': {
       example: 'deepify deploy path/to/web_app',
-      description: 'Deploy an web app',
+      description: 'Deploy microserice(s) or microapplication(s) as custom web app(s)',
+      section: 'Run in the cloud',
       opts: {
         prod: {
           description: 'Prepare web app for production and ensure prod env is used',
@@ -150,9 +154,10 @@ module.exports = {
         },
       },
     },
-    undeploy: {
+    'undeploy': {
       example: 'deepify undeploy path/to/web_app',
-      description: 'Remove web app provisioning and uploaded data',
+      description: 'Remove custom web app (provisioned resources, code and data)',
+      section: 'Run in the cloud',
       opts: {
         'cfg-bucket': {
           alias: 'b',
@@ -182,77 +187,167 @@ module.exports = {
         },
       },
     },
-    publish: {
-      example: 'deepify publish ./sample-microservice',
-      description: 'Publish microservice (may require manual approval before getting public)',
-      opts: {
-        registry: {
-          alias: 'r',
-          description: 'Custom registry url (ex. https://deep.mg)',
-          required: false,
+    'registry': {
+      description: 'Manage registry configuration and publish microservice(s) or microapplication(s) to DEEP registry',
+      commandsPath: './commands/registry',
+      section: 'Prepare your local environment',
+      commands: {
+        'publish': {
+          example: 'deepify registry publish ./sample-microservice',
+          description: 'Publish microservice (may require manual approval before getting public)',
+          opts: {
+            registry: {
+              alias: 'r',
+              description: 'Custom registry url (ex. https://deep.mg)',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the microservice you want to publish',
+              required: false,
+            },
+          },
         },
-      },
-      args: {
-        path: {
-          description: 'The path to the microservice you want to publish',
-          required: false,
-        },
-      },
-    },
-    'registry-cfg': {
-      example: 'deepify registry-cfg token --set "some_custom_auth_token"',
-      description: 'Read/Set the registry configuration value (read unless called with --set)',
-      opts: {
-        set: {
-          alias: 's',
-          description: 'Set the registry parameter to the value given',
-          required: false,
-        },
-        print: {
-          alias: 'p',
-          description: 'Print available registry parameters',
-          required: false,
-        },
-      },
-      args: {
-        parameter: {
-          description: 'Registry configuration parameter name',
-          required: false,
-        },
-      },
-    },
-    'enable-ssl': {
-      example: 'deepify enable-ssl path/to/web_app',
-      description: 'Enables SSL on a deployed web app',
-      opts: {
-        domain: {
-          alias: 'd',
-          description: 'The domain to create the certificate for (overrides the "deeploy.json" value)',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: false,
+        'config': {
+          example: 'deepify registry config token --set "some_custom_auth_token"',
+          description: 'Read/Set the registry configuration value (read unless called with --set)',
+          opts: {
+            set: {
+              alias: 's',
+              description: 'Set the registry parameter to the value given',
+              required: false,
+            },
+            print: {
+              alias: 'p',
+              description: 'Print available registry parameters',
+              required: false,
+            },
+          },
+          args: {
+            parameter: {
+              description: 'Registry configuration parameter name',
+              required: false,
+            },
+          },
         },
       },
     },
-    'disable-ssl': {
-      example: 'deepify disable-ssl path/to/web_app',
-      description: 'Disable activated SSL on a deployed web app',
-      opts: {
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: false,
+    'compile': {
+      description: 'Compile code for local or cloud execution',
+      commandsPath: './commands/compile',
+      section: 'Develop on your local environment',
+      commands: {
+        'frontend': {
+          example: 'deepify compile frontend path/to/web_app',
+          description: 'Build frontend of a web app',
+          opts: {
+            'output-path': {
+              alias: 'o',
+              description: 'Path to output built frontend of the web app (default _www)',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the web app',
+              required: false,
+            },
+          },
+        },
+        'es6': {
+          example: 'deepify compile es6 path/to/lambda',
+          description: 'Compile ES6 scripts to ES5 using babel (matched by *.es6)',
+          opts: {
+            'extension': {
+              alias: 'x',
+              description: 'Extensions to compile',
+              required: false,
+            },
+            'out-dir': {
+              alias: 'd',
+              description: 'Compile an input directory of modules into an output directory',
+              required: false,
+            },
+            'es5': {
+              description: 'Compile using es5 preset, instead of the node4 compatible',
+              required: false,
+            },
+            'source': {
+              description: 'Compile from source instead of directory',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the lambda root',
+              required: false,
+            },
+          },
+        },
+        'prod': {
+          example: 'deepify compile prod path/to/web_app',
+          description: 'Compile lambdas for production',
+          opts: {
+            'remove-source': {
+              alias: 's',
+              description: 'Remove original Lambda source',
+              required: false,
+            },
+            partial: {
+              alias: 'm',
+              description: 'Partial deploy (one or several comma separated microservices identifiers)',
+              required: false,
+            },
+            'aws-sdk': {
+              alias: 'a',
+              description: 'Force latest aws-sdk in Lambda',
+              required: false,
+            },
+            'linear': {
+              description: 'Compile lambdas linerar',
+              required: false,
+            },
+            'skip-cache': {
+              description: 'Skip loading lambda dependencies from cache',
+              required: false,
+            },
+            'invalidate-cache': {
+              description: 'Invalidate deep dependencies cache',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the web app',
+              required: false,
+            },
+          },
+        },
+        'dev': {
+          example: 'deepify init-backend path/to/web_app',
+          description: 'Initialize backend',
+          opts: {
+            partial: {
+              alias: 'm',
+              description: 'Partial init (one or several comma separated microservices identifiers)',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the web app',
+              required: false,
+            },
+          }
         },
       },
     },
     'build-frontend': {
       example: 'deepify build-frontend path/to/web_app',
       description: 'Build frontend of a web app',
+      actionPath: './commands/compile/frontend',
+      section: 'Deprecated',
       opts: {
         'output-path': {
           alias: 'o',
@@ -270,6 +365,8 @@ module.exports = {
     'compile-es6': {
       example: 'deepify compile-es6 path/to/lambda',
       description: 'Compile ES6 scripts to ES5 using babel (matched by *.es6)',
+      actionPath: './commands/compile/es6',
+      section: 'Deprecated',
       opts: {
         'extension': {
           alias: 'x',
@@ -300,6 +397,8 @@ module.exports = {
     'compile-prod': {
       example: 'deepify compile-prod path/to/web_app',
       description: 'Compile lambdas for production',
+      actionPath: './commands/compile/prod',
+      section: 'Deprecated',
       opts: {
         'remove-source': {
           alias: 's',
@@ -336,21 +435,11 @@ module.exports = {
         },
       },
     },
-    'create-migration': {
-      example: 'deepify create-migration path/to/microservice',
-      description: 'Create empty migration for a certain microservice',
-      opts: {
-      },
-      args: {
-        path: {
-          description: 'The path to the microservice',
-          required: false,
-        },
-      },
-    },
     'init-backend': {
       example: 'deepify init-backend path/to/web_app',
       description: 'Initialize backend',
+      actionPath: './commands/compile/dev',
+      section: 'Deprecated',
       opts: {
         partial: {
           alias: 'm',
@@ -365,9 +454,10 @@ module.exports = {
         },
       },
     },
-    'run-lambda': {
-      example: 'deepify run-lambda path/to/the/lambda -e=\'{"Name":"John Doe"}\'',
-      description: 'Run Lambda function locally',
+    'lambda': {
+      example: 'deepify lambda path/to/the/lambda -e=\'{"Name":"John Doe"}\'',
+      description: 'Run AWS Lambda function(s) locally',
+      section: 'Develop on your local environment',
       opts: {
         event: {
           alias: 'e',
@@ -407,75 +497,10 @@ module.exports = {
         },
       },
     },
-    'generate:microapp': {
-      example: 'deepify generate:microapp /target/path/',
-      description: 'Helps to generate microapp skeleton',
-      opts: {
-        name: {
-          alias: 'n',
-          description: 'Microapp name to use',
-          required: false,
-        },
-        engine: {
-          alias: 'e',
-          description: 'Frontend engine to use',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path where to generate the microapp',
-          required: false,
-        },
-      },
-    },
-    'generate:model': {
-      example: 'deepify generate:model /path/to/microapp',
-      description: 'Helps to generate a model',
-      opts: {
-        name: {
-          alias: 'n',
-          description: 'Default model name to use',
-          required: false,
-        },
-        microapp: {
-          alias: 'm',
-          description: 'Microapplication identifier to use',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the application',
-          required: false,
-        },
-      },
-    },
-    'generate:action': {
-      example: 'deepify generate:action /path/to/microapp',
-      description: 'Helps to generate a action',
-      opts: {
-        microapp: {
-          alias: 'm',
-          description: 'Microapplication identifier to use',
-          required: false,
-        },
-        resource: {
-          alias: 'r',
-          description: 'Resource name to use',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the application',
-          required: false,
-        },
-      },
-    },
     'list': {
       example: 'deepify list /path/to/microapp',
-      description: 'List resources created by DEEP',
+      description: 'List cloud resources provisioned for your web app(s)',
+      section: 'Run in the cloud',
       opts: {
         resource: {
           alias: 'r',
@@ -500,5 +525,131 @@ module.exports = {
         },
       },
     },
+    'generate': {
+      commandsPath: './commands/generate',
+      description: 'Generate microapplication component(s)',
+      section: 'Develop on your local environment',
+      commands: {
+        'microapp': {
+          example: 'deepify generate microapp /target/path/',
+          description: 'Helps to generate microapp skeleton',
+          opts: {
+            name: {
+              alias: 'n',
+              description: 'Microapp name to use',
+              required: false,
+            },
+            engine: {
+              alias: 'e',
+              description: 'Frontend engine to use',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path where to generate the microapp',
+              required: false,
+            },
+          },
+        },
+        'model': {
+          example: 'deepify generate model /path/to/microapp',
+          description: 'Helps to generate a model',
+          opts: {
+            name: {
+              alias: 'n',
+              description: 'Default model name to use',
+              required: false,
+            },
+            microapp: {
+              alias: 'm',
+              description: 'Microapplication identifier to use',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the application',
+              required: false,
+            },
+          },
+        },
+        'action': {
+          example: 'deepify generate action /path/to/microapp',
+          description: 'Helps to generate a action',
+          opts: {
+            microapp: {
+              alias: 'm',
+              description: 'Microapplication identifier to use',
+              required: false,
+            },
+            resource: {
+              alias: 'r',
+              description: 'Resource name to use',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the application',
+              required: false,
+            },
+          },
+        },
+        'migration': {
+          example: 'deepify generate migration path/to/app',
+          description: 'Create empty migration for a certain microservice',
+          opts: {
+            microapp: {
+              alias: 'm',
+              description: 'Microapplication identifier to use',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the microservice',
+              required: false,
+            },
+          },
+        },
+      },
+    },
+    'ssl': {
+      commandsPath: './commands/ssl',
+      description: 'Enable or disable SSL certificate(s) on your custom web app(s)',
+      section: 'Run in the cloud',
+      commands: {
+        'enable': {
+          example: 'deepify enable-ssl path/to/web_app',
+          description: 'Enables SSL on a deployed web app',
+          opts: {
+            domain: {
+              alias: 'd',
+              description: 'The domain to create the certificate for (overrides the "deeploy.json" value)',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path to the web app',
+              required: false,
+            },
+          },
+        },
+        'disable': {
+          example: 'deepify disable-ssl path/to/web_app',
+          description: 'Disable activated SSL on a deployed web app',
+          opts: {
+          },
+          args: {
+            path: {
+              description: 'The path to the web app',
+              required: false,
+            },
+          },
+        },
+      },
+    }
   },
 };

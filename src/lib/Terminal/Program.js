@@ -22,12 +22,14 @@ export class Program {
    * @param {String} version
    * @param {String} description
    * @param {String} example
+   * @param {String} section
    */
-  constructor(name = null, version = null, description = null, example = null) {
+  constructor(name = null, version = null, description = null, example = null, section = null) {
     this._name = name.toLowerCase();
     this._version = version;
     this._example = example;
     this._description = description;
+    this._section = section;
 
     this._commands = [];
     this._inputParsed = false;
@@ -60,8 +62,9 @@ export class Program {
    * @returns {Program}
    */
   inherit(program) {
+    // @todo: merge args as well?
+    // this._args.merge(program.args);
     this._opts.merge(program.opts);
-    this._args.merge(program.args);
 
     if (!this.hasCommands) {
       this._args.remove('command');
@@ -173,17 +176,6 @@ export class Program {
     let help = this._opts.locate('help');
     let command = this._args.locate('command');
 
-    // @todo: add it for commands as well
-    if (showAutoCompletion && showAutoCompletion.exists) {
-      Program._logDriver.overrideJsConsole(false, false);
-
-      this.help.printAutoCompletion(
-        (this.hasCommands && command) ? command.value : ''
-      );
-
-      this.exit(0);
-    }
-
     if (this.hasCommands && command && command.exists) {
       let subProgram = this.getCommand(command.value);
 
@@ -198,6 +190,16 @@ export class Program {
       subProgram.inherit(this).run();
 
       return;
+    }
+
+    if (showAutoCompletion && showAutoCompletion.exists) {
+      Program._logDriver.overrideJsConsole(false, false);
+
+      this.help.printAutoCompletion(
+        (this.hasCommands && command) ? command.value : ''
+      );
+
+      this.exit(0);
     }
 
     if (help.exists) {
@@ -286,11 +288,12 @@ export class Program {
    * @param {Function} action
    * @param {String} description
    * @param {String} example
+   * @param {String} section
    * @param {String} version
    * @returns {Program}
    */
-  command(name, action, description = null, example = null, version = null) {
-    let subProgram = new Program(name, version, description, example);
+  command(name, action, description = null, example = null, section = null, version = null) {
+    let subProgram = new Program(name, version, description, example, section);
     subProgram.action = action;
 
     this._commands.push(subProgram);
@@ -433,6 +436,20 @@ export class Program {
    */
   set description(value) {
     this._description = value;
+  }
+
+  /**
+   * @returns {String}
+   */
+  get section() {
+    return this._section;
+  }
+
+  /**
+   * @param {String} section
+   */
+  set section(section) {
+    this._section = section;
   }
 
   /**

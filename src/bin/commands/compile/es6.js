@@ -7,7 +7,7 @@
 
 module.exports = function(mainPath) {
   let path = require('path');
-  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  let Exec = require('../../../lib.compiled/Helpers/Exec').Exec;
 
   mainPath = this.normalizeInputPath(mainPath);
   let extension = this.opts.locate('extension').value || '.es6';
@@ -37,10 +37,10 @@ module.exports = function(mainPath) {
   };
 
   let babelCompileCommand = () => {
-    let presets = [path.join(__dirname, `../../node_modules/babel-preset-es2015${ compileEs5 ? '' : '-node4' }`)];
+    let presets = [path.join(__dirname, `../../../node_modules/babel-preset-es2015${ compileEs5 ? '' : '-node4' }`)];
     let plugins = [
-      path.join(__dirname, '../../node_modules/babel-plugin-transform-es2015-classes'),
-      path.join(__dirname, '../../node_modules/babel-plugin-add-module-exports'),
+      path.join(__dirname, '../../../node_modules/babel-plugin-transform-es2015-classes'),
+      path.join(__dirname, '../../../node_modules/babel-plugin-add-module-exports'),
     ];
 
     let cmd = new Exec('babel', mainPath)
