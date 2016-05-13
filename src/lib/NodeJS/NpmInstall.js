@@ -196,7 +196,7 @@ export class NpmInstall {
     let calculatedChunkSize = Math.min(
       Math.ceil(OS.freemem() * 2 / Math.pow(1024, 3)),
       OS.cpus().length,
-      8
+      16
     );
 
     return (calculatedChunkSize < 2) ? 2 : calculatedChunkSize;
