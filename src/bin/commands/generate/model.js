@@ -45,7 +45,7 @@ module.exports = function(mainPath) {
       questionList.push({
         type: 'input',
         name: 'name',
-        message: 'Enter the model name (e.g. User): ',
+        message: 'Enter the model name (e.g. user): ',
         validate: alphanumericalNotEmpty,
         default: name
       });
@@ -114,10 +114,10 @@ module.exports = function(mainPath) {
       Bin.node,
       this.scriptPath,
       'generate',
-      'model',
+      'action',
       mainPath,
       `-m=${modelSchema.microservice.identifier}`,
-      `-n=${modelSchema.name}`
+      `-r=${modelSchema.name}`
     );
 
     cmd.run((result) => {
