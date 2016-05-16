@@ -54,8 +54,6 @@ export class Options {
       }
     });
 
-    this._vector = this._vector.concat(sibling.list());
-
     return this;
   }
 
