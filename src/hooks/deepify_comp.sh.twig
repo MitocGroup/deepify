@@ -32,7 +32,7 @@ __deepify_comp() {
         fi
 
         if [ ${{ '{#' }}COMPREPLY[@]} -eq 0 ]; then
-          COMPREPLY=($(compgen -f '${CUR_WORD}'))
+          COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
         return 0;

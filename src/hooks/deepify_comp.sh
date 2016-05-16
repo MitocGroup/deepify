@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Created on 05/16/2016 11:51:04 AM
+# Created on 05/12/2016 05:53:46 PM
 __deepify_comp() {
     local CUR_WORD
 
@@ -26,7 +26,7 @@ __deepify_comp() {
         fi
 
         if [ ${#COMPREPLY[@]} -eq 0 ]; then
-          COMPREPLY=($(compgen -f '${CUR_WORD}'))
+          COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
         return 0;
@@ -50,7 +50,7 @@ __deepify_comp() {
         fi
 
         if [ ${#COMPREPLY[@]} -eq 0 ]; then
-          COMPREPLY=($(compgen -f '${CUR_WORD}'))
+          COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
         return 0;
@@ -74,7 +74,7 @@ __deepify_comp() {
         fi
 
         if [ ${#COMPREPLY[@]} -eq 0 ]; then
-          COMPREPLY=($(compgen -f '${CUR_WORD}'))
+          COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
         return 0;
@@ -98,7 +98,7 @@ __deepify_comp() {
         fi
 
         if [ ${#COMPREPLY[@]} -eq 0 ]; then
-          COMPREPLY=($(compgen -f '${CUR_WORD}'))
+          COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
         return 0;
@@ -121,7 +121,7 @@ __deepify_comp() {
         fi
 
         if [ ${#COMPREPLY[@]} -eq 0 ]; then
-          COMPREPLY=($(compgen -f '${CUR_WORD}'))
+          COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
         return 0;
