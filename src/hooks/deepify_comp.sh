@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Created on 05/13/2016 03:09:47 PM
+# Created on 05/16/2016 12:17:19 PM
 __deepify_comp() {
     local CUR_WORD
 
@@ -25,7 +25,7 @@ __deepify_comp() {
           done;
         fi
 
-        if [ ${#COMPREPLY[@]} -eq 0 ]; then
+        if [ ${#COMPREPLY[@]} -eq 0 ] && [[ "${CUR_WORD}" != '-'* ]]; then
           COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
@@ -49,7 +49,7 @@ __deepify_comp() {
           done;
         fi
 
-        if [ ${#COMPREPLY[@]} -eq 0 ]; then
+        if [ ${#COMPREPLY[@]} -eq 0 ] && [[ "${CUR_WORD}" != '-'* ]]; then
           COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
@@ -73,7 +73,7 @@ __deepify_comp() {
           done;
         fi
 
-        if [ ${#COMPREPLY[@]} -eq 0 ]; then
+        if [ ${#COMPREPLY[@]} -eq 0 ] && [[ "${CUR_WORD}" != '-'* ]]; then
           COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
@@ -97,7 +97,7 @@ __deepify_comp() {
           done;
         fi
 
-        if [ ${#COMPREPLY[@]} -eq 0 ]; then
+        if [ ${#COMPREPLY[@]} -eq 0 ] && [[ "${CUR_WORD}" != '-'* ]]; then
           COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
@@ -120,7 +120,7 @@ __deepify_comp() {
           done;
         fi
 
-        if [ ${#COMPREPLY[@]} -eq 0 ]; then
+        if [ ${#COMPREPLY[@]} -eq 0 ] && [[ "${CUR_WORD}" != '-'* ]]; then
           COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 

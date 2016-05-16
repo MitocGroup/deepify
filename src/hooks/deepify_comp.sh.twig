@@ -31,7 +31,7 @@ __deepify_comp() {
           done;
         fi
 
-        if [ ${{ '{#' }}COMPREPLY[@]} -eq 0 ]; then
+        if [ ${{ '{#' }}COMPREPLY[@]} -eq 0 ] && [[ "${CUR_WORD}" != '-'* ]]; then
           COMPREPLY=($(compgen -f ${CUR_WORD}))
         fi
 
