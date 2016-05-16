@@ -14,58 +14,38 @@ module.exports = function(mainPath) {
   let outDirectory = this.opts.locate('out-dir').value || mainPath;
   let compileEs5 = this.opts.locate('es5').exists;
   let pipeSource = this.opts.locate('source').exists;
-
-  let assureBabel6 = (callback) => {
-    let cmd = new Exec('babel -V');
-    cmd.runSync();
-
-    if (cmd.failed) {
-      let installBabelCmd = new Exec('npm install -g babel-cli@6');
-      installBabelCmd.run(callback, true);
-      return;
-    }
-
-    let babelVersion = cmd.result;
-
-    if (!/^6\.\d/.test(babelVersion)) {
-      console.warn(`Seems like your babel ${babelVersion} is not compatible with deepify.`);
-      console.warn(`We'd recommend you using babel@6.*.* (npm install babel-cli@6.*.* -g')...`);
-      this.exit(1);
-    }
-
-    callback();
-  };
+  let nodeModules = path.join(__dirname, '../../../node_modules');
 
   let babelCompileCommand = () => {
-    let presets = [path.join(__dirname, `../../../node_modules/babel-preset-es2015${ compileEs5 ? '' : '-node4' }`)];
+    let babelCmd = path.join(nodeModules, 'babel-cli/bin/babel.js');
+    let presets = [path.join(nodeModules, `babel-preset-es2015${ compileEs5 ? '' : '-node4' }`)];
     let plugins = [
-      path.join(__dirname, '../../../node_modules/babel-plugin-transform-es2015-classes'),
-      path.join(__dirname, '../../../node_modules/babel-plugin-add-module-exports'),
+      path.join(nodeModules, 'babel-plugin-transform-es2015-classes'),
+      path.join(nodeModules, 'babel-plugin-add-module-exports'),
     ];
 
-    let cmd = new Exec('babel', mainPath)
+    let compileCmd = new Exec(
+      this.nodeBinary,
+      babelCmd,
+      mainPath
+    );
+
+    compileCmd
       .addArg(`--extensions=${extension}`)
       .addArg(`--presets=${presets.join(',')}`)
       .addArg(`--plugins=${plugins.join(',')}`);
 
     if (!pipeSource) {
-      cmd.addArg(`--out-dir=${outDirectory}`);
+      compileCmd.addArg(`--out-dir=${outDirectory}`);
     }
 
-    return cmd;
+    return compileCmd;
   };
 
-  assureBabel6(() => {
-    if (!pipeSource) {
-      console.log(`Start compiling *${extension}`);
+  babelCompileCommand().run((result) => {
+    if (result.failed) {
+      console.error(result.error);
+      this.exit(1);
     }
-
-    let babelCompile = babelCompileCommand();
-    babelCompile.run((result) => {
-      if (result.failed) {
-        console.error(result.error);
-        this.exit(1);
-      }
-    }, true);
-  });
+  }, true);
 };
