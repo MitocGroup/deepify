@@ -71,6 +71,7 @@ export class ES {
     launcher
       .setSetting('http.cors.enabled', 'true')
       .setSetting('http.cors.allow-origin', '*')
+      .setSetting('http.cors.allow-headers', 'X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization')
       .autoRelease()
       .launch();
 
