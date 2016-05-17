@@ -19,10 +19,13 @@ import DeepDB from 'deep-db';
 import DeepFS from 'deep-fs';
 import {Hook} from './Hook';
 import {ResponseEvent} from '../Helpers/ResponseEvent';
+import {AsyncConfig} from '../Helpers/AsyncConfig';
 import {RequestListener} from './Listener/RequestListener';
 import {ConfigListener} from './Listener/ConfigListener';
+import {AsyncConfigListener} from './Listener/AsyncConfigListener';
 import {FileListener} from './Listener/FileListener';
 import {LambdaListener} from './Listener/LambdaListener';
+import {ES} from '../Elasticsearch/ES';
 
 export class Instance {
   /**
@@ -39,6 +42,8 @@ export class Instance {
     this._property = property;
     this._server = null;
     this._fs = null;
+    this._es = null;
+    this._asyncConfig = new AsyncConfig(this);
 
     this._host = null;
 
@@ -62,8 +67,9 @@ export class Instance {
     this._listener = new RequestListener(this);
     this._listener
       .register(new ConfigListener(), 0)
-      .register(new LambdaListener(), 1)
-      .register(new FileListener(), 2);
+      .register(new AsyncConfigListener(this), 0)
+      .register(new LambdaListener(), 2)
+      .register(new FileListener(), 3);
   }
 
   /**
@@ -71,6 +77,20 @@ export class Instance {
    */
   get fs() {
     return this._fs;
+  }
+
+  /**
+   * @returns {ES}
+   */
+  get es() {
+    return this._es;
+  }
+
+  /**
+   * @returns {AsyncConfig}
+   */
+  get asyncConfig() {
+    return this._asyncConfig;
   }
 
   /**
@@ -340,12 +360,16 @@ export class Instance {
     hook.runBefore(() => {
       this._log('Booting local FS');
 
+      this._es = new ES(this._property);
+      this._es.launchInstances();
+
       this._fs = new DeepFS();
       this._fs.localBackend = true;
 
       this._fs.boot(this._kernelMock, () => {
         this._log(`Linking custom validation schemas`);
 
+        this._asyncConfig.dumpIntoFs(this._fs.shared());
         Frontend.dumpValidationSchemas(this._property.config, this._fs.public._rootFolder, true);
 
         this._log(`Creating server on port ${port}`);

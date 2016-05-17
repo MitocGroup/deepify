@@ -14,7 +14,7 @@ export class RequestListener {
   }
 
   /**
-   * @param {ConfigListener|FileListener|LambdaListener} listener
+   * @param {AbstractListener} listener
    * @param {Number} priority
    * @returns {RequestListener}
    */
