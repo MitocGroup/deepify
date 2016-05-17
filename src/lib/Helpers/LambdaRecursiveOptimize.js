@@ -23,8 +23,18 @@ export class LambdaRecursiveOptimize {
     this._singleInstanceOnly = singleInstanceOnly;
 
     this._spinnerObj = null;
+    this._filters = [];
 
     LambdaRecursiveOptimize._inUse = LambdaRecursiveOptimize._inUse || false;
+  }
+
+  /**
+   * @param {Function} filter
+   * @returns {LambdaRecursiveOptimize}
+   */
+  addFilter(filter) {
+    this._filters.push(filter);
+    return this;
   }
 
   /**
@@ -250,7 +260,10 @@ export class LambdaRecursiveOptimize {
       .filter((val, i, arr) => arr.indexOf(val) === i)
 
       // skip deep-* files (brakes the functionality for some reason)
-      .filter((val) => !/\/deep_modules\/deep-[a-z]+/i.test(val));
+      .filter((val) => !/\/deep_modules\/deep-[a-z]+/i.test(val))
+    
+      // run user custom filters
+      .filter((val) => this._filters.reduce((isValid, filter) => isValid && filter(val), true));
   }
 
   /**

@@ -18,7 +18,7 @@ args.shift();
 
 let rawRuntime = JSON.parse(args[0]);
 
-let runtime = Runtime.createLambda(rawRuntime._lambdaPath, rawRuntime._awsConfigFile);
+let runtime = Runtime.createLambda(rawRuntime._lambdaPath, rawRuntime._dynamicContext);
 runtime.name = rawRuntime._name;
 
 /**

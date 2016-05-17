@@ -15,7 +15,6 @@ module.exports = function(mainPath) {
   var Config = require('deep-package-manager').Property_Config;
 
   var domain = this.opts.locate('domain').value || null;
-
   mainPath = this.normalizeInputPath(mainPath);
 
   var propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
@@ -39,11 +38,11 @@ module.exports = function(mainPath) {
   domain = property.config.domain;
 
   if (!domain) {
-    console.error('Please add a domain to \'' + Config.DEFAULT_FILENAME + '\' config file in order to activate SSL!');
+    console.error(`Please add a domain to '${Config.DEFAULT_FILENAME}' config file in order to activate SSL!`);
     console.log('You may add \'--domain\' option to add it to the config automatically.');
   }
 
-  property.configObj.tryLoadConfig(function() {
+  property.configObj.tryLoadConfig(() => {
     if (!property.configObj.configExists) {
       console.error('You should have the application deployed');
       this.exit(1);
@@ -54,17 +53,17 @@ module.exports = function(mainPath) {
     var acmService = property.provisioning.services.find(ACMService);
     var cfService = property.provisioning.services.find(CloudFrontService);
 
-    console.log('Ensure ACM certificate available for domain \'' + domain + '\'');
+    console.log(`Ensure ACM certificate available for domain '${domain}'`);
 
-    acmService.ensureCertificate(domain, function (error, certArn) {
+    acmService.ensureCertificate(domain, (error, certArn) => {
       if (error) {
         console.error(error);
         this.exit(1);
       }
 
-      console.log('Ensure ACM certificate \'' + certArn + '\' for domain \'' + domain + '\' have been activated');
+      console.log(`Ensure ACM certificate '${certArn}' for domain '${domain}' have been activated`);
 
-      acmService.isCertificateIssued(certArn, function(error, isIssued) {
+      acmService.isCertificateIssued(certArn, (error, isIssued) => {
         if (error) {
           console.error(error);
           this.exit(1);
@@ -92,19 +91,17 @@ module.exports = function(mainPath) {
           },
         };
 
-        console.log('Activating ACM certificate \'' + certArn + '\' for domain \'' + domain + '\'');
+        console.log(`Activating ACM certificate '${certArn}' for domain '${domain}'`);
 
-        cfService.updateDistribution(configChanges, function(error) {
+        cfService.updateDistribution(configChanges, (error) => {
           if (error) {
             console.error(error);
             this.exit(1);
           }
 
-          console.log(
-            'The ACM certificate \'' + certArn + '\' have been successfully assigned to the CloudFront distribution'
-          );
-        }.bind(this));
-      }.bind(this));
-    }.bind(this));
-  }.bind(this));
+          console.log(`The ACM certificate ${certArn} have been successfully assigned to the CloudFront distribution`);
+        });
+      });
+    });
+  });
 };

@@ -222,37 +222,35 @@ export class Help {
   }
 
   /**
-   * @param {Boolean} sortByKeys
    * @returns {Help}
    * @private
    */
-  _printCommands(sortByKeys = false) {
+  _printCommands() {
     if (this._program.hasCommands) {
+      let TAB = '   ';
       let commands = this._program.commands;
+      let sectionMap = commands.reduce((sectionMap, cmd) => {
+        let section = cmd.section || '';
 
-      if (sortByKeys) {
-        commands.sort((a, b) => {
-          if (a.name > b.name) {
-            return 1;
-          }
-          if (a.name < b.name) {
-            return -1;
-          }
+        sectionMap[section] = sectionMap[section] || [];
+        sectionMap[section].push(cmd);
 
-          return 0;
-        });
-      }
+        return sectionMap;
+      }, {});
 
       console.log('Available commands: ');
 
-      for (let i in commands) {
-        if (!commands.hasOwnProperty(i)) {
+      for (let sectionName in sectionMap) {
+        if (!sectionMap.hasOwnProperty(sectionName)) {
           continue;
         }
 
-        let cmd = commands[i];
+        console.log(`${OS.EOL}${TAB}# ${sectionName || this._program.name}: `);
+        let sectionCommands = sectionMap[sectionName];
 
-        console.log(`   ${cmd.name}: ${Help._stringify(cmd.description)}`);
+        for (let cmd of sectionCommands) {
+          console.log(`${TAB.repeat(2)} ${cmd.name}: ${Help._stringify(cmd.description)}`);
+        }
       }
     }
 

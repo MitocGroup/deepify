@@ -5,6 +5,7 @@ import {Runtime as LambdaRuntime} from '../../Lambda/Runtime';
 import FileSystemExtra from 'fs-extra';
 import FileSystem from 'fs';
 import Path from 'path';
+import objectMerge from 'object-merge';
 
 export class LambdaListener extends AbstractListener {
   /**
@@ -36,13 +37,16 @@ export class LambdaListener extends AbstractListener {
 
         let lambda = data.lambda;
         let payload = data.payload;
+        let lambdaConfig = {
+          dynamicContext: data.context,
+        };
 
         this.server.logger(
           `Running Lambda ${lambda} with payload ${JSON.stringify(payload)}${isAsync ? ' in async mode' : ''}`
         );
 
         if (this.server.buildPath) {
-          let lambdaConfig = this.server.buildConfig.lambdas[lambda];
+          lambdaConfig = objectMerge(lambdaConfig, this.server.buildConfig.lambdas[lambda]);
 
           if (!lambdaConfig) {
             this.server.logger(`Missing Lambda ${lambda} built config`);
@@ -64,7 +68,7 @@ export class LambdaListener extends AbstractListener {
             }
           );
         } else {
-          let lambdaConfig = this.server.defaultLambdasConfig[lambda];
+          lambdaConfig = objectMerge(lambdaConfig, this.server.defaultLambdasConfig[lambda]);
 
           if (!lambdaConfig) {
             this.server.logger(`Missing Lambda ${lambda} config`);
@@ -123,7 +127,7 @@ export class LambdaListener extends AbstractListener {
   _runLambda(event, lambdaConfig, payload, asyncMode) {
     let lambda = LambdaRuntime.createLambda(
       lambdaConfig.path,
-      lambdaConfig.buildPath ? Path.join(lambdaConfig.buildPath, '.aws.json') : null
+      lambdaConfig.dynamicContext
     );
 
     lambda.name = `${lambdaConfig.name}-${this.server.localId}`;

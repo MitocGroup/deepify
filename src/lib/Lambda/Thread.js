@@ -16,6 +16,7 @@ export class Thread {
   constructor(runtime) {
     this._runtime = runtime;
     this._process = null;
+    this._timeoutIdx = null;
   }
 
   /**
@@ -57,7 +58,7 @@ export class Thread {
     };
 
     // Kills lambda if execution time exceeded
-    setTimeout(() => {
+    this._timeoutIdx = setTimeout(() => {
       if (contextSent) {
         return;
       }
@@ -84,6 +85,7 @@ export class Thread {
 
     this._process.on('exit', () => {
       if (!contextSent && !noPrematureFailCheck) {
+
         // hook to avoid msg sending delays...
         setTimeout(() => {
           if (!contextSent) {
@@ -110,14 +112,15 @@ export class Thread {
    * @private
    */
   _cleanup() {
-    if (this._process) {
-      try {
-        this._process.kill();
-      } catch (e) {
-        // do nothing
-      }
+    if (this._timeoutIdx) {
+      clearTimeout(this._timeoutIdx);
     }
 
+    if (this._process) {
+      this._process.kill();
+    }
+
+    this._timeoutIdx = null;
     this._process = null;
 
     return this;

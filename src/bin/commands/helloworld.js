@@ -6,14 +6,14 @@
 'use strict';
 
 module.exports = function(dumpPath) {
-  var path = require('path');
-  var fse = require('fs-extra');
-  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
-  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  let path = require('path');
+  let fse = require('fs-extra');
+  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
 
   dumpPath = this.normalizeInputPath(dumpPath);
 
-  var cmd = new Exec(
+  let cmd = new Exec(
     Bin.node,
     this.scriptPath,
     'install',
@@ -25,10 +25,10 @@ module.exports = function(dumpPath) {
 
   cmd.cwd = dumpPath;
 
-  cmd.run(function(result) {
+  cmd.run((result) => {
     if (result.failed) {
       console.error(result.error);
       this.exit(1);
     }
-  }.bind(this), true);
+  }, true);
 };

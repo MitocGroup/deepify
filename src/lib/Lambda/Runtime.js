@@ -5,13 +5,12 @@
 'use strict';
 
 import Path from 'path';
-import AWS from 'aws-sdk';
 import JsonFile from 'jsonfile';
-import RequireProxy from 'proxyquire';
 import {Thread} from './Thread';
 import {Timer} from './Timer';
 import {ForksManager} from './ForksManager';
 import {Property_Lambda as Lambda} from 'deep-package-manager';
+import objectMerge from 'object-merge';
 
 /**
  * Lambda runtime
@@ -20,8 +19,9 @@ export class Runtime {
   /**
    * @param {Object} lambda
    * @param {String} lambdaPath
+   * @param {Object} dynamicContext
    */
-  constructor(lambda, lambdaPath = null) {
+  constructor(lambda, lambdaPath = null, dynamicContext = {}) {
     this._lambda = lambda;
 
     this._succeed = this._logCallback('SUCCEED');
@@ -35,51 +35,21 @@ export class Runtime {
     this._silent = false;
     this._name = null;
     this._lambdaPath = lambdaPath;
-    this._awsConfigFile = null;
+    this._dynamicContext = dynamicContext;
   }
 
   /**
    * @param {String} sourceFile
-   * @param {String} awsConfigFile
+   * @param {Object} dynamicContext
    */
-  static createLambda(sourceFile, awsConfigFile = null) {
-    if (awsConfigFile) {
-      let awsConfig = JsonFile.readFileSync(awsConfigFile);
-
-      AWS.config.update(awsConfig);
-    } else {
-      global.__DEEP_DEV_SERVER = true; // @todo: do we need this here?
-    }
-
-    Object.defineProperty(AWS, '@global', {
-      value: true,
-      writable: false,
-    });
-
+  static createLambda(sourceFile, dynamicContext = {}) {
+    global.__DEEP_DEV_SERVER = true; // @todo: do we need this here?
     sourceFile = Path.normalize(sourceFile);
 
-    let lambda = RequireProxy(sourceFile, {
-      'aws-sdk': AWS,
-    });
-
-    let runtime = new Runtime(lambda, sourceFile);
-    runtime.awsConfigFile = awsConfigFile;
+    let lambda = require(sourceFile);
+    let runtime = new Runtime(lambda, sourceFile, dynamicContext);
 
     return runtime;
-  }
-
-  /**
-   * @param {String} path
-   */
-  set awsConfigFile(path) {
-    this._awsConfigFile = path;
-  }
-
-  /**
-   * @returns {String}
-   */
-  get awsConfigFile() {
-    return this._awsConfigFile;
   }
 
   /**
@@ -109,7 +79,7 @@ export class Runtime {
    * @returns {String}
    */
   _extractLambdaNameFromConfig() {
-    let configFile = this._awsConfigFile || Path.join(Path.dirname(this._lambdaPath), Lambda.CONFIG_FILE);
+    let configFile = Path.join(Path.dirname(this._lambdaPath), Lambda.CONFIG_FILE);
 
     try {
       return JsonFile.readFileSync(configFile).name;
@@ -180,7 +150,7 @@ export class Runtime {
     global[Runtime.SIBLING_EXEC_WRAPPER_NAME] = new function() {
       return {
         invoke: function (localPath, data, callback) {
-          let lambda = Runtime.createLambda(localPath, _this._awsConfigFile);
+          let lambda = Runtime.createLambda(localPath, data.context);
 
           lambda.name = data.lambda;
 
@@ -293,8 +263,7 @@ export class Runtime {
     let date = new Date();
     let logStreamDate = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 
-    return {
-
+    let context = {
       /** make the context Lambda alike */
       awsRequestId: '6bde10dc-a329-11e5-8f4d-55470b0a5783',
       invokeid: '6bde10dc-a329-11e5-8f4d-55470b0a5783',
@@ -323,6 +292,8 @@ export class Runtime {
         this._complete(error, null);
       }.bind(this),
     };
+
+    return objectMerge(context, this._dynamicContext);
   }
 
   /**

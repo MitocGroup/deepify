@@ -6,46 +6,45 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  var path = require('path');
-  var fs = require('fs');
-  var fse = require('fs-extra');
-  var os = require('os');
-  var Exec = require('../../lib.compiled/Helpers/Exec').Exec;
-  var Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
-  var Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
-  var Property = require('deep-package-manager').Property_Instance;
-  var SharedAwsConfig = require('deep-package-manager').Helpers_SharedAwsConfig;
-  var Config = require('deep-package-manager').Property_Config;
-  var S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
-  var ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
-  var DeployConfig = require('deep-package-manager').Property_DeployConfig;
+  let path = require('path');
+  let fs = require('fs');
+  let fse = require('fs-extra');
+  let os = require('os');
+  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  let Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
+  let Property = require('deep-package-manager').Property_Instance;
+  let SharedAwsConfig = require('deep-package-manager').Helpers_SharedAwsConfig;
+  let Config = require('deep-package-manager').Property_Config;
+  let S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
+  let ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
+  let DeployConfig = require('deep-package-manager').Property_DeployConfig;
 
-  var isProd = this.opts.locate('prod').exists;
-  var installSdk = this.opts.locate('aws-sdk').exists;
-  var localOnly = this.opts.locate('dry-run').exists;
-  var fastDeploy = this.opts.locate('fast').exists;
-  var dumpCodePath = this.opts.locate('dump-local').value;
-  var cfgBucket = this.opts.locate('cfg-bucket').value;
-  var appEnv = isProd ? 'prod' : this.opts.locate('env').value;
-  var microservicesToDeploy = this.opts.locate('partial').value;
+  let isProd = this.opts.locate('prod').exists;
+  let installSdk = this.opts.locate('aws-sdk').exists;
+  let localOnly = this.opts.locate('dry-run').exists;
+  let fastDeploy = this.opts.locate('fast').exists;
+  let dumpCodePath = this.opts.locate('dump-local').value;
+  let cfgBucket = this.opts.locate('cfg-bucket').value;
+  let appEnv = isProd ? 'prod' : this.opts.locate('env').value;
+  let microservicesToDeploy = this.opts.locate('partial').value;
+  let validateNodeVersion = require('./helper/validate-node-version');
 
+  validateNodeVersion.call(this);
   mainPath = this.normalizeInputPath(mainPath);
 
   if (dumpCodePath) {
     dumpCodePath = this.normalizeInputPath(dumpCodePath);
   }
 
-  var configFile = path.join(mainPath, Config.DEFAULT_FILENAME);
-  var configExists = fs.existsSync(configFile);
-  var config = null;
+  let configFile = path.join(mainPath, Config.DEFAULT_FILENAME);
+  let configExists = fs.existsSync(configFile);
+  let config = null;
 
   appEnv = appEnv ? appEnv.toLowerCase() : null;
 
   if (appEnv && DeployConfig.AVAILABLE_ENV.indexOf(appEnv) === -1) {
-    console.error(
-      'Invalid environment "' + appEnv + '". Available environments: ' +
-      DeployConfig.AVAILABLE_ENV.join(', ')
-    );
+    console.error(`Invalid environment ${appEnv}. Available environments: ${DeployConfig.AVAILABLE_ENV.join(', ')}`);
     this.exit(1);
   }
 
@@ -67,40 +66,40 @@ module.exports = function(mainPath) {
     }
   }
 
-  var propertyInstance;
-  var tmpPropertyPath = mainPath;
+  let propertyInstance;
+  let tmpPropertyPath = mainPath;
 
   if (localOnly) {
     console.log('Local mode on!');
   }
 
   if (fastDeploy) {
-    var prompt = new Prompt('Fast deploy may alter the web app state! Start anyway?');
+    let prompt = new Prompt('Fast deploy may alter the web app state! Start anyway?');
 
-    prompt.readConfirm(function(result) {
+    prompt.readConfirm((result) => {
       if (result) {
-        process.on('exit', function() {
+        process.on('exit', () => {
           new Exec('rm', '-rf', path.join(tmpPropertyPath, '_public'))
             .avoidBufferOverflow()
             .runSync();
 
-          removePackedLambdas.bind(this)();
+          removePackedLambdas();
         });
 
-        startDeploy.bind(this)();
+        startDeploy();
         return;
       }
 
       console.log('Cancelled by the user...');
-    }.bind(this));
+    });
   } else {
-    var tmpDir = os.tmpdir();
+    let tmpDir = os.tmpdir();
     tmpPropertyPath = path.join(tmpDir, path.basename(mainPath));
-    tmpPropertyPath += '_' + (new Date()).getTime();
+    tmpPropertyPath += `_${new Date().getTime()}`;
 
     fse.ensureDirSync(tmpPropertyPath);
 
-    console.log('Copying sources to ' + tmpPropertyPath);
+    console.log(`Copying sources to ${tmpPropertyPath}`);
 
     new Exec(
       'cp',
@@ -109,14 +108,14 @@ module.exports = function(mainPath) {
       tmpPropertyPath + '/'
     )
       .avoidBufferOverflow()
-      .run(function(result) {
+      .run((result) => {
         if (result.failed) {
-          console.error('Error copying sources into ' + tmpPropertyPath + ': ' + result.error);
+          console.error(`Error copying sources into ${tmpPropertyPath}: ${result.error}`);
           this.exit(1);
         }
 
-        process.on('exit', function() {
-          var result = new Exec('rm', '-rf', tmpPropertyPath)
+        process.on('exit', () => {
+          let result = new Exec('rm', '-rf', tmpPropertyPath)
             .avoidBufferOverflow()
             .runSync();
 
@@ -125,52 +124,52 @@ module.exports = function(mainPath) {
           }
         });
 
-        startDeploy.bind(this)();
-      }.bind(this));
+        startDeploy();
+      });
   }
 
-  function ensureAWSProdKeys(cb) {
-    (new SharedAwsConfig()).refillPropertyConfigIfNeeded(config, function(refilled) {
+  let ensureAWSProdKeys = (cb) => {
+    (new SharedAwsConfig()).refillPropertyConfigIfNeeded(config, (refilled) => {
       if (refilled) {
         fse.outputJsonSync(configFile, config);
       }
 
       cb();
     });
-  }
+  };
 
-  function startDeploy() {
-    ensureAWSProdKeys(function() {
+  let startDeploy = () => {
+    ensureAWSProdKeys(() => {
       propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
 
-      propertyInstance.assureFrontendEngine(function(error) {
+      propertyInstance.assureFrontendEngine((error) => {
         if (error) {
           console.error('Error while assuring frontend engine: ' + error);
         }
 
-        propertyInstance.runInitMsHooks(function() {
-          prepareProduction.bind(this)(propertyInstance.path, doDeploy.bind(this));
-        }.bind(this));
-      }.bind(this));
-    }.bind(this));
-  }
+        propertyInstance.runInitMsHooks(() => {
+          prepareProduction(propertyInstance.path, doDeploy);
+        });
+      });
+    });
+  };
 
-  function dumpConfig(propertyInstance, cb) {
-    propertyInstance.configObj.completeDump(function() {
+  let dumpConfig = (propertyInstance, cb) => {
+    propertyInstance.configObj.completeDump(() => {
       if (!fastDeploy) {
-        var configFile = propertyInstance.configObj.configFile;
+        let configFile = propertyInstance.configObj.configFile;
 
         fse.copySync(configFile, path.join(mainPath, path.basename(configFile)));
       }
 
-      cb.bind(this)();
-    }.bind(this));
-  }
+      cb();
+    });
+  };
 
-  function doCompileProd(propertyPath, cb) {
+  let doCompileProd = (propertyPath, cb) => {
     console.log('Start preparing for production');
 
-    var cmd = new Exec(
+    let cmd = new Exec(
       Bin.node,
       this.scriptPath,
       'compile-prod',
@@ -181,25 +180,25 @@ module.exports = function(mainPath) {
     microservicesToDeploy && cmd.addArg('--partial ' + microservicesToDeploy);
     installSdk && cmd.addArg('--aws-sdk');
 
-    cmd.run(function(result) {
+    cmd.run((result) => {
       if (result.failed) {
-        console.error('Backend production preparations failed: ' + result.error);
+        console.error(`Backend production preparations failed: ${result.error}`);
         this.exit(1);
       }
 
       cb();
-    }.bind(this), true);
-  }
+    }, true);
+  };
 
-  function prepareProduction(propertyPath, cb) {
+  let prepareProduction = (propertyPath, cb) => {
     if (isProd) {
-      doCompileProd.bind(this)(propertyPath, cb);
+      doCompileProd(propertyPath, cb);
     } else if (!localOnly) {
-      var prompt = new Prompt('Prepare for production?');
+      let prompt = new Prompt('Prepare for production?');
 
-      prompt.readConfirm(function(result) {
+      prompt.readConfirm((result) => {
         if (result) {
-          doCompileProd.bind(this)(propertyPath, cb);
+          doCompileProd(propertyPath, cb);
 
           return;
         }
@@ -207,26 +206,26 @@ module.exports = function(mainPath) {
         console.log('Skipping production preparation...');
 
         cb();
-      }.bind(this));
+      });
     } else {
       cb();
     }
-  }
+  };
 
-  function doDeploy() {
+  let doDeploy = () => {
     propertyInstance.localDeploy = localOnly;
 
     // @todo: improve it!
     // Gracefully teardown...
-    (function() {
-      process.on('uncaughtException', function(error) {
+    (() => {
+      process.on('uncaughtException', (error) => {
         if (error instanceof ProvisioningCollisionsDetectedException) {
           console.error(
             os.EOL,
             os.EOL,
             'Seems like there are some resources on AWS that may generate collisions while provisioning the web app!',
             os.EOL,
-            'Remove them by running "deepify undeploy ' + mainPath + ' --resource ' + error.collisionHash + '"',
+            `Remove them by running "deepify undeploy ${mainPath} --resource ${error.collisionHash}"`,
             os.EOL,
             os.EOL,
             error.stringifiedResourcesObj
@@ -238,79 +237,75 @@ module.exports = function(mainPath) {
         }
 
         if (propertyInstance.config.provisioning) {
-          dumpConfig.bind(this)(propertyInstance, function() {
+          dumpConfig(propertyInstance, () => {
             this.exit(1);
-          }.bind(this));
+          });
         } else {
           this.exit(1);
         }
-      }.bind(this));
+      });
 
-      process.on('SIGINT', function() {
+      process.on('SIGINT', () => {
         console.log('Gracefully shutting down from SIGINT (Ctrl-C)...');
 
         if (propertyInstance.config.provisioning) {
-          dumpConfig.bind(this)(propertyInstance, function() {
-            this.exit(0);
-          }.bind(this));
+          dumpConfig(propertyInstance, () => this.exit(0));
         } else {
           this.exit(0);
         }
-      }.bind(this));
-    }.bind(this))();
+      });
+    })();
 
-    propertyInstance.configObj.tryLoadConfig(function() {
+    propertyInstance.configObj.tryLoadConfig(() => {
       if (propertyInstance.configObj.configExists) {
-        propertyInstance.update(function() {
-          console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-          console.log('Website address: ' + getPublicWebsite(propertyInstance));
+        propertyInstance.update(() => {
+          console.log(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
+          console.log(`Website address: ${getPublicWebsite(propertyInstance)}`);
 
-          dumpConfig.bind(this)(propertyInstance, dumpCode);
-        }.bind(this), null, getMicroservicesToDeploy());
+          dumpConfig(propertyInstance, dumpCode);
+        }, null, getMicroservicesToDeploy());
       } else {
         if (microservicesToDeploy) {
           console.warn(' Partial deploy option is useless during first deploy...');
         }
 
-        propertyInstance.install(function() {
-          console.log('CloudFront (CDN) domain: ' + getCfDomain(propertyInstance));
-          console.log('Website address: ' + getPublicWebsite(propertyInstance));
+        propertyInstance.install(() => {
+          console.log(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
+          console.log(`Website address: ${getPublicWebsite(propertyInstance)}`);
 
-          dumpConfig.bind(this)(propertyInstance, dumpCode);
-        }.bind(this));
+          dumpConfig(propertyInstance, dumpCode);
+        });
       }
-    }.bind(this), cfgBucket);
-  }
+    }, cfgBucket);
+  };
 
-  function arrayUnique(a) {
-    return a.reduce(function(p, c) {
+  let arrayUnique = (a) => {
+    return a.reduce((p, c) => {
       if (p.indexOf(c) < 0) {
         p.push(c);
       }
 
       return p;
     }, []);
-  }
+  };
 
-  function getMicroservicesToDeploy() {
+  let  getMicroservicesToDeploy = () => {
     if (!microservicesToDeploy) {
       return [];
     }
 
-    var msIdentifiers = arrayUnique(microservicesToDeploy.split(',').map(function(id) {
-      return id.trim();
-    }));
+    let msIdentifiers = arrayUnique(microservicesToDeploy.split(',').map(id => id.trim()));
 
     return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
-  }
+  };
 
-  function dumpCode() {
+  let dumpCode = () => {
     if (!dumpCodePath) {
       return;
     }
 
-    var tmpFrontendPath = path.join(tmpPropertyPath, '_public');
-    var frontendDumpPath = path.join(dumpCodePath, '_www');
+    let tmpFrontendPath = path.join(tmpPropertyPath, '_public');
+    let frontendDumpPath = path.join(dumpCodePath, '_www');
 
     fse.ensureDirSync(frontendDumpPath);
 
@@ -321,35 +316,32 @@ module.exports = function(mainPath) {
       frontendDumpPath + '/'
     )
       .avoidBufferOverflow()
-      .run(function(result) {
+      .run((result) => {
         if (result.failed) {
-          console.error('Unable to dump _frontend code into _www: ' + result.error);
+          console.error(`Unable to dump _frontend code into _www: ${result.error}`);
         }
 
         dumpLambdas();
-      }.bind(this));
-  }
+      });
+  };
 
-  function removePackedLambdas() {
-    var lambdas = getLambdas(tmpPropertyPath);
+  let removePackedLambdas = () => {
+    let lambdas = getLambdas(tmpPropertyPath);
 
     if (lambdas.length <= 0) {
       return;
     }
 
-    var lambdasVector = [];
-    var stack = lambdas.length;
-
-    for (var i = 0; i < lambdas.length; i++) {
+    for (let i = 0; i < lambdas.length; i++) {
       try {
         fs.unlinkSync(lambdas[i]);
       } catch (e) {
       }
     }
-  }
+  };
 
-  function dumpLambdas() {
-    var lambdas = getLambdas(tmpPropertyPath);
+  let dumpLambdas = () => {
+    let lambdas = getLambdas(tmpPropertyPath);
 
     if (lambdas.length <= 0) {
       console.log('There are no Lambdas to be dumped!');
@@ -358,20 +350,20 @@ module.exports = function(mainPath) {
 
     fse.ensureDirSync(dumpCodePath);
 
-    var globalAwsConfigFile = path.join(dumpCodePath, '.aws.json');
+    let globalAwsConfigFile = path.join(dumpCodePath, '.aws.json');
 
     fs.outputJsonSync(globalAwsConfigFile, config.aws);
 
-    var lambdasVector = [];
-    var stack = lambdas.length;
+    let lambdasVector = [];
+    let stack = lambdas.length;
 
-    for (var i = 0; i < lambdas.length; i++) {
-      var lambdaPath = lambdas[i];
-      var newLambdaPath = path.join(
+    for (let i = 0; i < lambdas.length; i++) {
+      let lambdaPath = lambdas[i];
+      let newLambdaPath = path.join(
         dumpCodePath,
         path.basename(lambdaPath, '.zip').replace(/^lambda_/i, '')
       );
-      var awsConfigFile = path.join(newLambdaPath, '.aws.json');
+      let awsConfigFile = path.join(newLambdaPath, '.aws.json');
 
       lambdasVector.push(path.basename(newLambdaPath));
 
@@ -401,31 +393,31 @@ module.exports = function(mainPath) {
 
           stack--;
 
-          console.log('Remaining ' + stack + ' Lambdas to be unpacked...');
+          console.log(`Remaining ${stack} Lambdas to be unpacked...`);
         }.bind(this, awsConfigFile));
     }
 
-    function waitUntilDone() {
+    let waitUntilDone = () => {
       if (stack > 0) {
         setTimeout(waitUntilDone, 50);
       } else {
         fs.unlinkSync(globalAwsConfigFile);
 
-        console.log('[' + lambdasVector.join(', ') + ']');
+        console.log(`[${lambdasVector.join(', ')}]`);
         console.log('All Lambdas are now ready to run locally!');
       }
-    }
+    };
 
     waitUntilDone();
-  }
+  };
 
-  function getLambdas(dir, files_) {
+  let getLambdas = (dir, files_) => {
     files_ = files_ || [];
 
-    var files = fs.readdirSync(dir);
+    let files = fs.readdirSync(dir);
 
-    for (var i = 0; i < files.length; i++) {
-      var file = path.join(dir, files[i]);
+    for (let i = 0; i < files.length; i++) {
+      let file = path.join(dir, files[i]);
 
       if (/\.zip$/i.test(file)) {
         files_.push(file);
@@ -433,17 +425,11 @@ module.exports = function(mainPath) {
     }
 
     return files_;
-  }
+  };
 
-  function getCfDomain(propertyInstance) {
-    return 'http://' + propertyInstance.config.provisioning.cloudfront.domain;
-  }
+  let getCfDomain = (propertyInstance) => `http://${propertyInstance.config.provisioning.cloudfront.domain}`;
 
-  function getPublicWebsite(propertyInstance) {
-    var config = propertyInstance.config;
-    var bucketName = config.provisioning.s3.buckets[S3Service.PUBLIC_BUCKET].name;
-    var bucketRegion = propertyInstance.provisioning.s3.config.region;
-
-    return 'http://' + bucketName + '.s3-website-' + bucketRegion + '.amazonaws.com';
-  }
+  let getPublicWebsite = (propertyInstance) => {
+    return `http://${propertyInstance.config.provisioning.s3.buckets[S3Service.PUBLIC_BUCKET].website}`;
+  };
 };

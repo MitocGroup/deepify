@@ -7,6 +7,7 @@
 import {Bin} from './Bin';
 import {Exec} from '../Helpers/Exec';
 import {Helpers_WaitFor as WaitFor} from 'deep-package-manager';
+import OS from 'os';
 
 export class NpmInstall {
   /**
@@ -192,6 +193,13 @@ export class NpmInstall {
    * @returns {Number}
    */
   static get DEFAULT_CHUNK_SIZE() {
-    return 3;
+    let calculatedChunkSize = Math.min(
+      Math.ceil(OS.freemem() * 2 / Math.pow(1024, 3)),
+      OS.cpus().length,
+      16
+    );
+
+    return (calculatedChunkSize < 2) ? 2 : calculatedChunkSize;
+
   }
 }
