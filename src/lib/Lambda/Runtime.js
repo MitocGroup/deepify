@@ -5,9 +5,7 @@
 'use strict';
 
 import Path from 'path';
-import AWS from 'aws-sdk';
 import JsonFile from 'jsonfile';
-import RequireProxy from 'proxyquire';
 import {Thread} from './Thread';
 import {Timer} from './Timer';
 import {ForksManager} from './ForksManager';
@@ -37,53 +35,21 @@ export class Runtime {
     this._silent = false;
     this._name = null;
     this._lambdaPath = lambdaPath;
-    this._awsConfigFile = null;
     this._dynamicContext = dynamicContext;
   }
 
   /**
    * @param {String} sourceFile
-   * @param {String} awsConfigFile
    * @param {Object} dynamicContext
    */
-  static createLambda(sourceFile, awsConfigFile = null, dynamicContext = {}) {
-    if (awsConfigFile) {
-      let awsConfig = JsonFile.readFileSync(awsConfigFile);
-
-      AWS.config.update(awsConfig);
-    } else {
-      global.__DEEP_DEV_SERVER = true; // @todo: do we need this here?
-    }
-
-    Object.defineProperty(AWS, '@global', {
-      value: true,
-      writable: false,
-    });
-
+  static createLambda(sourceFile, dynamicContext = {}) {
+    global.__DEEP_DEV_SERVER = true; // @todo: do we need this here?
     sourceFile = Path.normalize(sourceFile);
 
-    let lambda = RequireProxy(sourceFile, {
-      'aws-sdk': AWS,
-    });
-
+    let lambda = require(sourceFile);
     let runtime = new Runtime(lambda, sourceFile, dynamicContext);
-    runtime.awsConfigFile = awsConfigFile;
 
     return runtime;
-  }
-
-  /**
-   * @param {String} path
-   */
-  set awsConfigFile(path) {
-    this._awsConfigFile = path;
-  }
-
-  /**
-   * @returns {String}
-   */
-  get awsConfigFile() {
-    return this._awsConfigFile;
   }
 
   /**
@@ -113,7 +79,7 @@ export class Runtime {
    * @returns {String}
    */
   _extractLambdaNameFromConfig() {
-    let configFile = this._awsConfigFile || Path.join(Path.dirname(this._lambdaPath), Lambda.CONFIG_FILE);
+    let configFile = Path.join(Path.dirname(this._lambdaPath), Lambda.CONFIG_FILE);
 
     try {
       return JsonFile.readFileSync(configFile).name;
@@ -184,7 +150,7 @@ export class Runtime {
     global[Runtime.SIBLING_EXEC_WRAPPER_NAME] = new function() {
       return {
         invoke: function (localPath, data, callback) {
-          let lambda = Runtime.createLambda(localPath, _this._awsConfigFile, data.context);
+          let lambda = Runtime.createLambda(localPath, data.context);
 
           lambda.name = data.lambda;
 

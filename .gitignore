@@ -108,3 +108,4 @@ npm-debug.log
 #####=== Proprietary ===#####
 lib.compiled
 /tests/*
+config.gypi
