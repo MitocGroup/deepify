@@ -67,7 +67,7 @@ export class Instance {
     this._listener = new RequestListener(this);
     this._listener
       .register(new ConfigListener(), 0)
-      .register(new AsyncConfigListener(this), 0)
+      .register(new AsyncConfigListener(this), 1)
       .register(new LambdaListener(), 2)
       .register(new FileListener(), 3);
   }
