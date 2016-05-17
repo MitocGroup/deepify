@@ -34,7 +34,7 @@ export class BinaryLauncher extends AbstractLauncher {
 
     let pidFile = this.pidFile;
 
-    this._lockHandler = FS.openSync(pidFile, 'w');
+    this._lockHandler = FS.openSync(pidFile, 'w+');
     FSExt.flockSync(this._lockHandler, 'exnb');
 
     let launchCmd = new Exec(
@@ -61,7 +61,8 @@ export class BinaryLauncher extends AbstractLauncher {
       throw new FailedToLauchElasticsearchException(this, launchCmd.error);
     }
 
-    this._pid = FS.writeSync(this._lockHandler).toString();
+    this._pid = FS.readFileSync(pidFile).toString();
+
     return this;
   }
 
