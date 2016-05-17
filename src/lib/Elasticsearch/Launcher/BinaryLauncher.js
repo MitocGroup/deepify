@@ -10,6 +10,7 @@ import {MissingElasticsearchBinaryException} from '../Exception/MissingElasticse
 import {FailedToLauchElasticsearchException} from '../Exception/FailedToLauchElasticsearchException';
 import path from 'path';
 import FS from 'fs';
+import FSExt from 'fs-ext';
 import process from 'process';
 
 export class BinaryLauncher extends AbstractLauncher {
@@ -21,6 +22,7 @@ export class BinaryLauncher extends AbstractLauncher {
 
     this._binaryPath = binaryPath;
     this._pid = null;
+    this._lockHandler = null;
   }
 
   /**
@@ -31,6 +33,10 @@ export class BinaryLauncher extends AbstractLauncher {
     this._assureBinary();
 
     let pidFile = this.pidFile;
+
+    this._lockHandler = FS.openSync(pidFile, 'w');
+    FSExt.flockSync(this._lockHandler, 'exnb');
+
     let launchCmd = new Exec(
       this._binaryPath,
       '--daemonize',
@@ -38,7 +44,7 @@ export class BinaryLauncher extends AbstractLauncher {
       `--network.host=${this.hostname}`,
       `--http.port=${this.port}`
     );
-    
+
     for (let setting in this.settings) {
       if (!this.settings.hasOwnProperty(setting)) {
         continue;
@@ -55,8 +61,7 @@ export class BinaryLauncher extends AbstractLauncher {
       throw new FailedToLauchElasticsearchException(this, launchCmd.error);
     }
 
-    this._pid = FS.readFileSync(pidFile).toString();
-
+    this._pid = FS.writeSync(this._lockHandler).toString();
     return this;
   }
 
@@ -66,7 +71,7 @@ export class BinaryLauncher extends AbstractLauncher {
    */
   _stop() {
     if (this._pid) {
-      FS.existsSync(this.pidFile) && FS.unlinkSync(this.pidFile);
+      this._unlock();
 
       return process.kill(this._pid, 'SIGTERM');
     }
@@ -81,6 +86,14 @@ export class BinaryLauncher extends AbstractLauncher {
     if (!(FS.existsSync(this._binaryPath) && FS.lstatSync(this._binaryPath).isFile())) {
       throw new MissingElasticsearchBinaryException(this._binaryPath);
     }
+  }
+
+  /**
+   * @returns {Boolean}
+   * @private
+   */
+  _unlock() {
+    return this._lockHandler && FSExt.flock(this._lockHandler, 'un');
   }
 
   /**

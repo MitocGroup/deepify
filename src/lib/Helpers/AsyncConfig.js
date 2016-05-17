@@ -8,10 +8,10 @@ import FSExtra from 'fs-extra';
 
 export class AsyncConfig {
   /**
-   * @param {Server_Instance} property
+   * @param {Server_Instance} server
    */
-  constructor(property) {
-    this._server = property;
+  constructor(server) {
+    this._server = server;
     this._config = null;
   }
 

@@ -67,6 +67,7 @@
     "deep-fs": "^1.x.x",
     "deep-log": "^1.x.x",
     "deep-package-manager": "^1.x.x",
+    "fs-ext": "^0.5.0",
     "fs-extra": "^0.23.x",
     "gather-dependencies": "^1.0.x",
     "inquirer": "^1.0.2",
