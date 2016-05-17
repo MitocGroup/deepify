@@ -32,7 +32,7 @@ module.exports = function(mainPath) {
       questionList.push({
         type: 'input',
         name: 'name',
-        message: 'Enter the microapp name (e.g. DeepTestMicroservice): ',
+        message: 'Enter the microapp name (e.g. deep-sample-microapp): ',
         validate: alphanumericalNotEmpty,
       });
     }

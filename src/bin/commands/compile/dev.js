@@ -12,11 +12,13 @@ module.exports = function(mainPath) {
   let fs = require('fs');
   let fse = require('fs-extra');
   let NpmInstall = require('../../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
+  let NpmUpdate = require('../../../lib.compiled/NodeJS/NpmUpdate').NpmUpdate;
   let NpmInstallLibs = require('../../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
   let NpmChain = require('../../../lib.compiled/NodeJS/NpmChain').NpmChain;
   let Bin = require('../../../lib.compiled/NodeJS/Bin').Bin;
   let LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
 
+  let doUpdate = this.opts.locate('update').exists;
   let microservicesToInit = this.opts.locate('partial').value;
 
   mainPath = this.normalizeInputPath(mainPath);
@@ -45,8 +47,11 @@ module.exports = function(mainPath) {
     let lambdaPaths = new LambdaExtractor(property, getMicroservicesToInit()).extract(LambdaExtractor.NPM_PACKAGE_FILTER);
 
     let chain = new NpmChain();
-    let installCmd = new NpmInstall(lambdaPaths)
-      .addExtraArg('--loglevel silent');
+    let NpmProcess = doUpdate ? NpmUpdate : NpmInstall;
+    let installCmd = new NpmProcess(lambdaPaths)
+      .addExtraArg(
+      '--loglevel silent'
+    );
 
     installCmd.addExtraArg('--prod');
 

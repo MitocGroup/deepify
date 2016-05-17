@@ -333,6 +333,11 @@ module.exports = {
               description: 'Partial init (one or several comma separated microservices identifiers)',
               required: false,
             },
+            update: {
+              alias: 'u',
+              description: 'Use \'npm update\' instead of \'npm install\' when compiling lambdas',
+              required: false,
+            },
           },
           args: {
             path: {
@@ -444,6 +449,11 @@ module.exports = {
         partial: {
           alias: 'm',
           description: 'Partial init (one or several comma separated microservices identifiers)',
+          required: false,
+        },
+        update: {
+          alias: 'u',
+          description: 'Use \'npm update\' instead of \'npm install\' when compiling lambdas',
           required: false,
         },
       },

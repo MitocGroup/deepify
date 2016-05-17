@@ -50,7 +50,7 @@ module.exports = function(mainPath) {
       questionList.push({
         type: 'input',
         name: 'resource',
-        message: 'Enter the resource name (e.g. User): ',
+        message: 'Enter the resource name (e.g. user): ',
         validate: alphanumericalNotEmpty,
       });
     }
@@ -99,7 +99,7 @@ module.exports = function(mainPath) {
     inquirer.prompt([{
       type: 'input',
       name: 'action',
-      message: 'Enter the action name (e.g. Create): ',
+      message: 'Enter the action name (e.g. create): ',
       validate: alphanumericalNotEmpty,
     }, {
       type: 'checkbox',
