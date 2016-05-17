@@ -27,7 +27,7 @@ export class BinaryLauncher extends AbstractLauncher {
    * @returns {BinaryLauncher}
    * @private
    */
-  _launch(cb = () => {}) {
+  _launch() {
     this._assureBinary();
 
     let pidFile = this.pidFile;
@@ -49,15 +49,13 @@ export class BinaryLauncher extends AbstractLauncher {
       launchCmd.addArg(`--${setting}=${settingVal}`);
     }
 
-    launchCmd.run(() => {
-      if (launchCmd.failed) {
-        throw new FailedToLauchElasticsearchException(this, launchCmd.error);
-      }
+    launchCmd.runSync();
 
-      this._pid = FS.readFileSync(pidFile).toString();
+    if (launchCmd.failed) {
+      throw new FailedToLauchElasticsearchException(this, launchCmd.error);
+    }
 
-      cb();
-    });
+    this._pid = FS.readFileSync(pidFile).toString();
 
     return this;
   }

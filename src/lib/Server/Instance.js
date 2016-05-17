@@ -334,9 +334,11 @@ export class Instance {
           }
         },
       },
-      microservice: () => {
+      microservice: (identifier) => {
+        identifier = identifier || this._property.rootMicroservice.identifier;
+
         return {
-          identifier: '',
+          identifier: this._property.microservice(identifier).identifier,
         };
       },
     };
@@ -367,9 +369,10 @@ export class Instance {
       this._fs.localBackend = true;
 
       this._fs.boot(this._kernelMock, () => {
+        this._fs.kernel = this._kernelMock;
         this._log(`Linking custom validation schemas`);
 
-        this._asyncConfig.dumpIntoFs(this._fs.shared());
+        this._asyncConfig.dumpIntoFs(this._fs.shared(this._property.rootMicroservice));
         Frontend.dumpValidationSchemas(this._property.config, this._fs.public._rootFolder, true);
 
         this._log(`Creating server on port ${port}`);
