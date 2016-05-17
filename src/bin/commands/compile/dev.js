@@ -14,7 +14,6 @@ module.exports = function(mainPath) {
   let NpmInstall = require('../../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   let NpmUpdate = require('../../../lib.compiled/NodeJS/NpmUpdate').NpmUpdate;
   let NpmInstallLibs = require('../../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
-  let NpmLink = require('../../../lib.compiled/NodeJS/NpmLink').NpmLink;
   let NpmChain = require('../../../lib.compiled/NodeJS/NpmChain').NpmChain;
   let Bin = require('../../../lib.compiled/NodeJS/Bin').Bin;
   let LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
@@ -38,26 +37,9 @@ module.exports = function(mainPath) {
     }
 
     property.runInitMsHooks(() => {
-      if (!Bin.npmModuleInstalled('aws-sdk', true)) {
-        let awsSdkGlobalCmd = new NpmInstallLibs();
-        awsSdkGlobalCmd.libs = 'aws-sdk';
-        awsSdkGlobalCmd.global = true;
-
-        awsSdkGlobalCmd.run((result) => {
-          if (result.failed) {
-            console.error('Failed to install aws-sdk globally: ' + result.error);
-            this.exit(1);
-          }
-
-          initProperty(property, () => {
-            console.log('The backend had been successfully initialized.');
-          });
-        });
-      } else {
-        initProperty(property, () => {
-          console.log('The backend had been successfully initialized.');
-        });
-      }
+      initProperty(property, () => {
+        console.log('The backend had been successfully initialized.');
+      });
     });
   });
 
@@ -75,8 +57,11 @@ module.exports = function(mainPath) {
 
     chain.add(installCmd);
 
-    let linkCmd = new NpmLink(lambdaPaths);
-    linkCmd.libs = 'aws-sdk';
+    let linkCmd = new NpmInstallLibs(lambdaPaths);
+
+    // dtrace-provider: Fixes bonyan issue...
+    // aws-sdk: use globally
+    linkCmd.libs = 'aws-sdk dtrace-provider';
 
     chain.add(linkCmd);
 

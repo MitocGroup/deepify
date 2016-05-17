@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "1.7.57",
+  "version": "1.7.58",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -75,11 +75,11 @@
     "mime": "^1.3.x",
     "object-merge": "^2.5.x",
     "open": "^0.0.x",
-    "proxyquire": "^1.5.x",
     "semver": "^5.1.x",
     "tmp": "^0.0.x",
     "twig": "^0.8.9",
-    "uglify-js": "^2.6.x"
+    "uglify-js": "^2.6.x",
+    "dtrace-provider": "^0.6.x"
   },
   "devDependencies": {
     "chai": "^3.2.x",

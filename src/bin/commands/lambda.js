@@ -68,73 +68,61 @@ module.exports = function(lambdaPath) {
     });
   }
 
-  let awsConfigFile = path.join(path.dirname(lambdaPath), '.aws.json');
+  let overridenConsoleLog = console.log;
 
-  if (!fs.existsSync(awsConfigFile)) {
-    awsConfigFile = false;
-  } else {
-    console.log('AWS configuration found in ' + awsConfigFile);
+  if(!plain) {
+    console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
   }
 
-  let startServer = () => {
-    let overridenConsoleLog = console.log;
-
-    if(!plain) {
-      console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
+  DeepDB.startLocalDynamoDBServer((error) => {
+    if (error) {
+      console.error('Failed to start DynamoDB server: ' + error);
+      this.exit(1);
     }
 
-    DeepDB.startLocalDynamoDBServer((error) => {
-      if (error) {
-        console.error('Failed to start DynamoDB server: ' + error);
-        this.exit(1);
-      }
+    let lambda = Runtime.createLambda(lambdaPath, context);
 
-      let lambda = Runtime.createLambda(lambdaPath, awsConfigFile, context);
+    if(plain) {
+      delete console.log;
 
-      if(plain) {
-        delete console.log;
+      lambda.silent = true;
 
-        lambda.silent = true;
+      lambda.succeed = lambda.fail = (result) => {
+        console.log(JSON.stringify(result));
+      };
 
-        lambda.succeed = lambda.fail = (result) => {
-          console.log(JSON.stringify(result));
-        };
+      lambda.complete = () => {
 
-        lambda.complete = () => {
+        // assure invokeAsync()s are executed!
+        process.kill(process.pid);
 
-          // assure invokeAsync()s are executed!
-          process.kill(process.pid);
+        console.log = overridenConsoleLog;
+      };
+    } else {
+      lambda.complete = (error/*, response*/) => {
+        console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
 
-          console.log = overridenConsoleLog;
-        };
-      } else {
-        lambda.complete = (error/*, response*/) => {
-          console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
+        if (error) {
+          console.error(error);
+        }
 
-          if (error) {
-            console.error(error);
-          }
+        // assure invokeAsync()s are executed!
+        process.kill(process.pid);
+      };
 
-          // assure invokeAsync()s are executed!
-          process.kill(process.pid);
-        };
+      console.log('Starting Lambda.', os.EOL);
+    }
 
-        console.log('Starting Lambda.', os.EOL);
-      }
+    try {
+      process.chdir(path.dirname(lambdaPath));
 
-      try {
-        process.chdir(path.dirname(lambdaPath));
+      // avoid process to be killed when some async calls are still active!
+      ForksManager.registerListener();
 
-        // avoid process to be killed when some async calls are still active!
-        ForksManager.registerListener();
-
-        lambda.run(event, true);
-      } catch (e) {
-        console.error(e);
-        this.exit(1);
-      }
-    }, dbServer);
-  };
-
-  startServer();
+      lambda.run(event, true);
+    } catch (e) {
+      console.error(e);
+      this.exit(1);
+    }
+  }, dbServer);
 };
