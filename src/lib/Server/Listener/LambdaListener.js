@@ -127,7 +127,6 @@ export class LambdaListener extends AbstractListener {
   _runLambda(event, lambdaConfig, payload, asyncMode) {
     let lambda = LambdaRuntime.createLambda(
       lambdaConfig.path,
-      lambdaConfig.buildPath ? Path.join(lambdaConfig.buildPath, '.aws.json') : null,
       lambdaConfig.dynamicContext
     );
 
