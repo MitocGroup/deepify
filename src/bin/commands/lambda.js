@@ -12,8 +12,12 @@ module.exports = function(lambdaPath) {
   let path = require('path');
   let fs = require('fs');
   let os = require('os');
+  let URL = require('url');
   let extend = require('util')._extend;
   let Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
+  let ESServer = require('../../lib.compiled/Elasticsearch/Server').Server;
+  let AsyncConfig = require('../../lib.compiled/Helpers/AsyncConfig').AsyncConfig;
+  let Config = require('deep-package-manager').Property_Config;
 
   let dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   let event = this.opts.locate('event').value;
@@ -21,6 +25,8 @@ module.exports = function(lambdaPath) {
   let auth = this.opts.locate('auth').exists;
   let skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
   let plain = this.opts.locate('plain').exists;
+  let asyncConfig = null;
+  let kernelConfig = null;
 
   // @todo: implement it in a better way
   if (skipFrontendBuild) {
@@ -28,6 +34,8 @@ module.exports = function(lambdaPath) {
   }
 
   lambdaPath = this.normalizeInputPath(lambdaPath);
+  let asyncConfigPath = path.join(lambdaPath, AsyncConfig.FILE_NAME);
+  let kernelConfigPath = path.join(lambdaPath, Config.DEFAULT_FILENAME);
 
   try {
     if (fs.statSync(lambdaPath).isDirectory()) {
@@ -37,7 +45,15 @@ module.exports = function(lambdaPath) {
   }
 
   if (!fs.existsSync(lambdaPath)) {
-    console.error('Missing lambda in ' + lambdaPath);
+    console.error(`Missing lambda in ${lambdaPath}`);
+    this.exit(1);
+  }
+
+  try {
+    asyncConfig = JSON.parse(fs.readFileSync(asyncConfigPath).toString());
+    kernelConfig = JSON.parse(fs.readFileSync(kernelConfigPath).toString());
+  } catch (e) {
+    console.error(`Missing or broken config files in ${lambdaPath}`);
     this.exit(1);
   }
 
@@ -81,6 +97,18 @@ module.exports = function(lambdaPath) {
     }
 
     let lambda = Runtime.createLambda(lambdaPath, context);
+
+    for (let domainName in asyncConfig.searchDomains) {
+      if (!asyncConfig.searchDomains.hasOwnProperty(domainName)) {
+        continue;
+      }
+
+      let domainCfg = asyncConfig.searchDomains[domainName];
+      let urlParts = URL.parse(`http://${domainCfg.url}`);
+      let dataPath = path.join(os.tmpdir(), `${kernelConfig.buildId}-elasticsearch`);
+
+      ESServer.startElasticsearchServer(urlParts.hostname, urlParts.port, dataPath);
+    }
 
     if(plain) {
       delete console.log;

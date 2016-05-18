@@ -25,7 +25,7 @@ import {ConfigListener} from './Listener/ConfigListener';
 import {AsyncConfigListener} from './Listener/AsyncConfigListener';
 import {FileListener} from './Listener/FileListener';
 import {LambdaListener} from './Listener/LambdaListener';
-import {ES} from '../Elasticsearch/ES';
+import {Server as ESServer} from '../Elasticsearch/Server';
 
 export class Instance {
   /**
@@ -42,8 +42,7 @@ export class Instance {
     this._property = property;
     this._server = null;
     this._fs = null;
-    this._es = null;
-    this._asyncConfig = new AsyncConfig(this);
+    this._es = new ESServer(property);
 
     this._host = null;
 
@@ -53,9 +52,6 @@ export class Instance {
     this._defaultFrontendConfig = {};
     this._defaultLambdasConfig = {};
 
-    this._buildPath = null;
-    this._buildConfig = null;
-
     this._rootMicroservice = {};
     this._microservices = {};
 
@@ -64,11 +60,12 @@ export class Instance {
 
     this._setup();
 
+    this._asyncConfig = new AsyncConfig(this);
     this._listener = new RequestListener(this);
     this._listener
       .register(new ConfigListener(), 0)
       .register(new AsyncConfigListener(this), 1)
-      .register(new LambdaListener(), 2)
+      .register(new LambdaListener(this), 2)
       .register(new FileListener(), 3);
   }
 
@@ -98,29 +95,6 @@ export class Instance {
    */
   get host() {
     return this._host;
-  }
-
-  /**
-   * @returns {String}
-   */
-  get buildPath() {
-    return this._buildPath;
-  }
-
-  /**
-   * @param {String} path
-   */
-  set buildPath(path) {
-    this._buildPath = path;
-
-    this._populateBuildConfig();
-  }
-
-  /**
-   * @returns {Object}
-   */
-  get buildConfig() {
-    return this._buildConfig;
   }
 
   /**
@@ -159,56 +133,6 @@ export class Instance {
    */
   get rootMicroservice() {
     return this._rootMicroservice;
-  }
-
-
-  /**
-   * @private
-   */
-  _populateBuildConfig() {
-    this._buildConfig = {
-      lambdas: {},
-    };
-
-    let frontendConfig = JsonFile.readFileSync(Path.join(this.buildPath, '_www/_config.json'));
-
-    for (let microservice in frontendConfig.microservices) {
-      if (!frontendConfig.microservices.hasOwnProperty(microservice)) {
-        continue;
-      }
-
-      let microserviceLocalData = microservice === this._rootMicroservice.identifier
-        ? this._rootMicroservice : this._microservices[microservice];
-
-      let microserviceConfig = frontendConfig.microservices[microservice];
-
-      for (let resourceName in microserviceConfig.resources) {
-        if (!microserviceConfig.resources.hasOwnProperty(resourceName)) {
-          continue;
-        }
-
-        let resourceActions = microserviceConfig.resources[resourceName];
-
-        for (let actionName in resourceActions) {
-          if (!resourceActions.hasOwnProperty(actionName)) {
-            continue;
-          }
-
-          let resourceIdentifier = `${resourceName}-${actionName}`;
-          let resourceAction = resourceActions[actionName];
-
-          if (resourceAction.type === Action.LAMBDA) {
-            this._buildConfig.lambdas[resourceAction.source.original] = {
-              identifier: resourceIdentifier,
-              methods: resourceAction.methods,
-              name: resourceAction.source.original,
-              buildPath: Path.join(this.buildPath, `${microservice}_lambda_${resourceIdentifier}`),
-              path: microserviceLocalData.lambdas[resourceIdentifier].path,
-            };
-          }
-        }
-      }
-    }
   }
 
   /**
@@ -361,18 +285,14 @@ export class Instance {
 
     hook.runBefore(() => {
       this._log('Booting local FS');
-
-      this._es = new ES(this._property);
       this._es.launchInstances();
 
       this._fs = new DeepFS();
       this._fs.localBackend = true;
 
       this._fs.boot(this._kernelMock, () => {
-        this._fs.kernel = this._kernelMock;
         this._log(`Linking custom validation schemas`);
 
-        this._asyncConfig.dumpIntoFs(this._fs.shared(this._property.rootMicroservice));
         Frontend.dumpValidationSchemas(this._property.config, this._fs.public._rootFolder, true);
 
         this._log(`Creating server on port ${port}`);

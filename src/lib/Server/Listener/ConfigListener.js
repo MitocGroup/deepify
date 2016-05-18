@@ -26,35 +26,10 @@ export class ConfigListener extends AbstractListener {
     let uri = this.getUri(request.url);
 
     if (uri === '/_config.json') {
-      event.stopPropagation(); // stop other listeners
-
-      if (this.server.buildPath) {
-        this.server.logger(`Triggering frontend config hook...`);
-
-        let filename = Path.join(this.server.buildPath, '_www', uri);
-
-        FileSystem.exists(filename, (exists) => {
-          if (!exists) {
-            this.server.logger(`File ${filename} not found`);
-            event.send404();
-          }
-
-          FileSystem.readFile(filename, 'binary', (error, file) => {
-            if (error) {
-              this.server.logger(`Unable to read file ${filename}: ${error}`);
-              event.send500(error);
-              return;
-            }
-
-            let mimeType = Mime.lookup(filename);
-
-            this.logger(`Serving file ${filename} of type ${mimeType}`);
-            event.send(file, 200, mimeType, true);
-          });
-        });
-      } else {
-        event.send(JSON.stringify(this.server.defaultFrontendConfig), 200, 'application/json');
-      }
+      event
+        .stopPropagation()
+        .send(JSON.stringify(this.server.defaultFrontendConfig), 200, 'application/json')
+      ;
     }
   }
 }

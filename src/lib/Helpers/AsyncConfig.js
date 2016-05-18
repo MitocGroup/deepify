@@ -8,7 +8,7 @@ import FSExtra from 'fs-extra';
 
 export class AsyncConfig {
   /**
-   * @param {Server_Instance} server
+   * @param {Instance} server
    */
   constructor(server) {
     this._server = server;
@@ -53,7 +53,7 @@ export class AsyncConfig {
 
       let instance = runningInstances[name];
 
-      searchDomains[name] = {url: instance.url};
+      searchDomains[name] = {url: instance.shortUrl};
     }
 
     this._config.searchDomains = searchDomains;
@@ -62,15 +62,7 @@ export class AsyncConfig {
   }
 
   /**
-   * @param {FS} fs
-   * @returns {Boolean}
-   */
-  dumpIntoFs(fs) {
-    return fs.writeFileSync(AsyncConfig.FILE_NAME, JSON.stringify(this.json()));
-  }
-
-  /**
-   * @returns {ES}
+   * @returns {Server}
    * @private
    */
   get _es() {

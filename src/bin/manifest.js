@@ -64,11 +64,6 @@ module.exports = {
       description: 'Run local development server',
       section: 'Develop on your local environment',
       opts: {
-        'build-path': {
-          alias: 'b',
-          description: 'The path to the build (in order to pick up config)',
-          required: false,
-        },
         'skip-frontend-build': {
           alias: 'f',
           description: 'Skip picking up _build path from the microservices Frontend',
@@ -497,6 +492,11 @@ module.exports = {
         'plain': {
           alias: 'p',
           description: 'Output JSON stringified result only',
+          required: false,
+        },
+        'search-cluster': {
+          alias: 's',
+          description: 'Enable elasticsearch search cluster',
           required: false,
         }
       },

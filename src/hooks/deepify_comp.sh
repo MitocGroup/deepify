@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Created on 05/17/2016 03:49:03 PM
 __deepify_comp() {
     local CUR_WORD
 

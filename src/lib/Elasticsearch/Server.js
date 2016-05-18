@@ -1,0 +1,154 @@
+/**
+ * Created by CCristi on 5/16/16.
+ */
+
+'use strict';
+
+import {BinaryLauncher} from './Launcher/BinaryLauncher';
+import path from 'path';
+import OS from 'os';
+import {Property_Instance as Property} from 'deep-package-manager';
+import {PropertyObjectRequiredException} from '../Server/Exception/PropertyObjectRequiredException';
+
+export class Server {
+  /**
+   * @param {Property} property
+   */
+  constructor(property) {
+    if (!property instanceof Property) {
+      throw new PropertyObjectRequiredException();
+    }
+
+    this._property = property;
+    this._runningInstances = {};
+    this._dryLaunch = false;
+  }
+
+  /**
+   * @returns {Server}
+   */
+  launchInstances() {
+    let config = this._property.config;
+
+    if (config.globals.search && config.globals.search.enabled) {
+      this._launchSearch();
+    }
+
+    if (config.globals.logDrivers && config.globals.logDrivers.rum) {
+      this._launchRum();
+    }
+
+    return this;
+  }
+
+  /**
+   * @returns {AbstractLauncher}
+   * @private
+   */
+  _launchSearch() {
+    if (this._runningInstances.search) {
+      return this._runningInstances.search;
+    }
+
+    let searchInstance = Server.startElasticsearchServer(
+      '127.0.0.1', Server.SEARCH_CLIENT_PORT, 
+      this._dataPath, this._dryLaunch
+    );
+    
+    return this._runningInstances.search = searchInstance;
+  }
+
+  /**
+   * @returns {AbstractLauncher}
+   * @private
+   */
+  _launchRum() {
+    if (this._runningInstances.search) {
+      return this._runningInstances.search;
+    }
+
+    let rumInstance = Server.startElasticsearchServer(
+      '127.0.0.1', Server.RUM_CLIENT_PORT, 
+      this._dataPath, this._dryLaunch
+    );
+
+    return this._runningInstances.rum = rumInstance;
+  }
+
+  /**
+   * @returns {AbstractLauncher[]}
+   */
+  get runningInstances() {
+    return this._runningInstances;
+  }
+
+  /**
+   * @param {String} hostname
+   * @param {Number} port
+   * @param {String} dataPath
+   * @param {Boolean} dry
+   */
+  static startElasticsearchServer(hostname = '127.0.0.1', port = 9200, dataPath = null, dry = false) {
+    let launcher = new BinaryLauncher(Server.DEFAULT_BINARY_PATH);
+
+    launcher.port = port;
+    launcher.hostname = hostname;
+
+    if (dataPath) {
+      launcher.setSetting('path.data', dataPath);
+    }
+
+    launcher
+      .setSetting('http.cors.enabled', 'true')
+      .setSetting('http.cors.allow-origin', '*')
+      .setSetting('http.cors.allow-headers', 'X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization');
+
+    if (!dry) {
+      launcher
+        .autoRelease()
+        .launch();
+    }
+
+    return launcher;
+  }
+
+  /**
+   * @param {Boolean} bool
+   */
+  dry(bool = true) {
+    this._dryLaunch = bool;
+
+    return this;
+  }
+
+  /**
+   * @returns {String}
+   * @private
+   */
+  get _dataPath() {
+    let baseHash = this._property.configObj.baseHash;
+
+    return path.join(OS.tmpdir(), `${baseHash}-elasticsearch`);
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get DEFAULT_BINARY_PATH() {
+    return path.join(__dirname, '../../resources/elasticsearch/bin/elasticsearch');
+  }
+
+  /**
+   * @returns {Number}
+   */
+  static get SEARCH_CLIENT_PORT() {
+    return 8200
+  }
+
+  /**
+   * @returns {Number}
+   */
+  static get RUM_CLIENT_PORT() {
+    return 8201;
+  }
+}

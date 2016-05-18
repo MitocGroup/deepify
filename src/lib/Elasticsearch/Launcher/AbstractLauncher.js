@@ -30,7 +30,7 @@ export class AbstractLauncher extends Core.OOP.Interface {
     process.on('uncaughtException', (error) => {
       console.error(error.toString(), OS.EOL, error.stack);
 
-      process.exit(0);
+      process.exit(1);
     });
 
     process.on('exit', this.stop.bind(this));
@@ -43,7 +43,7 @@ export class AbstractLauncher extends Core.OOP.Interface {
    * @returns {Number}
    */
   launch(...args) { 
-    console.log(`Running elasticsearch on: ${this.url}`);
+    console.log(`Running elasticsearch on: ${this.shortUrl}`);
 
     return this._launch(...args);
   }
@@ -73,7 +73,7 @@ export class AbstractLauncher extends Core.OOP.Interface {
    * @returns {*}
    */
   stop(...args) {
-    console.log(`Stopping elasticsearch on: ${this.url}`);
+    console.log(`Stopping elasticsearch on: ${this.shortUrl}`);
 
     this._stop(...args);
   }
@@ -81,8 +81,8 @@ export class AbstractLauncher extends Core.OOP.Interface {
   /**
    * @returns {String}
    */
-  get url() {
-    return `http://${this.hostname}:${this.port}`;
+  get shortUrl() {
+    return `${this.hostname}:${this.port}`;
   }
 
   /**
