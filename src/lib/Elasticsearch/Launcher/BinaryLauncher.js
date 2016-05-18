@@ -34,7 +34,7 @@ export class BinaryLauncher extends AbstractLauncher {
 
     let pidFile = this.pidFile;
 
-    this._lockHandler = FS.openSync(pidFile, 'w+');
+    this._lockHandler = FS.openSync(pidFile, 'a+');
     FSExt.flockSync(this._lockHandler, 'exnb');
 
     let launchCmd = new Exec(

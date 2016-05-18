@@ -50,12 +50,12 @@ export class Server {
       return this._runningInstances.search;
     }
 
-    let searchInstance = Server.startElasticsearchServer(
+    this._runningInstances.search = Server.startElasticsearchServer(
       '127.0.0.1', Server.SEARCH_CLIENT_PORT, 
       this._dataPath, this._dryLaunch
     );
     
-    return this._runningInstances.search = searchInstance;
+    return this._runningInstances.search;
   }
 
   /**
@@ -63,16 +63,16 @@ export class Server {
    * @private
    */
   _launchRum() {
-    if (this._runningInstances.search) {
-      return this._runningInstances.search;
+    if (this._runningInstances.rum) {
+      return this._runningInstances.rum;
     }
 
-    let rumInstance = Server.startElasticsearchServer(
+    this._runningInstances.rum = Server.startElasticsearchServer(
       '127.0.0.1', Server.RUM_CLIENT_PORT, 
       this._dataPath, this._dryLaunch
     );
 
-    return this._runningInstances.rum = rumInstance;
+    return this._runningInstances.rum;
   }
 
   /**
