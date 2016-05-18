@@ -494,11 +494,6 @@ module.exports = {
           description: 'Output JSON stringified result only',
           required: false,
         },
-        'search-cluster': {
-          alias: 's',
-          description: 'Enable elasticsearch search cluster',
-          required: false,
-        }
       },
       args: {
         path: {
