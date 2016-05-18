@@ -11,12 +11,14 @@ module.exports = function(mainPath) {
   let Config = require('deep-package-manager').Property_Config;
   let fs = require('fs');
   let fse = require('fs-extra');
+  let Server = require('../../../lib.compiled/Server/Instance').Instance;
   let NpmInstall = require('../../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   let NpmUpdate = require('../../../lib.compiled/NodeJS/NpmUpdate').NpmUpdate;
   let NpmInstallLibs = require('../../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
   let NpmChain = require('../../../lib.compiled/NodeJS/NpmChain').NpmChain;
   let Bin = require('../../../lib.compiled/NodeJS/Bin').Bin;
   let LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
+  let AsyncConfig = require('../../../lib.compiled/Helpers/AsyncConfig').AsyncConfig;
 
   let doUpdate = this.opts.locate('update').exists;
   let microservicesToInit = this.opts.locate('partial').value;
@@ -30,6 +32,7 @@ module.exports = function(mainPath) {
   }
 
   let property = new Property(mainPath);
+  let server = new Server(property);
 
   property.assureFrontendEngine((error) => {
     if (error) {
@@ -67,6 +70,8 @@ module.exports = function(mainPath) {
 
     chain.runChunk(() => {
       let lambdasConfig = property.fakeBuild();
+      server.es.dry().launchInstances(); // asyncConfig is looking at running ES instances
+      let asyncConfig = server.asyncConfig.json();
 
       for (let lambdaArn in lambdasConfig) {
         if (!lambdasConfig.hasOwnProperty(lambdaArn)) {
@@ -75,15 +80,28 @@ module.exports = function(mainPath) {
 
         let lambdaConfig = lambdasConfig[lambdaArn];
         let lambdaPath = path.dirname(lambdaConfig.path);
-        let lambdaConfigPath = path.join(lambdaPath, '_config.json');
+        let lambdaConfigPath = path.join(lambdaPath, Config.DEFAULT_FILENAME);
+        let lambdaAsyncConfigPath = path.join(lambdaPath, AsyncConfig.FILE_NAME);
 
-        if (fs.existsSync(lambdaConfigPath)) {
-          console.log('An old Lambda(' + lambdaArn + ') config found in ' + lambdaPath + '. Removing...');
-          fs.unlinkSync(lambdaConfigPath);
+        let configs = {};
+        configs[lambdaConfigPath] = lambdaConfig;
+        configs[lambdaAsyncConfigPath] = asyncConfig;
+
+        for (let configPath in configs) {
+          if (!configs.hasOwnProperty(configPath)) {
+            continue;
+          }
+
+          let configObj = configs[configPath];
+
+          if (fs.existsSync(configPath)) {
+            console.log(`An old Lambda(${lambdaArn}) config found in ${lambdaPath}. Removing...`);
+            fs.unlinkSync(configPath);
+          }
+
+          console.log(`Persisting Lambda(${lambdaArn}) config into ${configPath}`);
+          fs.writeFileSync(configPath, JSON.stringify(configObj));
         }
-
-        console.log('Persisting Lambda(' + lambdaArn + ') config into ' + lambdaConfigPath);
-        fs.writeFileSync(lambdaConfigPath, JSON.stringify(lambdaConfig));
       }
 
       cb();

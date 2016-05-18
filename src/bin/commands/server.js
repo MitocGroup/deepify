@@ -17,7 +17,6 @@ module.exports = function(mainPath) {
   let open = require('open');
 
   let port = this.opts.locate('port').value || '8000';
-  let buildPath = this.opts.locate('build-path').value || null;
   let dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   let serverAddress = 'http://localhost:' + port;
   let openBrowser = this.opts.locate('open-browser').exists;
@@ -30,10 +29,6 @@ module.exports = function(mainPath) {
   }
 
   mainPath = this.normalizeInputPath(mainPath);
-
-  if (buildPath) {
-    buildPath = this.normalizeInputPath(buildPath);
-  }
 
   let propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
 
@@ -73,10 +68,6 @@ module.exports = function(mainPath) {
   }
 
   let startServer = (server) => {
-    if (buildPath) {
-      server.buildPath = buildPath;
-    }
-
     server.listen(parseInt(port, 10), dbServer, () => {
       if (openBrowser) {
         open(serverAddress);

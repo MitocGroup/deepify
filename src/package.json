@@ -47,7 +47,7 @@
     "url": "https://github.com/MitocGroup/deepify.git"
   },
   "scripts": {
-    "postinstall": "bash hooks/autocomplete_deepify.sh && bash hooks/install_templates.sh",
+    "postinstall": "bash hooks/autocomplete_deepify.sh && bash hooks/install_templates.sh && bash hooks/ensure_es.sh",
     "test": "bash node-bin/test.sh",
     "compile": "bash node-bin/compile.sh",
     "obfuscate-compiled": "bash node-bin/obfuscate-compiled.sh",
@@ -67,6 +67,7 @@
     "deep-fs": "^1.x.x",
     "deep-log": "^1.x.x",
     "deep-package-manager": "^1.x.x",
+    "fs-ext": "^0.5.0",
     "fs-extra": "^0.23.x",
     "gather-dependencies": "^1.0.x",
     "inquirer": "^1.0.2",

@@ -41,9 +41,13 @@ export class ResponseEvent {
 
   /**
    * Stop event propagation
+   * 
+   * @returns {ResponseEvent}
    */
   stopPropagation() {
     this._propagationStopped = true;
+
+    return this;
   }
 
   /**
@@ -56,7 +60,6 @@ export class ResponseEvent {
 
   /**
    * @param {Error|String} error
-   * @private
    */
   send500(error) {
     this.send(`${error}${OS.EOL}`, 500);
@@ -64,7 +67,6 @@ export class ResponseEvent {
 
   /**
    * @param {String} message
-   * @private
    */
   send404(message = null) {
     this.send(message || `404 Not Found${OS.EOL}`, 404);
@@ -75,7 +77,6 @@ export class ResponseEvent {
    * @param {Number} code
    * @param {String} contentType
    * @param {Boolean} isBinary
-   * @private
    */
   send(content, code = 200, contentType = 'text/plain', isBinary = false) {
     this.response.writeHead(code, {'Content-Type': contentType});
