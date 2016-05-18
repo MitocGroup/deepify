@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# This script is autogenrated by deepify. DO NOT CHANGE IT MANUALLY!!!
 __deepify_comp() {
     local CUR_WORD
 
