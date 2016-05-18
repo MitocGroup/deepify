@@ -8,9 +8,10 @@ import {AbstractLauncher} from './AbstractLauncher';
 import {Exec} from '../../Helpers/Exec';
 import {MissingElasticsearchBinaryException} from '../Exception/MissingElasticsearchBinaryException';
 import {FailedToLauchElasticsearchException} from '../Exception/FailedToLauchElasticsearchException';
+import {ServerAlreadyRunningException} from '../Exception/ServerAlreadyRunningException';
 import path from 'path';
 import FS from 'fs';
-import FSExt from 'fs-ext';
+import lock from 'lockfile';
 import process from 'process';
 
 export class BinaryLauncher extends AbstractLauncher {
@@ -22,7 +23,6 @@ export class BinaryLauncher extends AbstractLauncher {
 
     this._binaryPath = binaryPath;
     this._pid = null;
-    this._lockHandler = null;
   }
 
   /**
@@ -31,11 +31,8 @@ export class BinaryLauncher extends AbstractLauncher {
    */
   _launch() {
     this._assureBinary();
-
-    let pidFile = this.pidFile;
-
-    this._lockHandler = FS.openSync(pidFile, 'a+');
-    FSExt.flockSync(this._lockHandler, 'exnb');
+    this._lock();
+    let pidFile = this._pidFile;
 
     let launchCmd = new Exec(
       this._binaryPath,
@@ -62,7 +59,6 @@ export class BinaryLauncher extends AbstractLauncher {
     }
 
     this._pid = FS.readFileSync(pidFile).toString();
-
     return this;
   }
 
@@ -90,17 +86,27 @@ export class BinaryLauncher extends AbstractLauncher {
   }
 
   /**
-   * @returns {Boolean}
+   * @private
+   */
+  _lock() {
+    try {
+      lock.lockSync(this._pidFile);
+    } catch (e) {
+      throw new ServerAlreadyRunningException(this, e);
+    }
+  }
+
+  /**
    * @private
    */
   _unlock() {
-    return this._lockHandler && FSExt.flock(this._lockHandler, 'un');
+    lock.unlockSync(this._pidFile);
   }
 
   /**
    * @returns {String}
    */
-  get pidFile() {
-    return path.join(__dirname, '../../../resources/elasticsearch', `_es.${this.hostname}.${this.port}.pid`);
+  get _pidFile() {
+    return path.join(__dirname, '../../../resources/elasticsearch-2.1.2', `_es.${this.hostname}.${this.port}.pid`);
   }
 }
