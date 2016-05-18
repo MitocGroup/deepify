@@ -70,7 +70,7 @@ module.exports = function(mainPath) {
 
     chain.runChunk(() => {
       let lambdasConfig = property.fakeBuild();
-      server.es.dry().launchInstances();
+      server.es.dry().launchInstances(); // asyncConfig is looking at running ES instances
       let asyncConfig = server.asyncConfig.json();
 
       for (let lambdaArn in lambdasConfig) {
