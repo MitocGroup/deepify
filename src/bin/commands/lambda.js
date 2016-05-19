@@ -17,7 +17,7 @@ module.exports = function(lambdaPath) {
   let Autoload = require('deep-package-manager').Microservice_Metadata_Autoload;
   let ESServer = require('../../lib.compiled/Elasticsearch/Server').Server;
   let AsyncConfig = require('../../lib.compiled/Helpers/AsyncConfig').AsyncConfig;
-  let Config = require('deep-package-manager').Property_Config;
+  let Frontend = require('deep-package-manager').Property_Frontend;
 
   let dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   let event = this.opts.locate('event').value;
@@ -35,7 +35,7 @@ module.exports = function(lambdaPath) {
 
   lambdaPath = this.normalizeInputPath(lambdaPath);
   let asyncConfigPath = path.join(lambdaPath, AsyncConfig.FILE_NAME);
-  let kernelConfigPath = path.join(lambdaPath, Config.DEFAULT_FILENAME);
+  let kernelConfigPath = path.join(lambdaPath, Frontend.CONFIG_FILE);
 
   try {
     if (fs.statSync(lambdaPath).isDirectory()) {
