@@ -107,6 +107,6 @@ export class BinaryLauncher extends AbstractLauncher {
    * @returns {String}
    */
   get _pidFile() {
-    return path.join(__dirname, '../../../resources/elasticsearch-2.1.2', `_es.${this.hostname}.${this.port}.pid`);
+    return path.join(path.dirname(this._binaryPath), `_es.${this.hostname}.${this.port}.pid`);
   }
 }

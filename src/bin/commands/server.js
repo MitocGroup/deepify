@@ -32,6 +32,14 @@ module.exports = function(mainPath) {
 
   let propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
 
+  let startServer = (server) => {
+    server.listen(parseInt(port, 10), dbServer, () => {
+      if (openBrowser) {
+        open(serverAddress);
+      }
+    });
+  };
+
   if (!fs.existsSync(propertyConfigFile)) {
     fs.writeFileSync(propertyConfigFile, JSON.stringify(Config.generate()));
   }
@@ -66,12 +74,4 @@ module.exports = function(mainPath) {
       startServer(new Server(property));
     }, true);
   }
-
-  let startServer = (server) => {
-    server.listen(parseInt(port, 10), dbServer, () => {
-      if (openBrowser) {
-        open(serverAddress);
-      }
-    });
-  };
 };
