@@ -33,7 +33,6 @@ module.exports = function(mainPath) {
   }
 
   let property = new Property(mainPath);
-  let server = new Server(property);
 
   let initProperty = (property, cb) => {
     let lambdaPaths = new LambdaExtractor(property, getMicroservicesToInit()).extract(LambdaExtractor.NPM_PACKAGE_FILTER);
@@ -59,6 +58,7 @@ module.exports = function(mainPath) {
 
     chain.runChunk(() => {
       let lambdasConfig = property.fakeBuild();
+      let server = new Server(property);
       server.es.dry().launchInstances(); // asyncConfig is looking at running ES instances
       let asyncConfig = server.asyncConfig.json();
 
