@@ -135,7 +135,7 @@ export class Server {
    * @returns {String}
    */
   static get DEFAULT_BINARY_PATH() {
-    return path.join(__dirname, '../../resources/elasticsearch-2.1.2/bin/elasticsearch');
+    return path.join(__dirname, '..', '..', 'resources', 'elasticsearch-2.1.2', 'bin', 'elasticsearch');
   }
 
   /**

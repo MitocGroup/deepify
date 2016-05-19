@@ -9,6 +9,7 @@ module.exports = function(mainPath) {
   let path = require('path');
   let Property = require('deep-package-manager').Property_Instance;
   let Config = require('deep-package-manager').Property_Config;
+  let Frontend = require('deep-package-manager').Property_Frontend;
   let fs = require('fs');
   let fse = require('fs-extra');
   let Server = require('../../../lib.compiled/Server/Instance').Instance;
@@ -33,18 +34,6 @@ module.exports = function(mainPath) {
 
   let property = new Property(mainPath);
   let server = new Server(property);
-
-  property.assureFrontendEngine((error) => {
-    if (error) {
-      console.error('Error while assuring frontend engine: ' + error);
-    }
-
-    property.runInitMsHooks(() => {
-      initProperty(property, () => {
-        console.log('The backend had been successfully initialized.');
-      });
-    });
-  });
 
   let initProperty = (property, cb) => {
     let lambdaPaths = new LambdaExtractor(property, getMicroservicesToInit()).extract(LambdaExtractor.NPM_PACKAGE_FILTER);
@@ -80,7 +69,7 @@ module.exports = function(mainPath) {
 
         let lambdaConfig = lambdasConfig[lambdaArn];
         let lambdaPath = path.dirname(lambdaConfig.path);
-        let lambdaConfigPath = path.join(lambdaPath, Config.DEFAULT_FILENAME);
+        let lambdaConfigPath = path.join(lambdaPath, Frontend.CONFIG_FILE);
         let lambdaAsyncConfigPath = path.join(lambdaPath, AsyncConfig.FILE_NAME);
 
         let configs = {};
@@ -123,5 +112,17 @@ module.exports = function(mainPath) {
       if (p.indexOf(c) < 0) p.push(c);
       return p;
     }, []);
-  }
+  };
+
+  property.assureFrontendEngine((error) => {
+    if (error) {
+      console.error('Error while assuring frontend engine: ' + error);
+    }
+
+    property.runInitMsHooks(() => {
+      initProperty(property, () => {
+        console.log('The backend had been successfully initialized.');
+      });
+    });
+  });
 };

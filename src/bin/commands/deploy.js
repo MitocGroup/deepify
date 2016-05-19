@@ -148,7 +148,9 @@ module.exports = function(mainPath) {
         }
 
         propertyInstance.runInitMsHooks(() => {
-          prepareProduction(propertyInstance.path, doDeploy);
+          propertyInstance.runPreDeployMsHooks(() => {
+            prepareProduction(propertyInstance.path, doDeploy);
+          });
         });
       });
     });

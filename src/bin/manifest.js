@@ -54,7 +54,7 @@ module.exports = {
           required: false,
         },
         dumpPath: {
-          description: '[DEPRECATED] The path to dump dependency into (works with GitHub only!)',
+          description: 'The path to dump dependency into (works with GitHub only!)',
           required: false,
         },
       },
@@ -626,7 +626,7 @@ module.exports = {
       section: 'Run in the cloud',
       commands: {
         'enable': {
-          example: 'deepify enable-ssl path/to/web_app',
+          example: 'deepify ssl enable path/to/web_app',
           description: 'Enables SSL on a deployed web app',
           opts: {
             domain: {
@@ -643,7 +643,7 @@ module.exports = {
           },
         },
         'disable': {
-          example: 'deepify disable-ssl path/to/web_app',
+          example: 'deepify ssl disable path/to/web_app',
           description: 'Disable activated SSL on a deployed web app',
           opts: {
           },
