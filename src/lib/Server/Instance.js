@@ -66,7 +66,7 @@ export class Instance {
       .register(new ConfigListener(), 0)
       .register(new AsyncConfigListener(this), 1)
       .register(new LambdaListener(this), 2)
-      .register(new FileListener(), 3);
+      .register(new FileListener(this), 3);
   }
 
   /**
@@ -258,11 +258,10 @@ export class Instance {
           }
         },
       },
-      microservice: (identifier) => {
-        identifier = identifier || this._property.rootMicroservice.identifier;
-
+      microservice: () => {
+        // do not return a real microservice identifier
         return {
-          identifier: this._property.microservice(identifier).identifier,
+          identifier: '',
         };
       },
     };
