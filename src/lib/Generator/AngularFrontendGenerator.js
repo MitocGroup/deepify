@@ -23,7 +23,7 @@ export class AngularFrontendGenerator extends AbstractGenerator {
    */
   _generate(cb) {
     let identifier = this.generationSchema.identifier;
-    let targetDir = path.join(this.targetPath, identifier, AngularFrontendGenerator.TPL_DIR);
+    let targetDir = path.join(this.targetPath, 'js/app/angular');
 
     FSExtra.ensureDirSync(targetDir);
 
@@ -37,11 +37,11 @@ export class AngularFrontendGenerator extends AbstractGenerator {
 
     this.renderFile(
       'Frontend/angular_bootstrap.js',
-      path.join(this.targetPath, identifier, 'Frontend/bootstrap.js'),
+      path.join(`${this.targetPath}/bootstrap.js`),
       {identifier}
     );
 
-    cb(null, targetDir);
+    cb(null, this.targetPath);
   }
 
   /**
@@ -49,8 +49,8 @@ export class AngularFrontendGenerator extends AbstractGenerator {
    */
   validationSchema() {
     return Joi.object().keys({
-      name: Joi.string().required().regex(/^[a-zA-Z0-9_\-]{3,}$/),
-      identifier: Joi.string().required().regex(/^[a-zA-Z0-9_\-\.]{3,}$/),
+      name: Joi.string().required().regex(AbstractGenerator.DEEP_NAME_REGEXP),
+      identifier: Joi.string().required().regex(AbstractGenerator.DEEP_NAME_REGEXP),
     });
   }
 

@@ -1,0 +1,19 @@
+/**
+ * Created by CCristi on 5/20/16.
+ */
+
+'use strict';
+
+module.exports = function(mainPath) {
+  let inquirer = require('inquirer');
+  let Microservice = require('deep-package-manager').Microservice_Instance;
+  let FSExtra = require('fs-extra');
+  let path = require('path');
+
+  mainPath = this.normalizeInputPath(mainPath);
+  let microservice = Microservice.create(mainPath);
+  let backendTestFolder = path.join(microservice.basePath, 'Test', 'Backend');
+
+  FSExtra.ensureDirSync(backendTestFolder);
+  console.log(`Backend test folder has been generated in ${backendTestFolder}`);
+};

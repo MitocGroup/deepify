@@ -88,6 +88,7 @@ module.exports = function(mainPath) {
       Bin.node,
       this.scriptPath,
       'generate',
+      'data',
       'model',
       mainPath,
       `-m=${MicroserviceGenerator.identifier(appSchema.name)}`
@@ -95,7 +96,7 @@ module.exports = function(mainPath) {
 
     cmd.run((result) => {
       if (result.failed) {
-        console.error(`deepify generate model failed with: ${result.error}`);
+        console.error(`deepify generate data model failed with: ${result.error}`);
         this.exit(1);
       }
 

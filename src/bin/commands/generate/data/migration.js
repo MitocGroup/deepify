@@ -6,7 +6,7 @@
 
 module.exports = function(mainPath) {
   let inquirer = require('inquirer');
-  let MigrationGenerator = require('../../../lib.compiled/Generator/MigrationGenerator').MigrationGenerator;
+  let MigrationGenerator = require('../../../../lib.compiled/Generator/MigrationGenerator').MigrationGenerator;
   let Property = require('deep-package-manager').Property_Instance;
 
   mainPath = this.normalizeInputPath(mainPath);
@@ -35,8 +35,6 @@ module.exports = function(mainPath) {
     }
 
     if (questionList.length > 0) {
-      console.log('questionList', questionList);
-
       inquirer.prompt(questionList).then((schema) => {
         if (schema.microservice) {
           schema.microservice = property.microservice(schema.microservice);
