@@ -5,7 +5,6 @@
 'use strict';
 
 module.exports = function(mainPath) {
-  let inquirer = require('inquirer');
   let Microservice = require('deep-package-manager').Microservice_Instance;
   let FSExtra = require('fs-extra');
   let path = require('path');

@@ -43,10 +43,10 @@ module.exports = function(mainPath) {
           `'${engine}' frontend engine is not supported yet. ` +
           `Available engines: ${MicroserviceGenerator.ALLOWED_ENGINES.join(',')}`
         );
-        
+
         this.exit(1);
       }
-      
+
       appSchema.engines = [engine];
     } else {
       questionList.push({

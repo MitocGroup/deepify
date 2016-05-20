@@ -11,7 +11,6 @@ module.exports = function(mainPath) {
   let MicroserviceGenerator = require('../../../lib.compiled/Generator/MicroserviceGenerator').MicroserviceGenerator;
   let Property = require('deep-package-manager').Property_Instance;
   let FS = require('fs');
-  let path = require('path');
 
   mainPath = this.normalizeInputPath(mainPath);
   let property = new Property(mainPath);
