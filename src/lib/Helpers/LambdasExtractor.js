@@ -1,5 +1,6 @@
 /**
  * Created by AlexanderC on 12/2/15.
+ * jshint maxcomplexity:12
  */
 
 'use strict';
