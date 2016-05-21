@@ -17,7 +17,6 @@ module.exports = function(mainPath) {
   let NpmUpdate = require('../../../lib.compiled/NodeJS/NpmUpdate').NpmUpdate;
   let NpmInstallLibs = require('../../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
   let NpmChain = require('../../../lib.compiled/NodeJS/NpmChain').NpmChain;
-  let Bin = require('../../../lib.compiled/NodeJS/Bin').Bin;
   let LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   let AsyncConfig = require('../../../lib.compiled/Helpers/AsyncConfig').AsyncConfig;
 
@@ -109,7 +108,9 @@ module.exports = function(mainPath) {
 
   let arrayUnique = (a) => {
     return a.reduce((p, c) => {
-      if (p.indexOf(c) < 0) p.push(c);
+      if (p.indexOf(c) < 0) {
+        p.push(c);
+      }
       return p;
     }, []);
   };

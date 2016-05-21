@@ -6,7 +6,6 @@
 'use strict';
 
 module.exports = function(dumpPath) {
-  let path = require('path');
   let fse = require('fs-extra');
   let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
