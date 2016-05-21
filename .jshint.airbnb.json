@@ -15,5 +15,5 @@
   "undef": true,
   "unused": true,
   "eqnull": true,
-  "maxcomplexity" :false
+  "maxcomplexity": false
 }
