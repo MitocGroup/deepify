@@ -14,5 +14,6 @@
   "strict": true,
   "undef": true,
   "unused": true,
-  "eqnull": true
+  "eqnull": true,
+  "maxcomplexity" :false
 }
