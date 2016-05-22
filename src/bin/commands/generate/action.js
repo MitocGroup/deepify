@@ -2,7 +2,7 @@
  * Created by CCristi on 5/5/16.
  */
 
-/*jshint maxcomplexity:12 */
+/* jshint maxdepth:false */
 
 'use strict';
 
