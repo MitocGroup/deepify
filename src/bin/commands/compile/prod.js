@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+/**
+ * Created by AlexanderC on 8/4/15.
+ */
+
 /* jshint loopfunc:true */
 
 'use strict';

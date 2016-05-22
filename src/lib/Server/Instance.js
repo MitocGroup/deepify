@@ -2,6 +2,8 @@
  * Created by AlexanderC on 8/10/15.
  */
 
+/* jshint expr:true */
+
 'use strict';
 
 import {PropertyObjectRequiredException} from './Exception/PropertyObjectRequiredException';

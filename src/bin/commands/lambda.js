@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 
-/* jshint maxdepth:12, maxcomplexity:false */
+/**
+ * Created by AlexanderC on 6/19/15.
+ */
+
+/* jshint maxdepth:false */
+/* jshint maxcomplexity:false */
 
 'use strict';
 
