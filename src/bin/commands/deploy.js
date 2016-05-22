@@ -4,7 +4,6 @@
  * Created by AlexanderC on 6/19/15.
  */
 
-/* jshint maxdepth:12 */
 /* jshint maxcomplexity:false */
 /* jshint loopfunc:true */
 /* jshint expr:true */
