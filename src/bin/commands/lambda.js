@@ -4,8 +4,6 @@
  * Created by AlexanderC on 6/19/15.
  */
 
-/* jshint maxcomplexity:false */
-
 'use strict';
 
 module.exports = function(lambdaPath) {

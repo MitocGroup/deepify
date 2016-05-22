@@ -2,8 +2,6 @@
  * Created by CCristi on 5/5/16.
  */
 
-/* jshint maxdepth:false */
-
 'use strict';
 
 module.exports = function(mainPath) {

@@ -2,9 +2,6 @@
  * Created by CCristi <ccovali@mitocgroup.com> on 4/29/16.
  */
 
-/* jshint maxdepth:false */
-/* jshint maxcomplexity:false */
-
 'use strict';
 
 module.exports = function(mainPath) {

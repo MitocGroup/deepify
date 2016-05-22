@@ -3,8 +3,6 @@
  * Created by AlexanderC on 8/4/15.
  */
 
-/*jshint maxcomplexity:12 */
-
 'use strict';
 
 module.exports = function(mainPath) {
