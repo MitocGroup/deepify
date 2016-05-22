@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Created by AlexanderC on 6/19/15.
- */
+ * jshint maxcomplexity: 12*/
 
 'use strict';
 
