@@ -5,7 +5,7 @@
  */
 
 /* jshint maxdepth:false */
-/* jshint maxcomplexity:false */
+/* jshint maxcomplexity:12 */
 /* jshint loopfunc:true */
 /* jshint expr:true */
 

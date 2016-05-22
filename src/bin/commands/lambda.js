@@ -4,7 +4,7 @@
  * Created by AlexanderC on 6/19/15.
  */
 
-/* jshint maxdepth:false */
+/* jshint maxdepth:12 */
 /* jshint maxcomplexity:false */
 
 'use strict';
