@@ -5,6 +5,7 @@
  */
 
 /*jshint loopfunc:true */
+/*jshint maxcomplexity:false */
 
 'use strict';
 
