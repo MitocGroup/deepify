@@ -5,9 +5,10 @@
  */
 
 /*jshint loopfunc:true */
-/*jshint maxcomplexity:false */
 
 'use strict';
+
+/*jshint maxcomplexity:false */
 
 module.exports = function(mainPath) {
   let path = require('path');
