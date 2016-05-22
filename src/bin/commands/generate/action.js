@@ -2,6 +2,8 @@
  * Created by CCristi on 5/5/16.
  */
 
+/*jshint maxcomplexity:12 */
+
 'use strict';
 
 module.exports = function(mainPath) {
