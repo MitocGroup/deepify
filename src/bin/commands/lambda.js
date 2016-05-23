@@ -21,6 +21,7 @@ module.exports = function(lambdaPath) {
   let ESServer = require('../../lib.compiled/Elasticsearch/Server').Server;
   let AsyncConfig = require('../../lib.compiled/Helpers/AsyncConfig').AsyncConfig;
   let Frontend = require('deep-package-manager').Property_Frontend;
+  let ServerAlreadyRunningException = require('../../lib.compiled/Elasticsearch/Exception/ServerAlreadyRunningException').ServerAlreadyRunningException;
 
   let dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   let event = this.opts.locate('event').value;
@@ -110,7 +111,15 @@ module.exports = function(lambdaPath) {
       let urlParts = URL.parse(`http://${domainCfg.url}`);
       let dataPath = path.join(os.tmpdir(), `${kernelConfig.buildId}-elasticsearch`);
 
-      ESServer.startElasticsearchServer(urlParts.hostname, urlParts.port, dataPath);
+      try {
+        ESServer.startElasticsearchServer(urlParts.hostname, urlParts.port, dataPath);
+      } catch (e) {
+        if (e instanceof ServerAlreadyRunningException) {
+          console.log(`Elasticsearch service is already running on ${domainCfg.url}`);
+        } else {
+          throw e;
+        }
+      }
     }
 
     if(plain) {
