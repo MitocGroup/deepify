@@ -320,7 +320,7 @@ module.exports = {
           },
         },
         'dev': {
-          example: 'deepify init-backend path/to/web_app',
+          example: 'deepify compile dev path/to/web_app',
           description: 'Initialize backend',
           opts: {
             partial: {
@@ -331,6 +331,11 @@ module.exports = {
             update: {
               alias: 'u',
               description: 'Use \'npm update\' instead of \'npm install\' when compiling lambdas',
+              required: false,
+            },
+            'skip-install': {
+              alias: 's',
+              description: 'Skip npm dependencies installation in Lambdas and linking aws-sdk',
               required: false,
             },
           },
@@ -449,6 +454,11 @@ module.exports = {
         update: {
           alias: 'u',
           description: 'Use \'npm update\' instead of \'npm install\' when compiling lambdas',
+          required: false,
+        },
+        'skip-install': {
+          alias: 's',
+          description: 'Skip npm dependencies installation in Lambdas and linking aws-sdk',
           required: false,
         },
       },

@@ -36,38 +36,27 @@ export class LambdaListener extends AbstractListener {
         }
 
         let lambda = data.lambda;
+        let lambdaObj = this.server.defaultLambdasConfig[lambda];
         let payload = data.payload;
-        let lambdaConfig = {
-          dynamicContext: data.context,
-        };
+
+        if (!lambdaObj) {
+          return event.send404(`Unknown Lambda ${lambda}`);
+        }
 
         this.server.logger(
           `Running Lambda ${lambda} with payload ${JSON.stringify(payload)}${isAsync ? ' in async mode' : ''}`
         );
 
-        lambdaConfig = objectMerge(lambdaConfig, this.server.defaultLambdasConfig[lambda]);
+        let lambdaConfigFile = Path.join(Path.dirname(lambdaObj.path), '_config.json');
+        let lambdaConfig = null;
 
-        if (!lambdaConfig) {
-          this.server.logger(`Missing Lambda ${lambda} config`);
-          event.send404(`Unknown Lambda ${lambda}`);
-          return;
+        try {
+          lambdaConfig = FileSystemExtra.readJsonSync(lambdaConfigFile);
+        } catch (e) {
+          return event.send500(`Missing lambda _config.json in ${lambdaConfig}`);
         }
 
-        let lambdaConfigFile = Path.join(Path.dirname(lambdaConfig.path), '_config.json');
-
-        FileSystemExtra.outputJson(
-          lambdaConfigFile,
-          lambdaConfig,
-          (error) => {
-            if (error) {
-              this.server.logger(`Unable to persist fake Lambda ${lambda} config: ${error}`);
-              event.send500(error);
-              return;
-            }
-
-            this._runLambda(event, lambdaConfig, payload, isAsync);
-          }
-        );
+        this._runLambda(event, lambdaConfig, payload, isAsync);
       });
     }
   }

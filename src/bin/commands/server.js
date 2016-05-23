@@ -40,38 +40,35 @@ module.exports = function(mainPath) {
     });
   };
 
+  let compileDevCmd = () => {
+    let cmd = new Exec(
+      Bin.node,
+      this.scriptPath,
+      'compile',
+      'dev'
+    );
+
+    cmd.cwd = mainPath;
+
+    if (skipBackendBuild) {
+      cmd.addArg('--skip-install');
+    }
+
+    return cmd;
+  };
+
   if (!fs.existsSync(propertyConfigFile)) {
     fs.writeFileSync(propertyConfigFile, JSON.stringify(Config.generate()));
   }
 
   let property = new Property(mainPath);
 
-  if (skipBackendBuild) {
-    property.assureFrontendEngine((error) => {
-      if (error) {
-        console.error('Error while assuring frontend engine: ' + error);
-      }
+  compileDevCmd().run((result) => {
+    if (result.failed) {
+      console.error(result.error);
+      this.exit(1);
+    }
 
-      property.runInitMsHooks(() => {
-        startServer(new Server(property));
-      });
-    });
-  } else {
-    let cmd = new Exec(
-      Bin.node,
-      this.scriptPath,
-      'init-backend'
-    );
-
-    cmd.cwd = mainPath;
-
-    cmd.run((result) => {
-      if (result.failed) {
-        console.error(result.error);
-        this.exit(1);
-      }
-
-      startServer(new Server(property));
-    }, true);
-  }
+    startServer(new Server(property));
+  }, true);
 };
