@@ -164,6 +164,9 @@ suite('Lambda/Runtime', () => {
       'memoryLimitInMB',
       'succeed',
     ];
+
+    runtime = new Runtime(lambda, lambdaPath);
+
     let actualResult = Object.keys(runtime.context);
 
     expectedContextKeys.forEach((value) => {
