@@ -1,7 +1,11 @@
 #!/usr/bin/env node
+
 /**
  * Created by AlexanderC on 6/19/15.
  */
+
+/*jshint loopfunc:true */
+/*jshint expr:true */
 
 'use strict';
 

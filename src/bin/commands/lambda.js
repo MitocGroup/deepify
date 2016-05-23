@@ -1,9 +1,12 @@
 #!/usr/bin/env node
+
 /**
  * Created by AlexanderC on 6/19/15.
  */
 
 'use strict';
+
+/*jshint maxcomplexity:false */
 
 module.exports = function(lambdaPath) {
   let Runtime = require('../../lib.compiled/Lambda/Runtime').Runtime;

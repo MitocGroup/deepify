@@ -2,6 +2,8 @@
  * Created by AlexanderC on 6/19/15.
  */
 
+/* jshint expr:true */
+
 'use strict';
 
 import Path from 'path';
