@@ -22,6 +22,7 @@ module.exports = function(mainPath) {
 
   let doUpdate = this.opts.locate('update').exists;
   let microservicesToInit = this.opts.locate('partial').value;
+  let skipInstall = this.opts.locate('skip-install').exists;
 
   mainPath = this.normalizeInputPath(mainPath);
 
@@ -39,6 +40,7 @@ module.exports = function(mainPath) {
     let chain = new NpmChain();
     let NpmProcess = doUpdate ? NpmUpdate : NpmInstall;
     let installCmd = new NpmProcess(lambdaPaths)
+      .dry(skipInstall)
       .addExtraArg(
       '--loglevel silent'
     );
@@ -47,7 +49,7 @@ module.exports = function(mainPath) {
 
     chain.add(installCmd);
 
-    let linkCmd = new NpmInstallLibs(lambdaPaths);
+    let linkCmd = new NpmInstallLibs(lambdaPaths).dry(skipInstall);
 
     // dtrace-provider: Fixes bonyan issue...
     // aws-sdk: use globally
