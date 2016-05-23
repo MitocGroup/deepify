@@ -26,7 +26,7 @@ module.exports = function(microservicePath) {
   let RegistryConfig = require('../../../lib.compiled/Registry/Config').Config;
   let Registry = require('deep-package-manager').Registry_Registry;
   let RegistryAuthorizer = require('deep-package-manager').Registry_Storage_Driver_Helpers_Api_Auth_Authorizer;
-  let Microservice = require('deep-package-manager').Microservice_Instance;
+  let ParametersExtractor = require('deep-package-manager').Parameters_Extractor;
   let LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   let Property = require('deep-package-manager').Property_Instance;
   let Config = require('deep-package-manager').Property_Config;
@@ -101,7 +101,7 @@ module.exports = function(microservicePath) {
   console.log('Cleaning up microservice');
 
   console.log('Remove custom parameters and tests');
-  fse.removeSync(path.join(microservicePath, Microservice.PARAMS_FILE));
+  fse.removeSync(path.join(microservicePath, ParametersExtractor.PARAMETERS_FILE));
   fse.removeSync(path.join(microservicePath, 'Tests'));
 
   (new LambdaExtractor(property))
