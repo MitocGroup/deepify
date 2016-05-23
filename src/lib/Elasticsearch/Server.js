@@ -46,16 +46,16 @@ export class Server {
    * @private
    */
   _launchSearch() {
-    if (this._runningInstances.search) {
-      return this._runningInstances.search;
+    if (this._runningInstances.client) {
+      return this._runningInstances.client;
     }
 
-    this._runningInstances.search = Server.startElasticsearchServer(
+    this._runningInstances.client = Server.startElasticsearchServer(
       '127.0.0.1', Server.SEARCH_CLIENT_PORT, 
       this._dataPath, this._dryLaunch
     );
-    
-    return this._runningInstances.search;
+
+    return this._runningInstances.client;
   }
 
   /**
