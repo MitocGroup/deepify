@@ -4,3 +4,5 @@ tests
 .gitignore
 coverage
 resources
+.istanbul.yml
+.babelrc
