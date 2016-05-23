@@ -119,7 +119,8 @@ export class NpmInstall {
    */
   run(cb, silent = NpmInstall.DEFAULT_SILENT_STATE) {
     if (this._dry) {
-      return cb();
+      cb();
+      return this;
     }
     
     let wait = new WaitFor();
