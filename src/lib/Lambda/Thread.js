@@ -34,13 +34,8 @@ export class Thread {
       ],
       {
         cwd: Path.dirname(this._runtime.lambdaPath),
-        silent: true,
       }
     );
-
-    // @todo: replace with fork opts
-    this._process.stdout.pipe(process.stdout);
-    this._process.stderr.pipe(process.stderr);
 
     let contextSent = false;
     let noPrematureFailCheck = false;
