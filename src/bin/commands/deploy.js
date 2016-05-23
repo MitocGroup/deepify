@@ -239,8 +239,6 @@ module.exports = function(mainPath) {
           console.error(error.toString(), os.EOL, error.stack);
         }
 
-        process.exit(1);
-
         deployRollback((error) => {
           if (error) {
             console.error(`Error while undeploying resources for ${propertyInstance.configObj.baseHash}: ${error}`);
