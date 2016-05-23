@@ -8,8 +8,6 @@
 
 'use strict';
 
-/*jshint maxcomplexity:false */
-
 module.exports = function(mainPath) {
   let path = require('path');
   let fse = require('fs-extra');

@@ -6,8 +6,6 @@
 
 'use strict';
 
-/*jshint maxcomplexity:false */
-
 module.exports = function(lambdaPath) {
   let Runtime = require('../../lib.compiled/Lambda/Runtime').Runtime;
   let ForksManager = require('../../lib.compiled/Lambda/ForksManager').ForksManager;
