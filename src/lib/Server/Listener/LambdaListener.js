@@ -3,9 +3,7 @@
 import {AbstractListener} from './AbstractListener';
 import {Runtime as LambdaRuntime} from '../../Lambda/Runtime';
 import FileSystemExtra from 'fs-extra';
-import FileSystem from 'fs';
 import Path from 'path';
-import objectMerge from 'object-merge';
 
 export class LambdaListener extends AbstractListener {
   /**
