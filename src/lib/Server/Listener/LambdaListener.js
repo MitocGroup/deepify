@@ -50,6 +50,7 @@ export class LambdaListener extends AbstractListener {
 
         try {
           lambdaConfig = FileSystemExtra.readJsonSync(lambdaConfigFile);
+          lambdaConfig.dynamicContext = data.context;
         } catch (e) {
           return event.send500(`Missing or broken lambda _config.json in ${lambdaConfigFile}`);
         }
