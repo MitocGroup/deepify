@@ -7,6 +7,7 @@
 import {AbstractGenerator} from './AbstractGenerator';
 import Joi from 'joi';
 import path from 'path';
+import FSExtra from 'fs-extra';
 
 export class VanillaFrontendGenerator extends AbstractGenerator {
   /**
@@ -20,14 +21,14 @@ export class VanillaFrontendGenerator extends AbstractGenerator {
    * @param {Function} cb
    */
   _generate(cb) {
-    let targetBootstrap = path.join(this.targetPath, 'Frontend/bootstrap.js');
+    FSExtra.ensureDirSync(this.targetPath);
 
     this.renderFile(
       'Frontend/vanilla_bootstrap.js', 
-      targetBootstrap
+      path.join(this.targetPath, 'bootstrap.js')
     );
 
-    cb(null, targetBootstrap);
+    cb(null, this.targetPath);
   }
 
   /**

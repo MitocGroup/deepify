@@ -8,7 +8,7 @@ __deepify_comp() {
     {% import _self as this %}
 
     {% macro cmdComplete(cmdName, cmdDepth, cmdManifest) %}
-      if [ "${COMP_WORDS[{{ cmdDepth }}]}" = "{{ cmdName }}" ]; then
+      if [ "${{ '{' }}COMP_WORDS[{{ cmdDepth }}]}" = "{{ cmdName }}" ]; then
         {% for subCmdName, subCmdManifest in cmdManifest.commands  %}
           {%- if subCmdManifest.commands -%}
             {{ _self.cmdComplete(subCmdName, cmdDepth + 1, subCmdManifest) }}

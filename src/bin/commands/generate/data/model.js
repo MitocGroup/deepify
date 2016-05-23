@@ -6,12 +6,12 @@
 
 module.exports = function(mainPath) {
   let inquirer = require('inquirer');
-  let ModelGenerator = require('../../../lib.compiled/Generator/ModelGenerator').ModelGenerator;
+  let ModelGenerator = require('../../../../lib.compiled/Generator/ModelGenerator').ModelGenerator;
   let Property = require('deep-package-manager').Property_Instance;
-  let Exec = require('../../../lib.compiled/Helpers/Exec').Exec;
-  let Bin = require('../../../lib.compiled/NodeJS/Bin').Bin;
+  let Exec = require('../../../../lib.compiled/Helpers/Exec').Exec;
+  let Bin = require('../../../../lib.compiled/NodeJS/Bin').Bin;
   let OS = require('os');
-  let alphanumericalNotEmpty = require('../helper/inquirer-validators').alphanumericalNotEmpty;
+  let alphanumericalNotEmpty = require('../../helper/inquirer-validators').alphanumericalNotEmpty;
 
   mainPath = this.normalizeInputPath(mainPath);
   let property = new Property(mainPath);
@@ -28,7 +28,7 @@ module.exports = function(mainPath) {
         console.log(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
         this.exit(1);
       }
-      
+
       modelSchema.microservice = property.microservice(microservice);
     } else {
       questionList.push({
@@ -114,6 +114,7 @@ module.exports = function(mainPath) {
       Bin.node,
       this.scriptPath,
       'generate',
+      'backend',
       'action',
       mainPath,
       `-m=${modelSchema.microservice.identifier}`,
@@ -122,7 +123,7 @@ module.exports = function(mainPath) {
 
     cmd.run((result) => {
       if (result.failed) {
-        console.error(`deepify generate action failed with: ${result.error}`);
+        console.error(`deepify generate backend action failed with: ${result.error}`);
         this.exit(1);
       }
 
