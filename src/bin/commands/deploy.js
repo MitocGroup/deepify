@@ -23,6 +23,7 @@ module.exports = function(mainPath) {
   let S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
   let ProvisioningCollisionsDetectedException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsDetectedException;
   let DeployConfig = require('deep-package-manager').Property_DeployConfig;
+  let Listing = require('deep-package-manager').Provisioning_Listing;
 
   let isProd = this.opts.locate('prod').exists;
   let installSdk = this.opts.locate('aws-sdk').exists;
@@ -242,23 +243,37 @@ module.exports = function(mainPath) {
           console.error(error.toString(), os.EOL, error.stack);
         }
 
-        if (propertyInstance.config.provisioning) {
-          dumpConfig(propertyInstance, () => {
+        deployRollback((error) => {
+          if (error) {
+            console.error(`Error while undeploying resources for ${propertyInstance.configObj.baseHash}: ${error}`);
+          }
+
+          if (propertyInstance.config.provisioning) {
+            dumpConfig(propertyInstance, () => {
+              this.exit(1);
+            });
+          } else {
             this.exit(1);
-          });
-        } else {
-          this.exit(1);
-        }
+          }
+        });
       });
 
       process.on('SIGINT', () => {
         console.log('Gracefully shutting down from SIGINT (Ctrl-C)...');
 
-        if (propertyInstance.config.provisioning) {
-          dumpConfig(propertyInstance, () => this.exit(0));
-        } else {
-          this.exit(0);
-        }
+        deployRollback((error) => {
+          if (error) {
+            console.error(`Error while undeploying resources for ${propertyInstance.configObj.baseHash}: ${error}`);
+          }
+
+          if (propertyInstance.config.provisioning) {
+            dumpConfig(propertyInstance, () => {
+              this.exit(1);
+            });
+          } else {
+            this.exit(1);
+          }
+        });
       });
     })();
 
@@ -415,6 +430,46 @@ module.exports = function(mainPath) {
     };
 
     waitUntilDone();
+  };
+
+  let deployRollback = (cb) => {
+    if (propertyInstance.isUpdate) {
+      return ; // @todo: undeploy either the update?
+    }
+
+    hasDeployedResources((has) => {
+      if (!has) {
+        return;
+      }
+
+      let baseHash = propertyInstance.configObj.baseHash;
+
+      console.log(`Start undeploying resources for ${baseHash}`);
+
+      let undeployCmd = new Exec(
+        Bin.node,
+        this.scriptPath,
+        'undeploy',
+        mainPath,
+        `--resource=${baseHash}`
+      );
+
+      undeployCmd.run(() => {
+        if (undeployCmd.failed) {
+          return cb(undeployCmd.error);
+        }
+
+        cb(null);
+      }, true);
+    });
+  };
+
+  let hasDeployedResources = (cb) => {
+    let lister = new Listing(propertyInstance);
+
+    lister.list((listingResult) => {
+      cb(listingResult.matchedResources > 0);
+    })
   };
 
   let getLambdas = (dir, files_) => {
