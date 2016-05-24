@@ -5,7 +5,7 @@ import {NpmLink} from '../../lib/NodeJS/NpmLink';
 import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
 
 suite('NodeJS/NpmLink', () => {
-  let libs = 'mocha isparta';
+  let libs = 'mocha istanbul';
   let libsArray = ['codacy-coverage', 'istanbul'];
   let npmLink = null;
 

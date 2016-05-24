@@ -16,7 +16,7 @@ suite('NodeJS/NpmChain', () => {
   });
 
   test('Check constructor sets _commands', () => {
-    let libs = 'mocha isparta';
+    let libs = 'mocha istanbul';
     npmLink = new NpmLink();
     npmLink.libs = libs;
 

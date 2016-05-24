@@ -5,7 +5,7 @@ import {NpmInstallLibs} from '../../lib/NodeJS/NpmInstallLibs';
 import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
 
 suite('NodeJS/NpmInstallLibs', () => {
-  let libs = 'mocha isparta';
+  let libs = 'mocha istanbul';
   let libsArray = ['codacy-coverage', 'istanbul'];
   let npmInstallLibs = null;
 

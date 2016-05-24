@@ -44,10 +44,6 @@ suite('Lambda/Runtime', () => {
     chai.expect(runtime.lambdaPath).to.equal(null);
   });
 
-  test('Check constructor sets _awsConfigFile = null', () => {
-    chai.expect(runtime._awsConfigFile).to.equal(null);
-  });
-
   test('Check ENVIRONMENT static getter', () => {
     chai.expect(Runtime.ENVIRONMENT).to.equal('local');
   });
@@ -60,7 +56,6 @@ suite('Lambda/Runtime', () => {
     let actualResult = Runtime.createLambda(lambdaPath);
 
     chai.expect(actualResult).to.be.an.instanceOf(Runtime);
-    chai.expect(actualResult.awsConfigFile).to.be.equal(null);
   });
 
   test('Check complete setter/getter', () => {
@@ -169,6 +164,9 @@ suite('Lambda/Runtime', () => {
       'memoryLimitInMB',
       'succeed',
     ];
+
+    runtime = new Runtime(lambda, lambdaPath);
+
     let actualResult = Object.keys(runtime.context);
 
     expectedContextKeys.forEach((value) => {

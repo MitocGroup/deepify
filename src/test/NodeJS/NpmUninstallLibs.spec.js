@@ -5,7 +5,7 @@ import {NpmUninstallLibs} from '../../lib/NodeJS/NpmUninstallLibs';
 import {NpmInstall} from '../../lib/NodeJS/NpmInstall';
 
 suite('NodeJS/NpmUninstallLibs', () => {
-  let libs = 'mocha isparta';
+  let libs = 'mocha istanbul';
   let libsArray = ['codacy-coverage', 'istanbul'];
   let npmUninstallLibs = null;
 
