@@ -1,5 +1,5 @@
 {{ '#' }}!/usr/bin/env bash
-{{ '#' }} Created on {{ 'now'|date('m/d/Y h:i:s A') }}
+{{ '#' }} This script is autogenrated by deepify. DO NOT CHANGE IT MANUALLY!!!
 __deepify_comp() {
     local CUR_WORD
 
@@ -8,7 +8,7 @@ __deepify_comp() {
     {% import _self as this %}
 
     {% macro cmdComplete(cmdName, cmdDepth, cmdManifest) %}
-      if [ "${COMP_WORDS[{{ cmdDepth }}]}" = "{{ cmdName }}" ]; then
+      if [ "${{ '{' }}COMP_WORDS[{{ cmdDepth }}]}" = "{{ cmdName }}" ]; then
         {% for subCmdName, subCmdManifest in cmdManifest.commands  %}
           {%- if subCmdManifest.commands -%}
             {{ _self.cmdComplete(subCmdName, cmdDepth + 1, subCmdManifest) }}

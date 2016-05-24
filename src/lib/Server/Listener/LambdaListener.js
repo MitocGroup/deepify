@@ -3,9 +3,7 @@
 import {AbstractListener} from './AbstractListener';
 import {Runtime as LambdaRuntime} from '../../Lambda/Runtime';
 import FileSystemExtra from 'fs-extra';
-import FileSystem from 'fs';
 import Path from 'path';
-import objectMerge from 'object-merge';
 
 export class LambdaListener extends AbstractListener {
   /**
@@ -36,62 +34,28 @@ export class LambdaListener extends AbstractListener {
         }
 
         let lambda = data.lambda;
+        let lambdaObj = this.server.defaultLambdasConfig[lambda];
         let payload = data.payload;
-        let lambdaConfig = {
-          dynamicContext: data.context,
-        };
+
+        if (!lambdaObj) {
+          return event.send404(`Unknown Lambda ${lambda}`);
+        }
 
         this.server.logger(
           `Running Lambda ${lambda} with payload ${JSON.stringify(payload)}${isAsync ? ' in async mode' : ''}`
         );
 
-        if (this.server.buildPath) {
-          lambdaConfig = objectMerge(lambdaConfig, this.server.buildConfig.lambdas[lambda]);
+        let lambdaConfigFile = Path.join(Path.dirname(lambdaObj.path), '_config.json');
+        let lambdaConfig = null;
 
-          if (!lambdaConfig) {
-            this.server.logger(`Missing Lambda ${lambda} built config`);
-            event.send404(`Unknown Lambda ${lambda}`);
-            return;
-          }
-
-          FileSystemExtra.ensureSymlink(
-            Path.join(lambdaConfig.buildPath, '_config.json'),
-            Path.join(Path.dirname(lambdaConfig.path), '_config.json'),
-            (error) => {
-              if (error) {
-                this.server.logger(`Unable to link Lambda ${lambda} config: ${error}`);
-                event.send500(error);
-                return;
-              }
-
-              this._runLambda(event, lambdaConfig, payload, isAsync);
-            }
-          );
-        } else {
-          lambdaConfig = objectMerge(lambdaConfig, this.server.defaultLambdasConfig[lambda]);
-
-          if (!lambdaConfig) {
-            this.server.logger(`Missing Lambda ${lambda} config`);
-            event.send404(`Unknown Lambda ${lambda}`);
-            return;
-          }
-
-          let lambdaConfigFile = Path.join(Path.dirname(lambdaConfig.path), '_config.json');
-
-          FileSystemExtra.outputJson(
-            lambdaConfigFile,
-            lambdaConfig,
-            (error) => {
-              if (error) {
-                this.server.logger(`Unable to persist fake Lambda ${lambda} config: ${error}`);
-                event.send500(error);
-                return;
-              }
-
-              this._runLambda(event, lambdaConfig, payload, isAsync);
-            }
-          );
+        try {
+          lambdaConfig = FileSystemExtra.readJsonSync(lambdaConfigFile);
+          lambdaConfig.dynamicContext = data.context;
+        } catch (e) {
+          return event.send500(`Missing or broken lambda _config.json in ${lambdaConfigFile}`);
         }
+
+        this._runLambda(event, lambdaConfig, payload, isAsync);
       });
     }
   }

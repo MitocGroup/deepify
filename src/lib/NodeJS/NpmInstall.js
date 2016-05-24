@@ -21,6 +21,7 @@ export class NpmInstall {
 
     this._dirs = dirs;
     this._extraArgs = [];
+    this._dry = false;
   }
 
   /**
@@ -54,7 +55,7 @@ export class NpmInstall {
    * @returns {NpmInstall}
    */
   runChunk(cb, chunkSize = NpmInstall.DEFAULT_CHUNK_SIZE, silent = NpmInstall.DEFAULT_SILENT_STATE) {
-    if (this._dirs.length <= 0) {
+    if (this._dirs.length <= 0 || this._dry) {
       cb();
       return this;
     }
@@ -64,6 +65,16 @@ export class NpmInstall {
       silent,
       cb
     );
+
+    return this;
+  }
+
+  /**
+   * @param {Boolean} bool
+   * @returns {NpmInstall}
+   */
+  dry(bool = true) {
+    this._dry = bool;
 
     return this;
   }
@@ -107,6 +118,11 @@ export class NpmInstall {
    * @returns {NpmInstall}
    */
   run(cb, silent = NpmInstall.DEFAULT_SILENT_STATE) {
+    if (this._dry) {
+      cb();
+      return this;
+    }
+    
     let wait = new WaitFor();
     let remaining = this._dirs.length;
     let cmdStack = [];

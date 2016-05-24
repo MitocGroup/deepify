@@ -2,16 +2,18 @@ language: node_js
 sudo: false
 node_js:
   - '4.3'
-  - '5.9'
-  - '6.1'
+  - '5.11'
+  - '6.2'
 cache:
   directories:
-    - "$(npm root -g)"
+    - $(npm root -g)
     - node_modules
     - $(npm config get prefix)/bin
 notifications:
   email:
     - devs-deep@mitocgroup.com
+  slack:
+    secure: Kv3toHMK+/TguJa9jIbIhii/XmLZUDlEX8YiDSJv1S6zKEQqowqXT2Gi1J9u8KYiZBQC+S3x+T9eRkkNJk7RMrLaotbrtI5DNa7ynrhSydIApZIXxISZBh4Ihbdsch7y6ZPDuaGATKSInKY96NRqbXozw9f/pNYc/c2nq3BIBBexLAfGNlQPgVqBNKw12WlfU8O1ARMpQ3fWDE1JgTtLYZst1EGXwkm87O5ybDUcEUY+qqwj6I5HYSpCjanZ3ILeYagrb79gbgU6llusI6YF4PKVH12+51O0xqpvqawxqcLWbKwv7Y1H8kUBI0vKSPlvLS9dsqwnjG8BpHse2ypSzqfuMyViETmpP+ZHFJ8avxrGsPdiQe4doqiYBz2dkxRyorx4QTI/5JP/CGIp9k7NCsd3KQGViHvWOqMnYyBzkd8bTvYNbJYQ72xOYrgAhsiqEJaCOUk4x8h4pSUBb/r021XK3uIU9hu1GXdLg5o57pFk3XNFzD9pUBsQi6TZLYwH8GFGcJEUbDEYA8Gev5E/ZDRz3IheFL7oIWZbssT8I3uXojMMMQvBf4masC8MmYhc8IQh3LCS8h78Sw07sFEhcjXMcNCxeM+B5lkoByiLBMuI2Jwvfo/C2ulqitwo4niqju45bh/rsdUlJEJZwTrDkpj0imjDHQPxhSo9Ftrqk68=
 branches:
   only:
     - master
@@ -24,11 +26,12 @@ env:
     - secure: JHOBtvwzO2GYXh/qxryOry58driXb3s/aJ0MiozCn9ZvLkWvw5+45dEzr4iB8LYGfOgXVJ1cMF/yWoIXNZCeXnhaNlo9xPf7zzpX3co82zZufjOK430A5D07aQ3lrHCsLRuwS5m06/yvGwBw/2NLThibX5XHZ6e23xkSuYGefAaMqa9wS5QMmc1wyBNRE982BmxZIYhEBqUpLUnCpKLreDWXDIsRM6/VoIDEEZOFSVDI8AAFU4RBDopO1E4Y8lsDBVB9Ifa/w4ooEs+qp0Ewabv7wPCnmVJLPnlJckbazsMZ3iW4npSlYl7P75l3ChFEionkQdaUukkQ65PZ2sSstess3qXDwZp7XysQj97XB+0h1wWJm1zd3cATloZGzseflBxTQeC6NVnp0vKD06MCLNP4LtdFDfL3aDZRe5536ZsC3AF6Ge2IKIy71OvwJqlBKvq9uJoqA+GJ7Wpb+NwQfVXzCc0YKpc9s9WGRrq9TAQ0S3exmtYJ2aJyNBKuJ4wYdowG7OCMC6NGqJF8HmL1Hff+ldDSbDA61I3HgbcKjCDqFXB91gv9l7H0qrBB2jIBD0zMylei2SnLLVhoewpUFwV96ntE2YKicYmja9tK9u/9bhrJ8JVZyXng/Ftl81zSu/IqSZSVtC09ooYHeJv7bS33UaLEHufsmgfUavspreo=
 before_install:
   - (npm list -g babel-cli --depth=0 || npm install -g babel-cli@6.x.x)
+  - (npm list -g babel-polyfill --depth=0 || npm install -g babel-polyfill)
   - (npm list -g babel-preset-es2015 --depth=0 || npm install -g babel-preset-es2015)
   - (npm list -g babel-plugin-add-module-exports --depth=0 || npm install -g babel-plugin-add-module-exports)
   - (npm list -g browserify --depth=0 || npm install -g browserify@11.2.x)
-  - (npm list -g mocha --depth=0 || npm install -g mocha@2.3.x)
-  - (npm list -g istanbul --depth=0 || npm install -g istanbul@0.3.x)
+  - (npm list -g mocha --depth=0 || npm install -g mocha@2.4.x)
+  - (npm list -g istanbul@^1.0.0-alpha --depth=0 || npm install -g istanbul@^1.0.0-alpha)
   - (npm list -g isparta --depth=0 || npm install -g isparta@3.1.x)
   - (npm list -g codacy-coverage --depth=0 || npm install -g codacy-coverage@1.1.x)
   - cp test/package.json .

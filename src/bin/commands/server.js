@@ -17,7 +17,6 @@ module.exports = function(mainPath) {
   let open = require('open');
 
   let port = this.opts.locate('port').value || '8000';
-  let buildPath = this.opts.locate('build-path').value || null;
   let dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   let serverAddress = 'http://localhost:' + port;
   let openBrowser = this.opts.locate('open-browser').exists;
@@ -31,11 +30,32 @@ module.exports = function(mainPath) {
 
   mainPath = this.normalizeInputPath(mainPath);
 
-  if (buildPath) {
-    buildPath = this.normalizeInputPath(buildPath);
-  }
-
   let propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
+
+  let startServer = (server) => {
+    server.listen(parseInt(port, 10), dbServer, () => {
+      if (openBrowser) {
+        open(serverAddress);
+      }
+    });
+  };
+
+  let compileDevCmd = () => {
+    let cmd = new Exec(
+      Bin.node,
+      this.scriptPath,
+      'compile',
+      'dev'
+    );
+
+    cmd.cwd = mainPath;
+
+    if (skipBackendBuild) {
+      cmd.addArg('--skip-install');
+    }
+
+    return cmd;
+  };
 
   if (!fs.existsSync(propertyConfigFile)) {
     fs.writeFileSync(propertyConfigFile, JSON.stringify(Config.generate()));
@@ -43,44 +63,12 @@ module.exports = function(mainPath) {
 
   let property = new Property(mainPath);
 
-  if (skipBackendBuild) {
-    property.assureFrontendEngine((error) => {
-      if (error) {
-        console.error('Error while assuring frontend engine: ' + error);
-      }
-
-      property.runInitMsHooks(() => {
-        startServer(new Server(property));
-      });
-    });
-  } else {
-    let cmd = new Exec(
-      Bin.node,
-      this.scriptPath,
-      'init-backend'
-    );
-
-    cmd.cwd = mainPath;
-
-    cmd.run((result) => {
-      if (result.failed) {
-        console.error(result.error);
-        this.exit(1);
-      }
-
-      startServer(new Server(property));
-    }, true);
-  }
-
-  let startServer = (server) => {
-    if (buildPath) {
-      server.buildPath = buildPath;
+  compileDevCmd().run((result) => {
+    if (result.failed) {
+      console.error(result.error);
+      this.exit(1);
     }
 
-    server.listen(parseInt(port, 10), dbServer, () => {
-      if (openBrowser) {
-        open(serverAddress);
-      }
-    });
-  };
+    startServer(new Server(property));
+  }, true);
 };

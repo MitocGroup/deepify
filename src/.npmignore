@@ -1,5 +1,9 @@
 test
+!bin/commands/generate/test/
 tests
 /lib
 .gitignore
 coverage
+resources
+.istanbul.yml
+.babelrc

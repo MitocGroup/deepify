@@ -9,17 +9,20 @@ module.exports = function(mainPath) {
   let path = require('path');
   let Property = require('deep-package-manager').Property_Instance;
   let Config = require('deep-package-manager').Property_Config;
+  let Frontend = require('deep-package-manager').Property_Frontend;
   let fs = require('fs');
   let fse = require('fs-extra');
+  let Server = require('../../../lib.compiled/Server/Instance').Instance;
   let NpmInstall = require('../../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   let NpmUpdate = require('../../../lib.compiled/NodeJS/NpmUpdate').NpmUpdate;
   let NpmInstallLibs = require('../../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
   let NpmChain = require('../../../lib.compiled/NodeJS/NpmChain').NpmChain;
-  let Bin = require('../../../lib.compiled/NodeJS/Bin').Bin;
   let LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
+  let AsyncConfig = require('../../../lib.compiled/Helpers/AsyncConfig').AsyncConfig;
 
   let doUpdate = this.opts.locate('update').exists;
   let microservicesToInit = this.opts.locate('partial').value;
+  let skipInstall = this.opts.locate('skip-install').exists;
 
   mainPath = this.normalizeInputPath(mainPath);
 
@@ -31,24 +34,13 @@ module.exports = function(mainPath) {
 
   let property = new Property(mainPath);
 
-  property.assureFrontendEngine((error) => {
-    if (error) {
-      console.error('Error while assuring frontend engine: ' + error);
-    }
-
-    property.runInitMsHooks(() => {
-      initProperty(property, () => {
-        console.log('The backend had been successfully initialized.');
-      });
-    });
-  });
-
   let initProperty = (property, cb) => {
     let lambdaPaths = new LambdaExtractor(property, getMicroservicesToInit()).extract(LambdaExtractor.NPM_PACKAGE_FILTER);
 
     let chain = new NpmChain();
     let NpmProcess = doUpdate ? NpmUpdate : NpmInstall;
     let installCmd = new NpmProcess(lambdaPaths)
+      .dry(skipInstall)
       .addExtraArg(
       '--loglevel silent'
     );
@@ -57,7 +49,7 @@ module.exports = function(mainPath) {
 
     chain.add(installCmd);
 
-    let linkCmd = new NpmInstallLibs(lambdaPaths);
+    let linkCmd = new NpmInstallLibs(lambdaPaths).dry(skipInstall);
 
     // dtrace-provider: Fixes bonyan issue...
     // aws-sdk: use globally
@@ -67,6 +59,9 @@ module.exports = function(mainPath) {
 
     chain.runChunk(() => {
       let lambdasConfig = property.fakeBuild();
+      let server = new Server(property);
+      server.es.dry().launchInstances(); // asyncConfig is looking at running ES instances
+      let asyncConfig = server.asyncConfig.json();
 
       for (let lambdaArn in lambdasConfig) {
         if (!lambdasConfig.hasOwnProperty(lambdaArn)) {
@@ -75,15 +70,28 @@ module.exports = function(mainPath) {
 
         let lambdaConfig = lambdasConfig[lambdaArn];
         let lambdaPath = path.dirname(lambdaConfig.path);
-        let lambdaConfigPath = path.join(lambdaPath, '_config.json');
+        let lambdaConfigPath = path.join(lambdaPath, Frontend.CONFIG_FILE);
+        let lambdaAsyncConfigPath = path.join(lambdaPath, AsyncConfig.FILE_NAME);
 
-        if (fs.existsSync(lambdaConfigPath)) {
-          console.log('An old Lambda(' + lambdaArn + ') config found in ' + lambdaPath + '. Removing...');
-          fs.unlinkSync(lambdaConfigPath);
+        let configs = {};
+        configs[lambdaConfigPath] = lambdaConfig;
+        configs[lambdaAsyncConfigPath] = asyncConfig;
+
+        for (let configPath in configs) {
+          if (!configs.hasOwnProperty(configPath)) {
+            continue;
+          }
+
+          let configObj = configs[configPath];
+
+          if (fs.existsSync(configPath)) {
+            console.log(`An old Lambda(${lambdaArn}) config found in ${lambdaPath}. Removing...`);
+            fs.unlinkSync(configPath);
+          }
+
+          console.log(`Persisting Lambda(${lambdaArn}) config into ${configPath}`);
+          fs.writeFileSync(configPath, JSON.stringify(configObj));
         }
-
-        console.log('Persisting Lambda(' + lambdaArn + ') config into ' + lambdaConfigPath);
-        fs.writeFileSync(lambdaConfigPath, JSON.stringify(lambdaConfig));
       }
 
       cb();
@@ -102,8 +110,22 @@ module.exports = function(mainPath) {
 
   let arrayUnique = (a) => {
     return a.reduce((p, c) => {
-      if (p.indexOf(c) < 0) p.push(c);
+      if (p.indexOf(c) < 0) {
+        p.push(c);
+      }
       return p;
     }, []);
-  }
+  };
+
+  property.assureFrontendEngine((error) => {
+    if (error) {
+      console.error('Error while assuring frontend engine: ' + error);
+    }
+
+    property.runInitMsHooks(() => {
+      initProperty(property, () => {
+        console.log('The backend had been successfully initialized.');
+      });
+    });
+  });
 };

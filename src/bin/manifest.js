@@ -54,7 +54,7 @@ module.exports = {
           required: false,
         },
         dumpPath: {
-          description: '[DEPRECATED] The path to dump dependency into (works with GitHub only!)',
+          description: 'The path to dump dependency into (works with GitHub only!)',
           required: false,
         },
       },
@@ -64,11 +64,6 @@ module.exports = {
       description: 'Run local development server',
       section: 'Develop on your local environment',
       opts: {
-        'build-path': {
-          alias: 'b',
-          description: 'The path to the build (in order to pick up config)',
-          required: false,
-        },
         'skip-frontend-build': {
           alias: 'f',
           description: 'Skip picking up _build path from the microservices Frontend',
@@ -325,7 +320,7 @@ module.exports = {
           },
         },
         'dev': {
-          example: 'deepify init-backend path/to/web_app',
+          example: 'deepify compile dev path/to/web_app',
           description: 'Initialize backend',
           opts: {
             partial: {
@@ -336,6 +331,11 @@ module.exports = {
             update: {
               alias: 'u',
               description: 'Use \'npm update\' instead of \'npm install\' when compiling lambdas',
+              required: false,
+            },
+            'skip-install': {
+              alias: 's',
+              description: 'Skip npm dependencies installation in Lambdas and linking aws-sdk',
               required: false,
             },
           },
@@ -456,6 +456,11 @@ module.exports = {
           description: 'Use \'npm update\' instead of \'npm install\' when compiling lambdas',
           required: false,
         },
+        'skip-install': {
+          alias: 's',
+          description: 'Skip npm dependencies installation in Lambdas and linking aws-sdk',
+          required: false,
+        },
       },
       args: {
         path: {
@@ -498,7 +503,7 @@ module.exports = {
           alias: 'p',
           description: 'Output JSON stringified result only',
           required: false,
-        }
+        },
       },
       args: {
         path: {
@@ -540,9 +545,130 @@ module.exports = {
       description: 'Generate microapplication component(s)',
       section: 'Develop on your local environment',
       commands: {
+        'backend': {
+          commandsPath: './commands/generate/backend',
+          description: 'Generate microapplication backend component(s)',
+          commands: {
+            'action': {
+              example: 'deepify generate action /path/to/microapp',
+              description: 'Generate a microservice resource action',
+              opts: {
+                microapp: {
+                  alias: 'm',
+                  description: 'Microapplication identifier to use',
+                  required: false,
+                },
+                resource: {
+                  alias: 'r',
+                  description: 'Resource name to use',
+                  required: false,
+                },
+              },
+              args: {
+                path: {
+                  description: 'The path to the application',
+                  required: false,
+                },
+              },
+            },
+            'resource': {
+              example: 'deepify generate resource path/to/app',
+              description: 'Generate a microservice resource ',
+              args: {
+                path: {
+                  description: 'The path to the app',
+                  required: false,
+                }
+              },
+              opts: {
+                microapp: {
+                  alias: 'm',
+                  description: 'Microapplication identifier to use',
+                  required: false,
+                },
+                resource: {
+                  alias: 'r',
+                  description: 'Resource name to use',
+                  required: false,
+                },
+              },
+            },
+          },
+        },
+        'data': {
+          commandsPath: './commands/generate/data',
+          description: 'Generate microapplication data component(s)',
+          commands: {
+            'model': {
+              example: 'deepify generate model /path/to/microapp',
+              description: 'Generate a microservice model',
+              opts: {
+                name: {
+                  alias: 'n',
+                  description: 'Default model name to use',
+                  required: false,
+                },
+                microapp: {
+                  alias: 'm',
+                  description: 'Microapplication identifier to use',
+                  required: false,
+                },
+              },
+              args: {
+                path: {
+                  description: 'The path to the application',
+                  required: false,
+                },
+              },
+            },
+            'migration': {
+              example: 'deepify generate migration path/to/app',
+              description: 'Generate a microservice migration',
+              opts: {
+                microapp: {
+                  alias: 'm',
+                  description: 'Microapplication identifier to use',
+                  required: false,
+                },
+              },
+              args: {
+                path: {
+                  description: 'The path to the app',
+                  required: false,
+                },
+              },
+            },
+          }
+        },
+        'test': {
+          commandsPath: './commands/generate/test',
+          description: 'Generate microapplication test component(s)',
+          commands: {
+            'backend': {
+              example: 'deepify generate test backend /path/to/microapp',
+              description: 'Generate microservice backend test(s)',
+              args: {
+                path: {
+                  description: 'The path to the microservice',
+                  required: false,
+                },
+              },
+            },
+            'frontend': {
+              example: 'deepify generate test frontend /path/to/microapp',
+              description: 'Generate microservice frontend test(s)',
+              args: {
+                path: {
+                  description: 'The path to the microservice',
+                  required: false,
+                },
+              },
+            },
+          },
+        },
         'microapp': {
           example: 'deepify generate microapp /target/path/',
-          description: 'Helps to generate microapp skeleton',
+          description: 'Generate microapp skeleton component(s)',
           opts: {
             name: {
               alias: 'n',
@@ -562,60 +688,9 @@ module.exports = {
             },
           },
         },
-        'model': {
-          example: 'deepify generate model /path/to/microapp',
-          description: 'Helps to generate a model',
-          opts: {
-            name: {
-              alias: 'n',
-              description: 'Default model name to use',
-              required: false,
-            },
-            microapp: {
-              alias: 'm',
-              description: 'Microapplication identifier to use',
-              required: false,
-            },
-          },
-          args: {
-            path: {
-              description: 'The path to the application',
-              required: false,
-            },
-          },
-        },
-        'action': {
-          example: 'deepify generate action /path/to/microapp',
-          description: 'Helps to generate a action',
-          opts: {
-            microapp: {
-              alias: 'm',
-              description: 'Microapplication identifier to use',
-              required: false,
-            },
-            resource: {
-              alias: 'r',
-              description: 'Resource name to use',
-              required: false,
-            },
-          },
-          args: {
-            path: {
-              description: 'The path to the application',
-              required: false,
-            },
-          },
-        },
-        'migration': {
-          example: 'deepify generate migration path/to/app',
-          description: 'Create empty migration for a certain microservice',
-          opts: {
-            microapp: {
-              alias: 'm',
-              description: 'Microapplication identifier to use',
-              required: false,
-            },
-          },
+        'frontend': {
+          example: 'deepify generate frontend path/to/app',
+          description: 'Create microservice frontend component(s)',
           args: {
             path: {
               description: 'The path to the microservice',
@@ -631,7 +706,7 @@ module.exports = {
       section: 'Run in the cloud',
       commands: {
         'enable': {
-          example: 'deepify enable-ssl path/to/web_app',
+          example: 'deepify ssl enable path/to/web_app',
           description: 'Enables SSL on a deployed web app',
           opts: {
             domain: {
@@ -648,7 +723,7 @@ module.exports = {
           },
         },
         'disable': {
-          example: 'deepify disable-ssl path/to/web_app',
+          example: 'deepify ssl disable path/to/web_app',
           description: 'Disable activated SSL on a deployed web app',
           opts: {
           },

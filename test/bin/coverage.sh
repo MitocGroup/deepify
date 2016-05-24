@@ -4,7 +4,7 @@ source $(dirname $0)/_head.sh
 
 ### Update paths ###
 
-SEARCH_VALUE="/compile"
+SEARCH_VALUE=$(pwd -P)
 REPLACE_VALUE=""
 
 sed -e "s@${SEARCH_VALUE}@${REPLACE_VALUE}@g" ${__SRC_PATH}"/coverage/lcov.info" > ${__SRC_PATH}"/coverage/coverage.info"

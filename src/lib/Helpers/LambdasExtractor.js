@@ -1,6 +1,10 @@
+
 /**
  * Created by AlexanderC on 12/2/15.
  */
+
+/* jshint maxdepth:false */
+/* jshint maxcomplexity:false */
 
 'use strict';
 

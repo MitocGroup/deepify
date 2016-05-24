@@ -31,7 +31,8 @@ export class MicroserviceGenerator extends AbstractGenerator {
     let name = this.generationSchema.name;
     let identifier = MicroserviceGenerator.identifier(name);
     let engines = this.generationSchema.engines;
-    let targetMsPath = path.join(this.targetPath, identifier);
+    let msPath = path.join(this.targetPath, identifier);
+    let frontendPath = path.join(msPath, 'Frontend');
     let templateParams = {
       engines: engines,
       name: name,
@@ -39,17 +40,17 @@ export class MicroserviceGenerator extends AbstractGenerator {
     };
 
     this._ensureAppConfig();
-    this._ensureTargetDirs(targetMsPath);
+    this._ensureTargetDirs(msPath);
 
     MicroserviceGenerator.MS_RESOURCES.forEach((resource) => {
-      this.renderFile(resource, path.join(targetMsPath, resource), templateParams);
+      this.renderFile(resource, path.join(msPath, resource), templateParams);
     });
 
     let generateEngineFrontend = (engineIndex = 0) => {
       let engine = engines[engineIndex];
       let frontendGenerator = this._createFrontendGenerator(engine);
 
-      frontendGenerator.generate(this.targetPath, {name, identifier}, (error) => {
+      frontendGenerator.generate(frontendPath, {name, identifier}, (error) => {
         if (error) {
           cb(error);
           return;
@@ -60,7 +61,7 @@ export class MicroserviceGenerator extends AbstractGenerator {
         if (engineIndex < engines.length) {
           generateEngineFrontend(engineIndex);
         } else {
-          cb(null, targetMsPath);
+          cb(null, msPath);
         }
       });
     };
@@ -103,9 +104,9 @@ export class MicroserviceGenerator extends AbstractGenerator {
 
   /**
    * @todo: import autoload dir from deepkg.schema.js
-   * @param {String} targetMsPath
+   * @param {String} msPath
    */
-  _ensureTargetDirs(targetMsPath) {
+  _ensureTargetDirs(msPath) {
     let dirList = [
       'Backend',
       'Frontend',
@@ -114,7 +115,7 @@ export class MicroserviceGenerator extends AbstractGenerator {
     ];
 
     dirList.forEach((dir) => {
-      FSExtra.ensureDirSync(path.join(targetMsPath, dir));
+      FSExtra.ensureDirSync(path.join(msPath, dir));
     });
   }
 
