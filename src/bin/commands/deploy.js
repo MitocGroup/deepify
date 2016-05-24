@@ -107,10 +107,11 @@ module.exports = function(mainPath) {
     console.log(`Copying sources to ${tmpPropertyPath}`);
 
     new Exec(
-      'cp',
-      '-R',
-      path.join(mainPath, '*'),
-      tmpPropertyPath + '/'
+      'rsync',
+      '-a',
+      '--delete',
+      mainPath + path.sep,
+      tmpPropertyPath + path.sep
     )
       .avoidBufferOverflow()
       .run((result) => {
