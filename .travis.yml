@@ -20,6 +20,7 @@ branches:
     - stage
     - test
     - dev
+    - coverage_path_update
 env:
   global:
     #CODACY_PROJECT_TOKEN =[secured]
