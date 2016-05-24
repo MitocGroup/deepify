@@ -33,7 +33,6 @@ before_install:
   - (npm list -g browserify --depth=0 || npm install -g browserify@11.2.x)
   - (npm list -g mocha --depth=0 || npm install -g mocha@2.4.x)
   - (npm list -g istanbul@^1.0.0-alpha --depth=0 || npm install -g istanbul@^1.0.0-alpha)
-  - (npm list -g isparta --depth=0 || npm install -g isparta@3.1.x)
   - (npm list -g codacy-coverage --depth=0 || npm install -g codacy-coverage@1.1.x)
   - cp test/package.json .
 after_success:
