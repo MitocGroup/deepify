@@ -5,16 +5,15 @@ source $(dirname $0)/_head.sh
 ####################
 ### Update paths ###
 ####################
-#SEARCH_VALUE=$(pwd -P)"/"
-#REPLACE_VALUE=""
-#
-#sed -e "s@${SEARCH_VALUE}@${REPLACE_VALUE}@g" ${__SRC_PATH}"/coverage/lcov.info" > ${__SRC_PATH}"/coverage/coverage.info"
+SEARCH_VALUE=$(pwd -P)"/"
+REPLACE_VALUE=""
+
+sed -e "s@${SEARCH_VALUE}@${REPLACE_VALUE}@g" ${__SRC_PATH}"/coverage/lcov.info" > ${__SRC_PATH}"/coverage/coverage.info"
 
 ######################################
 ### Upload Coverage info to Codacy ###
 ######################################
-#cat ${__SRC_PATH}"/coverage/coverage.info" | codacy-coverage --debug
-cat ${__SRC_PATH}"/coverage/lcov.info" | codacy-coverage --debug
+cat ${__SRC_PATH}"/coverage/coverage.info" | codacy-coverage --debug
 
 #####################################################################
 ### Log top 20 file paths to be able see paths format from travis ###
