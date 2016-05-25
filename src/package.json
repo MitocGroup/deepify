@@ -54,7 +54,6 @@
     "prepublish": "bash node-bin/assure-deps.sh && bash node-bin/compile.sh && node hooks/dump_comp.js && bash node-bin/obfuscate-compiled.sh"
   },
   "dependencies": {
-    "aws-api-gw-client": "^0.1.x",
     "aws-sdk": "^2.3.x",
     "babel-cli": "^6.8.x",
     "babel-plugin-add-module-exports": "^0.1.2",
