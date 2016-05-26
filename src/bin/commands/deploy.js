@@ -435,7 +435,7 @@ module.exports = function(mainPath) {
 
   let deployRollback = (cb) => {
     if (propertyInstance.isUpdate) {
-      return ; // @todo: undeploy either the update?
+      return cb(null); // @todo: undeploy either the update?
     }
 
     hasDeployedResources((has) => {
