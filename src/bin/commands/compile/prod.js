@@ -31,7 +31,7 @@ module.exports = function(mainPath) {
   let WaitFor = require('deep-package-manager').Helpers_WaitFor;
   let tmp = require('tmp');
   let validateNodeVersion = require('../helper/validate-node-version');
-  
+
   validateNodeVersion.call(this);
 
   let installFromCache = (lambdas, callback) => {
@@ -275,24 +275,11 @@ module.exports = function(mainPath) {
 
                   new LambdaRecursiveOptimize(lambdaTmpPath)
                     .run(() => {
-                      if (installSdk) {
-                        console.log('Installing latest aws-sdk into ' + lambdaTmpPath);
-
-                        let npmLink = new NpmInstallLibs(lambdaTmpPath);
-                        npmLink.libs = 'aws-sdk';
-
-                        npmLink.run(() => {
-                          cacheDeepDeps(lambdaTmpPath, () => {
-                            packSingle(lambdaPath, lambdaTmpPath, () => remaining--);
-                          });
+                      cacheDeepDeps(lambdaTmpPath, () => {
+                        packSingle(lambdaPath, lambdaTmpPath, () => {
+                          remaining--;
                         });
-                      } else {
-                        cacheDeepDeps(lambdaTmpPath, () => {
-                          packSingle(lambdaPath, lambdaTmpPath, () => {
-                            remaining--;
-                          });
-                        });
-                      }
+                      });
                     });
                 });
             });
@@ -360,14 +347,13 @@ module.exports = function(mainPath) {
   };
 
   let objectValues = object => Object.keys(object).map(key => object[key]);
-  
+
   let removeSource = this.opts.locate('remove-source').exists;
-  let installSdk = this.opts.locate('aws-sdk').exists;
   let microservicesToCompile = this.opts.locate('partial').value;
   let linear =  this.opts.locate('linear').exists;
   let skipCache = this.opts.locate('skip-cache').exists;
   let invalidateCache = this.opts.locate('invalidate-cache').exists;
-  let deepDepsCache = new DeepDepsCache(DeepDepsCache.DEFAULT_CACHE_DIRECTORY, installSdk ? {'aws-sdk': 'latest'} : {});
+  let deepDepsCache = new DeepDepsCache(DeepDepsCache.DEFAULT_CACHE_DIRECTORY, {});
 
   mainPath = this.normalizeInputPath(mainPath);
   let property = new Property(mainPath);
@@ -457,10 +443,6 @@ module.exports = function(mainPath) {
 
       if (removeSource) {
         cmd.addArg('--remove-source');
-      }
-
-      if (installSdk) {
-        cmd.addArg('--aws-sdk');
       }
 
       if (skipCache) {
