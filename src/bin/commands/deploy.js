@@ -26,9 +26,8 @@ module.exports = function(mainPath) {
   let Listing = require('deep-package-manager').Provisioning_Listing;
 
   let isProd = this.opts.locate('prod').exists;
-  let installSdk = this.opts.locate('aws-sdk').exists;
   let localOnly = this.opts.locate('dry-run').exists;
-  let fastDeploy = this.opts.locate('fast').exists;
+  let invalidateCache = this.opts.locate('invalidate-cache').exists;
   let dumpCodePath = this.opts.locate('dump-local').value;
   let cfgBucket = this.opts.locate('cfg-bucket').value;
   let appEnv = isProd ? 'prod' : this.opts.locate('env').value;
@@ -78,62 +77,6 @@ module.exports = function(mainPath) {
     console.log('Local mode on!');
   }
 
-  if (fastDeploy) {
-    let prompt = new Prompt('Fast deploy may alter the web app state! Start anyway?');
-
-    prompt.readConfirm((result) => {
-      if (result) {
-        process.on('exit', () => {
-          new Exec('rm', '-rf', path.join(tmpPropertyPath, '_public'))
-            .avoidBufferOverflow()
-            .runSync();
-
-          removePackedLambdas();
-        });
-
-        startDeploy();
-        return;
-      }
-
-      console.log('Cancelled by the user...');
-    });
-  } else {
-    let tmpDir = os.tmpdir();
-    tmpPropertyPath = path.join(tmpDir, path.basename(mainPath));
-    tmpPropertyPath += `_${new Date().getTime()}`;
-
-    fse.ensureDirSync(tmpPropertyPath);
-
-    console.log(`Copying sources to ${tmpPropertyPath}`);
-
-    new Exec(
-      'rsync',
-      '-a',
-      '--delete',
-      mainPath + path.sep,
-      tmpPropertyPath + path.sep
-    )
-      .avoidBufferOverflow()
-      .run((result) => {
-        if (result.failed) {
-          console.error(`Error copying sources into ${tmpPropertyPath}: ${result.error}`);
-          this.exit(1);
-        }
-
-        process.on('exit', () => {
-          let result = new Exec('rm', '-rf', tmpPropertyPath)
-            .avoidBufferOverflow()
-            .runSync();
-
-          if (result.failed) {
-            console.error(result.error);
-          }
-        });
-
-        startDeploy();
-      });
-  }
-
   let ensureAWSProdKeys = (cb) => {
     (new SharedAwsConfig()).refillPropertyConfigIfNeeded(config, (refilled) => {
       if (refilled) {
@@ -162,17 +105,7 @@ module.exports = function(mainPath) {
     });
   };
 
-  let dumpConfig = (propertyInstance, cb) => {
-    propertyInstance.configObj.completeDump(() => {
-      if (!fastDeploy) {
-        let configFile = propertyInstance.configObj.configFile;
-
-        fse.copySync(configFile, path.join(mainPath, path.basename(configFile)));
-      }
-
-      cb();
-    });
-  };
+  let dumpConfig = (propertyInstance, cb) => propertyInstance.configObj.completeDump(cb);
 
   let doCompileProd = (propertyPath, cb) => {
     console.log('Start preparing for production');
@@ -184,9 +117,8 @@ module.exports = function(mainPath) {
       propertyPath
     );
 
-    !fastDeploy && cmd.addArg('--remove-source');
+    invalidateCache && cmd.addArg('--invalidate-cache');
     microservicesToDeploy && cmd.addArg('--partial ' + microservicesToDeploy);
-    installSdk && cmd.addArg('--aws-sdk');
 
     cmd.run((result) => {
       if (result.failed) {
@@ -433,12 +365,12 @@ module.exports = function(mainPath) {
     waitUntilDone();
   };
 
-  let deployRollback = (cb) => {
+  let deployRollback = cb => {
     if (propertyInstance.isUpdate) {
       return cb(null); // @todo: undeploy either the update?
     }
 
-    hasDeployedResources((has) => {
+    hasDeployedResources(has => {
       if (!has) {
         return;
       }
@@ -465,12 +397,12 @@ module.exports = function(mainPath) {
     });
   };
 
-  let hasDeployedResources = (cb) => {
+  let hasDeployedResources = cb => {
     let lister = new Listing(propertyInstance);
 
-    lister.list((listingResult) => {
+    lister.list(listingResult => {
       cb(listingResult.matchedResources > 0);
-    })
+    });
   };
 
   let getLambdas = (dir, files_) => {
@@ -489,9 +421,19 @@ module.exports = function(mainPath) {
     return files_;
   };
 
-  let getCfDomain = (propertyInstance) => `http://${propertyInstance.config.provisioning.cloudfront.domain}`;
+  let getCfDomain = propertyInstance => `http://${propertyInstance.config.provisioning.cloudfront.domain}`;
 
-  let getPublicWebsite = (propertyInstance) => {
+  let getPublicWebsite = propertyInstance => {
     return `http://${propertyInstance.config.provisioning.s3.buckets[S3Service.PUBLIC_BUCKET].website}`;
   };
+
+  process.on('exit', () => {
+    new Exec('rm', '-rf', path.join(tmpPropertyPath, '_public'))
+      .avoidBufferOverflow()
+      .runSync();
+
+    removePackedLambdas();
+  });
+
+  startDeploy();
 };

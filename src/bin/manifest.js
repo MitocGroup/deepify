@@ -131,14 +131,8 @@ module.exports = {
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
           required: false,
         },
-        fast: {
-          alias: 'f',
-          description: 'Faster deployment without copying the sources (may alter the web app state)',
-          required: false,
-        },
-        'aws-sdk': {
-          alias: 'a',
-          description: 'Force latest aws-sdk in Lambda',
+        'invalidate-cache': {
+          description: 'Invalidate deep dependencies cache',
           required: false,
         },
       },
@@ -294,11 +288,6 @@ module.exports = {
               description: 'Partial deploy (one or several comma separated microservices identifiers)',
               required: false,
             },
-            'aws-sdk': {
-              alias: 'a',
-              description: 'Force latest aws-sdk in Lambda',
-              required: false,
-            },
             'linear': {
               description: 'Compile lambdas linerar',
               required: false,
@@ -413,11 +402,6 @@ module.exports = {
         partial: {
           alias: 'm',
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
-          required: false,
-        },
-        'aws-sdk': {
-          alias: 'a',
-          description: 'Force latest aws-sdk in Lambda',
           required: false,
         },
         'linear': {
