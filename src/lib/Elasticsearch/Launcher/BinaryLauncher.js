@@ -89,9 +89,29 @@ export class BinaryLauncher extends AbstractLauncher {
    * @private
    */
   _lock() {
+    let pidFile = this._pidFile;
+
     try {
-      lock.lockSync(this._pidFile);
+      lock.lockSync(pidFile);
     } catch (e) {
+      if (FS.existsSync(pidFile)) {
+        let pid = FS.readFileSync(pidFile).toString();
+
+        if (pid) {
+          try {
+            process.kill(pid, 0)
+          } catch (e) {
+            if (e.code === 'ESRCH') { // process not found
+              FS.unlinkSync(pidFile);
+
+              this._lock();
+
+              return;
+            }
+          }
+        }
+      }
+
       throw new ServerAlreadyRunningException(this, e);
     }
   }
