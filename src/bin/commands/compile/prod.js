@@ -29,6 +29,8 @@ module.exports = function(mainPath) {
   let Hash = require('deep-package-manager').Helpers_Hash;
   let Property = require('deep-package-manager').Property_Instance;
   let WaitFor = require('deep-package-manager').Helpers_WaitFor;
+  let SharedBackendInjector = require('../../../lib.compiled/Helpers/SharedBackend/Injector').Injector;
+  let FSCopyStrategy = require('../../../lib.compiled/Helpers/SharedBackend/Strategy/FSCopyStrategy').FSCopyStrategy;
   let tmp = require('tmp');
   let validateNodeVersion = require('../helper/validate-node-version');
 
@@ -89,6 +91,7 @@ module.exports = function(mainPath) {
   };
 
   let prepareSources = (cb, lambdas) => {
+    let sharedBackendInjector = new SharedBackendInjector(lambdasTmpObj, property, new FSCopyStrategy());
     console.log(lambdas.path.length + ' Lambdas sources are going to be copied...');
 
     for (let i in lambdas.path) {
@@ -111,6 +114,7 @@ module.exports = function(mainPath) {
           '-ar',
           '--update',
           '--delete',
+          '--no-links',
           '--exclude node_modules',
           '--exclude deep_modules',
           path.join(lambdaPath, '/'),
@@ -122,6 +126,8 @@ module.exports = function(mainPath) {
         lambdas.splice(i, 1);
       }
     }
+
+    sharedBackendInjector.injectAll();
 
     cb();
   };
@@ -368,6 +374,7 @@ module.exports = function(mainPath) {
 
   let lambdasObj = new LambdaExtractor(property, getMicroservicesToCompile())
     .extract(LambdaExtractor.NPM_PACKAGE_FILTER, LambdaExtractor.EXTRACT_OBJECT);
+  let lambdasTmpObj = {};
   lambdas.path = arrayUnique(objectValues(lambdasObj));
 
   if (invalidateCache) {
@@ -379,15 +386,16 @@ module.exports = function(mainPath) {
 
     new ValidationSchemasSync(property).syncWorking(ValidationSchemasSync.NPM_PACKAGE_FILTER);
 
-    for (let i in lambdas.path) {
-      if (!lambdas.path.hasOwnProperty(i)) {
+    for (let lambdaIdentifier in lambdasObj) {
+      if (!lambdasObj.hasOwnProperty(lambdaIdentifier)) {
         continue;
       }
 
-      let lambdaPath = lambdas.path[i];
+      let lambdaPath = lambdasObj[lambdaIdentifier];
       let lambdaTmpPath = path.join(tmp.dirSync().name, Hash.md5(lambdaPath) + '_' + new Date().getTime());
 
       lambdas.tmpPath.push(lambdaTmpPath);
+      lambdasTmpObj[lambdaIdentifier] = lambdaTmpPath;
     }
 
     prepareSources(installFromCache.bind(this, lambdas, function () {
