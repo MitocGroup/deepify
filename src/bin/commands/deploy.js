@@ -372,7 +372,7 @@ module.exports = function(mainPath) {
 
     hasDeployedResources(has => {
       if (!has) {
-        return;
+        return cb(null);
       }
 
       let baseHash = propertyInstance.configObj.baseHash;
