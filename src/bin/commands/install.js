@@ -74,7 +74,8 @@ module.exports = function(dependency, dumpPath) {
       let cmd = new Exec(
         Bin.node,
         this.scriptPath,
-        'init-backend',
+        'compile',
+        'dev',
         workingDirectory
       );
 
