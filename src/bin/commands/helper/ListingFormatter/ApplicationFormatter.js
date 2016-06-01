@@ -8,16 +8,16 @@
 let AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
 let S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
 let DeployConfig = require('deep-package-manager').Property_DeployConfig;
-let async = require('co');
+let co = require('co');
 let os = require('os');
 
 module.exports = class ApplicationFormatter {
   /**
-   * @param {Provisioning_Listing} listing
+   * @param {Property_Instance} property
    */
-  constructor(listing) {
+  constructor(property) {
     this._namingCache = {};
-    this._listing = listing;
+    this._property = property;
   }
 
   /**
@@ -27,7 +27,7 @@ module.exports = class ApplicationFormatter {
   format(result) {
     let formattedResult = {};
 
-    return async(function* () {
+    return co(function* () {
       for (let service in result) {
         if (!result.hasOwnProperty(service)) {
           continue;
@@ -91,7 +91,7 @@ module.exports = class ApplicationFormatter {
         return Promise.resolve(this._namingCache[cacheKey]);
       }
 
-      return async(function* () {
+      return co(function* () {
         try {
           let data = yield this._tryReadS3ProvisionConfig(appBaseHash, appEnv);
           let config = JSON.parse(data.Body.toString());
@@ -145,7 +145,7 @@ module.exports = class ApplicationFormatter {
    * @private
    */
   _tryReadS3ProvisionConfig(appBaseHash, appEnv) {
-    let s3 = this._listing._createAwsService('s3');
+    let s3 = this._property.provisioning.getAwsServiceByName('s3');
     let payload = {
       Bucket: this._generateSystemBucketARN(appBaseHash, appEnv),
       Key: DeployConfig.generateConfigFilename(appBaseHash, appEnv),
@@ -172,37 +172,36 @@ module.exports = class ApplicationFormatter {
   /**
    *
    * @param {String} service
-   * @returns {*}
+   * @returns {String}
    * @private
    */
   _humanizeAwsServiceName(service) {
-    switch (service) {
+    return `${this._findSuitableServiceTier(service)} Tier / Amazon ${service}`;
+  }
+
+  /**
+   * @param {String} service
+   */
+  _findSuitableServiceTier(service) {
+    switch(service) {
       case 'IAM':
-        return 'Security Tier / AWS IAM';
       case 'CognitoIdentity':
-        return 'Security Tier / Amazon Cognito';
-      case 'S3':
-        return 'Frontend Tier / Amazon S3';
-      case 'CloudFront':
-        return 'Frontend Tier / Amazon CloudFront';
-      case 'APIGateway':
-        return 'Backend Tier / Amazon API Gateway';
-      case 'Lambda':
-        return 'Backend Tier / AWS Lambda';
-      case 'CloudWatchEvents':
-        return 'Backend Tier / Amazon CloudWatch Events';
-      case 'DynamoDB':
-        return 'Data Tier / Amazon DynamoDB';
-      case 'SQS':
-        return 'Data Tier / Amazon SQS';
-      case 'ElastiCache':
-        return 'Data Tier / Amazon ElastiCache';
+        return 'Security';
       case 'ES':
-        return 'Data Tier / Amazon ElasticSearch Service';
+      case 'ElastiCache':
       case 'CloudWatchLogs':
-        return 'Data Tier / Amazon CloudWatch Logs';
+      case 'DynamoDB':
+      case 'SQS':
+        return 'Data';
+      case 'CloudWatchEvents':
+      case 'Lambda':
+      case 'APIGateway':
+        return 'Backend';
+      case 'S3':
+      case 'CloudFront':
+        return 'Frontend';
       default:
-        return service;
+        return '';
     }
   }
 

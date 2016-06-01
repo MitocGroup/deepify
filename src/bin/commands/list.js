@@ -64,7 +64,7 @@ module.exports = function(mainPath) {
       try {
         let ucFormat = format.charAt(0).toUpperCase() + format.slice(1);
         let FormatterClass = require(`./helper/ListingFormatter/${ucFormat}Formatter`);
-        let formatter = new FormatterClass(lister);
+        let formatter = new FormatterClass(property);
 
         formatter.format(listingResult.resources).then((strResources) => {
           console.log(strResources);
