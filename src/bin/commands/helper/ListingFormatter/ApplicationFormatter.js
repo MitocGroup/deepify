@@ -119,11 +119,9 @@ module.exports = class ApplicationFormatter {
     let appIndex = 0;
 
     Object.keys(result).sort().forEach((appId) => {
-      output += os.EOL;
-
       let serviceIndex = 0;
       let resourcesObj = result[appId];
-      output += ` #${++appIndex}. ${appId} ${os.EOL}`;
+      output += `${os.EOL} #${++appIndex}. ${appId} ${os.EOL}`;
       output += `     ${'-'.repeat(appId.length)} ${os.EOL}`;
 
       Object.keys(resourcesObj).sort().forEach((serviceName) => {
