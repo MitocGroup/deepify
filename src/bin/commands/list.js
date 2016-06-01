@@ -16,7 +16,7 @@ module.exports = function(mainPath) {
   let lister = new Listing(property);
   let rawResource = this.opts.locate('resource').value;
   let service = this.opts.locate('service').value;
-  let format = this.opts.locate('format').value || 'text';
+  let format = this.opts.locate('format').value || 'application';
   let resource = null;
 
   let servicesToList = (servicesRaw) => {
@@ -34,30 +34,6 @@ module.exports = function(mainPath) {
     });
 
     return services;
-  };
-
-  this.jsonFormatter = (resourceObj) => {
-    return JSON.stringify(resourceObj, null, '  ');
-  };
-
-  this.textFormatter = (resourcesObj) => {
-    let output = OS.EOL;
-    let TAB = '  ';
-
-    for (let serviceName in resourcesObj) {
-      if (!resourcesObj.hasOwnProperty(serviceName)) {
-        continue;
-      }
-
-      output += `- ${serviceName}: ${OS.EOL}`;
-      let resourcesArr = Object.keys(resourcesObj[serviceName]);
-
-      for (let resource of resourcesArr) {
-        output += `${TAB}- ${resource}${OS.EOL}`;
-      }
-    }
-
-    return output;
   };
 
   if (rawResource) {
@@ -85,14 +61,18 @@ module.exports = function(mainPath) {
       console.log(`There are no DEEP resource on your AWS account ${resource ? `matching '${resource}' hash.` : '.'}`);
       this.exit(1);
     } else {
-      let formatter = `${format}Formatter`;
+      try {
+        let ucFormat = format.charAt(0).toUpperCase() + format.slice(1);
+        let FormatterClass = require(`./helper/ListingFormatter/${ucFormat}Formatter`);
+        let formatter = new FormatterClass(lister);
 
-      if (!this.hasOwnProperty(formatter)) {
+        formatter.format(listingResult.resources).then((strResources) => {
+          console.log(strResources);
+        });
+      } catch (e) {
         console.error(`'${format}' formatter is not supported`);
         this.exit(1);
       }
-
-      console.log(this[formatter](listingResult.resources));
     }
   }, serviceList);
 };

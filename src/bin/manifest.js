@@ -529,9 +529,41 @@ module.exports = {
       description: 'Generate microapplication component(s)',
       section: 'Develop on your local environment',
       commands: {
+        'microapp': {
+          example: 'deepify generate microapp /target/path/',
+          description: 'Generate microapp\'s skeleton',
+          opts: {
+            name: {
+              alias: 'n',
+              description: 'Microapp name to use',
+              required: false,
+            },
+            engine: {
+              alias: 'e',
+              description: 'Frontend engine to use',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path where to generate the microapp',
+              required: false,
+            },
+          },
+        },
+        'frontend': {
+          example: 'deepify generate frontend path/to/app',
+          description: 'Generate microapp\'s frontend tier',
+          args: {
+            path: {
+              description: 'The path to the microservice',
+              required: false,
+            },
+          },
+        },
         'backend': {
           commandsPath: './commands/generate/backend',
-          description: 'Generate microapplication backend component(s)',
+          description: 'Generate microapp\'s backend tier',
           commands: {
             'action': {
               example: 'deepify generate action /path/to/microapp',
@@ -581,7 +613,7 @@ module.exports = {
         },
         'data': {
           commandsPath: './commands/generate/data',
-          description: 'Generate microapplication data component(s)',
+          description: 'Generate microapp\'s data tier',
           commands: {
             'model': {
               example: 'deepify generate model /path/to/microapp',
@@ -626,7 +658,7 @@ module.exports = {
         },
         'test': {
           commandsPath: './commands/generate/test',
-          description: 'Generate microapplication test component(s)',
+          description: 'Generate microapp\'s tests',
           commands: {
             'backend': {
               example: 'deepify generate test backend /path/to/microapp',
@@ -647,38 +679,6 @@ module.exports = {
                   required: false,
                 },
               },
-            },
-          },
-        },
-        'microapp': {
-          example: 'deepify generate microapp /target/path/',
-          description: 'Generate microapp skeleton component(s)',
-          opts: {
-            name: {
-              alias: 'n',
-              description: 'Microapp name to use',
-              required: false,
-            },
-            engine: {
-              alias: 'e',
-              description: 'Frontend engine to use',
-              required: false,
-            },
-          },
-          args: {
-            path: {
-              description: 'The path where to generate the microapp',
-              required: false,
-            },
-          },
-        },
-        'frontend': {
-          example: 'deepify generate frontend path/to/app',
-          description: 'Create microservice frontend component(s)',
-          args: {
-            path: {
-              description: 'The path to the microservice',
-              required: false,
             },
           },
         },

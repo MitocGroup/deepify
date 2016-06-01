@@ -52,7 +52,7 @@ module.exports = function(mainPath) {
       questionList.push({
         type: 'checkbox',
         name: 'engines',
-        message: 'Select the frontend engines you\'d like to use: ',
+        message: 'Select the frontend engines you\'d like to use',
         choices: MicroserviceGenerator.ALLOWED_ENGINES.map(e => ({name: e, checked: e === 'angular'})),
       });
     }
