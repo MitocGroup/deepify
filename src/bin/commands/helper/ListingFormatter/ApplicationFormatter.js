@@ -51,6 +51,7 @@ module.exports = class ApplicationFormatter {
           ));
         }
       }
+
       return this._stringifyResult(formattedResult);
     }.bind(this));
   }
