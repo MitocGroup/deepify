@@ -206,9 +206,9 @@ module.exports = class ApplicationFormatter {
   }
 
   /**
-   * @param service
-   * @param resourceData
-   * @param defaultName
+   * @param {String} service
+   * @param {Object} resourceData
+   * @param {String} defaultName
    * @returns {*}
    * @private
    */
