@@ -230,11 +230,6 @@ module.exports = class ApplicationFormatter {
       case 'S3':
       case 'CloudWatchEvents':
         return resourceData.Name;
-      case 'DynamoDB':
-      case 'SQS':
-      case 'ElastiCache':
-      case 'ES':
-      case 'CloudWatchLogs':
       default:
         return defaultName;
     }
