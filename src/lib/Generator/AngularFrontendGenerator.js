@@ -36,7 +36,7 @@ export class AngularFrontendGenerator extends AbstractGenerator {
     });
 
     this.renderFile(
-      'Frontend/angular_bootstrap.js',
+      'frontend/angular_bootstrap.js',
       path.join(`${this.targetPath}/bootstrap.js`),
       {identifier}
     );
@@ -58,6 +58,6 @@ export class AngularFrontendGenerator extends AbstractGenerator {
    * @returns {String}
    */
   static get TPL_DIR() {
-    return 'Frontend/js/app/angular';
+    return 'frontend/js/app/angular';
   }
 }
