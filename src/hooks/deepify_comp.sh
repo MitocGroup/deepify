@@ -130,7 +130,7 @@ __deepify_comp() {
       fi
     
         if [ "${COMP_CWORD}" -eq "2" ]; then
-          WORDS=( "backend"  "data"  "test"  "microapp"  "frontend" )
+          WORDS=( "microapp"  "frontend"  "backend"  "data"  "test" )
 
           if [ "${CUR_WORD}" = "generate" ]; then
             COMPREPLY=WORDS;
@@ -177,7 +177,7 @@ __deepify_comp() {
       fi
     
         if [ "${COMP_CWORD}" -eq "1" ]; then
-          WORDS=( "helloworld"  "install"  "server"  "deploy"  "undeploy"  "registry"  "compile"  "build-frontend"  "compile-es6"  "compile-prod"  "init-backend"  "lambda"  "list"  "generate"  "ssl" )
+          WORDS=( "helloworld"  "install"  "server"  "deploy"  "undeploy"  "registry"  "compile"  "lambda"  "list"  "generate"  "ssl" )
 
           if [ "${CUR_WORD}" = "deepify" ]; then
             COMPREPLY=WORDS;
