@@ -5,6 +5,7 @@
 'use strict';
 
 import {EngineInterface} from './EngineInterface';
+import {Helpers_Inflector as Inflector} from 'deep-package-manager';
 import Twig from 'twig';
 
 export class TwigEngine extends EngineInterface {
@@ -21,7 +22,7 @@ export class TwigEngine extends EngineInterface {
    * @private
    */
   _registerFilters() {
-    Twig.extendFilter('identifier', (value) => value.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase());
+    Twig.extendFilter('lispCase', Inflector.lispCase);
   }
 
   /**

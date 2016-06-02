@@ -9,6 +9,7 @@ import {BrokenResourcesFileException} from './Exception/BrokenResourcesFileExcep
 import {Microservice_Instance as Microservice} from 'deep-package-manager';
 import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
 import {MicroserviceGenerator} from './MicroserviceGenerator';
+import {Helpers_Inflector as Inflector} from 'deep-package-manager';
 import Joi from 'joi';
 import path from 'path';
 import FSExtra from 'fs-extra';
@@ -47,19 +48,19 @@ export class ActionGenerator extends AbstractGenerator {
     FS.writeFileSync(this._resourcesPath, JSON.stringify(resourcesJson, null, '  '));
 
     this.renderFile(
-      `Backend/Lambda/${crud}.es6`,
+      `backend/lambda/${crud}.es6`,
       path.join(autoload.backend, actionStatement.source, 'Handler.es6'),
       templateParams
     );
 
     this.renderFile(
-      'Backend/Lambda/bootstrap.es6',
+      'backend/lambda/bootstrap.es6',
       path.join(autoload.backend, actionStatement.source, 'bootstrap.es6'),
       templateParams
     );
 
     this.renderFile(
-      'Backend/Lambda/package.json',
+      'backend/lambda/package.json',
       path.join(autoload.backend, actionStatement.source, 'package.json'),
       templateParams
     );
@@ -74,12 +75,12 @@ export class ActionGenerator extends AbstractGenerator {
     let resource = this.generationSchema.resource;
     let action = this.generationSchema.action;
     let methods = this.generationSchema.methods;
-    
+
     return {
       description: `${resource} ${action} Action`,
       type: 'lambda',
       methods: methods,
-      source: path.join('src', this._ucFirst(resource), this._ucFirst(action)),
+      source: path.join('src', Inflector.lispCase(resource), Inflector.lispCase(action)),
     };
   }
 
@@ -108,14 +109,6 @@ export class ActionGenerator extends AbstractGenerator {
     let autoload = microservice.autoload;
 
     return path.join(autoload.backend, Microservice.RESOURCES_FILE);
-  }
-
-  /**
-   * @param {String} string
-   * @returns {String}
-   */
-  _ucFirst(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   /**
