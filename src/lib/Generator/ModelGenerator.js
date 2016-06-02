@@ -8,6 +8,7 @@ import FS from 'fs';
 import Joi from 'joi';
 import path from 'path';
 import {Microservice_Instance as Microservice} from 'deep-package-manager';
+import {Helpers_Inflector as Inflector} from 'deep-package-manager';
 import {AbstractGenerator} from './AbstractGenerator';
 import inquirer  from 'inquirer';
 
@@ -28,10 +29,10 @@ export class ModelGenerator extends AbstractGenerator {
     let fields = this.generationSchema.fields;
     let templateArgs = {fields};
     let autoload = microservice.autoload;
-    let targetPath = path.join(autoload.models, `${modelName}.json`);
+    let targetPath = path.join(autoload.models, `${Inflector.lispCase(modelName)}.json`);
     let doGenerate = () => {
       this.renderFile(
-        'Data/Models/model.json',
+        'data/models/model.json',
         targetPath,
         templateArgs
       );

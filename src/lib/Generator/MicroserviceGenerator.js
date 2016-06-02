@@ -32,7 +32,7 @@ export class MicroserviceGenerator extends AbstractGenerator {
     let identifier = MicroserviceGenerator.identifier(name);
     let engines = this.generationSchema.engines;
     let msPath = path.join(this.targetPath, identifier);
-    let frontendPath = path.join(msPath, 'Frontend');
+    let frontendPath = path.join(msPath, 'frontend');
     let templateParams = {
       engines: engines,
       name: name,
@@ -108,10 +108,10 @@ export class MicroserviceGenerator extends AbstractGenerator {
    */
   _ensureTargetDirs(msPath) {
     let dirList = [
-      'Backend',
-      'Frontend',
-      'Data/Models',
-      'Data/Validation',
+      'backend',
+      'frontend',
+      'data/models',
+      'data/validation',
     ];
 
     dirList.forEach((dir) => {
@@ -154,7 +154,7 @@ export class MicroserviceGenerator extends AbstractGenerator {
    */
   static get MS_RESOURCES() {
     return [
-      `Backend/${Microservice.RESOURCES_FILE}`,
+      `backend/${Microservice.RESOURCES_FILE}`,
       Microservice.CONFIG_FILE,
       Microservice.PARAMS_FILE,
     ]
