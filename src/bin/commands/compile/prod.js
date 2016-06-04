@@ -445,7 +445,8 @@ module.exports = function(mainPath) {
       let cmd = new Exec(
         Bin.node,
         this.scriptPath,
-        'compile-prod',
+        'compile',
+        'prod',
         mainPath
       );
 
