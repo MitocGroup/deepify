@@ -273,7 +273,6 @@ module.exports = class ApplicationFormatter {
 
   /**
    * @returns {String[]}
-   * @constructor
    */
   static get SERVICES_TIERS() {
     return [
