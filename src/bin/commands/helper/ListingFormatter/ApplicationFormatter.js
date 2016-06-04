@@ -78,6 +78,9 @@ module.exports = class ApplicationFormatter {
       case 'IAM':
         resourceId = resourceData.RoleName;
         break;
+      case 'CognitoIdentity':
+        resourceId = resourceData.IdentityPoolName;
+        break;
       default:
         resourceId = resourceName;
     }
@@ -118,6 +121,13 @@ module.exports = class ApplicationFormatter {
     let TAB = '  ';
     let output = os.EOL;
     let appIndex = 0;
+    let serviceSorting = (a, b) => {
+      let tierA = a.replace(/^([^\s]+).+$/, '$1');
+      let tierB = b.replace(/^([^\s]+).+$/, '$1');
+
+      return ApplicationFormatter.SERVICES_TIERS.indexOf(tierA) >
+        ApplicationFormatter.SERVICES_TIERS.indexOf(tierB);
+    };
 
     Object.keys(result).sort().forEach((appId) => {
       let serviceIndex = 0;
@@ -125,7 +135,7 @@ module.exports = class ApplicationFormatter {
       output += `${os.EOL} #${++appIndex}. ${appId} ${os.EOL}`;
       output += `     ${'-'.repeat(appId.length)} ${os.EOL}`;
 
-      Object.keys(resourcesObj).sort().forEach((serviceName) => {
+      Object.keys(resourcesObj).sort(serviceSorting).forEach((serviceName) => {
         let resourceIndex = 0;
         let resourcesArr = resourcesObj[serviceName];
         output += `${TAB}${++serviceIndex}. ${serviceName}: ${os.EOL}`;
@@ -187,20 +197,20 @@ module.exports = class ApplicationFormatter {
     switch(service) {
       case 'IAM':
       case 'CognitoIdentity':
-        return 'Security';
+        return ApplicationFormatter.SECURITY_TIER;
       case 'ES':
       case 'ElastiCache':
       case 'CloudWatchLogs':
       case 'DynamoDB':
       case 'SQS':
-        return 'Data';
+        return ApplicationFormatter.DATA_TIER;
       case 'CloudWatchEvents':
       case 'Lambda':
       case 'APIGateway':
-        return 'Backend';
+        return ApplicationFormatter.BACKEND_TIER;
       case 'S3':
       case 'CloudFront':
-        return 'Frontend';
+        return ApplicationFormatter.FRONTEND_TIER;
       default:
         return '';
     }
@@ -231,6 +241,47 @@ module.exports = class ApplicationFormatter {
       default:
         return defaultName;
     }
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get BACKEND_TIER() {
+    return 'Backend';
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get FRONTEND_TIER() {
+    return 'Frontend';
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get SECURITY_TIER() {
+    return 'Security';
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get DATA_TIER() {
+    return 'Data';
+  }
+
+  /**
+   * @returns {String[]}
+   * @constructor
+   */
+  static get SERVICES_TIERS() {
+    return [
+      ApplicationFormatter.SECURITY_TIER,
+      ApplicationFormatter.FRONTEND_TIER,
+      ApplicationFormatter.BACKEND_TIER,
+      ApplicationFormatter.DATA_TIER
+    ];
   }
 
   /**
