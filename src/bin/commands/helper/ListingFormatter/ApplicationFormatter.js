@@ -121,7 +121,7 @@ module.exports = class ApplicationFormatter {
     let TAB = '  ';
     let output = os.EOL;
     let appIndex = 0;
-    let serviceSorting = (a, b) => {
+    let servicesSorting = (a, b) => {
       let tierA = a.replace(/^([^\s]+).+$/, '$1');
       let tierB = b.replace(/^([^\s]+).+$/, '$1');
 
@@ -135,7 +135,7 @@ module.exports = class ApplicationFormatter {
       output += `${os.EOL} #${++appIndex}. ${appId} ${os.EOL}`;
       output += `     ${'-'.repeat(appId.length)} ${os.EOL}`;
 
-      Object.keys(resourcesObj).sort(serviceSorting).forEach((serviceName) => {
+      Object.keys(resourcesObj).sort(servicesSorting).forEach((serviceName) => {
         let resourceIndex = 0;
         let resourcesArr = resourcesObj[serviceName];
         output += `${TAB}${++serviceIndex}. ${serviceName}: ${os.EOL}`;
@@ -280,7 +280,7 @@ module.exports = class ApplicationFormatter {
       ApplicationFormatter.SECURITY_TIER,
       ApplicationFormatter.FRONTEND_TIER,
       ApplicationFormatter.BACKEND_TIER,
-      ApplicationFormatter.DATA_TIER
+      ApplicationFormatter.DATA_TIER,
     ];
   }
 
