@@ -93,7 +93,7 @@ module.exports = function(mainPath) {
         this.exit(1);
       }
 
-      console.log(`Microservice frontend has been successfully generating in: ${microservice.autoload.frontend}`);
+      console.info(`Microservice frontend has been successfully generating in: ${microservice.autoload.frontend}`);
       this.exit(0);
     });
   });

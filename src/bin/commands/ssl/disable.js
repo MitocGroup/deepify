@@ -18,7 +18,7 @@ module.exports = function(mainPath) {
   let propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
 
   if (!fs.existsSync(propertyConfigFile)) {
-    console.error('You should have the application configured');
+    console.error('You must have the application configured');
     this.exit(1);
   }
 
@@ -26,7 +26,7 @@ module.exports = function(mainPath) {
 
   property.configObj.tryLoadConfig(() => {
     if (!property.configObj.configExists) {
-      console.error('You should have the application deployed');
+      console.error('You must have the application deployed');
       this.exit(1);
     }
 
@@ -39,7 +39,7 @@ module.exports = function(mainPath) {
     let acmService = property.provisioning.services.find(ACMService);
     let cfService = property.provisioning.services.find(CloudFrontService);
 
-    console.log(`Looking for ACM certificate available of the domain '${domain}'`);
+    console.debug(`Looking for ACM certificate available of the domain '${domain}'`);
 
     acmService.getDomainCertificateArn(domain, (certArn) => {
       if (!certArn) {
@@ -62,7 +62,7 @@ module.exports = function(mainPath) {
         },
       };
 
-      console.log(`Deactivating ACM certificate '${certArn}' for domain '${domain}'`);
+      console.debug(`Deactivating ACM certificate '${certArn}' for domain '${domain}'`);
 
       cfService.updateDistribution(configChanges, (error) => {
         if (error) {
@@ -70,7 +70,7 @@ module.exports = function(mainPath) {
           this.exit(1);
         }
 
-        console.log(`Certificate '${certArn}' have been successfully unassigned from the CloudFront distribution`);
+        console.info(`Certificate '${certArn}' have been successfully unassigned from the CloudFront distribution`);
       });
     });
   });

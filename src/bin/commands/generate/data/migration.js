@@ -20,7 +20,7 @@ module.exports = function(mainPath) {
 
     if (microservice) {
       if (microservices.indexOf(microservice) === -1) {
-        console.log(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
+        console.error(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
         this.exit(1);
       }
 
@@ -55,8 +55,8 @@ module.exports = function(mainPath) {
           console.error(`Error while generating migration: ${error}`);
           return;
         }
-        
-        console.log(`'Migration has been successfully generated in ${path}.`);
+
+        console.info(`'Migration has been successfully generated in ${path}.`);
       });
   });
 };

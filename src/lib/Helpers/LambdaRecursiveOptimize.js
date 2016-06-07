@@ -148,7 +148,7 @@ export class LambdaRecursiveOptimize {
     this._updateSpinner(jsFilesChunks);
 
     if (jsFilesChunks.length <= 0) {
-      console.log(`Optimization summary: ${filesOptimized} optimized / ${filesError} skipped due to errors`);
+      console.info(`Optimization summary: ${filesOptimized} optimized / ${filesError} skipped due to errors`);
 
       cb();
       return;
@@ -261,7 +261,7 @@ export class LambdaRecursiveOptimize {
 
       // skip deep-* files (brakes the functionality for some reason)
       .filter((val) => !/\/deep_modules\/deep-[a-z]+/i.test(val))
-    
+
       // run user custom filters
       .filter((val) => this._filters.reduce((isValid, filter) => isValid && filter(val), true));
   }
