@@ -86,7 +86,7 @@ try {
 } catch (e) {
   if (e instanceof ValidationException) {
     console.error('Invalid command call: [' + e.constructor.name + ']', e.message);
-    console.log('Usage example: ' + e.program.example);
+    console.info('Usage example: ' + e.program.example);
     process.exit(1);
   }
 

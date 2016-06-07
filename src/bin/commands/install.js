@@ -26,7 +26,7 @@ module.exports = function(dependency, dumpPath) {
   let getRegistryToken = () => new AuthToken().refresh().toString();
 
   let createRegistry = (cb) => {
-    console.log('Initializing remote registry');
+    console.debug('Initializing remote registry');
 
     Registry.createApiRegistry(registryBaseHost, (error, registry) => {
       if (error) {
@@ -55,7 +55,7 @@ module.exports = function(dependency, dumpPath) {
       return;
     }
 
-    console.log('Start initializing backend');
+    console.debug('Start initializing backend');
 
     npmInstall('"babel-cli@^6.x.x"', (error) => {
       if (error) {
@@ -85,13 +85,13 @@ module.exports = function(dependency, dumpPath) {
           this.exit(1);
         }
 
-        console.log('Wep app dependencies have been successfully initialized');
+        console.info('Wep app dependencies have been successfully initialized');
       }, true);
     });
   };
 
   let fetchGitHub = (cb) => {
-    console.log('Fetching microservice from GitHub');
+    console.debug('Fetching microservice from GitHub');
 
     let depObj = new GitHubDependency(depName, depVersion);
 
@@ -123,7 +123,7 @@ module.exports = function(dependency, dumpPath) {
 
         if (deps && Object.keys(deps).length > 0) {
           createRegistry((registry) => {
-            console.log('Installing \'' + depObj.shortDependencyName + '\' dependencies');
+            console.debug('Installing \'' + depObj.shortDependencyName + '\' dependencies');
 
             registry.install(createProperty(), (error) => {
               if (error) {
@@ -143,7 +143,7 @@ module.exports = function(dependency, dumpPath) {
 
   let fetchRepository = (cb) => {
     createRegistry((registry) => {
-      console.log('Fetching microservice from DEEP repository');
+      console.debug('Fetching microservice from DEEP repository');
 
       registry.installModule(
         depName,
@@ -156,7 +156,7 @@ module.exports = function(dependency, dumpPath) {
   };
 
   let npmInstall = (repo, cb) => {
-    console.log('Installing ' + repo + ' via NPM globally');
+    console.debug('Installing ' + repo + ' via NPM globally');
 
     new Exec('npm list -g --depth 0 ' + repo + ' || npm install -g ' + repo)
       .avoidBufferOverflow()
@@ -175,7 +175,7 @@ module.exports = function(dependency, dumpPath) {
   let registryBaseHost = this.opts.locate('registry').value ||
     RegistryConfig.create().refresh('registry').read('registry') ||
     DEFAULT_REGISTRY_BASE_HOST;
-  
+
   let workingDirectory = process.cwd();
   let gitHubAuthPair = this.opts.locate('github-auth').value;
   let initApp = this.opts.locate('init').exists;
@@ -201,13 +201,13 @@ module.exports = function(dependency, dumpPath) {
         this.exit(1);
       }
 
-      console.log('The microservice \'' + depName + '\' has been successfully installed');
+      console.info('The microservice \'' + depName + '\' has been successfully installed');
 
       initBackend();
     });
   } else {
     createRegistry((registry) => {
-      console.log('Installing web app dependencies');
+      console.debug('Installing web app dependencies');
 
       registry.install(createProperty(), (error) => {
         if (error) {
@@ -215,7 +215,7 @@ module.exports = function(dependency, dumpPath) {
           this.exit(1);
         }
 
-        console.log('Wep app dependencies have been successfully installed');
+        console.info('Wep app dependencies have been successfully installed');
 
         initBackend();
       });

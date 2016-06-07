@@ -28,7 +28,7 @@ server.start(function(error) {
     process.exit(1);
   }
 
-  console.log('--->', RegistryServer.DEFAULT_REGISTRY_HOST);
+  console.debug('--->', RegistryServer.DEFAULT_REGISTRY_HOST);
   console.info('\nPress Ctrl-C to stop the server');
 });
 

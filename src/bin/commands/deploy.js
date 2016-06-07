@@ -74,7 +74,7 @@ module.exports = function(mainPath) {
   let tmpPropertyPath = mainPath;
 
   if (localOnly) {
-    console.log('Local mode on!');
+    console.debug('Local mode on!');
   }
 
   let ensureAWSProdKeys = (cb) => {
@@ -108,7 +108,7 @@ module.exports = function(mainPath) {
   let dumpConfig = (propertyInstance, cb) => propertyInstance.configObj.completeDump(cb);
 
   let doCompileProd = (propertyPath, cb) => {
-    console.log('Start preparing for production');
+    console.debug('Start preparing for production');
 
     let cmd = new Exec(
       Bin.node,
@@ -144,7 +144,7 @@ module.exports = function(mainPath) {
           return;
         }
 
-        console.log('Skipping production preparation...');
+        console.debug('Skipping production preparation...');
 
         cb();
       });
@@ -193,7 +193,7 @@ module.exports = function(mainPath) {
       });
 
       process.on('SIGINT', () => {
-        console.log('Gracefully shutting down from SIGINT (Ctrl-C)...');
+        console.debug('Gracefully shutting down from SIGINT (Ctrl-C)...');
 
         deployRollback((error) => {
           if (error) {
@@ -214,19 +214,19 @@ module.exports = function(mainPath) {
     propertyInstance.configObj.tryLoadConfig(() => {
       if (propertyInstance.configObj.configExists) {
         propertyInstance.update(() => {
-          console.log(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
-          console.log(`Website address: ${getPublicWebsite(propertyInstance)}`);
+          console.info(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
+          console.info(`Website address: ${getPublicWebsite(propertyInstance)}`);
 
           dumpConfig(propertyInstance, dumpCode);
         }, null, getMicroservicesToDeploy());
       } else {
         if (microservicesToDeploy) {
-          console.warn(' Partial deploy option is useless during first deploy...');
+          console.warn('Partial deploy option is useless during first deploy...');
         }
 
         propertyInstance.install(() => {
-          console.log(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
-          console.log(`Website address: ${getPublicWebsite(propertyInstance)}`);
+          console.info(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
+          console.info(`Website address: ${getPublicWebsite(propertyInstance)}`);
 
           dumpConfig(propertyInstance, dumpCode);
         });
@@ -299,7 +299,7 @@ module.exports = function(mainPath) {
     let lambdas = getLambdas(tmpPropertyPath);
 
     if (lambdas.length <= 0) {
-      console.log('There are no Lambdas to be dumped!');
+      console.debug('There are no Lambdas to be dumped!');
       return;
     }
 
@@ -322,7 +322,7 @@ module.exports = function(mainPath) {
 
       lambdasVector.push(path.basename(newLambdaPath));
 
-      console.log('Unpacking Lambda into ' + newLambdaPath);
+      console.debug('Unpacking Lambda into ' + newLambdaPath);
 
       // @todo: find a smarter way to deny lambda runtime installing deps in runtime
       try {
@@ -348,7 +348,7 @@ module.exports = function(mainPath) {
 
           stack--;
 
-          console.log(`Remaining ${stack} Lambdas to be unpacked...`);
+          console.debug(`Remaining ${stack} Lambdas to be unpacked...`);
         }.bind(this, awsConfigFile));
     }
 
@@ -358,8 +358,8 @@ module.exports = function(mainPath) {
       } else {
         fs.unlinkSync(globalAwsConfigFile);
 
-        console.log(`[${lambdasVector.join(', ')}]`);
-        console.log('All Lambdas are now ready to run locally!');
+        console.debug(`[${lambdasVector.join(', ')}]`);
+        console.debug('All Lambdas are now ready to run locally!');
       }
     };
 

@@ -91,7 +91,7 @@ module.exports = function(lambdaPath) {
   let overridenConsoleLog = console.log;
 
   if(!plain) {
-    console.log('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
+    console.debug('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
   }
 
   DeepDB.startLocalDynamoDBServer((error) => {
@@ -115,7 +115,7 @@ module.exports = function(lambdaPath) {
         ESServer.startElasticsearchServer(urlParts.hostname, urlParts.port, dataPath);
       } catch (e) {
         if (e instanceof ServerAlreadyRunningException) {
-          console.log(`Elasticsearch service is already running on ${domainCfg.url}`);
+          console.debug(`Elasticsearch service is already running on ${domainCfg.url}`);
         } else {
           throw e;
         }
@@ -128,7 +128,7 @@ module.exports = function(lambdaPath) {
       lambda.silent = true;
 
       lambda.succeed = lambda.fail = (result) => {
-        console.log(JSON.stringify(result));
+        console.debug(JSON.stringify(result));
       };
 
       lambda.complete = () => {
@@ -140,7 +140,7 @@ module.exports = function(lambdaPath) {
       };
     } else {
       lambda.complete = (error/*, response*/) => {
-        console.log('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
+        console.info('Completed with' + (error ? '' : 'out') + ' errors' + (error ? '!' : '.'));
 
         if (error) {
           console.error(error);
@@ -150,7 +150,7 @@ module.exports = function(lambdaPath) {
         process.kill(process.pid);
       };
 
-      console.log('Starting Lambda.', os.EOL);
+      console.debug('Starting Lambda.', os.EOL);
     }
 
     try {

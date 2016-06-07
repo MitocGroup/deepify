@@ -34,7 +34,7 @@ module.exports = function(microservicePath) {
   let Core = require('deep-core');
 
   let createRegistry = (cb) => {
-    console.log('Initializing remote registry');
+    console.debug('Initializing remote registry');
 
     Registry.createApiRegistry(registryBaseHost, (error, registry) => {
       if (error) {
@@ -68,17 +68,17 @@ module.exports = function(microservicePath) {
     });
 
     process.on('SIGINT', () => {
-      console.log('Gracefully shutting down from SIGINT (Ctrl-C)...');
+      console.debug('Gracefully shutting down from SIGINT (Ctrl-C)...');
       fse.removeSync(tmpPropertyPath);
-      this.exit(1);
+      this.exit(0);
     });
   })();
 
-  console.log('Copying microservice sources into ' + tmpMicroservicePath);
+  console.debug('Copying microservice sources into ' + tmpMicroservicePath);
   fse.copySync(microservicePath, tmpMicroservicePath);
 
   let propertyConfigFile = path.join(tmpPropertyPath, Config.DEFAULT_FILENAME);
-  console.log('Persisting temporary property config in ' + propertyConfigFile);
+  console.debug('Persisting temporary property config in ' + propertyConfigFile);
   fse.outputJsonSync(propertyConfigFile, SAMPLE_PROPERTY_CONFIG);
 
   createRegistry.bind(this)((registry) => {
@@ -90,7 +90,7 @@ module.exports = function(microservicePath) {
         this.exit(1);
       }
 
-      console.log('Microservice has been successfully published');
+      console.info('Microservice has been successfully published');
     });
   });
 
@@ -98,16 +98,16 @@ module.exports = function(microservicePath) {
 
   let property = new Property(tmpPropertyPath);
 
-  console.log('Cleaning up microservice');
+  console.debug('Cleaning up microservice');
 
-  console.log('Remove custom parameters and tests');
+  console.debug('Remove custom parameters and tests');
   fse.removeSync(path.join(microservicePath, ParametersExtractor.PARAMETERS_FILE));
   fse.removeSync(path.join(microservicePath, 'Tests'));
 
   (new LambdaExtractor(property))
     .extract(LambdaExtractor.NPM_PACKAGE_FILTER)
     .forEach((lambdaPath) => {
-      console.log('Cleaning up backend in ' + lambdaPath);
+      console.debug('Cleaning up backend in ' + lambdaPath);
 
       fse.removeSync(path.join(lambdaPath, 'node_modules'));
       fse.removeSync(path.join(lambdaPath, Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR));

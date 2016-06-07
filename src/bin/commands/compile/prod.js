@@ -42,7 +42,7 @@ module.exports = function(mainPath) {
       let lambdaTmpPath = lambdas.tmpPath[lambdaIdx];
 
       if (!lambdaTmpPath || skipCache) {
-        console.log(lambdas.loadedFromCache + ' lambdas dependencies have been loaded from cache.');
+        console.debug(lambdas.loadedFromCache + ' lambdas dependencies have been loaded from cache.');
         callback();
         return;
       }
@@ -92,7 +92,7 @@ module.exports = function(mainPath) {
 
   let prepareSources = (cb, lambdas) => {
     let sharedBackendInjector = new SharedBackendInjector(lambdasTmpObj, property, new FSCopyStrategy());
-    console.log(lambdas.path.length + ' Lambdas sources are going to be copied...');
+    console.debug(lambdas.path.length + ' Lambdas sources are going to be copied...');
 
     for (let i in lambdas.path) {
       if (!lambdas.path.hasOwnProperty(i)) {
@@ -102,7 +102,7 @@ module.exports = function(mainPath) {
       let lambdaPath = lambdas.path[i];
       let lambdaTmpPath = lambdas.tmpPath[i];
 
-      console.log('Copying Lambda sources from ' + lambdaPath + ' into ' + lambdaTmpPath);
+      console.debug('Copying Lambda sources from ' + lambdaPath + ' into ' + lambdaTmpPath);
 
       if (fs.existsSync(lambdaTmpPath)) {
         fse.removeSync(lambdaTmpPath);
@@ -142,7 +142,7 @@ module.exports = function(mainPath) {
 
       let lambdaTmpPath = lambdas.tmpPath[i];
 
-      console.log('Optimizing Lambda code in ' + lambdaTmpPath);
+      console.debug('Optimizing Lambda code in ' + lambdaTmpPath);
 
       let depsLister = new NpmListDependencies(lambdaTmpPath);
       let depsObj = depsLister.list();
@@ -157,7 +157,7 @@ module.exports = function(mainPath) {
         let depObj = frameworkVector[j];
         let depPath = depObj.getPath(lambdaTmpPath);
 
-        console.log('Optimizing deep-framework in ' + depPath);
+        console.debug('Optimizing deep-framework in ' + depPath);
 
         frameworkPaths.push(depPath);
       }
@@ -202,13 +202,13 @@ module.exports = function(mainPath) {
 
       let lambdaTmpPath = chunk[i];
 
-      console.log('Optimizing Lambda dependencies in ' + lambdaTmpPath);
+      console.debug('Optimizing Lambda dependencies in ' + lambdaTmpPath);
 
       let depsOptimizer = new DepsTreeOptimizer(lambdaTmpPath);
 
       depsOptimizer.optimize(
         function(lambdaTmpPath, depsFullNames) {
-          console.log('Flatten dependencies in ' + lambdaTmpPath + ': ' + depsFullNames.join(', '));
+          console.debug('Flatten dependencies in ' + lambdaTmpPath + ': ' + depsFullNames.join(', '));
 
           remaining--;
         }.bind(this, lambdaTmpPath)
@@ -228,7 +228,7 @@ module.exports = function(mainPath) {
     let wait = new WaitFor();
     let remaining = lambdas.path.length;
 
-    console.log(lambdas.path.length + ' Lambdas are going to be optimized...');
+    console.debug(lambdas.path.length + ' Lambdas are going to be optimized...');
 
     wait.push(() => remaining <= 0);
     wait.ready(cb);
@@ -249,7 +249,7 @@ module.exports = function(mainPath) {
 
       cleanupCmd.cwd = lambdaTmpPath;
 
-      console.log('Cleanup Lambda sources in ' + lambdaTmpPath);
+      console.debug('Cleanup Lambda sources in ' + lambdaTmpPath);
 
       cleanupCmd
         .avoidBufferOverflow()
@@ -263,7 +263,7 @@ module.exports = function(mainPath) {
 
           cleanupCmd.cwd = lambdaTmpPath;
 
-          console.log('Fix broken links in ' + lambdaTmpPath);
+          console.debug('Fix broken links in ' + lambdaTmpPath);
 
           cleanupCmd
             .avoidBufferOverflow()
@@ -272,12 +272,12 @@ module.exports = function(mainPath) {
                 console.error(result.error);
               }
 
-              console.log('Running lodash optimizer');
+              console.debug('Running lodash optimizer');
 
               // @todo: get rid of this optimizer?
               new LodashOptimizer(lambdaTmpPath)
                 .optimize(() => {
-                  console.log('Running .js optimizer');
+                  console.debug('Running .js optimizer');
 
                   new LambdaRecursiveOptimize(lambdaTmpPath)
                     .run(() => {
@@ -301,11 +301,11 @@ module.exports = function(mainPath) {
     );
 
     if (fs.existsSync(outputFile)) {
-      console.log('Removing old Lambda build ' + outputFile);
+      console.debug('Removing old Lambda build ' + outputFile);
       fse.removeSync(outputFile);
     }
 
-    console.log('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
+    console.debug('Packing Lambda code into ' + outputFile + ' (' + lambdaTmpPath + ')');
 
     // @todo: replace this with a node native
     let zip = new Exec(
@@ -382,7 +382,7 @@ module.exports = function(mainPath) {
   }
 
   if (linear) {
-    console.log('Sync validation schemas into ' + lambdas.path.length + ' Lambdas');
+    console.debug('Sync validation schemas into ' + lambdas.path.length + ' Lambdas');
 
     new ValidationSchemasSync(property).syncWorking(ValidationSchemasSync.NPM_PACKAGE_FILTER);
 
@@ -431,7 +431,7 @@ module.exports = function(mainPath) {
                 });
               }
 
-              console.log(lambdas.count() + ' Lambdas were successfully prepared for production');
+              console.info(lambdas.count() + ' Lambdas were successfully prepared for production');
             }, lambdas);
           }, lambdas);
         }, lambdas);

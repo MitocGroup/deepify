@@ -43,7 +43,7 @@ module.exports = function(mainPath) {
       .extract(LambdaExtractor.NPM_PACKAGE_FILTER, LambdaExtractor.EXTRACT_OBJECT);
     let lambdaPaths = objectValues(lambdaPathsObj);
     let sharedBackendInjector = new SharedBackendInjector(
-      lambdaPathsObj, 
+      lambdaPathsObj,
       property,
       new FSCopyStrategy()
     );
@@ -98,11 +98,11 @@ module.exports = function(mainPath) {
           let configObj = configs[configPath];
 
           if (fs.existsSync(configPath)) {
-            console.log(`An old Lambda(${lambdaArn}) config found in ${lambdaPath}. Removing...`);
+            console.debug(`An old Lambda(${lambdaArn}) config found in ${lambdaPath}. Removing...`);
             fs.unlinkSync(configPath);
           }
 
-          console.log(`Persisting Lambda(${lambdaArn}) config into ${configPath}`);
+          console.debug(`Persisting Lambda(${lambdaArn}) config into ${configPath}`);
           fs.writeFileSync(configPath, JSON.stringify(configObj));
         }
       }
@@ -137,7 +137,7 @@ module.exports = function(mainPath) {
 
     property.runInitMsHooks(() => {
       initProperty(property, () => {
-        console.log('The backend had been successfully initialized.');
+        console.info('The backend had been successfully initialized.');
       });
     });
   });

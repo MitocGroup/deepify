@@ -58,8 +58,8 @@ module.exports = function(mainPath) {
       console.error(new ProvisioningCollisionsListingException(listingResult.errors).message);
       this.exit(1);
     } else if (listingResult.matchedResources <= 0) {
-      console.log(`There are no DEEP resource on your AWS account ${resource ? `matching '${resource}' hash.` : '.'}`);
-      this.exit(1);
+      console.warn(`There are no DEEP resource on your AWS account ${resource ? `matching '${resource}' hash.` : '.'}`);
+      this.exit(0);
     } else {
       try {
         let ucFormat = format.charAt(0).toUpperCase() + format.slice(1);

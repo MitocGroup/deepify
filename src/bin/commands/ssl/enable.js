@@ -39,7 +39,8 @@ module.exports = function(mainPath) {
 
   if (!domain) {
     console.error(`Please add a domain to '${Config.DEFAULT_FILENAME}' config file in order to activate SSL!`);
-    console.log('You may add \'--domain\' option to add it to the config automatically.');
+    console.info('You may add \'--domain\' option to add it to the config automatically.');
+    this.exit(1);
   }
 
   property.configObj.tryLoadConfig(() => {
@@ -53,7 +54,7 @@ module.exports = function(mainPath) {
     var acmService = property.provisioning.services.find(ACMService);
     var cfService = property.provisioning.services.find(CloudFrontService);
 
-    console.log(`Ensure ACM certificate available for domain '${domain}'`);
+    console.debug(`Ensure ACM certificate available for domain '${domain}'`);
 
     acmService.ensureCertificate(domain, (error, certArn) => {
       if (error) {
@@ -61,7 +62,7 @@ module.exports = function(mainPath) {
         this.exit(1);
       }
 
-      console.log(`Ensure ACM certificate '${certArn}' for domain '${domain}' have been activated`);
+      console.debug(`Ensure ACM certificate '${certArn}' for domain '${domain}' have been activated`);
 
       acmService.isCertificateIssued(certArn, (error, isIssued) => {
         if (error) {
@@ -99,7 +100,7 @@ module.exports = function(mainPath) {
             this.exit(1);
           }
 
-          console.log(`The ACM certificate ${certArn} have been successfully assigned to the CloudFront distribution`);
+          console.info(`The ACM certificate ${certArn} have been successfully assigned to the CloudFront distribution`);
         });
       });
     });
