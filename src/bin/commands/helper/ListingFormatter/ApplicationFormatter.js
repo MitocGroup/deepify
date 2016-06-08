@@ -177,7 +177,7 @@ module.exports = class ApplicationFormatter {
     return [
       AbstractService.AWS_RESOURCES_PREFIX,
       env,
-      S3Service.SYSTEM_BUCKET,
+      S3Service.PRIVATE_BUCKET,
       baseHash
     ].join(AbstractService.DELIMITER_DOT);
   }
