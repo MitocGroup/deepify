@@ -168,7 +168,7 @@ export class Program {
    * @param {Array} args
    */
   run(args = null) {
-    process.env.DEEP_LOG_LEVEL = this._opts.locate('loglevel') || 'info';
+    process.env.DEEP_LOG_LEVEL = this._opts.locate('loglevel').value || 'info';
     Program._logDriver.overrideJsConsole(false);
 
     if (args || !this._inputParsed) {
