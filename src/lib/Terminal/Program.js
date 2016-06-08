@@ -165,11 +165,18 @@ export class Program {
   }
 
   /**
+   * @private
+   */
+  _overrideDefaultConsole() {
+    process.env.DEEP_LOG_LEVEL = this._opts.locate('loglevel').value || process.env.DEEP_LOG_LEVEL;
+    Program._logDriver.overrideJsConsole(false);
+  }
+
+  /**
    * @param {Array} args
    */
   run(args = null) {
-    process.env.DEEP_LOG_LEVEL = this._opts.locate('loglevel').value || 'info';
-    Program._logDriver.overrideJsConsole(false);
+    this._overrideDefaultConsole();
 
     if (args || !this._inputParsed) {
       this.input(args);
