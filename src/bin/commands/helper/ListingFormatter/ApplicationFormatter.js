@@ -100,7 +100,7 @@ module.exports = class ApplicationFormatter {
           let data = yield this._tryReadS3ProvisionConfig(appBaseHash, appEnv);
           let config = JSON.parse(data.Body.toString());
 
-          this._namingCache[cacheKey] = `${config.appName} (${config.deployId})`;
+          this._namingCache[cacheKey] = `${config.appName} (${appBaseHash})`;
         } catch (e) {
           this._namingCache[cacheKey] = `${appEnv} (${appBaseHash})`;
         }
@@ -132,18 +132,20 @@ module.exports = class ApplicationFormatter {
     Object.keys(result).sort().forEach((appId) => {
       let serviceIndex = 0;
       let resourcesObj = result[appId];
-      output += `${os.EOL} #${++appIndex}. ${appId} ${os.EOL}`;
-      output += `     ${'-'.repeat(appId.length)} ${os.EOL}`;
+      output += `${os.EOL}#${++appIndex}. ${appId} ${os.EOL}`;
+      output += `    ${'-'.repeat(appId.length)} ${os.EOL}`;
 
       Object.keys(resourcesObj).sort(servicesSorting).forEach((serviceName) => {
         let resourceIndex = 0;
         let resourcesArr = resourcesObj[serviceName];
-        output += `${TAB}${++serviceIndex}. ${serviceName}: ${os.EOL}`;
+        output += `${os.EOL}${TAB.repeat(2)}${++serviceIndex}. ${serviceName}: ${os.EOL}`;
 
         for (let resource of resourcesArr) {
-          output += `${TAB.repeat(2)} ${serviceIndex}.${++resourceIndex}. ${resource}${os.EOL}`;
+          output += `${TAB.repeat(3)}${serviceIndex}.${++resourceIndex}. ${resource}${os.EOL}`;
         }
       });
+
+      output += os.EOL;
     });
 
     return output;
