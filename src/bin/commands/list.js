@@ -9,7 +9,7 @@ module.exports = function(mainPath) {
   let AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
   let ProvisioningCollisionsListingException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsListingException;
   let Listing  =  require('deep-package-manager').Provisioning_Listing;
-  let OS = require('os');
+  let ApplicationFormatter = require('./helper/ListingFormatter/ApplicationFormatter');
 
   mainPath = this.normalizeInputPath(mainPath);
   let property = new Property(mainPath);
@@ -17,6 +17,7 @@ module.exports = function(mainPath) {
   let rawResource = this.opts.locate('resource').value;
   let service = this.opts.locate('service').value;
   let format = this.opts.locate('format').value || 'application';
+  let depth = parseInt(this.opts.locate('depth').value || 3);
   let resource = null;
 
   let servicesToList = (servicesRaw) => {
@@ -51,8 +52,13 @@ module.exports = function(mainPath) {
   }
 
   let serviceList = servicesToList(service);
-  lister.hash = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP;
+  let depthFlagsMap = {
+    get 1() { return ApplicationFormatter.APP_LEVEL; },
+    get 2() { return this[1] | ApplicationFormatter.SERVICE_LEVEL; },
+    get 3() { return this[2] | ApplicationFormatter.RESOURCE_LEVEL; },
+  };
 
+  lister.hash = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP;
   lister.list((listingResult) => {
     if (Object.keys(listingResult.errors).length > 0) {
       console.error(new ProvisioningCollisionsListingException(listingResult.errors).message);
@@ -65,8 +71,13 @@ module.exports = function(mainPath) {
         let ucFormat = format.charAt(0).toUpperCase() + format.slice(1);
         let FormatterClass = require(`./helper/ListingFormatter/${ucFormat}Formatter`);
         let formatter = new FormatterClass(property);
+        let levelsFlags = depthFlagsMap[depth] || depthFlagsMap[3];
 
-        formatter.format(listingResult.resources).then((strResources) => {
+        formatter.format(listingResult.resources, levelsFlags).then((strResources) => {
+          if (depth === 1) {
+            strResources = 'To get more details, run deepify list --depth=2 or deepify list --depth=3' + strResources;
+          }
+
           console.log(strResources);
         });
       } catch (e) {
