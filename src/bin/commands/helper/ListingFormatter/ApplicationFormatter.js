@@ -22,9 +22,10 @@ module.exports = class ApplicationFormatter {
 
   /**
    * @param {Object} result
+   * @param {Number} levelsFlags
    * @returns {Promise}
    */
-  format(result) {
+  format(result, levelsFlags) {
     let formattedResult = {};
 
     return co(function* () {
@@ -52,7 +53,7 @@ module.exports = class ApplicationFormatter {
         }
       }
 
-      return this._stringifyResult(formattedResult);
+      return this._stringifyResult(formattedResult, levelsFlags);
     }.bind(this));
   }
 
@@ -113,11 +114,12 @@ module.exports = class ApplicationFormatter {
   }
 
   /**
-   * @param {String} result
+   * @param {Object} result
+   * @param {Number} levelsFlags
    * @returns {*}
    * @private
    */
-  _stringifyResult(result) {
+  _stringifyResult(result, levelsFlags) {
     let TAB = '  ';
     let output = os.EOL;
     let appIndex = 0;
@@ -129,19 +131,30 @@ module.exports = class ApplicationFormatter {
         ApplicationFormatter.SERVICES_TIERS.indexOf(tierB);
     };
 
-    Object.keys(result).sort().forEach((appId) => {
+    Object.keys(result).sort().forEach((appName) => {
       let serviceIndex = 0;
-      let resourcesObj = result[appId];
-      output += `${os.EOL}#${++appIndex}. ${appId} ${os.EOL}`;
-      output += `    ${'-'.repeat(appId.length)} ${os.EOL}`;
+      let servicesObj = result[appName];
+      let servicesNames = Object.keys(servicesObj);
 
-      Object.keys(resourcesObj).sort(servicesSorting).forEach((serviceName) => {
+      if (levelsFlags & ApplicationFormatter.APP_LEVEL) {
+        appName += ` | using ${servicesNames.length} cloud services`;
+        output += `${os.EOL}#${++appIndex}. ${appName} ${os.EOL}`;
+        output += `    ${'-'.repeat(appName.length)} ${os.EOL}`;
+      }
+
+      servicesNames.sort(servicesSorting).forEach((serviceName) => {
         let resourceIndex = 0;
-        let resourcesArr = resourcesObj[serviceName];
-        output += `${os.EOL}${TAB.repeat(2)}${++serviceIndex}. ${serviceName}: ${os.EOL}`;
+        let resourcesArr = servicesObj[serviceName];
 
-        for (let resource of resourcesArr) {
-          output += `${TAB.repeat(3)}${serviceIndex}.${++resourceIndex}. ${resource}${os.EOL}`;
+        if (levelsFlags & ApplicationFormatter.SERVICE_LEVEL) {
+          output += `${os.EOL}${TAB.repeat(2)}${++serviceIndex}. ${serviceName} `;
+          output += `| using ${resourcesArr.length} cloud resources: ${os.EOL}`
+        }
+
+        if (levelsFlags & ApplicationFormatter.RESOURCE_LEVEL) {
+          for (let resource of resourcesArr) {
+            output += `${TAB.repeat(3)}${serviceIndex}.${++resourceIndex}. ${resource}${os.EOL}`;
+          }
         }
       });
 
@@ -243,6 +256,27 @@ module.exports = class ApplicationFormatter {
       default:
         return defaultName;
     }
+  }
+
+  /**
+   * @returns {Number}
+   */
+  static get APP_LEVEL() {
+    return 0x001;
+  }
+
+  /**
+   * @returns {Number}
+   */
+  static get SERVICE_LEVEL() {
+    return 0x002;
+  }
+
+  /**
+   * @returns {Number}
+   */
+  static get RESOURCE_LEVEL() {
+    return 0x004;
   }
 
   /**

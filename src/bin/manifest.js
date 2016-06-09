@@ -400,6 +400,11 @@ module.exports = {
           description: 'Output format',
           required: false,
         },
+        depth: {
+          alias: 'd',
+          description: 'Listing depth',
+          required: false,
+        },
       },
       args: {
         path: {
