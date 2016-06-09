@@ -17,7 +17,7 @@ module.exports = function(mainPath) {
   let rawResource = this.opts.locate('resource').value;
   let service = this.opts.locate('service').value;
   let format = this.opts.locate('format').value || 'application';
-  let depth = parseInt(this.opts.locate('depth').value || 3);
+  let depth = parseInt(this.opts.locate('depth').value || 1);
   let resource = null;
 
   let servicesToList = (servicesRaw) => {
@@ -71,7 +71,7 @@ module.exports = function(mainPath) {
         let ucFormat = format.charAt(0).toUpperCase() + format.slice(1);
         let FormatterClass = require(`./helper/ListingFormatter/${ucFormat}Formatter`);
         let formatter = new FormatterClass(property);
-        let levelsFlags = depthFlagsMap[depth] || depthFlagsMap[3];
+        let levelsFlags = depthFlagsMap[depth] || depthFlagsMap[1];
 
         formatter.format(listingResult.resources, levelsFlags).then((strResources) => {
           if (depth === 1) {
