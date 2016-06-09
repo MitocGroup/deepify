@@ -12,7 +12,7 @@ module.exports = function(mainPath) {
   let ApplicationFormatter = require('./helper/ListingFormatter/ApplicationFormatter');
 
   mainPath = this.normalizeInputPath(mainPath);
-  let property = new Property(mainPath);
+  let property = Property.create(mainPath);
   let lister = new Listing(property);
   let rawResource = this.opts.locate('resource').value;
   let service = this.opts.locate('service').value;
