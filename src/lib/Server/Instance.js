@@ -249,7 +249,7 @@ export class Instance {
     let kernel = {
       config: {
         buckets: {
-          system: {
+          private: {
             name: ''
           },
           public: {
