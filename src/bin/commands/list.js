@@ -17,7 +17,7 @@ module.exports = function(mainPath) {
   let rawResource = this.opts.locate('resource').value;
   let service = this.opts.locate('service').value;
   let format = this.opts.locate('format').value || 'application';
-  let depth = this.opts.locate('depth').value || 3;
+  let depth = parseInt(this.opts.locate('depth').value || 3);
   let resource = null;
 
   let servicesToList = (servicesRaw) => {
@@ -74,7 +74,7 @@ module.exports = function(mainPath) {
         let levelsFlags = depthFlagsMap[depth] || depthFlagsMap[3];
 
         formatter.format(listingResult.resources, levelsFlags).then((strResources) => {
-          if (depth == 1) {
+          if (depth === 1) {
             strResources = 'To get more details, run deepify list --depth=2 or deepify list --depth=3' + strResources;
           }
 
