@@ -123,9 +123,10 @@ module.exports = class ApplicationFormatter {
     let TAB = '  ';
     let output = os.EOL;
     let appIndex = 0;
+    let extractTier = s => s.replace(/^([^\s]+).+$/, '$1');
     let servicesSorting = (a, b) => {
-      let tierA = a.replace(/^([^\s]+).+$/, '$1');
-      let tierB = b.replace(/^([^\s]+).+$/, '$1');
+      let tierA = extractTier(a);
+      let tierB = extractTier(b);
 
       return ApplicationFormatter.SERVICES_TIERS.indexOf(tierA) >
         ApplicationFormatter.SERVICES_TIERS.indexOf(tierB);
@@ -148,7 +149,7 @@ module.exports = class ApplicationFormatter {
 
         if (levelsFlags & ApplicationFormatter.SERVICE_LEVEL) {
           output += `${os.EOL}${TAB.repeat(2)}${++serviceIndex}. ${serviceName} `;
-          output += `| using ${resourcesArr.length} cloud resources: ${os.EOL}`
+          output += `| using ${resourcesArr.length} cloud resources: ${os.EOL}`;
         }
 
         if (levelsFlags & ApplicationFormatter.RESOURCE_LEVEL) {
