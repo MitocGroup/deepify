@@ -33,6 +33,7 @@ module.exports = function(mainPath) {
   let appEnv = isProd ? 'prod' : this.opts.locate('env').value;
   let microservicesToDeploy = this.opts.locate('partial').value;
   let validateNodeVersion = require('./helper/validate-node-version');
+  let undeployRunning = false;
 
   validateNodeVersion.call(this);
   mainPath = this.normalizeInputPath(mainPath);
@@ -367,7 +368,7 @@ module.exports = function(mainPath) {
   };
 
   let deployRollback = cb => {
-    if (propertyInstance.isUpdate) {
+    if (propertyInstance.isUpdate || undeployRunning) {
       return cb(null); // @todo: undeploy either the update?
     }
 
@@ -395,6 +396,8 @@ module.exports = function(mainPath) {
 
         cb(null);
       }, true);
+
+      undeployRunning = true;
     });
   };
 
