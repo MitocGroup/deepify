@@ -34,7 +34,6 @@ module.exports = class ApplicationFormatter {
           continue;
         }
 
-        let humanizedServiceName = this._humanizeAwsServiceName(service);
         let resources = result[service];
 
         for (let resourceName in resources) {
@@ -46,8 +45,8 @@ module.exports = class ApplicationFormatter {
           let appName = yield this._resolveAppName(service, resourceName, resourceData);
 
           formattedResult[appName] = formattedResult[appName] || {};
-          formattedResult[appName][humanizedServiceName] = formattedResult[appName][humanizedServiceName] || [];
-          formattedResult[appName][humanizedServiceName].push(this._findSuitableResourceName(
+          formattedResult[appName][service] = formattedResult[appName][service] || [];
+          formattedResult[appName][service].push(this._findSuitableResourceName(
             service, resourceData, resourceName
           ));
         }
@@ -123,14 +122,6 @@ module.exports = class ApplicationFormatter {
     let TAB = '  ';
     let output = os.EOL;
     let appIndex = 0;
-    let extractTier = s => s.replace(/^([^\s]+).+$/, '$1');
-    let servicesSorting = (a, b) => {
-      let tierA = extractTier(a);
-      let tierB = extractTier(b);
-
-      return ApplicationFormatter.SERVICES_TIERS.indexOf(tierA) >
-        ApplicationFormatter.SERVICES_TIERS.indexOf(tierB);
-    };
 
     Object.keys(result).sort().forEach((appName) => {
       let serviceIndex = 0;
@@ -143,12 +134,12 @@ module.exports = class ApplicationFormatter {
         output += `    ${'-'.repeat(appName.length)} ${os.EOL}`;
       }
 
-      servicesNames.sort(servicesSorting).forEach((serviceName) => {
+      servicesNames.sort(ApplicationFormatter.serviceSorting).forEach((serviceName) => {
         let resourceIndex = 0;
         let resourcesArr = servicesObj[serviceName];
 
         if (levelsFlags & ApplicationFormatter.SERVICE_LEVEL) {
-          output += `${os.EOL}${TAB.repeat(2)}${++serviceIndex}. ${serviceName} `;
+          output += `${os.EOL}${TAB.repeat(2)}${++serviceIndex}. ${this._humanizeAwsServiceName(serviceName)} `;
           output += `| using ${resourcesArr.length} cloud resources: ${os.EOL}`;
         }
 
@@ -230,6 +221,31 @@ module.exports = class ApplicationFormatter {
       default:
         return '';
     }
+  }
+
+  /**
+   * @param {String} serviceA
+   * @param {String} serviceB
+   * @returns {Number}
+   * @private
+   */
+  static serviceSorting(serviceA, serviceB) {
+    let order = [
+      'IAM',
+      'CognitoIdentity',
+      'S3',
+      'CloudFront',
+      'APIGateway',
+      'Lambda',
+      'CloudWatchEvents',
+      'DynamoDB',
+      'SQS',
+      'ElastiCache',
+      'ES',
+      'CloudWatchLogs',
+    ];
+
+    return order.indexOf(serviceA) - order.indexOf(serviceB);
   }
 
   /**
