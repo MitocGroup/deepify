@@ -134,8 +134,6 @@ module.exports = class ApplicationFormatter {
         output += `    ${'-'.repeat(appName.length)} ${os.EOL}`;
       }
 
-      console.log(servicesNames);
-
       servicesNames.sort(ApplicationFormatter.serviceSorting).forEach((serviceName) => {
         let resourceIndex = 0;
         let resourcesArr = servicesObj[serviceName];
