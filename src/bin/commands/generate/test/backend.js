@@ -14,9 +14,5 @@ module.exports = function(mainPath) {
   let backendTestFolder = path.join(microservice.basePath, 'Test', 'Backend');
 
   FSExtra.ensureDirSync(backendTestFolder);
-<<<<<<< HEAD
-  console.log(`Backend test folder has been generated in ${backendTestFolder}`);
-=======
   console.info(`Backend test folder has been generated in ${backendTestFolder}`);
->>>>>>> dev
 };
