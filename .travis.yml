@@ -22,8 +22,7 @@ branches:
     - dev
 env:
   global:
-    #CODACY_PROJECT_TOKEN =[secured]
-    - secure: JHOBtvwzO2GYXh/qxryOry58driXb3s/aJ0MiozCn9ZvLkWvw5+45dEzr4iB8LYGfOgXVJ1cMF/yWoIXNZCeXnhaNlo9xPf7zzpX3co82zZufjOK430A5D07aQ3lrHCsLRuwS5m06/yvGwBw/2NLThibX5XHZ6e23xkSuYGefAaMqa9wS5QMmc1wyBNRE982BmxZIYhEBqUpLUnCpKLreDWXDIsRM6/VoIDEEZOFSVDI8AAFU4RBDopO1E4Y8lsDBVB9Ifa/w4ooEs+qp0Ewabv7wPCnmVJLPnlJckbazsMZ3iW4npSlYl7P75l3ChFEionkQdaUukkQ65PZ2sSstess3qXDwZp7XysQj97XB+0h1wWJm1zd3cATloZGzseflBxTQeC6NVnp0vKD06MCLNP4LtdFDfL3aDZRe5536ZsC3AF6Ge2IKIy71OvwJqlBKvq9uJoqA+GJ7Wpb+NwQfVXzCc0YKpc9s9WGRrq9TAQ0S3exmtYJ2aJyNBKuJ4wYdowG7OCMC6NGqJF8HmL1Hff+ldDSbDA61I3HgbcKjCDqFXB91gv9l7H0qrBB2jIBD0zMylei2SnLLVhoewpUFwV96ntE2YKicYmja9tK9u/9bhrJ8JVZyXng/Ftl81zSu/IqSZSVtC09ooYHeJv7bS33UaLEHufsmgfUavspreo=
+  - secure: HLO6+HNsn5INLhN2VvLTKL64OGcBEWEjGKjfMY0cIaX0LlubLYtjKdP1YZpFlSDaeDwiPBSzzYdihwgA2y+FzSZUPgy3Z1UrwHGYsT1e/NhHGg7pjO0qVwogskR/0ieh7EDroK+6YndCujduPQDoXRcYOtSOU+iq12zwsY/H53VTLR3ZJw+9EWU+VvvnzMPXFFwSt0eVljzZacq2E4UWtbEdGYNdzzOKEZdP/eJPubuCGdbO+F1ae6jjzpaxwj1fKoOKoqh8CXZsjyJkGJJG7/3MwaA9ZJnhnoUoH1HlwqESlCWqV5zm4niN1SScOOiGmnirNFbMHrZcPN8qVsQMpNM9fqCpuDZjVZjALTGdK/l3wT34TEIx54MVIs6SfKs5d3q8TFScqZgUtEsv9SUQs13GmazncpxkB3/OJ/yYUjyT7CRC2b9RDVS8fYhuwytuX8woRNscm3EfgiT6bc0py/ppR5djt019AUjsS7lN3DDiTqkRKp6vD0mJw0Bu3Nibjl9uP2u+THMywrhI9IjyK/8GlY0WePE9G5d+7jb3Gq7SC+JEV6O6mMGl4sAfx+RRmL9yRZoXeCWKVTrCn5+BNikBouCFCAmxUPs8QizOzKz8H4RrGR3EYungvriAcke3j9I5MBEETr14xeo4oXhVQEmh8w6QBmCYFRNPQkqPHwc=
 before_install:
   - (npm list -g babel-cli --depth=0 || npm install -g babel-cli@6.x.x)
   - (npm list -g babel-polyfill --depth=0 || npm install -g babel-polyfill)
@@ -32,7 +31,6 @@ before_install:
   - (npm list -g browserify --depth=0 || npm install -g browserify@11.2.x)
   - (npm list -g mocha --depth=0 || npm install -g mocha@2.4.x)
   - (npm list -g istanbul@^1.0.0-alpha --depth=0 || npm install -g istanbul@^1.0.0-alpha)
-  - (npm list -g isparta --depth=0 || npm install -g isparta@3.1.x)
   - (npm list -g codacy-coverage --depth=0 || npm install -g codacy-coverage@1.1.x)
   - cp test/package.json .
 after_success:

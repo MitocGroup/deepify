@@ -43,8 +43,7 @@ module.exports = function(mainPath) {
   matcher.read((error) => {
     if (error && !resource && !dirtyMode) {
       console.error(error);
-      console.log('You may want to add "--dirty" flag to delete all account resources');
-
+      console.info('You may want to add "--dirty" flag to delete all account resources');
       this.exit(1);
       return;
     }
@@ -62,7 +61,7 @@ module.exports = function(mainPath) {
 
       prompt.read((confirmation) => {
         if ((confirmation || '').toLowerCase() !== 'yes') {
-          console.log('Undeploy cancelled by user');
+          console.info('Undeploy cancelled by user');
           this.exit(0);
         }
       });
@@ -80,11 +79,11 @@ module.exports = function(mainPath) {
         this.exit(1);
         return;
       } else if(!results) {
-        console.log('There are no AWS resources matched...');
+        console.warn('There are no AWS resources matched...');
       }
 
       if (backupConfig) {
-        console.log('Create configuration backup in ' + this.fileNameBck);
+        console.debug(`Create configuration backup in ${matcher.fileNameBck}`);
 
         matcher.bckConfigFile((error) => {
           if (error) {

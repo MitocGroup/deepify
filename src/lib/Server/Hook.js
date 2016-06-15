@@ -81,13 +81,13 @@ export class Hook {
     let hookFile = path.join(microservice.basePath, Hook.FILE_NAME);
 
     if (!fs.existsSync(hookFile)) {
-      console.log(`No "server ${type} init hook" found in ${microservice.identifier}`);
+      console.debug(`No "server ${type} init hook" found in ${microservice.identifier}`);
 
       callback();
       return this;
     }
 
-    console.log(`Running "server ${type} init hook" in ${microservice.identifier}`);
+    console.debug(`Running "server ${type} init hook" in ${microservice.identifier}`);
 
     let hook = require(hookFile);
 

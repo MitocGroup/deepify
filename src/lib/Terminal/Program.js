@@ -114,6 +114,7 @@ export class Program {
     this._opts.create('cmd-auto-complete', null, 'Used by bash auto completion', false, true);
     this._opts.create('version', 'v', 'Prints command version');
     this._opts.create('help', 'h', 'Prints command help');
+    this._opts.create('loglevel', null, 'Switches log level to error|warn|info|debug|silent');
 
     if (this.hasCommands) {
       this._args.create('command', 'Command to run', false, false, (cmd) => !!this.getCommand(cmd));
@@ -164,10 +165,18 @@ export class Program {
   }
 
   /**
+   * @private
+   */
+  _overrideDefaultConsole() {
+    process.env.DEEP_LOG_LEVEL = this._opts.locate('loglevel').value || process.env.DEEP_LOG_LEVEL;
+    Program._logDriver.overrideJsConsole(false);
+  }
+
+  /**
    * @param {Array} args
    */
   run(args = null) {
-    Program._logDriver.overrideJsConsole(false);
+    this._overrideDefaultConsole();
 
     if (args || !this._inputParsed) {
       this.input(args);
@@ -182,7 +191,7 @@ export class Program {
       let subProgram = this.getCommand(command.value);
 
       if (!subProgram) {
-        console.log('');
+        console.error('');
         console.error(`No such command '${command.value}' found!`);
         this._outputListCommands();
 

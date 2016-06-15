@@ -6,8 +6,7 @@
 'use strict';
 
 if (process.env.TRAVIS) {
-  console.log('Skipping dumping deep autocompletion');
-  
+  console.info('Skipping dumping deep autocompletion');
   process.exit(0);
 }
 
@@ -23,6 +22,4 @@ FS.writeFileSync(scriptPath, scriptRaw, {
   mode: 0o755
 });
 
-console.log(`Deepify autocomplete was dumped into '${scriptPath}`);
-
-process.exit(0);
+console.info(`Deepify autocomplete was dumped into '${scriptPath}`);

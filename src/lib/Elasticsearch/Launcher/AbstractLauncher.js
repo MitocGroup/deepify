@@ -42,8 +42,8 @@ export class AbstractLauncher extends Core.OOP.Interface {
    * @param {Object[]} args
    * @returns {Number}
    */
-  launch(...args) { 
-    console.log(`Running elasticsearch on: ${this.shortUrl}`);
+  launch(...args) {
+    console.debug(`Running elasticsearch on: ${this.shortUrl}`);
 
     return this._launch(...args);
   }
@@ -57,7 +57,7 @@ export class AbstractLauncher extends Core.OOP.Interface {
    */
   setSetting(setting, value) {
     this._settings[setting] = value;
-    
+
     return this;
   }
 
@@ -73,7 +73,7 @@ export class AbstractLauncher extends Core.OOP.Interface {
    * @returns {*}
    */
   stop(...args) {
-    console.log(`Stopping elasticsearch on: ${this.shortUrl}`);
+    console.debug(`Stopping elasticsearch on: ${this.shortUrl}`);
 
     this._stop(...args);
   }

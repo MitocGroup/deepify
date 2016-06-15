@@ -52,7 +52,7 @@ module.exports = function(mainPath) {
       questionList.push({
         type: 'checkbox',
         name: 'engines',
-        message: 'Select the frontend engines you\'d like to use: ',
+        message: 'Select the frontend engines you\'d like to use',
         choices: MicroserviceGenerator.ALLOWED_ENGINES.map(e => ({name: e, checked: e === 'angular'})),
       });
     }
@@ -125,7 +125,7 @@ module.exports = function(mainPath) {
           this.exit(1);
         }
 
-        console.log(`'${appSchema.name}' microapp has been successfully generated in ${path}${OS.EOL}`);
+        console.info(`'${appSchema.name}' microapp has been successfully generated in ${path}${OS.EOL}`);
         prepareModels();
       });
   });

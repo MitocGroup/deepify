@@ -27,7 +27,7 @@ export class MigrationGenerator extends AbstractGenerator {
     let cmdName = this.generationSchema.cmdName;
     let cmdVersion = this.generationSchema.cmdVersion;
     let migrationFolder = microservice.autoload.migration;
-    let migrationPath = path.join(migrationFolder, `Version${Date.now()}.js`);
+    let migrationPath = path.join(migrationFolder, `version${Date.now()}.js`);
     let templateArgs = {
       name: cmdName,
       version: cmdVersion
@@ -36,7 +36,7 @@ export class MigrationGenerator extends AbstractGenerator {
     FSExtra.ensureDirSync(migrationFolder);
 
     this.renderFile(
-      'Data/Migration/migration.js',
+      'data/migration/migration.js',
       migrationPath,
       templateArgs
     );

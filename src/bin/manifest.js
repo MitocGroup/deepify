@@ -113,7 +113,7 @@ module.exports = {
         },
         'cfg-bucket': {
           alias: 'b',
-          description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',
+          description: 'AWS S3 private bucket name where the deploy config was persisted (ex. deep.prod.private.db0c09cc)',
           required: false,
         },
         'dry-run': {
@@ -131,14 +131,8 @@ module.exports = {
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
           required: false,
         },
-        fast: {
-          alias: 'f',
-          description: 'Faster deployment without copying the sources (may alter the web app state)',
-          required: false,
-        },
-        'aws-sdk': {
-          alias: 'a',
-          description: 'Force latest aws-sdk in Lambda',
+        'invalidate-cache': {
+          description: 'Invalidate deep dependencies cache',
           required: false,
         },
       },
@@ -156,12 +150,12 @@ module.exports = {
       opts: {
         'cfg-bucket': {
           alias: 'b',
-          description: 'AWS S3 system bucket name where the deploy config was persisted (ex. deep.prod.system.db0c09cc)',
+          description: 'AWS S3 private bucket name where the deploy config was persisted (ex. deep.prod.private.db0c09cc)',
           required: false,
         },
         'resource': {
           alias: 'r',
-          description: 'An generated AWS resource name from given deploy (ex. deep.prod.system.db0c09cc)',
+          description: 'An generated AWS resource name from given deploy (ex. deep.prod.private.db0c09cc)',
           required: false,
         },
         dirty: {
@@ -294,11 +288,6 @@ module.exports = {
               description: 'Partial deploy (one or several comma separated microservices identifiers)',
               required: false,
             },
-            'aws-sdk': {
-              alias: 'a',
-              description: 'Force latest aws-sdk in Lambda',
-              required: false,
-            },
             'linear': {
               description: 'Compile lambdas linerar',
               required: false,
@@ -345,127 +334,6 @@ module.exports = {
               required: false,
             },
           }
-        },
-      },
-    },
-    'build-frontend': {
-      example: 'deepify build-frontend path/to/web_app',
-      description: 'Build frontend of a web app',
-      actionPath: './commands/compile/frontend',
-      section: 'Deprecated',
-      opts: {
-        'output-path': {
-          alias: 'o',
-          description: 'Path to output built frontend of the web app (default _www)',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: false,
-        },
-      },
-    },
-    'compile-es6': {
-      example: 'deepify compile-es6 path/to/lambda',
-      description: 'Compile ES6 scripts to ES5 using babel (matched by *.es6)',
-      actionPath: './commands/compile/es6',
-      section: 'Deprecated',
-      opts: {
-        'extension': {
-          alias: 'x',
-          description: 'Extensions to compile',
-          required: false,
-        },
-        'out-dir': {
-          alias: 'd',
-          description: 'Compile an input directory of modules into an output directory',
-          required: false,
-        },
-        'es5': {
-          description: 'Compile using es5 preset, instead of the node4 compatible',
-          required: false,
-        },
-        'source': {
-          description: 'Compile from source instead of directory',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the lambda root',
-          required: false,
-        },
-      },
-    },
-    'compile-prod': {
-      example: 'deepify compile-prod path/to/web_app',
-      description: 'Compile lambdas for production',
-      actionPath: './commands/compile/prod',
-      section: 'Deprecated',
-      opts: {
-        'remove-source': {
-          alias: 's',
-          description: 'Remove original Lambda source',
-          required: false,
-        },
-        partial: {
-          alias: 'm',
-          description: 'Partial deploy (one or several comma separated microservices identifiers)',
-          required: false,
-        },
-        'aws-sdk': {
-          alias: 'a',
-          description: 'Force latest aws-sdk in Lambda',
-          required: false,
-        },
-        'linear': {
-          description: 'Compile lambdas linerar',
-          required: false,
-        },
-        'skip-cache': {
-          description: 'Skip loading lambda dependencies from cache',
-          required: false,
-        },
-        'invalidate-cache': {
-          description: 'Invalidate deep dependencies cache',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: false,
-        },
-      },
-    },
-    'init-backend': {
-      example: 'deepify init-backend path/to/web_app',
-      description: 'Initialize backend',
-      actionPath: './commands/compile/dev',
-      section: 'Deprecated',
-      opts: {
-        partial: {
-          alias: 'm',
-          description: 'Partial init (one or several comma separated microservices identifiers)',
-          required: false,
-        },
-        update: {
-          alias: 'u',
-          description: 'Use \'npm update\' instead of \'npm install\' when compiling lambdas',
-          required: false,
-        },
-        'skip-install': {
-          alias: 's',
-          description: 'Skip npm dependencies installation in Lambdas and linking aws-sdk',
-          required: false,
-        },
-      },
-      args: {
-        path: {
-          description: 'The path to the web app',
-          required: false,
         },
       },
     },
@@ -519,7 +387,7 @@ module.exports = {
       opts: {
         resource: {
           alias: 'r',
-          description: 'An generated AWS resource name from given deploy (ex. deep.prod.system.db0c09cc)',
+          description: 'An generated AWS resource name from given deploy (ex. deep.prod.private.db0c09cc)',
           required: false,
         },
         service: {
@@ -530,6 +398,11 @@ module.exports = {
         format: {
           alias: 'f',
           description: 'Output format',
+          required: false,
+        },
+        depth: {
+          alias: 'd',
+          description: 'Listing depth',
           required: false,
         },
       },
@@ -545,9 +418,41 @@ module.exports = {
       description: 'Generate microapplication component(s)',
       section: 'Develop on your local environment',
       commands: {
+        'microapp': {
+          example: 'deepify generate microapp /target/path/',
+          description: 'Generate microapp\'s skeleton',
+          opts: {
+            name: {
+              alias: 'n',
+              description: 'Microapp name to use',
+              required: false,
+            },
+            engine: {
+              alias: 'e',
+              description: 'Frontend engine to use',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path where to generate the microapp',
+              required: false,
+            },
+          },
+        },
+        'frontend': {
+          example: 'deepify generate frontend path/to/app',
+          description: 'Generate microapp\'s frontend tier',
+          args: {
+            path: {
+              description: 'The path to the microservice',
+              required: false,
+            },
+          },
+        },
         'backend': {
           commandsPath: './commands/generate/backend',
-          description: 'Generate microapplication backend component(s)',
+          description: 'Generate microapp\'s backend tier',
           commands: {
             'action': {
               example: 'deepify generate action /path/to/microapp',
@@ -597,7 +502,7 @@ module.exports = {
         },
         'data': {
           commandsPath: './commands/generate/data',
-          description: 'Generate microapplication data component(s)',
+          description: 'Generate microapp\'s data tier',
           commands: {
             'model': {
               example: 'deepify generate model /path/to/microapp',
@@ -642,7 +547,7 @@ module.exports = {
         },
         'test': {
           commandsPath: './commands/generate/test',
-          description: 'Generate microapplication test component(s)',
+          description: 'Generate microapp\'s tests',
           commands: {
             'backend': {
               example: 'deepify generate test backend /path/to/microapp',
@@ -663,38 +568,6 @@ module.exports = {
                   required: false,
                 },
               },
-            },
-          },
-        },
-        'microapp': {
-          example: 'deepify generate microapp /target/path/',
-          description: 'Generate microapp skeleton component(s)',
-          opts: {
-            name: {
-              alias: 'n',
-              description: 'Microapp name to use',
-              required: false,
-            },
-            engine: {
-              alias: 'e',
-              description: 'Frontend engine to use',
-              required: false,
-            },
-          },
-          args: {
-            path: {
-              description: 'The path where to generate the microapp',
-              required: false,
-            },
-          },
-        },
-        'frontend': {
-          example: 'deepify generate frontend path/to/app',
-          description: 'Create microservice frontend component(s)',
-          args: {
-            path: {
-              description: 'The path to the microservice',
-              required: false,
             },
           },
         },

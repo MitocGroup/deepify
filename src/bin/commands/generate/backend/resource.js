@@ -30,7 +30,7 @@ module.exports = function(mainPath) {
 
     if (microservice) {
       if (microservices.indexOf(microservice) === -1) {
-        console.log(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
+        console.error(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
         this.exit(1);
       }
 
@@ -98,7 +98,7 @@ module.exports = function(mainPath) {
           return;
         }
 
-        console.log(
+        console.info(
           `'@${resourceSchema.microservice.identifier}` +
           `:${MicroserviceGenerator.identifier(resourceSchema.resource)}` +
           `:${MicroserviceGenerator.identifier(crud.name)}' ` +

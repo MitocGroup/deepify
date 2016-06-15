@@ -9,14 +9,15 @@ module.exports = function(mainPath) {
   let AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
   let ProvisioningCollisionsListingException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsListingException;
   let Listing  =  require('deep-package-manager').Provisioning_Listing;
-  let OS = require('os');
+  let ApplicationFormatter = require('./helper/ListingFormatter/ApplicationFormatter');
 
   mainPath = this.normalizeInputPath(mainPath);
-  let property = new Property(mainPath);
+  let property = Property.create(mainPath);
   let lister = new Listing(property);
   let rawResource = this.opts.locate('resource').value;
   let service = this.opts.locate('service').value;
-  let format = this.opts.locate('format').value || 'text';
+  let format = this.opts.locate('format').value || 'application';
+  let depth = parseInt(this.opts.locate('depth').value || 1);
   let resource = null;
 
   let servicesToList = (servicesRaw) => {
@@ -36,30 +37,6 @@ module.exports = function(mainPath) {
     return services;
   };
 
-  this.jsonFormatter = (resourceObj) => {
-    return JSON.stringify(resourceObj, null, '  ');
-  };
-
-  this.textFormatter = (resourcesObj) => {
-    let output = OS.EOL;
-    let TAB = '  ';
-
-    for (let serviceName in resourcesObj) {
-      if (!resourcesObj.hasOwnProperty(serviceName)) {
-        continue;
-      }
-
-      output += `- ${serviceName}: ${OS.EOL}`;
-      let resourcesArr = Object.keys(resourcesObj[serviceName]);
-
-      for (let resource of resourcesArr) {
-        output += `${TAB}- ${resource}${OS.EOL}`;
-      }
-    }
-
-    return output;
-  };
-
   if (rawResource) {
     resource = AbstractService.extractBaseHashFromResourceName(rawResource);
 
@@ -75,24 +52,38 @@ module.exports = function(mainPath) {
   }
 
   let serviceList = servicesToList(service);
-  lister.hash = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP;
+  let depthFlagsMap = {
+    get 1() { return ApplicationFormatter.APP_LEVEL; },
+    get 2() { return this[1] | ApplicationFormatter.SERVICE_LEVEL; },
+    get 3() { return this[2] | ApplicationFormatter.RESOURCE_LEVEL; },
+  };
 
+  lister.hash = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP;
   lister.list((listingResult) => {
     if (Object.keys(listingResult.errors).length > 0) {
       console.error(new ProvisioningCollisionsListingException(listingResult.errors).message);
       this.exit(1);
     } else if (listingResult.matchedResources <= 0) {
-      console.log(`There are no DEEP resource on your AWS account ${resource ? `matching '${resource}' hash.` : '.'}`);
-      this.exit(1);
+      console.warn(`There are no DEEP resource on your AWS account ${resource ? `matching '${resource}' hash.` : '.'}`);
+      this.exit(0);
     } else {
-      let formatter = `${format}Formatter`;
+      try {
+        let ucFormat = format.charAt(0).toUpperCase() + format.slice(1);
+        let FormatterClass = require(`./helper/ListingFormatter/${ucFormat}Formatter`);
+        let formatter = new FormatterClass(property);
+        let levelsFlags = depthFlagsMap[depth] || depthFlagsMap[1];
 
-      if (!this.hasOwnProperty(formatter)) {
+        formatter.format(listingResult.resources, levelsFlags).then((strResources) => {
+          if (depth === 1) {
+            strResources = 'To get more details, run deepify list --depth=2 or deepify list --depth=3' + strResources;
+          }
+
+          console.log(strResources);
+        });
+      } catch (e) {
         console.error(`'${format}' formatter is not supported`);
         this.exit(1);
       }
-
-      console.log(this[formatter](listingResult.resources));
     }
   }, serviceList);
 };

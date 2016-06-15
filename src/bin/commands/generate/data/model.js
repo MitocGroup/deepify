@@ -25,7 +25,7 @@ module.exports = function(mainPath) {
 
     if (microservice) {
       if (microservices.indexOf(microservice) === -1) {
-        console.log(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
+        console.error(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
         this.exit(1);
       }
 
@@ -145,7 +145,7 @@ module.exports = function(mainPath) {
   };
 
   promptModelSchema(() => {
-    console.log(`${OS.EOL}You have to add at least 1 field to your model${OS.EOL}`);
+    console.warn(`${OS.EOL}You have to add at least 1 field to your model${OS.EOL}`);
 
     promptModelFields(() => {
       new ModelGenerator()
@@ -156,8 +156,8 @@ module.exports = function(mainPath) {
           }
 
           if (path) {
-            console.log(`'${modelSchema.name}' model has been successfully generated in ${path}.`);
-            
+            console.info(`'${modelSchema.name}' model has been successfully generated in ${path}.`);
+
             prepareActions();
           }
         });

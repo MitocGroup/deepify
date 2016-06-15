@@ -33,7 +33,7 @@ module.exports = function(mainPath) {
     config = JSON.parse(fs.readFileSync(configFile));
   }
 
-  console.log('Dumping frontend into ' + dumpPath);
+  console.debug('Dumping frontend into ' + dumpPath);
 
   let tmpDir = os.tmpdir();
   let tmpPropertyPath = path.join(tmpDir, path.basename(mainPath));
@@ -74,7 +74,7 @@ module.exports = function(mainPath) {
 
         let frontendDumpPath = path.join(tmpPropertyPath, '_public');
 
-        console.log('Copying built sources into ' + dumpPath);
+        console.debug('Copying built sources into ' + dumpPath);
 
         fse.ensureDirSync(dumpPath);
 
@@ -86,7 +86,7 @@ module.exports = function(mainPath) {
               this.exit(1);
             }
 
-            console.log('Frontend dumped successfully');
+            console.info('Frontend dumped successfully');
           });
       });
     });

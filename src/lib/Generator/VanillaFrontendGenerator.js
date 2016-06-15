@@ -24,7 +24,7 @@ export class VanillaFrontendGenerator extends AbstractGenerator {
     FSExtra.ensureDirSync(this.targetPath);
 
     this.renderFile(
-      'Frontend/vanilla_bootstrap.js', 
+      'frontend/vanilla_bootstrap.js', 
       path.join(this.targetPath, 'bootstrap.js')
     );
 

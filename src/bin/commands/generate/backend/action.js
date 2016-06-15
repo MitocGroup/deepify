@@ -24,7 +24,7 @@ module.exports = function(mainPath) {
 
     if (microservice) {
       if (microservices.indexOf(microservice) === -1) {
-        console.log(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
+        console.error(`Unknown microservice '${microservice}'. Available microservices: ${microservices.join(',')}`);
         this.exit(1);
       }
 
@@ -122,9 +122,9 @@ module.exports = function(mainPath) {
             return;
           }
 
-          console.log(
-            `'@${lambdaSchema.microservice.identifier}` + 
-            `:${MicroserviceGenerator.identifier(lambdaSchema.resource)}` + 
+          console.info(
+            `'@${lambdaSchema.microservice.identifier}` +
+            `:${MicroserviceGenerator.identifier(lambdaSchema.resource)}` +
             `:${MicroserviceGenerator.identifier(lambdaSchema.action)}' ` +
             `action has been successfully generated in '${path}'`
           );

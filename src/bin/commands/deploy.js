@@ -26,14 +26,14 @@ module.exports = function(mainPath) {
   let Listing = require('deep-package-manager').Provisioning_Listing;
 
   let isProd = this.opts.locate('prod').exists;
-  let installSdk = this.opts.locate('aws-sdk').exists;
   let localOnly = this.opts.locate('dry-run').exists;
-  let fastDeploy = this.opts.locate('fast').exists;
+  let invalidateCache = this.opts.locate('invalidate-cache').exists;
   let dumpCodePath = this.opts.locate('dump-local').value;
   let cfgBucket = this.opts.locate('cfg-bucket').value;
   let appEnv = isProd ? 'prod' : this.opts.locate('env').value;
   let microservicesToDeploy = this.opts.locate('partial').value;
   let validateNodeVersion = require('./helper/validate-node-version');
+  let undeployRunning = false;
 
   validateNodeVersion.call(this);
   mainPath = this.normalizeInputPath(mainPath);
@@ -75,62 +75,7 @@ module.exports = function(mainPath) {
   let tmpPropertyPath = mainPath;
 
   if (localOnly) {
-    console.log('Local mode on!');
-  }
-
-  if (fastDeploy) {
-    let prompt = new Prompt('Fast deploy may alter the web app state! Start anyway?');
-
-    prompt.readConfirm((result) => {
-      if (result) {
-        process.on('exit', () => {
-          new Exec('rm', '-rf', path.join(tmpPropertyPath, '_public'))
-            .avoidBufferOverflow()
-            .runSync();
-
-          removePackedLambdas();
-        });
-
-        startDeploy();
-        return;
-      }
-
-      console.log('Cancelled by the user...');
-    });
-  } else {
-    let tmpDir = os.tmpdir();
-    tmpPropertyPath = path.join(tmpDir, path.basename(mainPath));
-    tmpPropertyPath += `_${new Date().getTime()}`;
-
-    fse.ensureDirSync(tmpPropertyPath);
-
-    console.log(`Copying sources to ${tmpPropertyPath}`);
-
-    new Exec(
-      'cp',
-      '-R',
-      path.join(mainPath, '*'),
-      tmpPropertyPath + '/'
-    )
-      .avoidBufferOverflow()
-      .run((result) => {
-        if (result.failed) {
-          console.error(`Error copying sources into ${tmpPropertyPath}: ${result.error}`);
-          this.exit(1);
-        }
-
-        process.on('exit', () => {
-          let result = new Exec('rm', '-rf', tmpPropertyPath)
-            .avoidBufferOverflow()
-            .runSync();
-
-          if (result.failed) {
-            console.error(result.error);
-          }
-        });
-
-        startDeploy();
-      });
+    console.debug('Local mode on!');
   }
 
   let ensureAWSProdKeys = (cb) => {
@@ -161,31 +106,21 @@ module.exports = function(mainPath) {
     });
   };
 
-  let dumpConfig = (propertyInstance, cb) => {
-    propertyInstance.configObj.completeDump(() => {
-      if (!fastDeploy) {
-        let configFile = propertyInstance.configObj.configFile;
-
-        fse.copySync(configFile, path.join(mainPath, path.basename(configFile)));
-      }
-
-      cb();
-    });
-  };
+  let dumpConfig = (propertyInstance, cb) => propertyInstance.configObj.completeDump(cb);
 
   let doCompileProd = (propertyPath, cb) => {
-    console.log('Start preparing for production');
+    console.debug('Start preparing for production');
 
     let cmd = new Exec(
       Bin.node,
       this.scriptPath,
-      'compile-prod',
+      'compile',
+      'prod',
       propertyPath
     );
 
-    !fastDeploy && cmd.addArg('--remove-source');
+    invalidateCache && cmd.addArg('--invalidate-cache');
     microservicesToDeploy && cmd.addArg('--partial ' + microservicesToDeploy);
-    installSdk && cmd.addArg('--aws-sdk');
 
     cmd.run((result) => {
       if (result.failed) {
@@ -210,7 +145,7 @@ module.exports = function(mainPath) {
           return;
         }
 
-        console.log('Skipping production preparation...');
+        console.debug('Skipping production preparation...');
 
         cb();
       });
@@ -259,7 +194,7 @@ module.exports = function(mainPath) {
       });
 
       process.on('SIGINT', () => {
-        console.log('Gracefully shutting down from SIGINT (Ctrl-C)...');
+        console.debug('Gracefully shutting down from SIGINT (Ctrl-C)...');
 
         deployRollback((error) => {
           if (error) {
@@ -280,19 +215,19 @@ module.exports = function(mainPath) {
     propertyInstance.configObj.tryLoadConfig(() => {
       if (propertyInstance.configObj.configExists) {
         propertyInstance.update(() => {
-          console.log(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
-          console.log(`Website address: ${getPublicWebsite(propertyInstance)}`);
+          console.info(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
+          console.info(`Website address: ${getPublicWebsite(propertyInstance)}`);
 
           dumpConfig(propertyInstance, dumpCode);
         }, null, getMicroservicesToDeploy());
       } else {
         if (microservicesToDeploy) {
-          console.warn(' Partial deploy option is useless during first deploy...');
+          console.warn('Partial deploy option is useless during first deploy...');
         }
 
         propertyInstance.install(() => {
-          console.log(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
-          console.log(`Website address: ${getPublicWebsite(propertyInstance)}`);
+          console.info(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
+          console.info(`Website address: ${getPublicWebsite(propertyInstance)}`);
 
           dumpConfig(propertyInstance, dumpCode);
         });
@@ -365,7 +300,7 @@ module.exports = function(mainPath) {
     let lambdas = getLambdas(tmpPropertyPath);
 
     if (lambdas.length <= 0) {
-      console.log('There are no Lambdas to be dumped!');
+      console.debug('There are no Lambdas to be dumped!');
       return;
     }
 
@@ -388,7 +323,7 @@ module.exports = function(mainPath) {
 
       lambdasVector.push(path.basename(newLambdaPath));
 
-      console.log('Unpacking Lambda into ' + newLambdaPath);
+      console.debug('Unpacking Lambda into ' + newLambdaPath);
 
       // @todo: find a smarter way to deny lambda runtime installing deps in runtime
       try {
@@ -414,7 +349,7 @@ module.exports = function(mainPath) {
 
           stack--;
 
-          console.log(`Remaining ${stack} Lambdas to be unpacked...`);
+          console.debug(`Remaining ${stack} Lambdas to be unpacked...`);
         }.bind(this, awsConfigFile));
     }
 
@@ -424,22 +359,22 @@ module.exports = function(mainPath) {
       } else {
         fs.unlinkSync(globalAwsConfigFile);
 
-        console.log(`[${lambdasVector.join(', ')}]`);
-        console.log('All Lambdas are now ready to run locally!');
+        console.debug(`[${lambdasVector.join(', ')}]`);
+        console.debug('All Lambdas are now ready to run locally!');
       }
     };
 
     waitUntilDone();
   };
 
-  let deployRollback = (cb) => {
-    if (propertyInstance.isUpdate) {
-      return ; // @todo: undeploy either the update?
+  let deployRollback = cb => {
+    if (propertyInstance.isUpdate || undeployRunning) {
+      return cb(null); // @todo: undeploy either the update?
     }
 
-    hasDeployedResources((has) => {
+    hasDeployedResources(has => {
       if (!has) {
-        return;
+        return cb(null);
       }
 
       let baseHash = propertyInstance.configObj.baseHash;
@@ -461,15 +396,17 @@ module.exports = function(mainPath) {
 
         cb(null);
       }, true);
+
+      undeployRunning = true;
     });
   };
 
-  let hasDeployedResources = (cb) => {
+  let hasDeployedResources = cb => {
     let lister = new Listing(propertyInstance);
 
-    lister.list((listingResult) => {
+    lister.list(listingResult => {
       cb(listingResult.matchedResources > 0);
-    })
+    });
   };
 
   let getLambdas = (dir, files_) => {
@@ -488,9 +425,19 @@ module.exports = function(mainPath) {
     return files_;
   };
 
-  let getCfDomain = (propertyInstance) => `http://${propertyInstance.config.provisioning.cloudfront.domain}`;
+  let getCfDomain = propertyInstance => `http://${propertyInstance.config.provisioning.cloudfront.domain}`;
 
-  let getPublicWebsite = (propertyInstance) => {
+  let getPublicWebsite = propertyInstance => {
     return `http://${propertyInstance.config.provisioning.s3.buckets[S3Service.PUBLIC_BUCKET].website}`;
   };
+
+  process.on('exit', () => {
+    new Exec('rm', '-rf', path.join(tmpPropertyPath, '_public'))
+      .avoidBufferOverflow()
+      .runSync();
+
+    removePackedLambdas();
+  });
+
+  startDeploy();
 };
