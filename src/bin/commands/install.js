@@ -16,10 +16,12 @@ module.exports = function(dependency, dumpPath) {
   let Property = require('deep-package-manager').Property_Instance;
   let PropertyConfig = require('deep-package-manager').Property_Config;
   let Registry = require('deep-package-manager').Registry_Registry;
+  let ApiDriver = require('deep-package-manager').Registry_Storage_Driver_ApiDriver;
+  let ModuleContext = require('deep-package-manager').Registry_Context_Context;
+  let GitHubDriver = require('deep-package-manager').Registry_Storage_Driver_GitHubDriver;
   let RegistryAuthorizer = require('deep-package-manager').Registry_Storage_Driver_Helpers_Api_Auth_Authorizer;
   let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
-  let Microservice = require('deep-package-manager').Microservice_Instance;
   let path = require('path');
 
   let createProperty = () => Property.create(workingDirectory, PropertyConfig.DEFAULT_FILENAME);
@@ -34,7 +36,15 @@ module.exports = function(dependency, dumpPath) {
         this.exit(1);
       }
 
-      registry.storage.driver.authorizer = RegistryAuthorizer.createHeaderToken(getRegistryToken());
+      if (registry.storage.driver.find(ApiDriver)) {
+        registry.storage.driver.find(ApiDriver).authorizer = RegistryAuthorizer.createHeaderToken(getRegistryToken());
+      }
+
+      if (registry.storage.driver.find(GitHubDriver) && gitHubAuthPair) {
+        let gitHubCred = gitHubAuthPair.split(':');
+
+        registry.storage.driver.find(GitHubDriver).auth(...gitHubCred);
+      }
 
       cb(registry);
     }, true);
@@ -90,64 +100,12 @@ module.exports = function(dependency, dumpPath) {
     });
   };
 
-  let fetchGitHub = (cb) => {
-    console.debug('Fetching microservice from GitHub');
-
-    let depObj = new GitHubDependency(depName, depVersion);
-
-    // @todo: move logic into GitHubDependency?
-    if (gitHubAuthPair) {
-      let gitHubCred = gitHubAuthPair.split(':');
-
-      if (gitHubCred.length === 1) {
-
-        // @todo: read git user followed by this fallback?
-        gitHubCred.unshift(depObj.repositoryUser);
-      }
-
-      depObj.auth(gitHubCred[0], gitHubCred[1]);
-    }
-
-    let localDumpPath = path.join(dumpPath || workingDirectory, depObj.shortDependencyName);
-
-    depObj.extract(
-      localDumpPath,
-      (error) => {
-        if (error) {
-          console.error(error);
-          this.exit(1);
-        }
-
-        let microservice = Microservice.create(localDumpPath);
-        let deps = microservice.config.dependencies;
-
-        if (deps && Object.keys(deps).length > 0) {
-          createRegistry((registry) => {
-            console.debug('Installing \'' + depObj.shortDependencyName + '\' dependencies');
-
-            registry.install(createProperty(), (error) => {
-              if (error) {
-                console.error(error);
-                this.exit(1);
-              }
-
-              cb();
-            }, [microservice.identifier]);
-          });
-        } else {
-          cb();
-        }
-      }
-    );
-  };
-
-  let fetchRepository = (cb) => {
+  let fetchRepository = (moduleContext, cb) => {
     createRegistry((registry) => {
       console.debug('Fetching microservice from DEEP repository');
 
       registry.installModule(
-        depName,
-        depVersion,
+        moduleContext,
         workingDirectory,
         cb,
         createProperty()
@@ -172,30 +130,31 @@ module.exports = function(dependency, dumpPath) {
       });
   };
 
+  let registryConfig = RegistryConfig.create().refresh('registry', 'github');
   let registryBaseHost = this.opts.locate('registry').value ||
-    RegistryConfig.create().refresh('registry').read('registry') ||
+    registryConfig.read('registry') ||
     DEFAULT_REGISTRY_BASE_HOST;
 
   let workingDirectory = process.cwd();
-  let gitHubAuthPair = this.opts.locate('github-auth').value;
+  let gitHubAuthPair = this.opts.locate('github-auth').value || registryConfig.read('github');
   let initApp = this.opts.locate('init').exists;
   let depParts = parseDep();
   let depName = depParts[0];
   let depVersion = depParts[1];
 
-  if (dumpPath) {
-    dumpPath = this.normalizeInputPath(dumpPath);
-  }
-
   if (depName) {
-
     // @todo: remove on the next major release
     // the following code is here for back compatibility
     depName = depName.replace(/^(?:https?:\/\/)github\.com\/([^\/]+\/[^\/]+)(?:\.git)$/i, 'github://$1');
+    depName = depName.replace(/^github:\/\/([^#]+)(#[\d\.]+)?$/, (_, depName, depVersion) => {
+      let depIdentifier = path.basename(depName.replace('/', path.sep));
+      depIdentifier = depIdentifier.replace(/-microservices?/, '');
+      depVersion = depVersion || '#*';
 
-    let fetcher = GitHubDependency.isGitHubDependency(depName) ? fetchGitHub : fetchRepository;
+      return `github://${depIdentifier}@${depName}${depVersion}`;
+    });
 
-    fetcher((error) => {
+    fetchRepository(ModuleContext.create(depName, depVersion), (error) => {
       if (error) {
         console.error(error);
         this.exit(1);

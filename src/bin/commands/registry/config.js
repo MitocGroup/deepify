@@ -6,7 +6,7 @@
 'use strict';
 
 module.exports = function(parameter) {
-  let RegistryConfig = require('../../lib.compiled/Registry/Config').Config;
+  let RegistryConfig = require('../../../lib.compiled/Registry/Config').Config;
 
   parameter = parameter || 'unknown';
   let newValue = this.opts.locate('set').value;
