@@ -10,7 +10,6 @@ module.exports = function(dependency, dumpPath) {
   // @todo: move it in some json config?
   let DEFAULT_REGISTRY_BASE_HOST = 'https://deep.mg';
 
-  let GitHubDependency = require('deep-package-manager').Registry_GitHub_Dependency;
   let AuthToken = require('../../lib.compiled/Registry/AuthToken').AuthToken;
   let RegistryConfig = require('../../lib.compiled/Registry/Config').Config;
   let Property = require('deep-package-manager').Property_Instance;
