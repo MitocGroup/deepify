@@ -48,6 +48,7 @@ export class ConfigVars {
   static get MAPPING() {
     return {
       token: AuthToken.TOKEN_VAR_NAME, // DEEP_REGISTRY_AUTH_TOKEN
+      github: 'DEEP_REGISTRY_GITHUB_TOKEN',
       registry: 'DEEP_REGISTRY_BASE_HOST',
     };
   }
