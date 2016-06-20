@@ -43,7 +43,7 @@ module.exports = function(dependency, dumpPath) {
       if (registry.storage.driver.find(GitHubDriver) && gitHubAuthPair) {
         let gitHubCred = gitHubAuthPair.split(':');
 
-        registry.storage.driver.find(GitHubDriver).auth(...gitHubCred);
+        registry.storage.driver.find(GitHubDriver).auth(gitHubCred[0], gitHubCred[1]);
       }
 
       cb(registry);
