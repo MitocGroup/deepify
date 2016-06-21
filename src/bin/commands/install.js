@@ -150,7 +150,7 @@ module.exports = function(dependency, dumpPath) {
       depIdentifier = depIdentifier.replace(/-microservices?/, '');
       depVersion = depVersion || '#*';
 
-      return `github://${depIdentifier}@${depName}${depVersion}`;
+``      return `${depIdentifier}@github://${depName}${depVersion}`;
     });
 
     fetchRepository(ModuleContext.create(depName, depVersion), (error) => {
