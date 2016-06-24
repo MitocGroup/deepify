@@ -2,6 +2,8 @@
 
 /**
  * Created by AlexanderC on 6/21/16.
+ *
+ * DO NOT USE IT!
  */
 
 'use strict';

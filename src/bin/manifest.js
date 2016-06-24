@@ -97,29 +97,6 @@ module.exports = {
         },
       },
     },
-    'publish': {
-      example: 'deepify publish --domain-name example.com --blue-env stage:abcd1234 --green-env prod:wxyz0987',
-      description: 'Manage traffic between the Blue and the Green environments',
-      section: 'Run in the cloud',
-      opts: {
-        'domain-name': {
-          alias: 'd',
-          description: 'Web app domain to be used for the custom web app (picked up from deploy config by default)',
-          required: false,
-        },
-        'blue-env': {
-          alias: 'b',
-          description: 'The Blue environment identifier that consists from the deploy env and base hash (ex. stage:abcd1234)',
-          required: false,
-        },
-        'green-env': {
-          alias: 'g',
-          description: 'The Green environment identifier that consists from the deploy env and base hash (ex. prod:wxyz0987)',
-          required: false,
-        },
-      },
-      args: {},
-    },
     'deploy': {
       example: 'deepify deploy path/to/web_app',
       description: 'Deploy microserice(s) or microapplication(s) as custom web app(s)',
