@@ -23,7 +23,9 @@ module.exports = function(dependency, dumpPath) {
   let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   let path = require('path');
 
-  let createProperty = () => Property.create(workingDirectory, PropertyConfig.DEFAULT_FILENAME);
+  dumpPath = this.normalizeInputPath(dumpPath);
+
+  let createProperty = () => Property.create(dumpPath, PropertyConfig.DEFAULT_FILENAME);
   let getRegistryToken = () => new AuthToken().refresh().toString();
 
   let createRegistry = (cb) => {
@@ -85,7 +87,7 @@ module.exports = function(dependency, dumpPath) {
         this.scriptPath,
         'compile',
         'dev',
-        workingDirectory
+        dumpPath
       );
 
       cmd.run((result) => {
@@ -105,7 +107,7 @@ module.exports = function(dependency, dumpPath) {
 
       registry.installModule(
         moduleContext,
-        workingDirectory,
+        dumpPath,
         cb,
         createProperty()
       );
