@@ -10,7 +10,7 @@ var jsonFile = require('jsonfile');
 var packageConfig = jsonFile.readFileSync(path.join(__dirname, '../package.json'));
 
 module.exports = {
-  version: packageConfig.version,
+  version: `${packageConfig.version} (built: ${packageConfig.buildDate || 'unknown'})`,
   description: 'DEEP CLI',
   commandsPath: './commands',
   commands: {
