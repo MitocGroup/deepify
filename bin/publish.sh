@@ -47,4 +47,8 @@ if ${DRY_RUN}; then
     echo ""
 fi
 
-publish_npm_package ${path}"/../src" ${DRY_RUN} ${VERSION_TYPE}
+base_src_path=${path}"/../src"
+
+inject_build_date "$base_src_path" "`date`" > ${base_src_path}"/package.json.tmp" \
+  && mv ${base_src_path}"/package.json.tmp" ${base_src_path}"/package.json"
+publish_npm_package "$base_src_path" ${DRY_RUN} ${VERSION_TYPE}

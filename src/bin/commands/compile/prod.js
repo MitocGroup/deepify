@@ -362,7 +362,7 @@ module.exports = function(mainPath) {
   let deepDepsCache = new DeepDepsCache(DeepDepsCache.DEFAULT_CACHE_DIRECTORY, {});
 
   mainPath = this.normalizeInputPath(mainPath);
-  let property = new Property(mainPath);
+  let property = Property.create(mainPath);
   let lambdas = {
     path: [],
     tmpPath: [],
