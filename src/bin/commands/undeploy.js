@@ -18,11 +18,13 @@ module.exports = function(mainPath) {
   let cfgBucket = this.opts.locate('cfg-bucket').value;
   let rawResource = this.opts.locate('resource').value;
   let resource = null;
+  let env = null;
 
   validateNodeVersion.call(this);
 
   if (rawResource) {
     resource = AbstractService.extractBaseHashFromResourceName(rawResource);
+    env = AbstractService.extractEnvFromResourceName(rawResource);
 
     if (!resource) {
       // in case the hash is provided
@@ -39,6 +41,8 @@ module.exports = function(mainPath) {
 
   let property = new Property(mainPath, Config.DEFAULT_FILENAME);
   let matcher = new ProvisioningDumpFileMatcher(property);
+  property.configObj.baseHash = resource || property.configObj.baseHash;
+  property.config.env = env || property.config.env;
 
   matcher.read((error) => {
     if (error && !resource && !dirtyMode) {

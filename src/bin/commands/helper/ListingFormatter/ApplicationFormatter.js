@@ -262,7 +262,7 @@ module.exports = class ApplicationFormatter {
       case 'CognitoIdentity':
         return `${resourceData.IdentityPoolId} (${resourceData.IdentityPoolName})`;
       case 'CloudFront':
-        return resourceData.DomainName;
+        return `${resourceData.DomainName} | ${resourceData.Enabled ? 'Enabled' : 'Disabled'}`;
       case 'APIGateway':
         return resourceData.name;
       case 'Lambda':
@@ -270,6 +270,8 @@ module.exports = class ApplicationFormatter {
       case 'S3':
       case 'CloudWatchEvents':
         return resourceData.Name;
+      case 'ES':
+        return `${resourceData.DomainName} | ${resourceData.Deleted ? 'Deleting' : 'Running'}`;
       default:
         return defaultName;
     }
@@ -322,18 +324,6 @@ module.exports = class ApplicationFormatter {
    */
   static get DATA_TIER() {
     return 'Data';
-  }
-
-  /**
-   * @returns {String[]}
-   */
-  static get SERVICES_TIERS() {
-    return [
-      ApplicationFormatter.SECURITY_TIER,
-      ApplicationFormatter.FRONTEND_TIER,
-      ApplicationFormatter.BACKEND_TIER,
-      ApplicationFormatter.DATA_TIER,
-    ];
   }
 
   /**
