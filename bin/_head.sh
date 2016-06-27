@@ -3,8 +3,12 @@
 path=$(cd $(dirname $0); pwd -P)
 npm=$(which npm)
 
+inject_build_date() {
+    cd "$1" && sed -e "4s/\"buildDate\": \".*\",/\"buildDate\": \"$2\",/" package.json
+}
+
 publish_npm_package() {
-    name=$(basename $1)
+    local name=$(basename $1)
 
     echo "Publishing "${name}
 
