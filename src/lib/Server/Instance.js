@@ -27,6 +27,7 @@ import {ConfigListener} from './Listener/ConfigListener';
 import {AsyncConfigListener} from './Listener/AsyncConfigListener';
 import {FileListener} from './Listener/FileListener';
 import {LambdaListener} from './Listener/LambdaListener';
+import {IndexListener} from './Listener/IndexListener';
 import {Server as ESServer} from '../Elasticsearch/Server';
 
 export class Instance {
@@ -68,7 +69,8 @@ export class Instance {
       .register(new ConfigListener(), 0)
       .register(new AsyncConfigListener(this), 1)
       .register(new LambdaListener(this), 2)
-      .register(new FileListener(this), 3);
+      .register(new IndexListener(this), 3)
+      .register(new FileListener(this), 4);
   }
 
   /**
@@ -176,6 +178,7 @@ export class Instance {
     for (let microservice of microservices) {
       if (microservice.isRoot) {
         this._rootMicroservice = this._buildMicroservice(microservice);
+        this._rootMicroservice.isRoot = true;
       } else {
         this._microservices[microservice.identifier] = this._buildMicroservice(microservice);
       }
