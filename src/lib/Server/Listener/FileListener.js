@@ -59,8 +59,6 @@ export class FileListener  extends AbstractListener {
             return;
           }
 
-          file = this._tagInjector(event.request.url, file);
-
           let mimeType = Mime.lookup(filename);
 
           this.server.logger(`Serving file ${filename} of type ${mimeType}`);
