@@ -6,6 +6,7 @@
 'use strict';
 
 let AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
+let CognitoIdentityProviderService = require('deep-package-manager').Provisioning_Service_CognitoIdentityProviderService;
 let S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
 let DeployConfig = require('deep-package-manager').Property_DeployConfig;
 let co = require('co');
@@ -80,6 +81,9 @@ module.exports = class ApplicationFormatter {
         break;
       case 'CognitoIdentity':
         resourceId = resourceData.IdentityPoolName;
+        break;
+      case 'CognitoIdentityProvider':
+        resourceId = resourceData.Name;
         break;
       default:
         resourceId = resourceName;
@@ -204,6 +208,7 @@ module.exports = class ApplicationFormatter {
     switch(service) {
       case 'IAM':
       case 'CognitoIdentity':
+      case 'CognitoIdentityProvider':
         return ApplicationFormatter.SECURITY_TIER;
       case 'ES':
       case 'ElastiCache':
@@ -233,6 +238,7 @@ module.exports = class ApplicationFormatter {
     let order = [
       'IAM',
       'CognitoIdentity',
+      'CognitoIdentityProvider',
       'S3',
       'CloudFront',
       'APIGateway',
@@ -272,6 +278,10 @@ module.exports = class ApplicationFormatter {
         return resourceData.Name;
       case 'ES':
         return `${resourceData.DomainName} | ${resourceData.Deleted ? 'Deleting' : 'Running'}`;
+      case 'CognitoIdentityProvider':
+        return this._property.provisioning.services
+          .find(CognitoIdentityProviderService)
+          ._generateCognitoProviderName(resourceData);
       default:
         return defaultName;
     }
