@@ -30,8 +30,6 @@ module.exports = function(mainPath) {
 
   mainPath = this.normalizeInputPath(mainPath);
 
-  let propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
-
   let startServer = (server) => {
     server.listen(parseInt(port, 10), dbServer, () => {
       if (openBrowser) {
@@ -57,11 +55,7 @@ module.exports = function(mainPath) {
     return cmd;
   };
 
-  if (!fs.existsSync(propertyConfigFile)) {
-    fs.writeFileSync(propertyConfigFile, JSON.stringify(Config.generate()));
-  }
-
-  let property = new Property(mainPath);
+  let property = Property.create(mainPath);
 
   compileDevCmd().run((result) => {
     if (result.failed) {
