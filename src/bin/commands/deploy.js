@@ -42,9 +42,9 @@ module.exports = function(mainPath) {
     dumpCodePath = this.normalizeInputPath(dumpCodePath);
   }
 
-  let configFile = path.join(mainPath, Config.DEFAULT_FILENAME);
-  let configExists = fs.existsSync(configFile);
-  let config = null;
+  let propertyInstance = Property.create(mainPath);
+  let configFile = path.join(propertyInstance.path, Config.DEFAULT_FILENAME);
+  let config = propertyInstance.config;
 
   appEnv = appEnv ? appEnv.toLowerCase() : null;
 
@@ -53,29 +53,12 @@ module.exports = function(mainPath) {
     this.exit(1);
   }
 
-  if (!configExists) {
-    config = Config.generate();
-
-    if (appEnv) {
-      config.env = appEnv;
-    }
-
-    fse.outputJsonSync(configFile, config);
-  } else {
-    config = fse.readJsonSync(configFile);
-
-    if (appEnv) {
-      config.env = appEnv;
-
-      fse.outputJsonSync(configFile, config);
-    }
-  }
-
-  let propertyInstance;
-  let tmpPropertyPath = mainPath;
-
   if (localOnly) {
     console.debug('Local mode on!');
+  }
+
+  if (appEnv) {
+    config.env = appEnv;
   }
 
   let ensureAWSProdKeys = (cb) => {
@@ -90,8 +73,6 @@ module.exports = function(mainPath) {
 
   let startDeploy = () => {
     ensureAWSProdKeys(() => {
-      propertyInstance = new Property(tmpPropertyPath, Config.DEFAULT_FILENAME);
-
       propertyInstance.assureFrontendEngine((error) => {
         if (error) {
           console.error('Error while assuring frontend engine: ' + error);
@@ -167,7 +148,7 @@ module.exports = function(mainPath) {
             os.EOL,
             'Seems like there are some resources on AWS that may generate collisions while provisioning the web app!',
             os.EOL,
-            `Remove them by running "deepify undeploy ${mainPath} --resource ${error.collisionHash}"`,
+            `Remove them by running "deepify undeploy ${propertyInstance.path} --resource ${error.collisionHash}"`,
             os.EOL,
             os.EOL,
             error.stringifiedResourcesObj
@@ -260,7 +241,7 @@ module.exports = function(mainPath) {
       return;
     }
 
-    let tmpFrontendPath = path.join(tmpPropertyPath, '_public');
+    let tmpFrontendPath = path.join(propertyInstance.path, '_public');
     let frontendDumpPath = path.join(dumpCodePath, '_www');
 
     fse.ensureDirSync(frontendDumpPath);
@@ -282,7 +263,7 @@ module.exports = function(mainPath) {
   };
 
   let removePackedLambdas = () => {
-    let lambdas = getLambdas(tmpPropertyPath);
+    let lambdas = getLambdas(propertyInstance.path);
 
     if (lambdas.length <= 0) {
       return;
@@ -297,7 +278,7 @@ module.exports = function(mainPath) {
   };
 
   let dumpLambdas = () => {
-    let lambdas = getLambdas(tmpPropertyPath);
+    let lambdas = getLambdas(propertyInstance.path);
 
     if (lambdas.length <= 0) {
       console.debug('There are no Lambdas to be dumped!');
@@ -385,7 +366,7 @@ module.exports = function(mainPath) {
         Bin.node,
         this.scriptPath,
         'undeploy',
-        mainPath,
+        propertyInstance.path,
         `--resource=${baseHash}`
       );
 
@@ -432,7 +413,7 @@ module.exports = function(mainPath) {
   };
 
   process.on('exit', () => {
-    new Exec('rm', '-rf', path.join(tmpPropertyPath, '_public'))
+    new Exec('rm', '-rf', path.join(propertyInstance.path, '_public'))
       .avoidBufferOverflow()
       .runSync();
 

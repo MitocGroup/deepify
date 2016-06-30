@@ -28,13 +28,7 @@ module.exports = function(mainPath) {
 
   mainPath = this.normalizeInputPath(mainPath);
 
-  let propertyConfigFile = path.join(mainPath, Config.DEFAULT_FILENAME);
-
-  if (!fs.existsSync(propertyConfigFile)) {
-    fse.outputJsonSync(propertyConfigFile, Config.generate());
-  }
-
-  let property = new Property(mainPath);
+  let property = Property.create(mainPath);
 
   let objectValues = obj => Object.keys(obj).map(k => obj[k]);
 
