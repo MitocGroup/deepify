@@ -472,16 +472,22 @@ module.exports = function(mainPath) {
         let identifier = lambdaIdentifiers.shift();
         let cmd = createCommand();
 
-        cmd.addArg('--partial="' + identifier + '"'); // is not working without quotes
+        cmd.addArg('--partial="' + identifier + '"'); // doesn't work without quotes
         cmd.run(() => processCount--, true);
 
         processCount++;
       }
     };
 
-    setInterval(
-      refreshProcessList.bind(this, Object.keys(lambdasObj)),
-      1000
-    );
+    property.assureFrontendEngine(error => {
+      if (error) {
+        console.error('Error while assuring frontend engine: ' + error);
+      }
+
+      setInterval(
+        refreshProcessList.bind(this, Object.keys(lambdasObj)),
+        1000
+      );
+    });
   }
 };
