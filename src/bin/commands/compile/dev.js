@@ -19,7 +19,6 @@ module.exports = function(mainPath) {
   let NpmChain = require('../../../lib.compiled/NodeJS/NpmChain').NpmChain;
   let LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   let AsyncConfig = require('../../../lib.compiled/Helpers/AsyncConfig').AsyncConfig;
-  let SharedBackendInjector = require('../../../lib.compiled/Helpers/SharedBackend/Injector').Injector;
   let FSCopyStrategy = require('../../../lib.compiled/Helpers/SharedBackend/Strategy/FSCopyStrategy').FSCopyStrategy;
 
   let doUpdate = this.opts.locate('update').exists;
@@ -36,11 +35,6 @@ module.exports = function(mainPath) {
     let lambdaPathsObj = new LambdaExtractor(property, getMicroservicesToInit())
       .extract(LambdaExtractor.NPM_PACKAGE_FILTER, LambdaExtractor.EXTRACT_OBJECT);
     let lambdaPaths = objectValues(lambdaPathsObj);
-    let sharedBackendInjector = new SharedBackendInjector(
-      lambdaPathsObj,
-      property,
-      new FSCopyStrategy()
-    );
 
     let chain = new NpmChain();
     let NpmProcess = doUpdate ? NpmUpdate : NpmInstall;
@@ -61,8 +55,6 @@ module.exports = function(mainPath) {
     linkCmd.libs = 'aws-sdk dtrace-provider';
 
     chain.add(linkCmd);
-
-    sharedBackendInjector.injectAll();
 
     chain.runChunk(() => {
       let lambdasConfig = property.fakeBuild();
