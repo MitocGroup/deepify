@@ -10,13 +10,17 @@ module.exports = function(mainPath) {
   let Property = require('deep-package-manager').Property_Instance;
 
   mainPath = this.normalizeInputPath(mainPath);
-  let property = new Property(mainPath);
+  let property = Property.create(mainPath);
   let microservice = this.opts.locate('microapp').value;
   let migrationSchema = {version: this.version};
-  let microservices = property.microservices.map(m => m.identifier);
+  let microservices = property.microservices.filter(m => !m.isRoot).map(m => m.identifier);
 
   let promptMigrationSchema = (cb) => {
     let questionList = [];
+
+    if (microservices.length === 1) {
+      microservice = microservices[0];
+    }
 
     if (microservice) {
       if (microservices.indexOf(microservice) === -1) {
