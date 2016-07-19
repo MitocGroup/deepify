@@ -6,7 +6,8 @@
 'use strict';
 
 let AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
-let CognitoIdentityProviderService = require('deep-package-manager').Provisioning_Service_CognitoIdentityProviderService;
+let CognitoIdentityProviderService = require('deep-package-manager')
+  .Provisioning_Service_CognitoIdentityProviderService;
 let S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
 let DeployConfig = require('deep-package-manager').Property_DeployConfig;
 let co = require('co');
@@ -70,23 +71,23 @@ module.exports = class ApplicationFormatter {
     let appEnv;
 
     switch (service) {
-      case 'APIGateway':
-        resourceId = resourceData.name;
-        break;
-      case 'CloudFront':
-        resourceId = resourceData.Comment;
-        break;
-      case 'IAM':
-        resourceId = resourceData.RoleName;
-        break;
-      case 'CognitoIdentity':
-        resourceId = resourceData.IdentityPoolName;
-        break;
-      case 'CognitoIdentityProvider':
-        resourceId = resourceData.Name;
-        break;
-      default:
-        resourceId = resourceName;
+    case 'APIGateway':
+      resourceId = resourceData.name;
+      break;
+    case 'CloudFront':
+      resourceId = resourceData.Comment;
+      break;
+    case 'IAM':
+      resourceId = resourceData.RoleName;
+      break;
+    case 'CognitoIdentity':
+      resourceId = resourceData.IdentityPoolName;
+      break;
+    case 'CognitoIdentityProvider':
+      resourceId = resourceData.Name;
+      break;
+    default:
+      resourceId = resourceName;
     }
 
     appBaseHash = AbstractService.extractBaseHashFromResourceName(resourceId);
@@ -206,25 +207,25 @@ module.exports = class ApplicationFormatter {
    */
   _findSuitableServiceTier(service) {
     switch(service) {
-      case 'IAM':
-      case 'CognitoIdentity':
-      case 'CognitoIdentityProvider':
-        return ApplicationFormatter.SECURITY_TIER;
-      case 'ES':
-      case 'ElastiCache':
-      case 'CloudWatchLogs':
-      case 'DynamoDB':
-      case 'SQS':
-        return ApplicationFormatter.DATA_TIER;
-      case 'CloudWatchEvents':
-      case 'Lambda':
-      case 'APIGateway':
-        return ApplicationFormatter.BACKEND_TIER;
-      case 'S3':
-      case 'CloudFront':
-        return ApplicationFormatter.FRONTEND_TIER;
-      default:
-        return '';
+    case 'IAM':
+    case 'CognitoIdentity':
+    case 'CognitoIdentityProvider':
+      return ApplicationFormatter.SECURITY_TIER;
+    case 'ES':
+    case 'ElastiCache':
+    case 'CloudWatchLogs':
+    case 'DynamoDB':
+    case 'SQS':
+      return ApplicationFormatter.DATA_TIER;
+    case 'CloudWatchEvents':
+    case 'Lambda':
+    case 'APIGateway':
+      return ApplicationFormatter.BACKEND_TIER;
+    case 'S3':
+    case 'CloudFront':
+      return ApplicationFormatter.FRONTEND_TIER;
+    default:
+      return '';
     }
   }
 
@@ -263,27 +264,27 @@ module.exports = class ApplicationFormatter {
    */
   _findSuitableResourceName(service, resourceData, defaultName) {
     switch (service) {
-      case 'IAM':
-        return resourceData.RoleName;
-      case 'CognitoIdentity':
-        return `${resourceData.IdentityPoolId} (${resourceData.IdentityPoolName})`;
-      case 'CloudFront':
-        return `${resourceData.DomainName} | ${resourceData.Enabled ? 'Enabled' : 'Disabled'}`;
-      case 'APIGateway':
-        return resourceData.name;
-      case 'Lambda':
-        return resourceData.FunctionName;
-      case 'S3':
-      case 'CloudWatchEvents':
-        return resourceData.Name;
-      case 'ES':
-        return `${resourceData.DomainName} | ${resourceData.Deleted ? 'Deleting' : 'Running'}`;
-      case 'CognitoIdentityProvider':
-        return this._property.provisioning.services
+    case 'IAM':
+      return resourceData.RoleName;
+    case 'CognitoIdentity':
+      return `${resourceData.IdentityPoolId} (${resourceData.IdentityPoolName})`;
+    case 'CloudFront':
+      return `${resourceData.DomainName} | ${resourceData.Enabled ? 'Enabled' : 'Disabled'}`;
+    case 'APIGateway':
+      return resourceData.name;
+    case 'Lambda':
+      return resourceData.FunctionName;
+    case 'S3':
+    case 'CloudWatchEvents':
+      return resourceData.Name;
+    case 'ES':
+      return `${resourceData.DomainName} | ${resourceData.Deleted ? 'Deleting' : 'Running'}`;
+    case 'CognitoIdentityProvider':
+      return this._property.provisioning.services
           .find(CognitoIdentityProviderService)
           ._generateCognitoProviderName(resourceData);
-      default:
-        return defaultName;
+    default:
+      return defaultName;
     }
   }
 

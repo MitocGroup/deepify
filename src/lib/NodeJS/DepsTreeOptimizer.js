@@ -2,8 +2,6 @@
  * Created by AlexanderC on 12/3/15.
  */
 
-/* jshint maxcomplexity:false */
-
 'use strict';
 
 import path from 'path';
@@ -335,6 +333,8 @@ export class DepsTreeOptimizer {
       // @todo: fix missing deps (need all of them!)
       if (Bin.npmMajorVersion >= 3) {
         cb(this._readShrinkwrapFile());
+
+        return;
       } else {
         gatherDependencies(this._path, (error, data) => {
           if (error) {
