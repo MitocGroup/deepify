@@ -4,7 +4,6 @@
 
 'use strict';
 
-import os from 'os';
 import path from 'path';
 import fse from 'fs-extra';
 import fs from 'fs';

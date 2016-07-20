@@ -12,39 +12,14 @@ let path = require('path');
 let manifest = require('./manifest');
 let cli = new Program('deepify', manifest.version, manifest.description);
 
-registerCommands(cli, manifest);
+function escapeCmdName(name) {
+  return name.replace(/[^a-zA-Z0-9_\-]/g, '-');
+}
 
-function registerCommands(programObj, programManifest) {
-  for (let cmdName in programManifest.commands) {
-    if (!programManifest.commands.hasOwnProperty(cmdName)) {
-      continue;
-    }
+function printHelpAction() {
+  this.help.print();
 
-    let cmdManifest = programManifest.commands[cmdName];
-    let cmdDesc = cmdManifest.description;
-    let cmdEx = cmdManifest.example;
-    let cmdSection = cmdManifest.section;
-    let cmdSubCommands = cmdManifest.commands;
-    let requirePath = cmdManifest.actionPath || (`./${path.join(programManifest.commandsPath, escapeCmdName(cmdName))}`);
-    let cmdAction = cmdSubCommands ? printHelpAction : require(requirePath);
-
-    let cmd = programObj.command(
-      cmdName,
-      cmdAction,
-      cmdDesc,
-      cmdEx,
-      cmdSection
-    );
-
-    registerCommandOpts(cmd, cmdManifest);
-    registerCommandArgs(cmd, cmdManifest);
-
-    if (cmdSubCommands) {
-      registerCommands(cmd, cmdManifest);
-    }
-
-    cmd.defaults();
-  }
+  this.exit(0);
 }
 
 function registerCommandOpts(cmdObj, cmdManifest) {
@@ -71,15 +46,41 @@ function registerCommandArgs(cmdObj, cmdManifest) {
   }
 }
 
-function escapeCmdName(name) {
-  return name.replace(/[^a-zA-Z0-9_\-]/g, '-');
+function registerCommands(programObj, programManifest) {
+  for (let cmdName in programManifest.commands) {
+    if (!programManifest.commands.hasOwnProperty(cmdName)) {
+      continue;
+    }
+
+    let cmdManifest = programManifest.commands[cmdName];
+    let cmdDesc = cmdManifest.description;
+    let cmdEx = cmdManifest.example;
+    let cmdSection = cmdManifest.section;
+    let cmdSubCommands = cmdManifest.commands;
+    let requirePath = cmdManifest.actionPath ||
+      (`./${path.join(programManifest.commandsPath, escapeCmdName(cmdName))}`);
+    let cmdAction = cmdSubCommands ? printHelpAction : require(requirePath);
+
+    let cmd = programObj.command(
+      cmdName,
+      cmdAction,
+      cmdDesc,
+      cmdEx,
+      cmdSection
+    );
+
+    registerCommandOpts(cmd, cmdManifest);
+    registerCommandArgs(cmd, cmdManifest);
+
+    if (cmdSubCommands) {
+      registerCommands(cmd, cmdManifest);
+    }
+
+    cmd.defaults();
+  }
 }
 
-function printHelpAction() {
-  this.help.print();
-
-  this.exit(0);
-}
+registerCommands(cli, manifest);
 
 try {
   cli.defaults().run();

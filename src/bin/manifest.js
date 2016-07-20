@@ -113,7 +113,8 @@ module.exports = {
         },
         'cfg-bucket': {
           alias: 'b',
-          description: 'AWS S3 private bucket name where the deploy config was persisted (ex. deep.prod.private.db0c09cc)',
+          description: 'AWS S3 private bucket name where the deploy config was persisted ' +
+          '(ex. deep.prod.private.db0c09cc)',
           required: false,
         },
         'dry-run': {
@@ -150,7 +151,8 @@ module.exports = {
       opts: {
         'cfg-bucket': {
           alias: 'b',
-          description: 'AWS S3 private bucket name where the deploy config was persisted (ex. deep.prod.private.db0c09cc)',
+          description: 'AWS S3 private bucket name where the deploy config was persisted ' +
+          '(ex. deep.prod.private.db0c09cc)',
           required: false,
         },
         'resource': {

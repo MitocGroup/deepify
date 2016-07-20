@@ -4,8 +4,6 @@
 
 'use strict';
 
-import {NpmInstall} from './NpmInstall';
-import {Helpers_WaitFor as WaitFor} from 'deep-package-manager';
 
 export class NpmChain {
   /**

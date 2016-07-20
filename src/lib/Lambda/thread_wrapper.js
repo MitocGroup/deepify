@@ -2,6 +2,8 @@
  * Created by AlexanderC on 8/18/15.
  */
 
+/* eslint no-undefined: 1 */
+
 'use strict';
 
 import {Runtime} from './Runtime';
@@ -56,7 +58,9 @@ runtime.name = rawRuntime._name;
       if (typeof error !== 'string') {
         try {
           error = JSON.parse(error);
-        } catch (e) {}
+        } catch (e) {
+          console.error('Unable to parse error: ', error)
+        }
       }
 
       process.send({
