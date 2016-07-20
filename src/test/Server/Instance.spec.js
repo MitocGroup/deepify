@@ -85,7 +85,7 @@ suite('Server/Instance', () => {
   test('Check _setup()', () => {
     server._setup();
 
-    chai.expect(server._rootMicroservice).to.have.all.keys('frontend', 'identifier', 'lambdas', 'path');
+    chai.expect(server._rootMicroservice).to.have.all.keys('frontend', 'identifier', 'isRoot', 'lambdas', 'path');
     chai.expect(server._defaultFrontendConfig).to.be.an('object');
   });
 

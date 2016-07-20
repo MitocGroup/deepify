@@ -12,11 +12,16 @@ __CODECLIMATE_TOKEN_NAME="CODECLIMATE_REPO_TOKEN_${__UPPER_CASE_TRAVIS_BRANCH}"
 subpath_run_cmd () {
     local DIR
     local CMD
+    local EXIT_CODE=0
 
     DIR=$(cd $1 && pwd -P)
     CMD=$2
 
     cd $DIR && eval_or_exit "$CMD"
+
+    EXIT_CODE=$((EXIT_CODE+$?))
+
+    exit $EXIT_CODE
 }
 
 function eval_or_exit() {
