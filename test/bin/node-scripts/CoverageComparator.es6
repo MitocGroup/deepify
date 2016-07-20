@@ -7,7 +7,6 @@ import combine from 'istanbul-combine';
 import fs from 'fs';
 import fsExtra from 'fs-extra';
 import path from 'path';
-import nodeDir from 'node-dir';
 import S3CoverageSynchronizer from './S3CoverageSynchronizer';
 import GitHubMsgPublisher from './GitHubMsgPublisher';
 

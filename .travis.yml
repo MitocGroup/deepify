@@ -48,6 +48,10 @@ before_install:
   - (npm list -g istanbul@^1.0.0-alpha --depth=0 || npm install -g istanbul@^1.0.0-alpha)
   - (npm list -g codacy-coverage --depth=0 || npm install -g codacy-coverage@1.1.x)
   - (if [ ! -d "node_modules/istanbul-combine" ]; then npm install istanbul-combine@0.3.x; fi)
+  - (if [ ! -d "node_modules/fs-extra" ]; then npm install fs-extra@0.x.x; fi)
+  - (if [ ! -d "node_modules/github" ]; then npm install github; fi)
+  - (if [ ! -d "node_modules/aws-sdk" ]; then npm install aws-sdk; fi)
+  - (if [ ! -d "node_modules/s3" ]; then npm install s3; fi)
   - cp test/package.json .
 after_success:
   - npm run coverage
