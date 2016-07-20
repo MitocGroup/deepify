@@ -6,9 +6,7 @@
 
 'use strict';
 
-/*jshint maxcomplexity:false */
-
-module.exports = function(lambdaPath) {
+module.exports = function (lambdaPath) {
   let Runtime = require('../../lib.compiled/Lambda/Runtime').Runtime;
   let ForksManager = require('../../lib.compiled/Lambda/ForksManager').ForksManager;
   let DeepDB = require('deep-db');
@@ -21,8 +19,9 @@ module.exports = function(lambdaPath) {
   let ESServer = require('../../lib.compiled/Elasticsearch/Server').Server;
   let AsyncConfig = require('../../lib.compiled/Helpers/AsyncConfig').AsyncConfig;
   let Frontend = require('deep-package-manager').Property_Frontend;
-  let ServerAlreadyRunningException = require('../../lib.compiled/Elasticsearch/Exception/ServerAlreadyRunningException').ServerAlreadyRunningException;
-
+  let ServerAlreadyRunningException = require(
+    '../../lib.compiled/Elasticsearch/Exception/ServerAlreadyRunningException'
+  ).ServerAlreadyRunningException;
   let dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
   let event = this.opts.locate('event').value;
   let context = this.opts.locate('context').value;
@@ -46,6 +45,7 @@ module.exports = function(lambdaPath) {
       lambdaPath = path.join(lambdaPath, 'bootstrap.js');
     }
   } catch (e) {
+    console.error(e);
   }
 
   if (!fs.existsSync(lambdaPath)) {
@@ -90,7 +90,7 @@ module.exports = function(lambdaPath) {
 
   let overridenConsoleLog = console.log;
 
-  if(!plain) {
+  if (!plain) {
     console.debug('Creating local DynamoDB instance on port ' + DeepDB.LOCAL_DB_PORT);
   }
 
@@ -122,7 +122,7 @@ module.exports = function(lambdaPath) {
       }
     }
 
-    if(plain) {
+    if (plain) {
       delete console.log;
 
       lambda.silent = true;

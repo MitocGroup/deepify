@@ -4,8 +4,6 @@
 
 'use strict';
 
-import FSExtra from 'fs-extra';
-
 export class AsyncConfig {
   /**
    * @param {Instance} server

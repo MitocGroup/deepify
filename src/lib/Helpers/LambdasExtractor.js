@@ -3,9 +3,6 @@
  * Created by AlexanderC on 12/2/15.
  */
 
-/* jshint maxdepth:false */
-/* jshint maxcomplexity:false */
-
 'use strict';
 
 import path from 'path';
@@ -119,10 +116,10 @@ export class LambdasExtractor {
     }
 
     switch (extractMode) {
-      case LambdasExtractor.EXTRACT_ARRAY:
-        return this._objectValues(lambdas);
-      case LambdasExtractor.EXTRACT_OBJECT:
-        return lambdas;
+    case LambdasExtractor.EXTRACT_ARRAY:
+      return this._objectValues(lambdas);
+    case LambdasExtractor.EXTRACT_OBJECT:
+      return lambdas;
     }
     
     throw new Error(`Unknown extract mode: ${extractMode}`);

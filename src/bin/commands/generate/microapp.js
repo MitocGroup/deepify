@@ -65,22 +65,9 @@ module.exports = function(mainPath) {
       });
     } else {
       cb();
+
+      return;
     }
-  };
-
-  let prepareModels = (cb) => {
-    inquirer.prompt([{
-      type: 'confirm',
-      name: 'yes',
-      message: 'Do you want to generate a model? ',
-    }]).then((response) => {
-      if (response.yes) {
-        doGenerateModel(cb);
-        return;
-      }
-
-      cb();
-    })
   };
 
   let doGenerateModel = (cb) => {
@@ -112,13 +99,30 @@ module.exports = function(mainPath) {
 
         if (cb) {
           cb();
+
+          return;
         }
       })
     }, true);
   };
 
+  let prepareModels = (cb) => {
+    inquirer.prompt([{
+      type: 'confirm',
+      name: 'yes',
+      message: 'Do you want to generate a model? ',
+    }]).then((response) => {
+      if (response.yes) {
+        doGenerateModel(cb);
+        return;
+      }
+
+      cb();
+    })
+  };
+
   promptAppSchema(() => {
-   new MicroserviceGenerator()
+    new MicroserviceGenerator()
       .generate(mainPath, appSchema, (error, path) => {
         if (error) {
           console.error(`An error has occurred while generating the microapp: ${error}`);

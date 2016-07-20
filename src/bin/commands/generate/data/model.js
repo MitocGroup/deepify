@@ -4,7 +4,7 @@
 
 'use strict';
 
-module.exports = function(mainPath) {
+module.exports = function (mainPath) {
   let inquirer = require('inquirer');
   let ModelGenerator = require('../../../../lib.compiled/Generator/ModelGenerator').ModelGenerator;
   let Property = require('deep-package-manager').Property_Instance;
@@ -66,6 +66,8 @@ module.exports = function(mainPath) {
       });
     } else {
       cb();
+
+      return;
     }
   };
 
@@ -94,22 +96,8 @@ module.exports = function(mainPath) {
         promptModelFields(cb);
       } else {
         cb();
-      }
-    })
-  };
-
-  let prepareActions = (cb) => {
-    inquirer.prompt([{
-      type: 'confirm',
-      name: 'yes',
-      message: `Do you want to generate a ${modelSchema.name} resource action? `,
-    }]).then((response) => {
-      if (response.yes) {
-        doGenerateAction(cb);
         return;
       }
-
-      cb();
     })
   };
 
@@ -143,9 +131,25 @@ module.exports = function(mainPath) {
 
         if (cb) {
           cb();
+          return;
         }
       })
     }, true);
+  };
+
+  let prepareActions = (cb) => {
+    inquirer.prompt([{
+      type: 'confirm',
+      name: 'yes',
+      message: `Do you want to generate a ${modelSchema.name} resource action? `,
+    }]).then((response) => {
+      if (response.yes) {
+        doGenerateAction(cb);
+        return;
+      }
+
+      cb();
+    })
   };
 
   promptModelSchema(() => {

@@ -33,6 +33,14 @@ module.exports = function(microservicePath) {
   let Lambda = require('deep-package-manager').Property_Lambda;
   let Core = require('deep-core');
 
+  let registryBaseHost = this.opts.locate('registry').value ||
+    RegistryConfig.create().refresh('registry').read('registry') ||
+    DEFAULT_REGISTRY_BASE_HOST;
+
+  let tmpDirObj = tmp.dirSync();
+  let tmpPropertyPath = tmpDirObj.name;
+  let getRegistryToken = () => new AuthToken().refresh().toString();
+
   let createRegistry = (cb) => {
     console.debug('Initializing remote registry');
 
@@ -49,14 +57,8 @@ module.exports = function(microservicePath) {
     }, true);
   };
 
-  let registryBaseHost = this.opts.locate('registry').value ||
-    RegistryConfig.create().refresh('registry').read('registry') ||
-    DEFAULT_REGISTRY_BASE_HOST;
-
   microservicePath = this.normalizeInputPath(microservicePath);
 
-  let tmpDirObj = tmp.dirSync();
-  let tmpPropertyPath = tmpDirObj.name;
   let tmpMicroservicePath = path.join(tmpPropertyPath, path.basename(microservicePath));
 
   // Gracefully teardown...
@@ -93,8 +95,6 @@ module.exports = function(microservicePath) {
       console.info('Microservice has been successfully published');
     });
   });
-
-  let getRegistryToken = () => new AuthToken().refresh().toString();
 
   let property = new Property(tmpPropertyPath);
 

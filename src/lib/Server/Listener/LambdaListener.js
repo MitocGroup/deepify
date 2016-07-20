@@ -78,6 +78,8 @@ export class LambdaListener extends AbstractListener {
       });
     } else {
       callback(null);
+
+      return;
     }
   }
 

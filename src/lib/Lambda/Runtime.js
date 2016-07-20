@@ -2,7 +2,7 @@
  * Created by AlexanderC on 6/19/15.
  */
 
-/* jshint expr:true */
+/* eslint no-unused-expressions: 0 */
 
 'use strict';
 
@@ -113,20 +113,20 @@ export class Runtime {
 
   /**
    * @param {Object} event
-   * @param {Boolean|undefined} measureTime
+   * @param {Boolean} measureTime
    * @returns {Thread}
    */
-  runForked(event, measureTime = undefined) {
+  runForked(event, measureTime) {
     return new Thread(this)
       .run(event, measureTime);
   }
 
   /**
    * @param {Object} event
-   * @param {Boolean|undefined} measureTime
+   * @param {Boolean} measureTime
    * @returns {Runtime}
    */
-  run(event, measureTime = undefined) {
+  run(event, measureTime) {
     this._injectSiblingExecutionWrapper();
 
     if (typeof measureTime !== 'undefined') {

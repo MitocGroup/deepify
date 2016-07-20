@@ -6,9 +6,6 @@
 'use strict';
 
 import {AbstractListener} from './AbstractListener';
-import FileSystem from 'fs';
-import Path from 'path';
-import Mime from 'mime';
 
 export class ConfigListener extends AbstractListener {
   /**
