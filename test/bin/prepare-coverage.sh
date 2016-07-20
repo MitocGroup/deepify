@@ -7,17 +7,13 @@ source $(dirname $0)/_head.sh
 
 if [ $(IS_ENV_VARS_AVAILABLE) == "1" ]; then
 
-  echo `pwd`
-
   ################################################
   ### Transpile from ES6 to ES5 by using babel ###
   ################################################
   cd $(dirname $0) && babel -x ".es6" ./ --out-dir=./ --presets="../../../src/node_modules/babel-preset-es2015"
 
-  echo `pwd`
-
   ##########################################################################################################
   ### Merge coverage results, compare with s3 report, add comments and update report in s3 if applicable ###
   ##########################################################################################################
-  node $(dirname $0)/node-scripts/CoverageManager.js
+  node ./node-scripts/CoverageManager.js
 fi
