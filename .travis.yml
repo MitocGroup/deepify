@@ -44,7 +44,7 @@ before_install:
   - (npm list -g babel-preset-es2015 --depth=0 || npm install -g babel-preset-es2015)
   - (npm list -g babel-plugin-add-module-exports --depth=0 || npm install -g babel-plugin-add-module-exports)
   - (npm list -g browserify --depth=0 || npm install -g browserify@11.2.x)
-  - (npm list -g mocha --depth=0 || npm install -g mocha@2.4.x)
+  - (npm list -g mocha@2.5.x --depth=0 || npm install -g mocha@2.5.x)
   - (npm list -g istanbul@^1.0.0-alpha --depth=0 || npm install -g istanbul@^1.0.0-alpha)
   - (npm list -g codacy-coverage --depth=0 || npm install -g codacy-coverage@1.1.x)
   - cp test/package.json .
