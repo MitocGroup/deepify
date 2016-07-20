@@ -12,16 +12,27 @@ let path = require('path');
 let manifest = require('./manifest');
 let cli = new Program('deepify', manifest.version, manifest.description);
 
+/**
+ * @param {String} name
+ * @returns {string}
+ */
 function escapeCmdName(name) {
   return name.replace(/[^a-zA-Z0-9_\-]/g, '-');
 }
 
+/**
+ *
+ */
 function printHelpAction() {
   this.help.print();
 
   this.exit(0);
 }
 
+/**
+ * @param {Object} cmdObj
+ * @param {Object} cmdManifest
+ */
 function registerCommandOpts(cmdObj, cmdManifest) {
   for (let optName in cmdManifest.opts) {
     if (!cmdManifest.opts.hasOwnProperty(optName)) {
@@ -34,6 +45,10 @@ function registerCommandOpts(cmdObj, cmdManifest) {
   }
 }
 
+/**
+ * @param {Program} cmdObj
+ * @param {Object} cmdManifest
+ */
 function registerCommandArgs(cmdObj, cmdManifest) {
   for (let argName in cmdManifest.args) {
     if (!cmdManifest.args.hasOwnProperty(argName)) {
@@ -46,6 +61,10 @@ function registerCommandArgs(cmdObj, cmdManifest) {
   }
 }
 
+/**
+ * @param {Program} programObj
+ * @param {Object} programManifest
+ */
 function registerCommands(programObj, programManifest) {
   for (let cmdName in programManifest.commands) {
     if (!programManifest.commands.hasOwnProperty(cmdName)) {

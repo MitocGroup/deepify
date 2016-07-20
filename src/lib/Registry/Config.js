@@ -77,6 +77,7 @@ export class Config {
   }
 
   /**
+   * @param {String} name
    * @returns {*}
    */
   read(name) {

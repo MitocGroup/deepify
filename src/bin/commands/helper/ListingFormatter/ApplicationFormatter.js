@@ -204,6 +204,8 @@ module.exports = class ApplicationFormatter {
 
   /**
    * @param {String} service
+   * @returns {*}
+   * @private
    */
   _findSuitableServiceTier(service) {
     switch(service) {

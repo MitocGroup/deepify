@@ -43,6 +43,7 @@ export class Runtime {
   /**
    * @param {String} sourceFile
    * @param {Object} dynamicContext
+   * @returns {Runtime}
    */
   static createLambda(sourceFile, dynamicContext = {}) {
     global.__DEEP_DEV_SERVER = true; // @todo: do we need this here?

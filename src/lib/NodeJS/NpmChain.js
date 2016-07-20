@@ -32,17 +32,16 @@ export class NpmChain {
 
   /**
    * @param {Function} cb
-   * @param {*} args
-   * @returns {NpmInstall}
+   * @param {Array} args
    */
   runChunk(cb, ...args) {
     this._trigger('runChunk', cb, ...args);
   }
 
+
   /**
    * @param {Function} cb
-   * @param {*} args
-   * @returns {NpmInstall}
+   * @param {Array} args
    */
   run(cb, ...args) {
     this._trigger('run', cb, ...args);

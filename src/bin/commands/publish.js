@@ -27,6 +27,9 @@ module.exports = function() {
   let configFile = path.join(process.cwd(), Config.DEFAULT_FILENAME);
   let configFileExists = fs.existsSync(configFile);
 
+  /**
+   * @returns {*}
+   */
   function getProvisionDumpFiles() {
     return (new FileWalker()).walk(
       process.cwd(),
@@ -34,6 +37,10 @@ module.exports = function() {
     );
   }
 
+  /**
+   * @param {Function} cb
+   * @returns {*}
+   */
   function prepareEnvs(cb) {
     if (blueEnv && greenEnv) {
       return cb();

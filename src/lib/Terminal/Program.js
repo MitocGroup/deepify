@@ -44,7 +44,7 @@ export class Program {
   }
 
   /**
-   * @returns {String}
+   * @returns {String|*}
    */
   get nodeBinary() {
     return this._nodeBinary;
