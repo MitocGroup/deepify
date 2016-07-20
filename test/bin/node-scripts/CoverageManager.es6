@@ -13,11 +13,14 @@ import CoverageComparator from './CoverageComparator';
 let s3CoverageSync = new S3CoverageSynchronizer();
 
 s3CoverageSync.init((err, data) => {
+
     s3CoverageSync.downloadReportsFromS3(
       S3CoverageSynchronizer.BUCKET_NAME,
       S3CoverageSynchronizer.REPORT_PREFIX,
       S3CoverageSynchronizer.S3_REPORTS_PATH,
       () => {
+
+        CoverageComparator.gatherReports();
 
         //copy s3 reports to local
         if (CoverageComparator.accessSync(S3CoverageSynchronizer.S3_REPORTS_PATH)) {

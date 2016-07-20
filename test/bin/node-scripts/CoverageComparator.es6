@@ -30,7 +30,7 @@ export default class CoverageComparator {
    * @constructor
    */
   static get LOCAL_COVERAGE_FULL_PATH() {
-    return path.join(__dirname, `../../../${CoverageComparator.LOCAL_COVERAGE_SUMMARY_DIR}/coverage-summary.json`);
+    return path.join(CoverageComparator.LOCAL_COVERAGE_SUMMARY_DIR, 'coverage-summary.json');
   }
 
   /**
@@ -38,7 +38,7 @@ export default class CoverageComparator {
    * @constructor
    */
   static get S3_COVERAGE_FULL_PATH() {
-    return path.join(__dirname, `../../../${CoverageComparator.S3_COVERAGE_SUMMARY_DIR}/coverage-summary.json`);
+    return path.join(CoverageComparator.S3_COVERAGE_SUMMARY_DIR, 'coverage-summary.json');
   }
 
   /**
@@ -54,7 +54,7 @@ export default class CoverageComparator {
    * @constructor
    */
   static get LOCAL_COVERAGE_DIR() {
-    return `bin/coverages/local/${CoverageComparator.REPORT_PREFIX}`;
+    return path.join(__dirname, `../../coverages/local/${CoverageComparator.REPORT_PREFIX}`);
   }
 
   /**
@@ -62,7 +62,7 @@ export default class CoverageComparator {
    * @constructor
    */
   static get S3_COVERAGE_DIR() {
-    return `bin/coverages/aws/${CoverageComparator.REPORT_PREFIX}`;
+     return path.join(__dirname, `../../coverages/aws/${CoverageComparator.REPORT_PREFIX}`);
   }
 
   /**
@@ -180,6 +180,7 @@ export default class CoverageComparator {
     let coveragePath = path.join(__dirname, '../../../src/coverage/coverage.raw.json');
 
     if (CoverageComparator.accessSync(coveragePath)) {
+
       let coverageDestPath = path.join(
         CoverageComparator.LOCAL_COVERAGES_PATH,
         process.env['TRAVIS_REPO_SLUG'],
