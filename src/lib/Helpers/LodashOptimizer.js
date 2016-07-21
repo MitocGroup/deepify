@@ -66,8 +66,8 @@ export class LodashOptimizer {
 
             try {
               fse.removeSync(lodashPath);
-            } catch (exception) {
-              console.error(exception);
+            } catch (error) {
+              console.error(error);
             }
 
             let linkCmd = new Exec(
