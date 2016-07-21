@@ -4,7 +4,7 @@
 
 'use strict';
 
-module.exports = function (mainPath) {
+module.exports = function(mainPath) {
   let inquirer = require('inquirer');
   let ModelGenerator = require('../../../../lib.compiled/Generator/ModelGenerator').ModelGenerator;
   let Property = require('deep-package-manager').Property_Instance;

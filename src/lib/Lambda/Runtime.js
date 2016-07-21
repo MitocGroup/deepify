@@ -152,7 +152,7 @@ export class Runtime {
 
     global[Runtime.SIBLING_EXEC_WRAPPER_NAME] = new function() {
       return {
-        invoke: function (localPath, data, callback) {
+        invoke: function(localPath, data, callback) {
           let lambda = Runtime.createLambda(localPath, data.context);
 
           lambda.name = data.lambda;
@@ -169,7 +169,7 @@ export class Runtime {
 
           ForksManager.manage(thread.process);
         },
-        invokeAsync: function (localPath, data, callback) {
+        invokeAsync: function(localPath, data, callback) {
           this.invoke(localPath, data, (error, result) => {
             if (error) {
               _this._log(`Lambda ${data.lambda} async execution fail`, error);

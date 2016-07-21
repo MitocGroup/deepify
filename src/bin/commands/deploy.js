@@ -8,7 +8,7 @@
 
 'use strict';
 
-module.exports = function (mainPath) {
+module.exports = function(mainPath) {
   let path = require('path');
   let fs = require('fs');
   let fse = require('fs-extra');
@@ -188,7 +188,7 @@ module.exports = function (mainPath) {
         newLambdaPath
       )
         .avoidBufferOverflow()
-        .run(function (awsConfigFile, result) {
+        .run(function(awsConfigFile, result) {
           if (result.failed) {
             console.error(result.error);
           }

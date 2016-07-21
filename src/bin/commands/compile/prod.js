@@ -394,7 +394,7 @@ module.exports = function(mainPath) {
       lambdas.tmpPath.push(lambdaTmpPath);
     }
 
-    prepareSources(installFromCache.bind(this, lambdas, function () {
+    prepareSources(installFromCache.bind(this, lambdas, function() {
       let chain = new NpmChain();
 
       chain.add(

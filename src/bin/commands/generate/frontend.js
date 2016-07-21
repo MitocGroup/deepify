@@ -4,7 +4,7 @@
 
 'use strict';
 
-module.exports = function (mainPath) {
+module.exports = function(mainPath) {
   let inquirer = require('inquirer');
   let AngularFrontendGenerator = require('../../../lib.compiled/Generator/AngularFrontendGenerator')
     .AngularFrontendGenerator;
