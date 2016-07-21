@@ -36,7 +36,7 @@ function eval_or_exit() {
         eval_or_exit "$DEBUG_TEST_CMD"
     elif [ ${RET_CODE} != 0 ]; then
         echo "[FAILED] $1"
-        exit 1
+        return 1
     else
         echo "[SUCCEED] $1"
     fi
