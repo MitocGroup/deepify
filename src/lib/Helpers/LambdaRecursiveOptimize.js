@@ -187,7 +187,7 @@ export class LambdaRecursiveOptimize {
 
             remaining--;
           });
-        } catch (exception) {
+        } catch (error) {
           filesError++;
           remaining--;
         }

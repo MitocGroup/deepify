@@ -95,7 +95,7 @@ export class Timer {
     return this;
   }
 
-  /***
+  /**
    * @param {Boolean} sec
    * @returns {*}
    */

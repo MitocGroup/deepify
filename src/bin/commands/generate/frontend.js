@@ -24,17 +24,17 @@ module.exports = function (mainPath) {
 
     switch (engine) {
 
-    case 'angular':
-      GeneratorClass = AngularFrontendGenerator;
-      break;
+      case 'angular':
+        GeneratorClass = AngularFrontendGenerator;
+        break;
 
-    case 'vanilla':
-      GeneratorClass = VanillaFrontendGenerator;
-      break;
+      case 'vanilla':
+        GeneratorClass = VanillaFrontendGenerator;
+        break;
 
-    default:
-      console.error(`Unknown frontend engine: ${engine}`);
-      this.exit(1);
+      default:
+        console.error(`Unknown frontend engine: ${engine}`);
+        this.exit(1);
     }
 
     return new GeneratorClass();

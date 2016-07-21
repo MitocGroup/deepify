@@ -2,6 +2,8 @@
  * Created by AlexanderC on 8/7/15.
  */
 
+/*eslint max-len: 1*/
+
 'use strict';
 
 var path = require('path');
@@ -113,8 +115,7 @@ module.exports = {
         },
         'cfg-bucket': {
           alias: 'b',
-          description: 'AWS S3 private bucket name where the deploy config was persisted ' +
-          '(ex. deep.prod.private.db0c09cc)',
+          description: 'AWS S3 private bucket name where the deploy config was persisted (ex. deep.prod.private.db0c09cc)',
           required: false,
         },
         'dry-run': {
@@ -151,8 +152,7 @@ module.exports = {
       opts: {
         'cfg-bucket': {
           alias: 'b',
-          description: 'AWS S3 private bucket name where the deploy config was persisted ' +
-          '(ex. deep.prod.private.db0c09cc)',
+          description: 'AWS S3 private bucket name where the deploy config was persisted (ex. deep.prod.private.db0c09cc)',
           required: false,
         },
         'resource': {

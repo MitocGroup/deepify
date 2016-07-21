@@ -361,7 +361,7 @@ export class Instance {
    * @returns {Instance}
    */
   stop(callback = () => {}) {
-    if(this.running) {
+    if (this.running) {
       this._server.close(callback)
     } else {
       callback();

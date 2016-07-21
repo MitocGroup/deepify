@@ -116,10 +116,10 @@ export class LambdasExtractor {
     }
 
     switch (extractMode) {
-    case LambdasExtractor.EXTRACT_ARRAY:
-      return this._objectValues(lambdas);
-    case LambdasExtractor.EXTRACT_OBJECT:
-      return lambdas;
+      case LambdasExtractor.EXTRACT_ARRAY:
+        return this._objectValues(lambdas);
+      case LambdasExtractor.EXTRACT_OBJECT:
+        return lambdas;
     }
     
     throw new Error(`Unknown extract mode: ${extractMode}`);

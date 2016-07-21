@@ -100,8 +100,8 @@ export class BinaryLauncher extends AbstractLauncher {
         if (pid) {
           try {
             process.kill(pid, 0)
-          } catch (exception) {
-            if (exception.code === 'ESRCH') { // process not found
+          } catch (e) {
+            if (e.code === 'ESRCH') { // process not found
               FS.unlinkSync(pidFile);
 
               this._lock();

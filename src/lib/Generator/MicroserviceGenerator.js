@@ -91,14 +91,14 @@ export class MicroserviceGenerator extends AbstractGenerator {
     let GeneratorClass = null;
     
     switch (frontendEngine) {
-    case 'angular':
-      GeneratorClass = AngularFrontendGenerator;
-      break;
-    case 'vanilla':
-      GeneratorClass = VanillaFrontendGenerator;
-      break;
-    default:
-      throw new EngineNotSupportedException(frontendEngine);
+      case 'angular':
+        GeneratorClass = AngularFrontendGenerator;
+        break;
+      case 'vanilla':
+        GeneratorClass = VanillaFrontendGenerator;
+        break;
+      default:
+        throw new EngineNotSupportedException(frontendEngine);
     }
 
     return new GeneratorClass(this.templatingEngine, this.skeletonsDirectory);

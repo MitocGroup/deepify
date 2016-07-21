@@ -4,7 +4,7 @@
 
 'use strict';
 
-module.exports = function(mainPath) {
+module.exports = function (mainPath) {
   let inquirer = require('inquirer');
   let ActionGenerator = require('../../../../lib.compiled/Generator/ActionGenerator').ActionGenerator;
   let MicroserviceGenerator = require('../../../../lib.compiled/Generator/MicroserviceGenerator').MicroserviceGenerator;
@@ -78,22 +78,22 @@ module.exports = function(mainPath) {
 
   let promptLambdaMethods = (cb) => {
     switch (lambdaSchema.crud) {
-    case 'Create':
-      lambdaSchema.methods = ['PUT'];
-      lambdaSchema.action = 'Create';
-      break;
-    case 'Retrieve':
-      lambdaSchema.methods = ['GET'];
-      lambdaSchema.action = 'Retrieve';
-      break;
-    case 'Update':
-      lambdaSchema.methods = ['POST'];
-      lambdaSchema.action = 'Update';
-      break;
-    case 'Delete':
-      lambdaSchema.methods = ['DELETE'];
-      lambdaSchema.action = 'Delete';
-      break;
+      case 'Create':
+        lambdaSchema.methods = ['PUT'];
+        lambdaSchema.action = 'Create';
+        break;
+      case 'Retrieve':
+        lambdaSchema.methods = ['GET'];
+        lambdaSchema.action = 'Retrieve';
+        break;
+      case 'Update':
+        lambdaSchema.methods = ['POST'];
+        lambdaSchema.action = 'Update';
+        break;
+      case 'Delete':
+        lambdaSchema.methods = ['DELETE'];
+        lambdaSchema.action = 'Delete';
+        break;
     }
 
     if (lambdaSchema.crud !== 'Custom') {
