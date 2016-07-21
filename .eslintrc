@@ -16,6 +16,7 @@ env:
   jquery: true
   node: true
   jasmine: true
+  mocha: true
 
 parserOptions:
   sourceType: module
