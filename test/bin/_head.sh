@@ -12,22 +12,19 @@ __CODECLIMATE_TOKEN_NAME="CODECLIMATE_REPO_TOKEN_${__UPPER_CASE_TRAVIS_BRANCH}"
 subpath_run_cmd () {
     local DIR
     local CMD
-    local EXIT_CODE=0
 
     DIR=$(cd $1 && pwd -P)
     CMD=$2
 
     cd $DIR && eval_or_exit "$CMD"
-
-    EXIT_CODE=$((EXIT_CODE+$?))
-
-    exit $EXIT_CODE
 }
 
 function eval_or_exit() {
     eval "$1"
 
     local RET_CODE=$?
+
+    echo "RET_CODE: ${RET_CODE}"
 
     if [[ ${RET_CODE} != 0 ]]  &&  [[ $1 == "npm run test" ]]; then
         #Run DEBUG_TEST_CMD command to show error in log
@@ -36,7 +33,7 @@ function eval_or_exit() {
         eval_or_exit "$DEBUG_TEST_CMD"
     elif [ ${RET_CODE} != 0 ]; then
         echo "[FAILED] $1"
-        return 1
+        exit 1
     else
         echo "[SUCCEED] $1"
     fi
