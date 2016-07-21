@@ -4,7 +4,7 @@
  * Created by AlexanderC on 6/19/15.
  */
 
-/* eslint max-statements: 1, no-unused-expressions: 0 */
+/*eslint max-statements: 0, no-unused-expressions: 0*/
 
 'use strict';
 

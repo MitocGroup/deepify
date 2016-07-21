@@ -20,11 +20,10 @@ subpath_run_cmd () {
 }
 
 function eval_or_exit() {
+
     eval "$1"
 
     local RET_CODE=$?
-
-    echo "RET_CODE: ${RET_CODE}"
 
     if [[ ${RET_CODE} != 0 ]]  &&  [[ $1 == "npm run test" ]]; then
         #Run DEBUG_TEST_CMD command to show error in log

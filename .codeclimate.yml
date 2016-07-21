@@ -3,7 +3,7 @@ engines:
   csslint:
     enabled: true
   duplication:
-    enabled: true
+    enabled: false
     config:
       languages:
         javascript:
@@ -29,6 +29,8 @@ exclude_paths:
 - "**/tests"
 - "tmp/**/*"
 - "vendor/**/*"
+- "coverage/*"
+- "**/coverage"
 - ".idea/"
 - "**.spec.js"
 - "**.min.js"
