@@ -2,7 +2,7 @@
  * Created by AlexanderC on 8/10/15.
  */
 
-/* eslint callback-return: 1 */
+/* eslint callback-return: 0 */
 
 'use strict';
 

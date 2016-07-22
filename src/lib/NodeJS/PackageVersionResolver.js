@@ -2,7 +2,7 @@
  * Created by AlexanderC on 12/4/15.
  */
 
-/* eslint no-constant-condition: 1 */
+/* eslint no-constant-condition: 0 */
 
 'use strict';
 
