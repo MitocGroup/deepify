@@ -28,7 +28,6 @@ module.exports = function(mainPath) {
   let Property = require('deep-package-manager').Property_Instance;
   let WaitFor = require('deep-package-manager').Helpers_WaitFor;
   let PackageDepsAdapter = require('../../../lib.compiled/Helpers/PackageDepsAdapter').PackageDepsAdapter;
-  let FSCopyStrategy = require('../../../lib.compiled/Helpers/SharedBackend/Strategy/FSCopyStrategy').FSCopyStrategy;
   let tmp = require('tmp');
   let validateNodeVersion = require('../helper/validate-node-version');
 
