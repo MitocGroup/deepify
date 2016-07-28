@@ -96,7 +96,6 @@ module.exports = function(mainPath) {
         promptModelFields(cb);
       } else {
         cb();
-        return;
       }
     })
   };
@@ -131,7 +130,6 @@ module.exports = function(mainPath) {
 
         if (cb) {
           cb();
-          return;
         }
       })
     }, true);

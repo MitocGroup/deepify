@@ -2,7 +2,7 @@
  * Created by AlexanderC on 6/19/15.
  */
 
-/* eslint no-unused-expressions: 0 */
+/* eslint no-unused-expressions: 0, no-undefined: 0 */
 
 'use strict';
 
@@ -117,7 +117,7 @@ export class Runtime {
    * @param {Boolean} measureTime
    * @returns {Thread}
    */
-  runForked(event, measureTime) {
+  runForked(event, measureTime = undefined) {
     return new Thread(this)
       .run(event, measureTime);
   }
