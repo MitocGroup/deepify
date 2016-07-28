@@ -31,8 +31,7 @@ export class RequestListener {
   }
 
   /**
-   *
-   * @params {ResponseEvent} event
+   * @param {ResponseEvent} event
    */
   dispatchEvent(event) {
     for (let priority in this._listeners) {

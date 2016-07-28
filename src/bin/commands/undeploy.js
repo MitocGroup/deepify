@@ -8,7 +8,8 @@ module.exports = function(mainPath) {
   let Property = require('deep-package-manager').Property_Instance;
   let Config = require('deep-package-manager').Property_Config;
   let Undeploy = require('deep-package-manager').Provisioning_Undeploy;
-  let ProvisioningDumpFileMatcher = require('deep-package-manager').Provisioning_UndeployMatcher_ProvisioningDumpFileMatcher;
+  let ProvisioningDumpFileMatcher = require('deep-package-manager')
+    .Provisioning_UndeployMatcher_ProvisioningDumpFileMatcher;
   let AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
   let Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
   let validateNodeVersion = require('./helper/validate-node-version');

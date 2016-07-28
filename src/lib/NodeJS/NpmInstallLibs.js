@@ -54,6 +54,13 @@ export class NpmInstallLibs extends NpmInstall {
    * @param {*} args
    * @private
    */
+
+
+  /**
+   * @param {Array} args
+   * @returns {*}
+   * @private
+   */
   _newInstance(...args) {
     let instance = super._newInstance(...args);
 

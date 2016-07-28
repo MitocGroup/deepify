@@ -7,7 +7,8 @@
 module.exports = function(mainPath) {
   let Property = require('deep-package-manager').Property_Instance;
   let AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
-  let ProvisioningCollisionsListingException = require('deep-package-manager').Property_Exception_ProvisioningCollisionsListingException;
+  let ProvisioningCollisionsListingException = require('deep-package-manager')
+    .Property_Exception_ProvisioningCollisionsListingException;
   let Listing  =  require('deep-package-manager').Provisioning_Listing;
   let ApplicationFormatter = require('./helper/ListingFormatter/ApplicationFormatter');
 

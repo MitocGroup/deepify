@@ -2,6 +2,8 @@
  * Created by AlexanderC on 8/7/15.
  */
 
+/* eslint no-undefined: 0 */
+
 'use strict';
 
 export class Option {

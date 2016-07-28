@@ -6,7 +6,8 @@
 'use strict';
 
 let AbstractService = require('deep-package-manager').Provisioning_Service_AbstractService;
-let CognitoIdentityProviderService = require('deep-package-manager').Provisioning_Service_CognitoIdentityProviderService;
+let CognitoIdentityProviderService = require('deep-package-manager')
+  .Provisioning_Service_CognitoIdentityProviderService;
 let S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
 let DeployConfig = require('deep-package-manager').Property_DeployConfig;
 let co = require('co');
@@ -203,6 +204,8 @@ module.exports = class ApplicationFormatter {
 
   /**
    * @param {String} service
+   * @returns {*}
+   * @private
    */
   _findSuitableServiceTier(service) {
     switch(service) {

@@ -2,6 +2,8 @@
  * Created by AlexanderC on 12/4/15.
  */
 
+/* eslint no-constant-condition: 0 */
+
 'use strict';
 
 import {Exec} from '../Helpers/Exec';
@@ -97,6 +99,7 @@ export class PackageVersionResolver {
       info = JSON.parse(rawInfo);
     } catch (e) {
       cb(new Error(`Broken ${this._fullName} package version JSON object (${e}): ${rawInfo}`), null);
+      return;
     }
 
     if (!info || !info.hasOwnProperty('dependencies')) {
@@ -106,7 +109,7 @@ export class PackageVersionResolver {
 
     let tmpDeps = info.dependencies;
 
-    while(true) {
+    while (true) {
       let firstD = tmpDeps[Object.keys(tmpDeps).shift()];
 
       if (firstD.hasOwnProperty('dependencies')) {
