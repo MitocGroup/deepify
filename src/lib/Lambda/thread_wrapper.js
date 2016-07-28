@@ -59,7 +59,7 @@ runtime.name = rawRuntime._name;
         try {
           error = JSON.parse(error);
         } catch (e) {
-          console.error('Unable to parse error: ', error)
+          console.debug('Unable to parse error: ', error)
         }
       }
 

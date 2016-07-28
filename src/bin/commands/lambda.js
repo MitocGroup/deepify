@@ -45,7 +45,7 @@ module.exports = function(lambdaPath) {
       lambdaPath = path.join(lambdaPath, 'bootstrap.js');
     }
   } catch (e) {
-    console.error(e);
+    console.debug('Failed to resolve lambda bootstrap path: ', e);
   }
 
   if (!fs.existsSync(lambdaPath)) {

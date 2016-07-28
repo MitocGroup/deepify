@@ -62,8 +62,6 @@ export class MicroserviceGenerator extends AbstractGenerator {
           generateEngineFrontend(engineIndex);
         } else {
           cb(null, msPath);
-
-          return;
         }
       });
     };

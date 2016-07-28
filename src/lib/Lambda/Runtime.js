@@ -114,7 +114,7 @@ export class Runtime {
 
   /**
    * @param {Object} event
-   * @param {Boolean} measureTime
+   * @param {Boolean | undefined} measureTime
    * @returns {Thread}
    */
   runForked(event, measureTime = undefined) {
@@ -124,10 +124,10 @@ export class Runtime {
 
   /**
    * @param {Object} event
-   * @param {Boolean} measureTime
+   * @param {Boolean | undefined} measureTime
    * @returns {Runtime}
    */
-  run(event, measureTime) {
+  run(event, measureTime = undefined) {
     this._injectSiblingExecutionWrapper();
 
     if (typeof measureTime !== 'undefined') {

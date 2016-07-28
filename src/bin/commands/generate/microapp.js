@@ -65,8 +65,6 @@ module.exports = function(mainPath) {
       });
     } else {
       cb();
-
-      return;
     }
   };
 
@@ -99,8 +97,6 @@ module.exports = function(mainPath) {
 
         if (cb) {
           cb();
-
-          return;
         }
       })
     }, true);
