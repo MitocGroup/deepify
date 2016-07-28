@@ -66,8 +66,6 @@ module.exports = function(mainPath) {
       });
     } else {
       cb();
-
-      return;
     }
   };
 
