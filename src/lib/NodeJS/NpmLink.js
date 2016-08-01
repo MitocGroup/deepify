@@ -31,8 +31,10 @@ export class NpmLink extends NpmInstall {
     return this._libsPlain;
   }
 
+
   /**
-   * @param {*} args
+   * @param {Array} args
+   * @returns {*}
    * @private
    */
   _newInstance(...args) {

@@ -5,7 +5,6 @@
 'use strict';
 
 import uglify from 'uglify-js';
-import {_extend as extend} from 'util';
 import {Helpers_FileWalker as FileWalker} from 'deep-package-manager';
 import {Helpers_WaitFor as WaitFor} from 'deep-package-manager';
 import fs from 'fs';

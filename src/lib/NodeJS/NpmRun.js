@@ -18,7 +18,9 @@ export class NpmRun extends NpmInstall {
   }
 
   /**
-   * @param {*} args
+   *
+   * @param {Array} args
+   * @returns {*}
    * @private
    */
   _newInstance(...args) {

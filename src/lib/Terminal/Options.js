@@ -2,8 +2,6 @@
  * Created by AlexanderC on 8/7/15.
  */
 
-/* jshint maxcomplexity:false */
-
 'use strict';
 
 import {Option} from './Option';

@@ -4,8 +4,6 @@
  * Created by AlexanderC on 8/4/15.
  */
 
-/*jshint loopfunc:true */
-
 'use strict';
 
 module.exports = function(mainPath) {
@@ -30,7 +28,6 @@ module.exports = function(mainPath) {
   let Property = require('deep-package-manager').Property_Instance;
   let WaitFor = require('deep-package-manager').Helpers_WaitFor;
   let PackageDepsAdapter = require('../../../lib.compiled/Helpers/PackageDepsAdapter').PackageDepsAdapter;
-  let FSCopyStrategy = require('../../../lib.compiled/Helpers/SharedBackend/Strategy/FSCopyStrategy').FSCopyStrategy;
   let tmp = require('tmp');
   let validateNodeVersion = require('../helper/validate-node-version');
 
@@ -396,7 +393,7 @@ module.exports = function(mainPath) {
       lambdas.tmpPath.push(lambdaTmpPath);
     }
 
-    prepareSources(installFromCache.bind(this, lambdas, function () {
+    prepareSources(installFromCache.bind(this, lambdas, function() {
       let chain = new NpmChain();
 
       chain.add(

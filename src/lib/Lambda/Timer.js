@@ -96,7 +96,7 @@ export class Timer {
   }
 
   /**
-   * @param sec
+   * @param {Boolean} sec
    * @returns {*}
    */
   toString(sec = true) {

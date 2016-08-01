@@ -76,8 +76,8 @@ export class AbstractGenerator extends Core.OOP.Interface {
   }
 
   /**
-   * @param {String} targetFile
    * @param {String} template
+   * @param {String} targetFile
    * @param {Object} params
    */
   renderFile(template, targetFile, params = {}) {

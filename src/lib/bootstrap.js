@@ -7,4 +7,4 @@
 'use strict';
 
 // @todo: think on exporting main functionality
-var exports = module.exports = {};
+module.exports = {};

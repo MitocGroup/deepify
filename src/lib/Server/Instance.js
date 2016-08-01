@@ -2,17 +2,16 @@
  * Created by AlexanderC on 8/10/15.
  */
 
-/* jshint expr:true */
+/* eslint callback-return: 0 */
 
 'use strict';
+
 
 import {PropertyObjectRequiredException} from './Exception/PropertyObjectRequiredException';
 import Http from 'http';
 import Path from 'path';
 import Url from 'url';
 import {FailedToStartServerException} from './Exception/FailedToStartServerException';
-import JsonFile from 'jsonfile';
-import QueryString from 'querystring';
 import {Property_Instance as Property} from 'deep-package-manager';
 import {Property_Frontend as Frontend} from 'deep-package-manager';
 import {Microservice_Metadata_Action as Action} from 'deep-package-manager';
@@ -295,7 +294,7 @@ export class Instance {
       this._fs.localBackend = true;
 
       this._fs.boot(this._kernelMock, () => {
-        this._log(`Linking custom validation schemas`);
+        this._log('Linking custom validation schemas');
 
         Frontend.dumpValidationSchemas(this._property.config, this._fs.public._rootFolder, true);
 
@@ -362,7 +361,11 @@ export class Instance {
    * @returns {Instance}
    */
   stop(callback = () => {}) {
-    this.running ? this._server.close(callback) : callback();
+    if (this.running) {
+      this._server.close(callback)
+    } else {
+      callback();
+    }
 
     return this;
   }

@@ -63,6 +63,7 @@ export class AbstractLauncher extends Core.OOP.Interface {
 
   /**
    * @param {String} setting
+   * @returns {*}
    */
   getSetting(setting) {
     return this._settings[setting];
@@ -70,7 +71,6 @@ export class AbstractLauncher extends Core.OOP.Interface {
 
   /**
    * @param {Object[]} args
-   * @returns {*}
    */
   stop(...args) {
     console.debug(`Stopping elasticsearch on: ${this.shortUrl}`);

@@ -19,7 +19,6 @@ module.exports = function(mainPath) {
   let NpmChain = require('../../../lib.compiled/NodeJS/NpmChain').NpmChain;
   let LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   let AsyncConfig = require('../../../lib.compiled/Helpers/AsyncConfig').AsyncConfig;
-  let FSCopyStrategy = require('../../../lib.compiled/Helpers/SharedBackend/Strategy/FSCopyStrategy').FSCopyStrategy;
 
   let doUpdate = this.opts.locate('update').exists;
   let microservicesToInit = this.opts.locate('partial').value;

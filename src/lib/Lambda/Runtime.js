@@ -2,7 +2,7 @@
  * Created by AlexanderC on 6/19/15.
  */
 
-/* jshint expr:true */
+/* eslint no-unused-expressions: 0, no-undefined: 0 */
 
 'use strict';
 
@@ -43,6 +43,7 @@ export class Runtime {
   /**
    * @param {String} sourceFile
    * @param {Object} dynamicContext
+   * @returns {Runtime}
    */
   static createLambda(sourceFile, dynamicContext = {}) {
     global.__DEEP_DEV_SERVER = true; // @todo: do we need this here?
@@ -113,7 +114,7 @@ export class Runtime {
 
   /**
    * @param {Object} event
-   * @param {Boolean|undefined} measureTime
+   * @param {Boolean | undefined} measureTime
    * @returns {Thread}
    */
   runForked(event, measureTime = undefined) {
@@ -123,7 +124,7 @@ export class Runtime {
 
   /**
    * @param {Object} event
-   * @param {Boolean|undefined} measureTime
+   * @param {Boolean | undefined} measureTime
    * @returns {Runtime}
    */
   run(event, measureTime = undefined) {
@@ -151,7 +152,7 @@ export class Runtime {
 
     global[Runtime.SIBLING_EXEC_WRAPPER_NAME] = new function() {
       return {
-        invoke: function (localPath, data, callback) {
+        invoke: function(localPath, data, callback) {
           let lambda = Runtime.createLambda(localPath, data.context);
 
           lambda.name = data.lambda;
@@ -168,7 +169,7 @@ export class Runtime {
 
           ForksManager.manage(thread.process);
         },
-        invokeAsync: function (localPath, data, callback) {
+        invokeAsync: function(localPath, data, callback) {
           this.invoke(localPath, data, (error, result) => {
             if (error) {
               _this._log(`Lambda ${data.lambda} async execution fail`, error);

@@ -2,7 +2,7 @@
  * Created by AlexanderC on 8/7/15.
  */
 
-/* jshint maxcomplexity:false */
+/* eslint callback-return:1 */
 
 'use strict';
 
@@ -103,7 +103,7 @@ export class Help {
    * @private
    */
   static _numRound2(num) {
-    return +(Math.round(num + "e+2")  + "e-2");
+    return +(Math.round(num + 'e+2')  + 'e-2');
   }
 
   /**
@@ -361,7 +361,7 @@ export class Help {
    * @private
    */
   static _stringify(value) {
-    if (value === undefined || value === null) {
+    if (typeof value === 'undefined' || value === null) {
       return 'unknown';
     } else if (typeof value === 'boolean') {
       return value ? 'true' : 'false';

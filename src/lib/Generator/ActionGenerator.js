@@ -96,7 +96,7 @@ export class ActionGenerator extends AbstractGenerator {
       
       return JSON.parse(resourcesRaw);
     } catch (e) {
-      throw new BrokenResourcesFileException(resourcesFile);
+      throw new BrokenResourcesFileException(this._resourcesPath);
     }
   }
 

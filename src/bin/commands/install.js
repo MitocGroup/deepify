@@ -3,6 +3,8 @@
  * Created by AlexanderC on 8/4/15.
  */
 
+/* eslint no-use-before-define: 1 */
+
 'use strict';
 
 module.exports = function(dependency, dumpPath) {
@@ -61,6 +63,23 @@ module.exports = function(dependency, dumpPath) {
     return [parts[0], parts[1]];
   };
 
+  let npmInstall = (repo, cb) => {
+    console.debug('Installing ' + repo + ' via NPM globally');
+
+    new Exec('npm list -g --depth 0 ' + repo + ' || npm install -g ' + repo)
+      .avoidBufferOverflow()
+      .run((result) => {
+        if (result.failed) {
+          console.error('Error installing ' + repo + ' globally: ' + result.error);
+
+          cb(result.error);
+          return;
+        }
+
+        cb(null);
+      });
+  };
+
   let initBackend = () => {
     if (!initApp) {
       return;
@@ -114,31 +133,13 @@ module.exports = function(dependency, dumpPath) {
     });
   };
 
-  let npmInstall = (repo, cb) => {
-    console.debug('Installing ' + repo + ' via NPM globally');
-
-    new Exec('npm list -g --depth 0 ' + repo + ' || npm install -g ' + repo)
-      .avoidBufferOverflow()
-      .run((result) => {
-        if (result.failed) {
-          console.error('Error installing ' + repo + ' globally: ' + result.error);
-
-          cb(result.error);
-          return;
-        }
-
-        cb(null);
-      });
-  };
-
   let registryConfig = RegistryConfig.create().refresh('registry', 'github');
   let registryBaseHost = this.opts.locate('registry').value ||
     registryConfig.read('registry') ||
     DEFAULT_REGISTRY_BASE_HOST;
-
-  let workingDirectory = process.cwd();
   let gitHubAuthPair = this.opts.locate('github-auth').value || registryConfig.read('github');
   let initApp = this.opts.locate('init').exists;
+
   let depParts = parseDep();
   let depName = depParts[0];
   let depVersion = depParts[1];

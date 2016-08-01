@@ -69,7 +69,7 @@ else
     echo "Completion setup in ${BASH_PROFILE}, skipping..."
 fi
 
-## TODO: why it is not reloading properly?
+## todo: why it is not reloading properly?
 #if [ "$CURRENT_USER" = "nobody" ]; then
 #    echo "The setup script was run with 'sudo' command. Please login to your user:"
 #    su $SUDO_USER -c "source ${BASH_PROFILE}"
