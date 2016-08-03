@@ -6,8 +6,10 @@
 
 module.exports = function(mainPath) {
   let inquirer = require('inquirer');
-  let AngularFrontendGenerator = require('../../../lib.compiled/Generator/AngularFrontendGenerator').AngularFrontendGenerator;
-  let VanillaFrontendGenerator = require('../../../lib.compiled/Generator/VanillaFrontendGenerator').VanillaFrontendGenerator;
+  let AngularFrontendGenerator = require('../../../lib.compiled/Generator/AngularFrontendGenerator')
+    .AngularFrontendGenerator;
+  let VanillaFrontendGenerator = require('../../../lib.compiled/Generator/VanillaFrontendGenerator')
+    .VanillaFrontendGenerator;
   let MicroserviceGenerator = require('../../../lib.compiled/Generator/MicroserviceGenerator').MicroserviceGenerator;
   let Property = require('deep-package-manager').Property_Instance;
   let FS = require('fs');
@@ -16,6 +18,27 @@ module.exports = function(mainPath) {
   let property = new Property(mainPath);
   let microservice = null;
   let engines = [];
+
+  let frontendGenerator = (engine) => {
+    let GeneratorClass = null;
+
+    switch (engine) {
+
+      case 'angular':
+        GeneratorClass = AngularFrontendGenerator;
+        break;
+
+      case 'vanilla':
+        GeneratorClass = VanillaFrontendGenerator;
+        break;
+
+      default:
+        console.error(`Unknown frontend engine: ${engine}`);
+        this.exit(1);
+    }
+
+    return new GeneratorClass();
+  };
 
   let generateFrontend = (cb, engineIndex) => {
     engineIndex = engineIndex || 0;
@@ -38,27 +61,12 @@ module.exports = function(mainPath) {
         generateFrontend(cb, engineIndex);
       } else {
         cb(null);
+
+        return;
       }
     });
   };
 
-  let frontendGenerator = (engine) => {
-    let GeneratorClass = null;
-
-    switch (engine) {
-      case 'angular':
-        GeneratorClass = AngularFrontendGenerator;
-        break;
-      case 'vanilla':
-        GeneratorClass = VanillaFrontendGenerator;
-        break;
-      default:
-        console.error(`Unknown frontend engine: ${engine}`);
-        this.exit(1);
-    }
-
-    return new GeneratorClass();
-  };
 
   inquirer.prompt([
     {

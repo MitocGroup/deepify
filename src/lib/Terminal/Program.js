@@ -2,8 +2,6 @@
  * Created by AlexanderC on 8/7/15.
  */
 
-/* jshint maxcomplexity:false */
-
 'use strict';
 
 import {Options} from './Options';
@@ -46,7 +44,7 @@ export class Program {
   }
 
   /**
-   * @returns {String}
+   * @returns {String|*}
    */
   get nodeBinary() {
     return this._nodeBinary;

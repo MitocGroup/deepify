@@ -98,21 +98,6 @@ module.exports = function(mainPath) {
     })
   };
 
-  let prepareActions = (cb) => {
-    inquirer.prompt([{
-      type: 'confirm',
-      name: 'yes',
-      message: `Do you want to generate a ${modelSchema.name} resource action? `,
-    }]).then((response) => {
-      if (response.yes) {
-        doGenerateAction(cb);
-        return;
-      }
-
-      cb();
-    })
-  };
-
   let doGenerateAction = (cb) => {
     let cmd = new Exec(
       Bin.node,
@@ -146,6 +131,21 @@ module.exports = function(mainPath) {
         }
       })
     }, true);
+  };
+
+  let prepareActions = (cb) => {
+    inquirer.prompt([{
+      type: 'confirm',
+      name: 'yes',
+      message: `Do you want to generate a ${modelSchema.name} resource action? `,
+    }]).then((response) => {
+      if (response.yes) {
+        doGenerateAction(cb);
+        return;
+      }
+
+      cb();
+    })
   };
 
   promptModelSchema(() => {

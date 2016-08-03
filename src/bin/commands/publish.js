@@ -27,31 +27,20 @@ module.exports = function() {
   let configFile = path.join(process.cwd(), Config.DEFAULT_FILENAME);
   let configFileExists = fs.existsSync(configFile);
 
-  (configFileExists ? cb => cb() : prepareEnvs)(() => {
-    let defaultConfig = {
-      domain: domain,
-      environments: {
-        blue: blueEnv,
-        green: greenEnv,
-      },
-    };
+  /**
+   * @returns {*}
+   */
+  function getProvisionDumpFiles() {
+    return (new FileWalker()).walk(
+      process.cwd(),
+        f => /^\.[a-z0-9]+\.[a-z]+\.provisioning\.json$/i.test(path.basename(f))
+    );
+  }
 
-    if (!configFileExists) {
-      fse.outputJsonSync(configFile, Config.generate(defaultConfig), {spaces: 2});
-    }
-
-    let config = Config.createFromJsonFile(configFile);
-
-    (new EnvConfigLoader(config, process.cwd())).load()
-      .catch(error => {
-        console.error(error, error.stack);
-        this.exit(1);
-      })
-      .then(envProvisioningConfig => {
-        console.log('envProvisioningConfig', envProvisioningConfig);//TODO:remove
-      });
-  });
-
+  /**
+   * @param {Function} cb
+   * @returns {*}
+   */
   function prepareEnvs(cb) {
     if (blueEnv && greenEnv) {
       return cb();
@@ -96,10 +85,28 @@ module.exports = function() {
     });
   }
 
-  function getProvisionDumpFiles() {
-    return (new FileWalker()).walk(
-      process.cwd(),
-      f => /^\.[a-z0-9]+\.[a-z]+\.provisioning\.json$/i.test(path.basename(f))
-    );
-  }
+  (configFileExists ? cb => cb() : prepareEnvs)(() => {
+    let defaultConfig = {
+      domain: domain,
+      environments: {
+        blue: blueEnv,
+        green: greenEnv,
+      },
+    };
+
+    if (!configFileExists) {
+      fse.outputJsonSync(configFile, Config.generate(defaultConfig), {spaces: 2});
+    }
+
+    let config = Config.createFromJsonFile(configFile);
+
+    (new EnvConfigLoader(config, process.cwd())).load()
+      .catch(error => {
+        console.error(error, error.stack);
+        this.exit(1);
+      })
+      .then(envProvisioningConfig => {
+        console.log('envProvisioningConfig', envProvisioningConfig);//TODO:remove
+      });
+  });
 };

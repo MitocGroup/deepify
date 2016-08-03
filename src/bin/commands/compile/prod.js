@@ -4,8 +4,6 @@
  * Created by AlexanderC on 8/4/15.
  */
 
-/*jshint loopfunc:true */
-
 'use strict';
 
 module.exports = function(mainPath) {
@@ -395,7 +393,7 @@ module.exports = function(mainPath) {
       lambdas.tmpPath.push(lambdaTmpPath);
     }
 
-    prepareSources(installFromCache.bind(this, lambdas, function () {
+    prepareSources(installFromCache.bind(this, lambdas, function() {
       let chain = new NpmChain();
 
       chain.add(

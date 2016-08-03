@@ -2,6 +2,8 @@
  * Created by AlexanderC on 8/7/15.
  */
 
+/*eslint max-len: 1*/
+
 'use strict';
 
 var path = require('path');

@@ -68,21 +68,6 @@ module.exports = function(mainPath) {
     }
   };
 
-  let prepareModels = (cb) => {
-    inquirer.prompt([{
-      type: 'confirm',
-      name: 'yes',
-      message: 'Do you want to generate a model? ',
-    }]).then((response) => {
-      if (response.yes) {
-        doGenerateModel(cb);
-        return;
-      }
-
-      cb();
-    })
-  };
-
   let doGenerateModel = (cb) => {
     let cmd = new Exec(
       Bin.node,
@@ -117,8 +102,23 @@ module.exports = function(mainPath) {
     }, true);
   };
 
+  let prepareModels = (cb) => {
+    inquirer.prompt([{
+      type: 'confirm',
+      name: 'yes',
+      message: 'Do you want to generate a model? ',
+    }]).then((response) => {
+      if (response.yes) {
+        doGenerateModel(cb);
+        return;
+      }
+
+      cb();
+    })
+  };
+
   promptAppSchema(() => {
-   new MicroserviceGenerator()
+    new MicroserviceGenerator()
       .generate(mainPath, appSchema, (error, path) => {
         if (error) {
           console.error(`An error has occurred while generating the microapp: ${error}`);

@@ -101,7 +101,8 @@ export class NpmInstall {
   }
 
   /**
-   * @param {*} args
+   * @param {Array} args
+   * @returns {*}
    * @private
    */
   _newInstance(...args) {

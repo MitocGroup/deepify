@@ -87,6 +87,7 @@ export class Server {
    * @param {Number} port
    * @param {String} dataPath
    * @param {Boolean} dry
+   * @returns {BinaryLauncher}
    */
   static startElasticsearchServer(hostname = '127.0.0.1', port = 9200, dataPath = null, dry = false) {
     let launcher = new BinaryLauncher(Server.DEFAULT_BINARY_PATH);
@@ -114,6 +115,7 @@ export class Server {
 
   /**
    * @param {Boolean} bool
+   * @returns {Server}
    */
   dry(bool = true) {
     this._dryLaunch = bool;
