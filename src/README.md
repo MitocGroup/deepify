@@ -3,8 +3,7 @@ deepify
 
 [![NPM Version](https://img.shields.io/npm/v/deepify.svg)](https://npmjs.org/package/deepify)
 [![Build Status](https://magnum.travis-ci.com/MitocGroup/deepify.svg?token=K6deyi9kwkfxRyXwcv6c)](https://magnum.travis-ci.com/MitocGroup/deepify)
-[![Codacy Badge](https://api.codacy.com/project/badge/grade/b5a92ac9c5f24794ae4e3eb468903810)](https://www.codacy.com/app/MitocGroup/deepify)
-[![Codacy Badge](https://api.codacy.com/project/badge/coverage/b5a92ac9c5f24794ae4e3eb468903810)](https://www.codacy.com/app/MitocGroup/deepify)
+[![Test Coverage](https://codeclimate.com/repos/5789fd9d3a2d0a0071006513/badges/0980d55f79fcea2032a7/coverage.svg)](https://codeclimate.com/repos/5789fd9d3a2d0a0071006513/coverage)
 [![API Docs](http://docs.deep.mg/badge.svg)](http://docs.deep.mg)
 
 [deepify](https://www.npmjs.com/package/deepify) is a node.js library, part of [DEEP Framework](https://github.com/MitocGroup/deep-framework).
@@ -72,12 +71,34 @@ We are eager to get your feedback, so please use whatever communication channel 
 - [gitter chat room](https://gitter.im/MitocGroup/deep-framework)
 - [deep email address](mailto:feedback@deep.mg)
 
-## License
+### Contribution
+
+This project is open source, and we encourage developers to contribute. Here below is the easiest way to do so:
+
+1. [Fork](http://help.github.com/forking/) this repository in GitHub.
+2. Develop the feature in your repository. Make one or more commits to your repository in GitHub.
+3. Perform a [pull request](http://help.github.com/pull-requests/) from your repository back into original repository in GitHub.
+
+Make sure you update `package.json` (or `deepkg.json`, depends on the use case) and put your name and contact information in contributors section. We would like to recognize the work and empower every contributor in creative ways :)
+
+### Roadmap
+
+Our short-to-medium-term roadmap items, in order of descending priority:
+
+Feature | Details | Owner
+--------|---------|------
+Implement deployment rollbacks | Implement rollbacks in case if deployment fails or some logix is broken without undeploy-ing whole application (create diff's) | [@alexanderc](https://github.com/alexanderc)
+Optimize frontend code (browserify, minimize, reduce nr of calls, etc) | Optimize frontend code and build scripts in order to get deep-framework smaller footprint  | [@alexanderc](https://github.com/alexanderc)
+Add caching option to the resource actions (via api gateway) | Implement resource actions caching natively by adding an option to ApiGateway while provisioning | [@alexanderc](https://github.com/alexanderc)
+Notify developer on possible naming collisions | Notify developer on possible naming collisions during deploy process | [@alexanderc](https://github.com/alexanderc)
+Add Windows support for development tools | Add development tools Windows support | [@alexanderc](https://github.com/alexanderc)
+
+### License
 
 This repository can be used under the MIT license.
 > See [LICENSE](https://github.com/MitocGroup/deepify/blob/master/LICENSE) for more details.
 
-## Sponsors
+### Sponsors
 
 This repository is being sponsored by:
 > [Mitoc Group](http://www.mitocgroup.com)
