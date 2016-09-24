@@ -79,6 +79,10 @@ export class ResponseEvent {
    * @param {Boolean} isBinary
    */
   send(content, code = 200, contentType = 'text/plain', isBinary = false) {
+    // setup CORS headers
+    this.response.setHeader('Access-Control-Allow-Origin', '*');
+    this.response.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+
     this.response.writeHead(code, {'Content-Type': contentType});
 
     if (isBinary) {

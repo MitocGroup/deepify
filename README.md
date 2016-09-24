@@ -33,26 +33,26 @@ inside Git Bash.
 ### Step 2. Install Microservice(s) Locally
 
 ```bash
-deepify install github://MitocGroup/deep-microservices-helloworld ~/deep-microservices-helloworld
+deepify install github://MitocGroup/deepify ~/deepify
 ```
 
 > Path parameter in all `deepify` commands is optional and if not specified, assumes current
-working directory. Therefore you can skip `~/deep-microservices-helloworld` by executing
-`mkdir ~/deep-microservices-helloworld && cd ~/deep-microservices-helloworld` before `deepify install`.
+working directory. Therefore you can skip `~/deepify` by executing
+`mkdir ~/deepify && cd ~/deepify` before `deepify install`.
 
 ### Step 3. Run Microservice(s) in Development
 
 ```bash
-deepify server ~/deep-microservices-helloworld -o
+deepify server ~/deepify -o
 ```
 
 > When this step is finished, you can open in your browser the link *http://localhost:8000*
-and enjoy the deep-microservices-helloworld running locally.
+and enjoy the deepify running locally.
 
 ### Step 4. Deploy Microservice(s) to Production
 
 ```bash
-deepify deploy ~/deep-microservices-helloworld
+deepify deploy ~/deepify
 ```
 
 > Amazon CloudFront distribution takes up to 20 minutes to provision, therefore don’t worry
@@ -61,7 +61,7 @@ if it returns an HTTP error in the first couple of minutes.
 ### Step 5. Remove Microservice(s) from Production
 
 ```bash
-deepify undeploy ~/deep-microservices-helloworld
+deepify undeploy ~/deepify
 ```
 
 > Amazon CloudFront distribution takes up to 20 minutes to unprovision. That's why `deepify`
