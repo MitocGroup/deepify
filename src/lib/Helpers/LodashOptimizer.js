@@ -184,6 +184,6 @@ export class LodashOptimizer {
    * @return {String}
    */
   static get FIND_CMD() {
-    return 'find deep_modules -maxdepth 1 -type d -ipath "*/lodash*"';
+    return 'find deep_modules -maxdepth 1 -type d -ipath "*/lodash/*"';
   }
 }
