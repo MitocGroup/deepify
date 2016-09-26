@@ -15,6 +15,7 @@ export class LambdaListener extends AbstractListener {
 
   /**
    * @param {ResponseEvent} event
+   * @returns {*}
    */
   handler(event) {
     let request = event.request;
@@ -23,6 +24,10 @@ export class LambdaListener extends AbstractListener {
     if (uri === LambdaListener.LAMBDA_URI || uri === LambdaListener.LAMBDA_ASYNC_URI) {
       let isAsync = uri === LambdaListener.LAMBDA_ASYNC_URI;
       event.stopPropagation(); // lambda runs async. stop other listeners
+
+      if (request.method.toUpperCase() === 'OPTIONS') {
+        return event.send('{}', 200, 'application/json', false);
+      }
 
       this._readRequestData(request, (rawData) => {
         let data = JSON.parse(rawData);
