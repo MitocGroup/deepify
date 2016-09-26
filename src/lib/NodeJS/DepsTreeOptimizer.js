@@ -192,7 +192,8 @@ export class DepsTreeOptimizer {
         continue;
       }
 
-      let pkgPath = this._findPkgDownTree(depsFlattenObj[pkgFullName]);
+      let version = pkgFullName.split('@')[1];
+      let pkgPath = this._findPkgDownTree(depsFlattenObj[pkgFullName], version);
       let pkgFinalPath = this._getFinalPkgPath(pkgFullName);
 
       fse.copySync(pkgPath, pkgFinalPath);
@@ -204,11 +205,12 @@ export class DepsTreeOptimizer {
 
   /**
    * @param {String} pkgPath
+   * @param {String} version
    * @param {String|null} initialPkgPath
    * @returns {String}
    * @private
    */
-  _findPkgDownTree(pkgPath, initialPkgPath= null) {
+  _findPkgDownTree(pkgPath, version, initialPkgPath = null) {
     if (fs.existsSync(pkgPath)) {
       return pkgPath;
     }
@@ -229,25 +231,26 @@ export class DepsTreeOptimizer {
       );
     }
 
-    let matchedPkgPath = this._findPkgUpperTheTree(downPath, pkgName);
+    let matchedPkgPath = this._findPkgUpperTheTree(downPath, pkgName, version);
 
     if (matchedPkgPath) {
       return matchedPkgPath;
     }
 
-    return this._findPkgDownTree(path.join(downPath, pkgName), initialPkgPath);
+    return this._findPkgDownTree(path.join(downPath, pkgName), version, initialPkgPath);
   }
 
   /**
    * @param {String} upperPath
    * @param {String} pkgName
+   * @param {String} version
    * @returns {String}
    * @private
    */
-  _findPkgUpperTheTree(upperPath, pkgName) {
+  _findPkgUpperTheTree(upperPath, pkgName, version) {
     let pkgPath = path.join(upperPath, pkgName);
 
-    if (fs.existsSync(pkgPath)) {
+    if (fs.existsSync(pkgPath) && this._getPackageVersion(pkgPath) === version) {
       return pkgPath;
     }
 
@@ -267,7 +270,7 @@ export class DepsTreeOptimizer {
       let upperPkgPath = path.join(upperPath, upperPkgName, NpmDependency.NODE_MODULES_DIR);
 
       if (fs.existsSync(upperPkgPath)) {
-        let matchedPath = this._findPkgUpperTheTree(upperPkgPath, pkgName);
+        let matchedPath = this._findPkgUpperTheTree(upperPkgPath, pkgName, version);
 
         if (matchedPath) {
           return matchedPath;
@@ -276,6 +279,18 @@ export class DepsTreeOptimizer {
     }
 
     return null;
+  }
+
+  /**
+   * @param {String} packagePath
+   * @returns {String}
+   * @private
+   */
+  _getPackageVersion(packagePath) {
+    let packageJsonFile = path.join(packagePath, NpmDependency.PACKAGE_JSON_FILE);
+    let packageJson = fse.readJsonSync(packageJsonFile);
+
+    return packageJson.version;
   }
 
   /**
