@@ -46,9 +46,6 @@ after_success:
 after_script:
   - npm run remove-coverage
 env:
-  matrix:
-    - TEST_SUITE=backend
-    - TEST_SUITE=frontend
   global:
     - secure: 
         WqeHyb6mAmUPb0goQ+qep3bYYcRxGZkCZkvrjHB2OMnlL3SnI6kUfLQ/3bHHggXgSaCn78gPj/dWTFFbKDD74amfO9NQAes5R+FcCIfGBnjmYOBMXTXs7VZB5zTq+vJtSiKoTvJwAGd15tsWTprZsvbVl+87mSzGjsLon4ZwagtygD5FVKLIdwFYVqQC4LeCutlUOvBrKE2i4phJImecyGRxfYYa70hyHfgj9IpvrPPf+svjMB7GXiJ/QqNEq+/FHA+H27RTW/SC8agjItmabUqzSEdrKPlIpbwCtJGDueje6jZF1oi+NCbo3t9RmtRy7DlB9oFOAnwX681TVKnNr2kNwIBtYWRvbXP3k9c9qmhWi4ro8PE4eyye7pxb3SX/4KUN9dmCiraYbalbLbJg/0/Y3Pc8eRXLiM9NhZA6MHTNR9cdbBotimKdPmQ25aZG59QdwV9p0U5j/UTr7fTY1C7iXWhNR2Zmn/tY/Br2J/O07OM9YB0puiBFltJxrCCU5a1K/Z/QH+khq1O6ZCfCQ2ZKkWYPYTB6wN7qe7bB2S+JKjm/PWoVrxTPuXqNR8wZTXrETGH+ucz4vMxeGJE1C+HX3McwGZ/Eyn96CWjY9cDsPKR3Gq4RLesj0IwsPbaAO18FP5lITVCJffkI3AfCMkzCYBbJIfhV5AIk5qZX3wg=
