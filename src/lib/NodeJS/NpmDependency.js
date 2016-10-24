@@ -371,6 +371,13 @@ export class NpmDependency {
   /**
    * @returns {String}
    */
+  static get PACKAGE_JSON_FILE() {
+    return 'package.json';
+  }
+
+  /**
+   * @returns {String}
+   */
   static get NODE_MODULES_DIR() {
     return 'node_modules';
   }

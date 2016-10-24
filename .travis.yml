@@ -3,53 +3,67 @@ sudo: false
 node_js:
   - '4.3'
   - '5.11'
-  - '6.5'
+  - '6.9'
 cache:
+  edge: true
   directories:
     - $(npm root -g)
     - node_modules
     - $(npm config get prefix)/bin
-notifications:
-  email:
-    - devs-deep@mitocgroup.com
-  slack:
-    secure: Kv3toHMK+/TguJa9jIbIhii/XmLZUDlEX8YiDSJv1S6zKEQqowqXT2Gi1J9u8KYiZBQC+S3x+T9eRkkNJk7RMrLaotbrtI5DNa7ynrhSydIApZIXxISZBh4Ihbdsch7y6ZPDuaGATKSInKY96NRqbXozw9f/pNYc/c2nq3BIBBexLAfGNlQPgVqBNKw12WlfU8O1ARMpQ3fWDE1JgTtLYZst1EGXwkm87O5ybDUcEUY+qqwj6I5HYSpCjanZ3ILeYagrb79gbgU6llusI6YF4PKVH12+51O0xqpvqawxqcLWbKwv7Y1H8kUBI0vKSPlvLS9dsqwnjG8BpHse2ypSzqfuMyViETmpP+ZHFJ8avxrGsPdiQe4doqiYBz2dkxRyorx4QTI/5JP/CGIp9k7NCsd3KQGViHvWOqMnYyBzkd8bTvYNbJYQ72xOYrgAhsiqEJaCOUk4x8h4pSUBb/r021XK3uIU9hu1GXdLg5o57pFk3XNFzD9pUBsQi6TZLYwH8GFGcJEUbDEYA8Gev5E/ZDRz3IheFL7oIWZbssT8I3uXojMMMQvBf4masC8MmYhc8IQh3LCS8h78Sw07sFEhcjXMcNCxeM+B5lkoByiLBMuI2Jwvfo/C2ulqitwo4niqju45bh/rsdUlJEJZwTrDkpj0imjDHQPxhSo9Ftrqk68=
 branches:
   only:
     - master
     - stage
     - test
     - dev
-env:
-  global:
-  # S3_BUCKET_NAME=[secured]
-  - secure: WqeHyb6mAmUPb0goQ+qep3bYYcRxGZkCZkvrjHB2OMnlL3SnI6kUfLQ/3bHHggXgSaCn78gPj/dWTFFbKDD74amfO9NQAes5R+FcCIfGBnjmYOBMXTXs7VZB5zTq+vJtSiKoTvJwAGd15tsWTprZsvbVl+87mSzGjsLon4ZwagtygD5FVKLIdwFYVqQC4LeCutlUOvBrKE2i4phJImecyGRxfYYa70hyHfgj9IpvrPPf+svjMB7GXiJ/QqNEq+/FHA+H27RTW/SC8agjItmabUqzSEdrKPlIpbwCtJGDueje6jZF1oi+NCbo3t9RmtRy7DlB9oFOAnwX681TVKnNr2kNwIBtYWRvbXP3k9c9qmhWi4ro8PE4eyye7pxb3SX/4KUN9dmCiraYbalbLbJg/0/Y3Pc8eRXLiM9NhZA6MHTNR9cdbBotimKdPmQ25aZG59QdwV9p0U5j/UTr7fTY1C7iXWhNR2Zmn/tY/Br2J/O07OM9YB0puiBFltJxrCCU5a1K/Z/QH+khq1O6ZCfCQ2ZKkWYPYTB6wN7qe7bB2S+JKjm/PWoVrxTPuXqNR8wZTXrETGH+ucz4vMxeGJE1C+HX3McwGZ/Eyn96CWjY9cDsPKR3Gq4RLesj0IwsPbaAO18FP5lITVCJffkI3AfCMkzCYBbJIfhV5AIk5qZX3wg=
-  # AWS_DEFAULT_REGION=[secured]
-  - secure: cIfv+nmRGTkWYOBA5gZf1NOau+9QOiYg1QQ6RDxI3CSQYiZxNaAfEir8oxl2yF9MMGIjPuEQSt821HlCZg/VZC3Pwi/jG/cXDQg/tWsUwNEyz/VRHJZLw7pIbUqwbIUkSV/k/5pfzKgmsdKgYz8DrRJHibMFpv0zjW553DoL8pBm7Q5rzoFx/zwNh0gaT/yylpJYrUkqa4GD1KhW2nDgAjFegpAfyVKR5KgKYkgpASrZF05PdF9tgv4wd8ahTDEHwYB8VScBLyEsrKY6reW0ek1o7t1DohcNZUPuDzr9rzjNapo/J1vUTAEZDHfRHI+EWzmUmFJ7HITyLTbjlaeyamSIJxufGWjX0zgob1qzMt0yJ5Cjtoqeoa7+S1aMRh/OPSTkJv/3kCTY5ougS3r3UWWYxLVaf3kuVATw+lUIP/ACim19OBudSInE3JGWSJ6VsTp70pInmaBnY6U/GKGy1h+n5+lVSz63d8Ps1zAOzkCk7Kdf+T0yBwg2zlvtTZ4E4Ah9QGNPtpcx8MutpYRO44IQpJrXvVtGeu5GanNhPig11F2wICBOz+iCofzl7YmfhnnuZkElDaO1LOyxue1GUmTcp8ZA4TniG7hb6ZSwdyxBEgHE56RM878A93EzVkePJnL7ACcxl+qg36jW15Y8B+5OiWvdGG0aVtTbagWXYcc=
-  # GITHUB_OAUTH_TOKEN=[secured]
-  - secure: by6ZJyxigv+aziYMB+ARHwpVsNLEq/gMCXL3WFi3HsZLfvApzzpMRjcO1bkb+iJlznvO53RGoWo7MbToE14rSYvRCZgXKki8eE+n0TMoNotDvFIlwed6t43rgDQGBLzdMkgjydNFnHFmO9rvR99I917QOzQAkh5SkDOm9NjzeLk26WhU4SEtqrAFdTF/YEfYthc5hVeKLUPFMidgrkX5+9z5jW342j1Tglee5mQPx0YozMqE96Mpq0pn6aamvTr/nXecN67p7lX9wHn58BRGOuPOt6sxTvYoslXW4VHiFg6/lI2EDJKWj8M6wRGtz+vMxL8gCM1xZaSkaMBDguRh+SpwscFBBuDbm4LX95YT5emWqztVbHBFp1qCCJ8GMXr5YfaRomZhdIAPWWqv0byoWhCwq/w9iyWK7NYQIanHpd4H8s9Vad7Cdlb8IPc/Vrm0Wg3pvmlkJvsT4uqLXiSjj+rvlaUvZ1pFI9bYo0ab5sEYe7N47w/Zz5d+QW6R2k+I/Me4fpyMoM7Ql5ry6ag7yDMlAH7ZOMlwZBLz5/JwOxU2NTZMprcfBGprpu6CKdneavwiv79m71JnXHvQXeCQs2xn6T6XQxzC3W5VK/pDSLQHkMRmC5qTY+PL6au56anuEaV0cCT36lCc9aGIo0zhVuHrukD8Y6cV9ghOUuXI7fg=
-  # AWS_ACCESS_KEY_ID=[secured]
-  - secure: Fsifu7/BPeZgHUtWQjTDyfoq22XzyHRI9rjLFNq6ZjgTH0XNleWTuembVCzBlVKctkxPqzt0FwbHmKumi/tjoidljQnEuoVTJ8VpcGypownBec/YLjpsX1Bk4SXsGn70umkiJHQW3yKUA4ZqRB1oXtDU9WSaN521tWw8ahJRAnVqbso+S/89NEAQOJugiVIRn1dIyIYtj82WtEizehE7oFDwkX/n+d0Ds/TpNlyw2I/JTjxagQ6j7Yfqe178YhuxM9RzpWYTuDSzqNU6t37zLa1JFjksPww17Wu5CuXkyVXD5IImlg6rXLqPKYj24AkJ9jESKN4wGAlxZOCWMQJhKDYXRrJ1y7PzcebtDsIevQxZfbjyaOunvULpj8eY+Wl/jNcFnp4nyCXyuZZb3iiNw05LkCGlyIHqp23gyCPvbhQFrEAWO/ty7Qk4H9IQJb/9hWnguOaKWeo2Uf0mWUgMNvDXVJJhzsACZTyYfVat5rouz4atZptGVqaG8Jf/+knzmEL/YB5LOWVWWfTaalDjousqqwIodpazBhe0aqMFa5iyfeLNZVudssV9VPYUJ2EqzjIv0g5OI+Y3UvHB52KF3PVFK832+i23WSWqJwTd2c+zhqYc7uxP2q/LpehprSXueAKfh2CByyR2senIK0Bu4eeboeuYtH/3upShHmqbgkY=
-  # AWS_SECRET_ACCESS_KEY=[secured]
-  - secure: cMnTRDG+6L0UpFSJeVMacVA29KUCzWk3AFljdhpf/FjH1WPE8Z5+lVLqENY3H+CgCwTDQqlR2LnD29Rwnb8UwaQm9Kv3aMEyOoThw6FcCnN0+RHP9xM3KDXQMr87lld6K0ZNP3MNi24bG7dI3muN0Iedi1bXSeWvY8wXjN1bbgJyYLXqZz/JYJSAbe8NUMco7aBel8d0GUhOJh8fexwjj4yQ8Kaf3G0U4cUzDfIo4nn1068JozvslhnpwGqrR7YQ+sRbsQsNWrwcpTV1dEgGgtemGPTJdUqF6SCQFg72ShN3LX1RaBtSevYTLKZbgXga8sbNsoeugxGgk9mddGg/8rFHdmJzA2PJwm28kKDTxrKSoPK1gAmWgjodvaQIKqqXHviylNdVO8fq36lyEvXLaAZFLQIOlCkbmTBu9sxpbqfosCDf6xKTK2tJMWAcTw7VsbCLm7K6mqK3u0R1uJDCTl+loxq7gRQVs3eqlBZuaus0K/RGUuu6aia00pl0jKTZyybbvEzazFwSCPAuS10aiG3bqKebMl1YHNqF7ShVzcxzUwY3nlx30zTIKDBgkM8EjRgn8o8ERi2eUsCstZtZKBRyXkIJBvMMEsIdfJObUlJ3EJQzU6SGWl4U135burQGxRE9iV93RPhqtHd5LPn+KFJiW5vZ/lmn52+MxM+bMJU=
-  # CODECLIMATE_REPO_TOKEN_DEV=[secured]
-  - secure: cKpY5xXMMMc9tduR0ceTVIfu9wGcTnx8A44VvY6MPSTNcSlKbjYjWe9Irpqw/Vp+oZJ4lyxQp9AD0wP9EuIWc+kbJlinZ+QLrRxmhWde+1NA2p9Q6JqsYLqpkUYw7RiVIJNnMOs6/9GBHp80z+eG7rV9YF6ymeZWCy9Gny3yMe74I/9idLFdIM9oNu+yhX1LeHK3kZZ1vP4ULfbuhXfBRCYGfxW6q9eI+uFjqfwFEfhZKRQ9gXQfD/OruILYCBdKt4+iCPRtkILUBqWk6b6EBPW+UZQXmVJs5fEYr756l8PWsaOF7+FBdveTagPk77HIoyB9TJ8cOpVSI0H5LtYCSIxJOa9akqAN015utBtWHRkmhwJCRYHojUkpRbqMqypGev+WbITm6jf16hbGVTaxwSss5kFJywSpGKxmORQ2dhwsphxlkT5FElRivD2IijGTVhk4azfEoJ3jX6XKrvMsuP13shDtkguYzjadrV7k277BMe6Z4TqKsW35AAdJvP3dgbn+cL8D+mR0OEjTG0S1OVND6fmidsWcUb+l8v50T4U+ljlPh+H2DYKqEwzBKKqEIRwjEofLibBSiNj3IwNs73s/V+iGwGuuhvfiL907CPXT6LTj8fHTOPNFcfHKxA64L/SqroqNepHkkyajwi7d3nzmYYeVVt4OMD4j0/ub+qA=
-  # CODECLIMATE_REPO_TOKEN_MASTER=[secured]
-  - secure: O0Z6lWl/IvYEPE2mmhPrVMSS2erETgvqSbyxV0tNaG34QgSKuv1JEbiz/v5pg9IHUKCmgAaTl7ZwBsyzMsx+eXl6bC+Viv/2EVKuFfegBzmCjmBaIK4YhZFJohEX2aJuo8y7/pCXQwz+Zbu02GdepWmYWdQ04lc6YcZ8jb8OMpAutllX5apYwTx7HXCSgAv6k3z9E7EHgGQKF+Y9S2PmP0zPTetQg5JEK9qiUjrzMV6WBsXV23VtWh/LyVQl0F4URzRpgCfhgiV8T3jCRFeMF3s+2oY2e8EftrSpOZuiTbSdvyrZ++CjqlrIiPkFxO74TrQvxk1VuLPNdUL34DYDowVdx7S6qBLAuhu55RRI0F/r16B6whL/A5sviemnQVR6OObJYoE6Bnnq80KJ6sf/Bzl/dO4aZGo3gc4Nt45DQPYP/QtBaYAhmu13GBKIh5dpE1yw8h5obfwv3IXQmah1cyR6AWxFA/k7MbUxkGYr2e6mw/4X+yhkaswWYZILK0zss0yYIsojS9ym1u/zt/N3kUYcm+pMETZSb+/nDaf21+MXhqQ23e4mHlSfPn5DaNRsby7UK5S5FPCiGMut7TR5PRw7UnWDrHFCCgyXowcbKjUnzeh2jjOAUkMLHpXhPGsOnnREKp6hhHYu39HPYTUk7Mcv3kXH1JXTwvTs+MBEZGE=
 before_install:
   - (npm list -g babel-cli --depth=0 || npm install -g babel-cli@6.x.x)
   - (npm list -g babel-polyfill --depth=0 || npm install -g babel-polyfill)
-  - (npm list -g babel-preset-es2015 --depth=0 || npm install -g babel-preset-es2015)
-  - (npm list -g babel-plugin-add-module-exports --depth=0 || npm install -g babel-plugin-add-module-exports)
+  - 
+    (npm list -g babel-preset-es2015 --depth=0 || npm install -g
+    babel-preset-es2015)
+  - 
+    (npm list -g babel-plugin-add-module-exports --depth=0 || npm install -g
+    babel-plugin-add-module-exports)
   - (npm list -g browserify --depth=0 || npm install -g browserify@11.2.x)
   - (npm list -g mocha@2.5.x --depth=0 || npm install -g mocha@2.5.x)
-  - (npm list -g istanbul@^1.0.0-alpha --depth=0 || npm install -g istanbul@^1.0.0-alpha)
-  - (npm list -g codeclimate-test-reporter --depth=0 || npm install -g codeclimate-test-reporter)
-  - (if [ ! -d "node_modules/istanbul-combine" ]; then npm install istanbul-combine@0.3.x; fi)
-  - (if [ ! -d "node_modules/fs-extra" ]; then npm install fs-extra@0.x.x; fi)
-  - (if [ ! -d "node_modules/github" ]; then npm install github; fi)
-  - (if [ ! -d "node_modules/aws-sdk" ]; then npm install aws-sdk; fi)
-  - (if [ ! -d "node_modules/s3" ]; then npm install s3; fi)
+  - 
+    (npm list -g istanbul@^1.0.0-alpha --depth=0 || npm install -g
+    istanbul@^1.0.0-alpha)
+  - 
+    (npm list -g codeclimate-test-reporter --depth=0 || npm install -g
+    codeclimate-test-reporter)
+  - 
+    (if [ ! -d "node_modules/istanbul-combine" ]; then npm install
+    istanbul-combine@0.3.x; fi)
+  - '(if [ ! -d "node_modules/fs-extra" ]; then npm install fs-extra@0.x.x; fi)'
+  - '(if [ ! -d "node_modules/github" ]; then npm install github; fi)'
+  - '(if [ ! -d "node_modules/aws-sdk" ]; then npm install aws-sdk; fi)'
+  - '(if [ ! -d "node_modules/s3" ]; then npm install s3; fi)'
   - cp test/package.json .
 after_success:
   - npm run coverage
+after_script:
+  - npm run remove-coverage
+env:
+  global:
+    - secure: 
+        WqeHyb6mAmUPb0goQ+qep3bYYcRxGZkCZkvrjHB2OMnlL3SnI6kUfLQ/3bHHggXgSaCn78gPj/dWTFFbKDD74amfO9NQAes5R+FcCIfGBnjmYOBMXTXs7VZB5zTq+vJtSiKoTvJwAGd15tsWTprZsvbVl+87mSzGjsLon4ZwagtygD5FVKLIdwFYVqQC4LeCutlUOvBrKE2i4phJImecyGRxfYYa70hyHfgj9IpvrPPf+svjMB7GXiJ/QqNEq+/FHA+H27RTW/SC8agjItmabUqzSEdrKPlIpbwCtJGDueje6jZF1oi+NCbo3t9RmtRy7DlB9oFOAnwX681TVKnNr2kNwIBtYWRvbXP3k9c9qmhWi4ro8PE4eyye7pxb3SX/4KUN9dmCiraYbalbLbJg/0/Y3Pc8eRXLiM9NhZA6MHTNR9cdbBotimKdPmQ25aZG59QdwV9p0U5j/UTr7fTY1C7iXWhNR2Zmn/tY/Br2J/O07OM9YB0puiBFltJxrCCU5a1K/Z/QH+khq1O6ZCfCQ2ZKkWYPYTB6wN7qe7bB2S+JKjm/PWoVrxTPuXqNR8wZTXrETGH+ucz4vMxeGJE1C+HX3McwGZ/Eyn96CWjY9cDsPKR3Gq4RLesj0IwsPbaAO18FP5lITVCJffkI3AfCMkzCYBbJIfhV5AIk5qZX3wg=
+    - secure: 
+        cIfv+nmRGTkWYOBA5gZf1NOau+9QOiYg1QQ6RDxI3CSQYiZxNaAfEir8oxl2yF9MMGIjPuEQSt821HlCZg/VZC3Pwi/jG/cXDQg/tWsUwNEyz/VRHJZLw7pIbUqwbIUkSV/k/5pfzKgmsdKgYz8DrRJHibMFpv0zjW553DoL8pBm7Q5rzoFx/zwNh0gaT/yylpJYrUkqa4GD1KhW2nDgAjFegpAfyVKR5KgKYkgpASrZF05PdF9tgv4wd8ahTDEHwYB8VScBLyEsrKY6reW0ek1o7t1DohcNZUPuDzr9rzjNapo/J1vUTAEZDHfRHI+EWzmUmFJ7HITyLTbjlaeyamSIJxufGWjX0zgob1qzMt0yJ5Cjtoqeoa7+S1aMRh/OPSTkJv/3kCTY5ougS3r3UWWYxLVaf3kuVATw+lUIP/ACim19OBudSInE3JGWSJ6VsTp70pInmaBnY6U/GKGy1h+n5+lVSz63d8Ps1zAOzkCk7Kdf+T0yBwg2zlvtTZ4E4Ah9QGNPtpcx8MutpYRO44IQpJrXvVtGeu5GanNhPig11F2wICBOz+iCofzl7YmfhnnuZkElDaO1LOyxue1GUmTcp8ZA4TniG7hb6ZSwdyxBEgHE56RM878A93EzVkePJnL7ACcxl+qg36jW15Y8B+5OiWvdGG0aVtTbagWXYcc=
+    - secure: 
+        by6ZJyxigv+aziYMB+ARHwpVsNLEq/gMCXL3WFi3HsZLfvApzzpMRjcO1bkb+iJlznvO53RGoWo7MbToE14rSYvRCZgXKki8eE+n0TMoNotDvFIlwed6t43rgDQGBLzdMkgjydNFnHFmO9rvR99I917QOzQAkh5SkDOm9NjzeLk26WhU4SEtqrAFdTF/YEfYthc5hVeKLUPFMidgrkX5+9z5jW342j1Tglee5mQPx0YozMqE96Mpq0pn6aamvTr/nXecN67p7lX9wHn58BRGOuPOt6sxTvYoslXW4VHiFg6/lI2EDJKWj8M6wRGtz+vMxL8gCM1xZaSkaMBDguRh+SpwscFBBuDbm4LX95YT5emWqztVbHBFp1qCCJ8GMXr5YfaRomZhdIAPWWqv0byoWhCwq/w9iyWK7NYQIanHpd4H8s9Vad7Cdlb8IPc/Vrm0Wg3pvmlkJvsT4uqLXiSjj+rvlaUvZ1pFI9bYo0ab5sEYe7N47w/Zz5d+QW6R2k+I/Me4fpyMoM7Ql5ry6ag7yDMlAH7ZOMlwZBLz5/JwOxU2NTZMprcfBGprpu6CKdneavwiv79m71JnXHvQXeCQs2xn6T6XQxzC3W5VK/pDSLQHkMRmC5qTY+PL6au56anuEaV0cCT36lCc9aGIo0zhVuHrukD8Y6cV9ghOUuXI7fg=
+    - secure: 
+        Fsifu7/BPeZgHUtWQjTDyfoq22XzyHRI9rjLFNq6ZjgTH0XNleWTuembVCzBlVKctkxPqzt0FwbHmKumi/tjoidljQnEuoVTJ8VpcGypownBec/YLjpsX1Bk4SXsGn70umkiJHQW3yKUA4ZqRB1oXtDU9WSaN521tWw8ahJRAnVqbso+S/89NEAQOJugiVIRn1dIyIYtj82WtEizehE7oFDwkX/n+d0Ds/TpNlyw2I/JTjxagQ6j7Yfqe178YhuxM9RzpWYTuDSzqNU6t37zLa1JFjksPww17Wu5CuXkyVXD5IImlg6rXLqPKYj24AkJ9jESKN4wGAlxZOCWMQJhKDYXRrJ1y7PzcebtDsIevQxZfbjyaOunvULpj8eY+Wl/jNcFnp4nyCXyuZZb3iiNw05LkCGlyIHqp23gyCPvbhQFrEAWO/ty7Qk4H9IQJb/9hWnguOaKWeo2Uf0mWUgMNvDXVJJhzsACZTyYfVat5rouz4atZptGVqaG8Jf/+knzmEL/YB5LOWVWWfTaalDjousqqwIodpazBhe0aqMFa5iyfeLNZVudssV9VPYUJ2EqzjIv0g5OI+Y3UvHB52KF3PVFK832+i23WSWqJwTd2c+zhqYc7uxP2q/LpehprSXueAKfh2CByyR2senIK0Bu4eeboeuYtH/3upShHmqbgkY=
+    - secure: 
+        cMnTRDG+6L0UpFSJeVMacVA29KUCzWk3AFljdhpf/FjH1WPE8Z5+lVLqENY3H+CgCwTDQqlR2LnD29Rwnb8UwaQm9Kv3aMEyOoThw6FcCnN0+RHP9xM3KDXQMr87lld6K0ZNP3MNi24bG7dI3muN0Iedi1bXSeWvY8wXjN1bbgJyYLXqZz/JYJSAbe8NUMco7aBel8d0GUhOJh8fexwjj4yQ8Kaf3G0U4cUzDfIo4nn1068JozvslhnpwGqrR7YQ+sRbsQsNWrwcpTV1dEgGgtemGPTJdUqF6SCQFg72ShN3LX1RaBtSevYTLKZbgXga8sbNsoeugxGgk9mddGg/8rFHdmJzA2PJwm28kKDTxrKSoPK1gAmWgjodvaQIKqqXHviylNdVO8fq36lyEvXLaAZFLQIOlCkbmTBu9sxpbqfosCDf6xKTK2tJMWAcTw7VsbCLm7K6mqK3u0R1uJDCTl+loxq7gRQVs3eqlBZuaus0K/RGUuu6aia00pl0jKTZyybbvEzazFwSCPAuS10aiG3bqKebMl1YHNqF7ShVzcxzUwY3nlx30zTIKDBgkM8EjRgn8o8ERi2eUsCstZtZKBRyXkIJBvMMEsIdfJObUlJ3EJQzU6SGWl4U135burQGxRE9iV93RPhqtHd5LPn+KFJiW5vZ/lmn52+MxM+bMJU=
+    - secure: 
+        cKpY5xXMMMc9tduR0ceTVIfu9wGcTnx8A44VvY6MPSTNcSlKbjYjWe9Irpqw/Vp+oZJ4lyxQp9AD0wP9EuIWc+kbJlinZ+QLrRxmhWde+1NA2p9Q6JqsYLqpkUYw7RiVIJNnMOs6/9GBHp80z+eG7rV9YF6ymeZWCy9Gny3yMe74I/9idLFdIM9oNu+yhX1LeHK3kZZ1vP4ULfbuhXfBRCYGfxW6q9eI+uFjqfwFEfhZKRQ9gXQfD/OruILYCBdKt4+iCPRtkILUBqWk6b6EBPW+UZQXmVJs5fEYr756l8PWsaOF7+FBdveTagPk77HIoyB9TJ8cOpVSI0H5LtYCSIxJOa9akqAN015utBtWHRkmhwJCRYHojUkpRbqMqypGev+WbITm6jf16hbGVTaxwSss5kFJywSpGKxmORQ2dhwsphxlkT5FElRivD2IijGTVhk4azfEoJ3jX6XKrvMsuP13shDtkguYzjadrV7k277BMe6Z4TqKsW35AAdJvP3dgbn+cL8D+mR0OEjTG0S1OVND6fmidsWcUb+l8v50T4U+ljlPh+H2DYKqEwzBKKqEIRwjEofLibBSiNj3IwNs73s/V+iGwGuuhvfiL907CPXT6LTj8fHTOPNFcfHKxA64L/SqroqNepHkkyajwi7d3nzmYYeVVt4OMD4j0/ub+qA=
+    - secure: 
+        O0Z6lWl/IvYEPE2mmhPrVMSS2erETgvqSbyxV0tNaG34QgSKuv1JEbiz/v5pg9IHUKCmgAaTl7ZwBsyzMsx+eXl6bC+Viv/2EVKuFfegBzmCjmBaIK4YhZFJohEX2aJuo8y7/pCXQwz+Zbu02GdepWmYWdQ04lc6YcZ8jb8OMpAutllX5apYwTx7HXCSgAv6k3z9E7EHgGQKF+Y9S2PmP0zPTetQg5JEK9qiUjrzMV6WBsXV23VtWh/LyVQl0F4URzRpgCfhgiV8T3jCRFeMF3s+2oY2e8EftrSpOZuiTbSdvyrZ++CjqlrIiPkFxO74TrQvxk1VuLPNdUL34DYDowVdx7S6qBLAuhu55RRI0F/r16B6whL/A5sviemnQVR6OObJYoE6Bnnq80KJ6sf/Bzl/dO4aZGo3gc4Nt45DQPYP/QtBaYAhmu13GBKIh5dpE1yw8h5obfwv3IXQmah1cyR6AWxFA/k7MbUxkGYr2e6mw/4X+yhkaswWYZILK0zss0yYIsojS9ym1u/zt/N3kUYcm+pMETZSb+/nDaf21+MXhqQ23e4mHlSfPn5DaNRsby7UK5S5FPCiGMut7TR5PRw7UnWDrHFCCgyXowcbKjUnzeh2jjOAUkMLHpXhPGsOnnREKp6hhHYu39HPYTUk7Mcv3kXH1JXTwvTs+MBEZGE=
+notifications:
+  email:
+    - devs-deep@mitocgroup.com
+  slack:
+    secure: 
+      Kv3toHMK+/TguJa9jIbIhii/XmLZUDlEX8YiDSJv1S6zKEQqowqXT2Gi1J9u8KYiZBQC+S3x+T9eRkkNJk7RMrLaotbrtI5DNa7ynrhSydIApZIXxISZBh4Ihbdsch7y6ZPDuaGATKSInKY96NRqbXozw9f/pNYc/c2nq3BIBBexLAfGNlQPgVqBNKw12WlfU8O1ARMpQ3fWDE1JgTtLYZst1EGXwkm87O5ybDUcEUY+qqwj6I5HYSpCjanZ3ILeYagrb79gbgU6llusI6YF4PKVH12+51O0xqpvqawxqcLWbKwv7Y1H8kUBI0vKSPlvLS9dsqwnjG8BpHse2ypSzqfuMyViETmpP+ZHFJ8avxrGsPdiQe4doqiYBz2dkxRyorx4QTI/5JP/CGIp9k7NCsd3KQGViHvWOqMnYyBzkd8bTvYNbJYQ72xOYrgAhsiqEJaCOUk4x8h4pSUBb/r021XK3uIU9hu1GXdLg5o57pFk3XNFzD9pUBsQi6TZLYwH8GFGcJEUbDEYA8Gev5E/ZDRz3IheFL7oIWZbssT8I3uXojMMMQvBf4masC8MmYhc8IQh3LCS8h78Sw07sFEhcjXMcNCxeM+B5lkoByiLBMuI2Jwvfo/C2ulqitwo4niqju45bh/rsdUlJEJZwTrDkpj0imjDHQPxhSo9Ftrqk68=
