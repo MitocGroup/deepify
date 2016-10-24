@@ -115,7 +115,7 @@ module.exports = function(dependency, dumpPath) {
           this.exit(1);
         }
 
-        console.info('Wep app dependencies have been successfully initialized');
+        console.info('Web app dependencies have been successfully initialized');
       }, true);
     });
   };
@@ -176,7 +176,7 @@ module.exports = function(dependency, dumpPath) {
           this.exit(1);
         }
 
-        console.info('Wep app dependencies have been successfully installed');
+        console.info('Web app dependencies have been successfully installed');
 
         initBackend();
       });
