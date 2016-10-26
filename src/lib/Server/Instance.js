@@ -281,9 +281,10 @@ export class Instance {
    * @param {Number} port
    * @param {String} dbServer
    * @param {Function} callback
+   * @param {Boolean} isSecured
    * @returns {Instance}
    */
-  listen(port = 8080, dbServer = null, callback = () => {}) {
+  listen(port = 8080, dbServer = null, callback = () => {}, isSecured = false) {
     let hook = new Hook(this);
 
     hook.runBefore(() => {
@@ -311,7 +312,7 @@ export class Instance {
             throw new FailedToStartServerException(port, error);
           }
 
-          this._host = `http://localhost:${port}`;
+          this._host = `http${isSecured ? 's' : ''}://localhost:${port}`;
 
           this._log('HTTP Server is up and running!');
 
