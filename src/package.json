@@ -81,7 +81,8 @@
     "semver": "^5.2.x",
     "tmp": "^0.0.x",
     "twig": "^0.9.x",
-    "uglify-js": "^2.7.x"
+    "uglify-js": "^2.7.x",
+    "local-ssl-proxy": "^1.3.x"
   },
   "devDependencies": {
     "chai": "^3.5.x",
