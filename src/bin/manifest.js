@@ -86,6 +86,10 @@ module.exports = {
           description: 'Local DynamoDB server implementation (ex. LocalDynamo, Dynalite)',
           required: false,
         },
+        'secure': {
+          description: 'Enstablish a secure connection (SSL)',
+          required: false,
+        },
         'open-browser': {
           alias: 'o',
           description: 'Open browser after the server starts',
