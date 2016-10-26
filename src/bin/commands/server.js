@@ -12,7 +12,6 @@ module.exports = function(mainPath) {
   let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   let open = require('open');
-  let path = require('path');
 
   let sslConnection = this.opts.locate('secure').exists;
   let port = parseInt(this.opts.locate('port').value, 10) || 8000;
@@ -30,37 +29,10 @@ module.exports = function(mainPath) {
 
   let startServer = (server) => {
     let serverAddress = `http${sslConnection ? 's' : ''}://localhost:${port}`;
-    let serverPort = sslConnection ? port + 1 : port;
     
-    server.listen(serverPort, dbServer, () => {
+    server.listen(port, dbServer, () => {
       if (openBrowser) {
         open(serverAddress);
-      }
-      
-      if (sslConnection) {
-        
-        // @todo start it natively
-        let sslProxyBinary = path.join(
-          __dirname, 
-          '..', 
-          '..', 
-          'node_modules', 
-          'local-ssl-proxy', 
-          'bin', 
-          'local-ssl-proxy'
-        );
-        
-        let cmd = new Exec(Bin.node, sslProxyBinary);
-        
-        cmd.addArg(`--source=${port}`);
-        cmd.addArg(`--target=${serverPort}`);
-        
-        cmd.avoidBufferOverflow().run(result => {
-          if (result.failed) {
-            console.error(result.error);
-            this.exit(1);
-          }
-        });
       }
     }, sslConnection);
   };

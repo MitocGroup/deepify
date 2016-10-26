@@ -9,8 +9,10 @@
 
 import {PropertyObjectRequiredException} from './Exception/PropertyObjectRequiredException';
 import Http from 'http';
+import Https from 'https';
 import Path from 'path';
 import Url from 'url';
+import FileSystem from 'fs';
 import {FailedToStartServerException} from './Exception/FailedToStartServerException';
 import {Property_Instance as Property} from 'deep-package-manager';
 import {Property_Frontend as Frontend} from 'deep-package-manager';
@@ -219,7 +221,7 @@ export class Instance {
   }
 
   /**
-   * @returns {Http.Server}
+   * @returns {Http.Server|Https.Server}
    */
   get nativeServer() {
     return this._server;
@@ -301,7 +303,14 @@ export class Instance {
 
         this._log(`Creating server on port ${port}`);
 
-        this._server = Http.createServer((...args) => {
+        // @todo abstract this
+        let sslKeysDir = Path.join(__dirname, '..', '..', 'assets');
+        let options = {
+          key: FileSystem.readFileSync(Path.join(sslKeysDir, 'localhost.key')),
+          cert: FileSystem.readFileSync(Path.join(sslKeysDir, 'localhost.cert')),
+        };
+
+        this._server = (isSecured ? Https : Http).createServer(options, (...args) => {
           this._handler(...args);
         });
 
@@ -379,8 +388,8 @@ export class Instance {
   }
 
   /**
-   * @param {Http.IncomingMessage} request
-   * @param {Http.ServerResponse} response
+   * @param {Http.IncomingMessage|Https.IncomingMessage} request
+   * @param {Http.ServerResponse|Https.ServerResponse} response
    * @private
    */
   _handler(request, response) {
