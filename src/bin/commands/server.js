@@ -13,9 +13,9 @@ module.exports = function(mainPath) {
   let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   let open = require('open');
 
-  let port = this.opts.locate('port').value || '8000';
+  let sslConnection = this.opts.locate('secure').exists;
+  let port = parseInt(this.opts.locate('port').value, 10) || 8000;
   let dbServer = this.opts.locate('db-server').value || 'LocalDynamo';
-  let serverAddress = 'http://localhost:' + port;
   let openBrowser = this.opts.locate('open-browser').exists;
   let skipBackendBuild = this.opts.locate('skip-backend-build').exists;
   let skipFrontendBuild = this.opts.locate('skip-frontend-build').exists;
@@ -28,11 +28,13 @@ module.exports = function(mainPath) {
   mainPath = this.normalizeInputPath(mainPath);
 
   let startServer = (server) => {
-    server.listen(parseInt(port, 10), dbServer, () => {
+    let serverAddress = `http${sslConnection ? 's' : ''}://localhost:${port}`;
+    
+    server.listen(port, dbServer, () => {
       if (openBrowser) {
         open(serverAddress);
       }
-    });
+    }, sslConnection);
   };
 
   let compileDevCmd = () => {
