@@ -141,6 +141,14 @@ module.exports = {
           description: 'Invalidate deep dependencies cache',
           required: false,
         },
+        frontend: {
+          description: 'Deploy only frontend resource',
+          required: false,
+        },
+        backend: {
+          description: 'Deploy only backend resource',
+          required: false,
+        }
       },
       args: {
         path: {

@@ -32,6 +32,8 @@ module.exports = function(mainPath) {
   let cfgBucket = this.opts.locate('cfg-bucket').value;
   let appEnv = isProd ? 'prod' : this.opts.locate('env').value;
   let microservicesToDeploy = this.opts.locate('partial').value;
+  let frontendOnly = this.opts.locate('frontend').exists ? Property.DEPLOY_FRONTEND : 0;
+  let backendOnly = this.opts.locate('backend').exists ? Property.DEPLOY_BACKEND : 0;
   let validateNodeVersion = require('./helper/validate-node-version');
   let undeployRunning = false;
 
@@ -45,6 +47,10 @@ module.exports = function(mainPath) {
   let propertyInstance = Property.create(mainPath);
   let configFile = path.join(propertyInstance.path, Config.DEFAULT_FILENAME);
   let config = propertyInstance.config;
+  
+  if (frontendOnly || backendOnly) {
+    propertyInstance.deployFlags = frontendOnly | backendOnly;
+  }
 
   appEnv = appEnv ? appEnv.toLowerCase() : null;
 
