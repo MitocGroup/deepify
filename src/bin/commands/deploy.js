@@ -369,7 +369,7 @@ module.exports = function(mainPath) {
   let prepareProduction = (propertyPath, cb) => {
     if (isProd) {
       doCompileProd(propertyPath, cb);
-    } else if (!localOnly) {
+    } else if (!localOnly && !frontendOnly) {
       let prompt = new Prompt('Prepare for production?');
 
       prompt.readConfirm((result) => {
