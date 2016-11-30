@@ -109,27 +109,35 @@ module.exports = function(mainPath) {
         return cb(null);
       }
 
-      let baseHash = propertyInstance.configObj.baseHash;
+      let prompt = new Prompt('Do you want to undeploy deployed resources?');
 
-      console.log(`Start undeploying resources for ${baseHash}`);
-
-      let undeployCmd = new Exec(
-        Bin.node,
-        this.scriptPath,
-        'undeploy',
-        propertyInstance.path,
-        `--resource=${baseHash}`
-      );
-
-      undeployCmd.run(() => {
-        if (undeployCmd.failed) {
-          return cb(undeployCmd.error);
+      prompt.readConfirm(result => {
+        if (!result) {
+          return cb(null);
         }
 
-        cb(null);
-      }, true);
+        let baseHash = propertyInstance.configObj.baseHash;
 
-      undeployRunning = true;
+        console.log(`Start undeploying resources for ${baseHash}`);
+
+        let undeployCmd = new Exec(
+          Bin.node,
+          this.scriptPath,
+          'undeploy',
+          propertyInstance.path,
+          `--resource=${baseHash}`
+        );
+
+        undeployCmd.run(() => {
+          if (undeployCmd.failed) {
+            return cb(undeployCmd.error);
+          }
+
+          cb(null);
+        }, true);
+
+        undeployRunning = true;
+      });
     });
   };
 
