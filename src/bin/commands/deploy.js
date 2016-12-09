@@ -128,6 +128,10 @@ module.exports = function(mainPath) {
           `--resource=${baseHash}`
         );
 
+        if (isProd) {
+          undeployCmd.addArg('--prod');
+        }
+
         undeployCmd.run(() => {
           if (undeployCmd.failed) {
             return cb(undeployCmd.error);
