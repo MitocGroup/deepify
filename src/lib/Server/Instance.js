@@ -303,16 +303,22 @@ export class Instance {
 
         this._log(`Creating server on port ${port}`);
 
-        // @todo abstract this
-        let sslKeysDir = Path.join(__dirname, '..', '..', 'assets');
-        let options = {
-          key: FileSystem.readFileSync(Path.join(sslKeysDir, 'localhost.key')),
-          cert: FileSystem.readFileSync(Path.join(sslKeysDir, 'localhost.cert')),
-        };
-
-        this._server = (isSecured ? Https : Http).createServer(options, (...args) => {
-          this._handler(...args);
-        });
+        if (isSecured) {
+          // @todo abstract this
+          let sslKeysDir = Path.join(__dirname, '..', '..', 'assets');
+          let options = {
+            key: FileSystem.readFileSync(Path.join(sslKeysDir, 'localhost.key')),
+            cert: FileSystem.readFileSync(Path.join(sslKeysDir, 'localhost.cert')),
+          };
+          
+          this._server = Https.createServer(options, (...args) => {
+            this._handler(...args);
+          });
+        } else {
+          this._server = Http.createServer((...args) => {
+            this._handler(...args);
+          });
+        }
 
         var localDbInstance = null;
 

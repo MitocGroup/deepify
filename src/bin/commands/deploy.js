@@ -32,6 +32,8 @@ module.exports = function(mainPath) {
   let cfgBucket = this.opts.locate('cfg-bucket').value;
   let appEnv = isProd ? 'prod' : this.opts.locate('env').value;
   let microservicesToDeploy = this.opts.locate('partial').value;
+  let frontendOnly = this.opts.locate('frontend').exists ? Property.DEPLOY_FRONTEND : 0;
+  let backendOnly = this.opts.locate('backend').exists ? Property.DEPLOY_BACKEND : 0;
   let validateNodeVersion = require('./helper/validate-node-version');
   let undeployRunning = false;
 
@@ -45,6 +47,10 @@ module.exports = function(mainPath) {
   let propertyInstance = Property.create(mainPath);
   let configFile = path.join(propertyInstance.path, Config.DEFAULT_FILENAME);
   let config = propertyInstance.config;
+  
+  if (frontendOnly || backendOnly) {
+    propertyInstance.deployFlags = frontendOnly | backendOnly;
+  }
 
   appEnv = appEnv ? appEnv.toLowerCase() : null;
 
@@ -103,27 +109,39 @@ module.exports = function(mainPath) {
         return cb(null);
       }
 
-      let baseHash = propertyInstance.configObj.baseHash;
+      let prompt = new Prompt('Do you want to undeploy deployed resources?');
 
-      console.log(`Start undeploying resources for ${baseHash}`);
-
-      let undeployCmd = new Exec(
-        Bin.node,
-        this.scriptPath,
-        'undeploy',
-        propertyInstance.path,
-        `--resource=${baseHash}`
-      );
-
-      undeployCmd.run(() => {
-        if (undeployCmd.failed) {
-          return cb(undeployCmd.error);
+      prompt.readConfirm(result => {
+        if (!result) {
+          return cb(null);
         }
 
-        cb(null);
-      }, true);
+        let baseHash = propertyInstance.configObj.baseHash;
 
-      undeployRunning = true;
+        console.log(`Start undeploying resources for ${baseHash}`);
+
+        let undeployCmd = new Exec(
+          Bin.node,
+          this.scriptPath,
+          'undeploy',
+          propertyInstance.path,
+          `--resource=${baseHash}`
+        );
+
+        if (isProd) {
+          undeployCmd.addArg('--prod');
+        }
+
+        undeployCmd.run(() => {
+          if (undeployCmd.failed) {
+            return cb(undeployCmd.error);
+          }
+
+          cb(null);
+        }, true);
+
+        undeployRunning = true;
+      });
     });
   };
 
@@ -363,7 +381,7 @@ module.exports = function(mainPath) {
   let prepareProduction = (propertyPath, cb) => {
     if (isProd) {
       doCompileProd(propertyPath, cb);
-    } else if (!localOnly) {
+    } else if (!localOnly && !frontendOnly) {
       let prompt = new Prompt('Prepare for production?');
 
       prompt.readConfirm((result) => {
