@@ -3,7 +3,7 @@ sudo: false
 node_js:
   - '4.3'
   - '6.9'
-  - '7.3'
+  - '7.4'
 cache:
   edge: true
   directories:
@@ -62,8 +62,8 @@ env:
     - secure: 
         O0Z6lWl/IvYEPE2mmhPrVMSS2erETgvqSbyxV0tNaG34QgSKuv1JEbiz/v5pg9IHUKCmgAaTl7ZwBsyzMsx+eXl6bC+Viv/2EVKuFfegBzmCjmBaIK4YhZFJohEX2aJuo8y7/pCXQwz+Zbu02GdepWmYWdQ04lc6YcZ8jb8OMpAutllX5apYwTx7HXCSgAv6k3z9E7EHgGQKF+Y9S2PmP0zPTetQg5JEK9qiUjrzMV6WBsXV23VtWh/LyVQl0F4URzRpgCfhgiV8T3jCRFeMF3s+2oY2e8EftrSpOZuiTbSdvyrZ++CjqlrIiPkFxO74TrQvxk1VuLPNdUL34DYDowVdx7S6qBLAuhu55RRI0F/r16B6whL/A5sviemnQVR6OObJYoE6Bnnq80KJ6sf/Bzl/dO4aZGo3gc4Nt45DQPYP/QtBaYAhmu13GBKIh5dpE1yw8h5obfwv3IXQmah1cyR6AWxFA/k7MbUxkGYr2e6mw/4X+yhkaswWYZILK0zss0yYIsojS9ym1u/zt/N3kUYcm+pMETZSb+/nDaf21+MXhqQ23e4mHlSfPn5DaNRsby7UK5S5FPCiGMut7TR5PRw7UnWDrHFCCgyXowcbKjUnzeh2jjOAUkMLHpXhPGsOnnREKp6hhHYu39HPYTUk7Mcv3kXH1JXTwvTs+MBEZGE=
 notifications:
-  email:
-    - devs-deep@mitocgroup.com
   slack:
     secure: 
       Kv3toHMK+/TguJa9jIbIhii/XmLZUDlEX8YiDSJv1S6zKEQqowqXT2Gi1J9u8KYiZBQC+S3x+T9eRkkNJk7RMrLaotbrtI5DNa7ynrhSydIApZIXxISZBh4Ihbdsch7y6ZPDuaGATKSInKY96NRqbXozw9f/pNYc/c2nq3BIBBexLAfGNlQPgVqBNKw12WlfU8O1ARMpQ3fWDE1JgTtLYZst1EGXwkm87O5ybDUcEUY+qqwj6I5HYSpCjanZ3ILeYagrb79gbgU6llusI6YF4PKVH12+51O0xqpvqawxqcLWbKwv7Y1H8kUBI0vKSPlvLS9dsqwnjG8BpHse2ypSzqfuMyViETmpP+ZHFJ8avxrGsPdiQe4doqiYBz2dkxRyorx4QTI/5JP/CGIp9k7NCsd3KQGViHvWOqMnYyBzkd8bTvYNbJYQ72xOYrgAhsiqEJaCOUk4x8h4pSUBb/r021XK3uIU9hu1GXdLg5o57pFk3XNFzD9pUBsQi6TZLYwH8GFGcJEUbDEYA8Gev5E/ZDRz3IheFL7oIWZbssT8I3uXojMMMQvBf4masC8MmYhc8IQh3LCS8h78Sw07sFEhcjXMcNCxeM+B5lkoByiLBMuI2Jwvfo/C2ulqitwo4niqju45bh/rsdUlJEJZwTrDkpj0imjDHQPxhSo9Ftrqk68=
+  email:
+    - devs-deep@mitocgroup.com
