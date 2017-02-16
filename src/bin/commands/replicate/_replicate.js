@@ -68,14 +68,14 @@ module.exports = function(commandParams) {
 
   /**
    * @param {String} baseHash
-   * @param {String|undefined} env
    * @returns {Object}
    */
-  function createProperty(baseHash, env) {
+  function createProperty(baseHash) {
+    let hashParts = baseHash.split(':');
     let property = Property.create(mainPath);
 
-    property.configObj.baseHash = baseHash;
-    property.config.env = env || DEFAULT_ENV;
+    property.configObj.baseHash = hashParts[0];
+    property.config.env = hashParts[1] || DEFAULT_ENV;
 
     return property;
   }
