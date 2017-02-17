@@ -11,6 +11,7 @@ module.exports = function(microservicePath) {
   let SAMPLE_PROPERTY_CONFIG = {
     appIdentifier: 'appIdentifier',
     env: 'prod',
+    apiVersion: 'v1',
     awsAccountId: '0000000000',
     aws: {
       accessKeyId: 'accessKeyId',
