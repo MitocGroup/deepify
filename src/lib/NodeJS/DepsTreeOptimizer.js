@@ -37,6 +37,18 @@ export class DepsTreeOptimizer {
    * @returns {DepsTreeOptimizer}
    */
   optimize(cb) {
+    try {
+      let packageJson = fse.readJsonSync(path.join(this._path, 'package.json'));
+
+      if (!packageJson.dependencies || Object.keys(packageJson.dependencies).length === 0) {
+        cb([]);
+        return this;
+      }
+    } catch (e) {
+      cb([]);
+      return this;
+    }
+
     this._lockDeps((lockedDepsRawObject) => {
       let mainDep = NpmDependency.createFromRawObject(lockedDepsRawObject);
       mainDep.defaultRootPath = this._path;
