@@ -50,6 +50,16 @@ module.exports = function(mainPath) {
           return;
         }
 
+        let dryRun = false; // do no run postinstall if there isn't script for that
+
+        try {
+          let packageJson = fse.readJsonSync(path.join(lambdaTmpPath, 'package.json'));
+
+          dryRun = !(packageJson.scripts || {}).postinstall;
+        } catch (e) {
+          dryRun = true;
+        }
+
         let run = new NpmRun(lambdaTmpPath);
         run.cmd = 'postinstall';
         run.addExtraArg(
@@ -57,7 +67,7 @@ module.exports = function(mainPath) {
           '--production'
         );
 
-        run.run(() => {
+        run.dry(dryRun).run(() => {
           deepDepsCache.loadInto(lambdaTmpPath, (error) => {
             if (error) {
               doInstall(++lambdaIdx);

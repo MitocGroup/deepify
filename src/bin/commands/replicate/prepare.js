@@ -8,10 +8,10 @@ module.exports = function(mainPath) {
   require('./_replicate')({
     context: this,
     mainPath: mainPath,
-    afterLoad: (replicationInstance, tables, blueHash, greenHash) => {
-      return replicationInstance.prepare(tables).then(() => {
+    afterLoad: (replicationInstance, params, blueHash, greenHash) => {
+      return replicationInstance.prepare(params).then(() => {
         console.log('Replication has been prepared. You can check backfill status by running: ');
-        console.log(`deepify replicate status --blue "${blueHash}" --green "${greenHash}" --tables "${tables.join(',')}"`);
+        console.log(`deepify replicate status --blue "${blueHash}" --green "${greenHash}" --tables "${params.DB.join(',')}"`);
       });
     },
   });

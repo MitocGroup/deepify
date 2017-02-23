@@ -58,6 +58,14 @@ module.exports = {
               description: 'Tables to replicate',
               required: true,
             },
+            'private-ignore': {
+              description: 'Path to ignore file for private bucket replication',
+              required: false,
+            },
+            'public-ignore': {
+              description: 'Path to ignore file for public bucket replication',
+              required: false,
+            },
           },
         },
         start: {
@@ -84,6 +92,14 @@ module.exports = {
               description: 'Tables to replicate',
               required: true,
             },
+            'private-ignore': {
+              description: 'Path to ignore file for private bucket replication',
+              required: false,
+            },
+            'public-ignore': {
+              description: 'Path to ignore file for public bucket replication',
+              required: false,
+            },
           },
         },
         prepare: {
@@ -105,6 +121,14 @@ module.exports = {
               alias: 't',
               description: 'Tables to replicate',
               required: true,
+            },
+            'private-ignore': {
+              description: 'Path to ignore file for private bucket replication',
+              required: false,
+            },
+            'public-ignore': {
+              description: 'Path to ignore file for public bucket replication',
+              required: false,
             },
           },
           args: {
