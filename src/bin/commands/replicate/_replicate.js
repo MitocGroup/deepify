@@ -8,11 +8,15 @@ const DEFAULT_ENV = 'dev';
 const BLUE_GREEN_MICROSERVICE = 'deep-blue-green';
 
 module.exports = function(commandParams) {
+  let fs = require('fs');
+  let os = require('os');
   let Replication = require('deep-package-manager').Replication_Instance;
   let Property = require('deep-package-manager').Property_Instance;
   let tablesRaw = commandParams.context.opts.locate('tables').value;
   let blueHash = commandParams.context.opts.locate('blue').value;
   let greenHash = commandParams.context.opts.locate('green').value;
+  let publicIgnore = commandParams.context.opts.locate('public-ignore').value;
+  let privateIgnore = commandParams.context.opts.locate('private-ignore').value;
 
   let mainPath = commandParams.context.normalizeInputPath(commandParams.mainPath);
   let blueProperty = createProperty(blueHash);
@@ -32,9 +36,14 @@ module.exports = function(commandParams) {
       );
     }
 
-    let replication = new Replication(blueConfig, greenConfig, blueHash, greenHash);
+    let replication = new Replication(blueConfig, greenConfig);
 
-    return commandParams.afterLoad(replication, getTables(), blueHash, greenHash);
+    let params = {
+      DB: getTables(),
+      FS: getIgnoreGlobs(),
+    };
+
+    return commandParams.afterLoad(replication, params, blueHash, greenHash);
   }).catch(e => {
     console.error(e.toString(), e.stack);
   });
@@ -56,6 +65,30 @@ module.exports = function(commandParams) {
    */
   function getTables() {
     return tablesRaw.split(',') || [];
+  }
+
+  /**
+   * @returns {{privateIgnoreGlob: string, publicIgnoreGlob: string}}
+   */
+  function getIgnoreGlobs() {
+    return {
+      privateIgnoreGlob: readIgnoreFileSafe(privateIgnore) || 'temp',
+      publicIgnoreGlob: readIgnoreFileSafe(publicIgnore) || '*__EOL__!shared',
+    };
+  }
+
+  /**
+   * @param {String} filePath
+   * @returns {String|null}
+   */
+  function readIgnoreFileSafe(filePath) {
+    try {
+      let content = fs.readFileSync(filePath).toString();
+
+      return content.split(os.EOL).filter(l => !!l.trim()).join('__EOL__');
+    } catch (e) {
+      return null;
+    }
   }
 
   /**

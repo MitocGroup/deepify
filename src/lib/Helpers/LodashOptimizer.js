@@ -144,7 +144,7 @@ export class LodashOptimizer {
           return;
         }
 
-        let deps = result.result
+        let deps = (result.result || '')
           .split('\n')
           .map((d) => (d || '').trim())
           .filter((d) => !!d);
