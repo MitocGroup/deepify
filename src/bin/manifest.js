@@ -29,6 +29,117 @@ module.exports = {
         },
       },
     },
+    'replicate': {
+      description: 'Manage blue green deployment process',
+      commandsPath: './commands/replicate',
+      section: 'Blue green deployment',
+      commands: {
+        stop: {
+          example: 'deepify replicate stop --tables',
+          args: {
+            path: {
+              description: 'The path app',
+              required: false,
+            },
+          },
+          opts: {
+            blue: {
+              alias: 'b',
+              description: 'Blue env hash',
+              required: true,
+            },
+            green: {
+              alias: 'g',
+              description: 'Green env hash',
+              required: true,
+            },
+            tables: {
+              alias: 't',
+              description: 'Tables to replicate',
+              required: true,
+            },
+            'private-ignore': {
+              description: 'Path to ignore file for private bucket replication',
+              required: false,
+            },
+            'public-ignore': {
+              description: 'Path to ignore file for public bucket replication',
+              required: false,
+            },
+          },
+        },
+        start: {
+          example: 'deepify replicate start --tables',
+          args: {
+            path: {
+              description: 'The path app',
+              required: false,
+            },
+          },
+          opts: {
+            blue: {
+              alias: 'b',
+              description: 'Blue env hash',
+              required: true,
+            },
+            green: {
+              alias: 'g',
+              description: 'Green env hash',
+              required: true,
+            },
+            tables: {
+              alias: 't',
+              description: 'Tables to replicate',
+              required: true,
+            },
+            'private-ignore': {
+              description: 'Path to ignore file for private bucket replication',
+              required: false,
+            },
+            'public-ignore': {
+              description: 'Path to ignore file for public bucket replication',
+              required: false,
+            },
+          },
+        },
+        prepare: {
+          example: 'deepify replicate prepare --blue blueHash --green greenHash --tables User,Comments,Threads',
+          description: 'Dump the "Hello World" sample web app',
+          section: 'Prepare your local environment',
+          opts: {
+            blue: {
+              alias: 'b',
+              description: 'Blue env hash',
+              required: true,
+            },
+            green: {
+              alias: 'g',
+              description: 'Green env hash',
+              required: true,
+            },
+            tables: {
+              alias: 't',
+              description: 'Tables to replicate',
+              required: true,
+            },
+            'private-ignore': {
+              description: 'Path to ignore file for private bucket replication',
+              required: false,
+            },
+            'public-ignore': {
+              description: 'Path to ignore file for public bucket replication',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path app',
+              required: false,
+            },
+          },
+        },
+      },
+    },
     'install': {
       example: 'deepify install github://MitocGroup/deep-microservices-todo-app',
       description: 'Install any DEEP microservice or microapplication from DEEP registry or GitHub repository',

@@ -7,7 +7,31 @@ __deepify_comp() {
 
     
           if [ "${COMP_WORDS[0]}" = "deepify" ]; then
-              if [ "${COMP_WORDS[1]}" = "registry" ]; then
+              if [ "${COMP_WORDS[1]}" = "replicate" ]; then
+        
+        if [ "${COMP_CWORD}" -eq "2" ]; then
+          WORDS=( "stop"  "start"  "prepare" )
+
+          if [ "${CUR_WORD}" = "replicate" ]; then
+            COMPREPLY=WORDS;
+
+            return 0;
+          fi;
+
+          for WORD in ${WORDS[@]}; do
+            if [[ ${WORD} == "${CUR_WORD}"* ]]; then
+              COMPREPLY+=(${WORD});
+            fi
+          done;
+        fi
+
+        if [ ${#COMPREPLY[@]} -eq 0 ] && [[ "${CUR_WORD}" != '-'* ]]; then
+          COMPREPLY=($(compgen -f ${CUR_WORD}))
+        fi
+
+        return 0;
+      fi
+          if [ "${COMP_WORDS[1]}" = "registry" ]; then
         
         if [ "${COMP_CWORD}" -eq "2" ]; then
           WORDS=( "publish"  "config" )
@@ -177,7 +201,7 @@ __deepify_comp() {
       fi
     
         if [ "${COMP_CWORD}" -eq "1" ]; then
-          WORDS=( "helloworld"  "install"  "server"  "deploy"  "undeploy"  "registry"  "compile"  "lambda"  "list"  "generate"  "ssl" )
+          WORDS=( "helloworld"  "replicate"  "install"  "server"  "deploy"  "undeploy"  "registry"  "compile"  "lambda"  "list"  "generate"  "ssl" )
 
           if [ "${CUR_WORD}" = "deepify" ]; then
             COMPREPLY=WORDS;
