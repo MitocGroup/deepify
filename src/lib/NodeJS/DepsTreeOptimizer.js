@@ -163,7 +163,13 @@ export class DepsTreeOptimizer {
     let packageObj = null;
 
     if (!this._packageCache.hasOwnProperty(depPackagePath)) {
-      packageObj = fse.readJsonSync(depPackagePath);
+      try {
+        packageObj = fse.readJsonSync(depPackagePath);
+      } catch (e) {
+        console.debug(`Retrying reading ${depPackagePath} due to error`, e);
+        packageObj = fse.readJsonSync(depPackagePath);
+      }
+      
       packageObj.requestedDependencies = Object.assign({}, packageObj.dependencies); // clone
 
       this._packageCache[depPackagePath] = packageObj;
