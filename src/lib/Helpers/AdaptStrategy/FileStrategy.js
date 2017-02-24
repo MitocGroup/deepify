@@ -62,6 +62,6 @@ export class FileStrategy extends AbstractStrategy {
    * @returns {Boolean}
    */
   static isLocalDependencyVersion(depVersion) {
-    return /^file:/.test(depVersion);
+    return /^(file:|\.)/.test(depVersion);
   }
 }
