@@ -20,7 +20,7 @@ suite('NodeJS/NpmListDependencies', () => {
   });
 
   test('Check list(0)', () => {
-    let actualResult = npmListDependencies.list(0);
+    let actualResult = npmListDependencies.list(0, false);
 
     chai.expect(actualResult).to.be.an.instanceOf(NpmDependency);
   });
@@ -31,7 +31,7 @@ suite('NodeJS/NpmListDependencies', () => {
     npmListDependencies = new NpmListDependencies('invalidPath');
 
     try {
-      npmListDependencies.list(0);
+      npmListDependencies.list(0, false);
     } catch (e) {
       error = e;
     }
