@@ -48,6 +48,8 @@ export class NpmListDependencies {
   /**
    * @param {*} deps
    * @param {String} problem
+   * @param {String[]} _nesting
+   * @param {*} _originalDeps
    *
    * @private
    */
@@ -130,7 +132,7 @@ export class NpmListDependencies {
   /**
    * @param {*} deps
    * @param {String} name
-   * @param {Stirng[]} filterPath
+   * @param {Stirng[]} _similarDeps
    *
    * @returns {Array}
    *
@@ -167,6 +169,7 @@ export class NpmListDependencies {
 
   /**
    * @param {Number|null} depth
+   * @param {Boolean} _tryFixMissing
    * 
    * @returns {NpmDependency}
    */
