@@ -72,6 +72,8 @@ module.exports = class ApplicationFormatter {
 
     switch (service) {
       case 'APIGateway':
+      case 'APIGatewayKey':
+      case 'APIGatewayPlan':
         resourceId = resourceData.name;
         break;
       case 'CloudFront':
@@ -273,6 +275,8 @@ module.exports = class ApplicationFormatter {
       case 'CloudFront':
         return `${resourceData.DomainName} | ${resourceData.Enabled ? 'Enabled' : 'Disabled'}`;
       case 'APIGateway':
+      case 'APIGatewayKey':
+      case 'APIGatewayPlan':
         return resourceData.name;
       case 'Lambda':
         return resourceData.FunctionName;
