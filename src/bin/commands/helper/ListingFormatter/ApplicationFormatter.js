@@ -224,6 +224,8 @@ module.exports = class ApplicationFormatter {
       case 'CloudWatchEvents':
       case 'Lambda':
       case 'APIGateway':
+      case 'APIGatewayKey':
+      case 'APIGatewayPlan':
         return ApplicationFormatter.BACKEND_TIER;
       case 'S3':
       case 'CloudFront':
@@ -247,6 +249,8 @@ module.exports = class ApplicationFormatter {
       'S3',
       'CloudFront',
       'APIGateway',
+      'APIGatewayKey',
+      'APIGatewayPlan',
       'Lambda',
       'CloudWatchEvents',
       'DynamoDB',
