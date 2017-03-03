@@ -168,17 +168,27 @@ module.exports = function(dependency, dumpPath) {
     });
   } else {
     createRegistry((registry) => {
-      console.debug('Installing web app dependencies');
+      console.debug('Ensure root microservice in place');
 
-      registry.install(createProperty(), (error) => {
+      let property = createProperty();
+
+      property.assureFrontendEngine((error) => {
         if (error) {
-          console.error(error);
-          this.exit(1);
+          console.error('Error while assuring frontend engine: ' + error);
         }
+        
+        console.debug('Installing web app dependencies');
 
-        console.info('Web app dependencies have been successfully installed');
+        registry.install(property, (error) => {
+          if (error) {
+            console.error(error);
+            this.exit(1);
+          }
 
-        initBackend();
+          console.info('Web app dependencies have been successfully installed');
+
+          initBackend();
+        });
       });
     });
   }
