@@ -119,7 +119,7 @@ export class NpmListDependencies {
       `${name}@${existingSimilarDeps[0]}`
     );
     
-    let linkCmd = new Exec('rm', name, '&& ln -s', depLinkPath, name);
+    let linkCmd = new Exec('rm', name, '|| ln -s', depLinkPath, name);
     linkCmd.cwd = Path.join(this._path, depBasePath);
     
     let result = linkCmd.runSync();
