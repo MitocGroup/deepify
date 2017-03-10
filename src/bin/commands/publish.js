@@ -105,7 +105,7 @@ module.exports = function(mainPath) {
       scriptPath,
       'replicate',
       cmdName,
-      `-tables="${tables.join(',')}"`,
+      `--tables="${tables.join(',')}"`,
       `--blue=${blueHash}`,
       `--green=${greenHash}`,
       mainPath
