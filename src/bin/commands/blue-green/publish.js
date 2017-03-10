@@ -11,8 +11,8 @@ module.exports = function(mainPath) {
   let URL = require('url');
   let Replication = require('deep-package-manager').Replication_Instance;
   let Property = require('deep-package-manager').Property_Instance;
-  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
-  let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  let Exec = require('../../../lib.compiled/Helpers/Exec').Exec;
+  let Bin = require('../../../lib.compiled/NodeJS/Bin').Bin;
 
   let scriptPath = this.scriptPath;
   let blueHash = this.opts.locate('blue').value;
@@ -53,8 +53,8 @@ module.exports = function(mainPath) {
 
     return (
       hasToReplicate
-        ? replicateData(tables)
-        : Promise.resolve()
+      ? replicateData(tables)
+      : Promise.resolve()
     ).then(() => replication.publish(
       greenHostName,
       guessAppDomain(),

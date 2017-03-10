@@ -624,7 +624,7 @@ module.exports = {
       },
     },
     'replicate': {
-      description: 'Manage blue green deployment process',
+      description: 'Blue Green replication management',
       commandsPath: './commands/replicate',
       section: 'Blue green deployment',
       commands: {
@@ -731,6 +731,52 @@ module.exports = {
               required: false,
             },
           },
+        },
+      },
+    },
+    publish: {
+      description: 'Blue Green traffic management',
+      section: 'Blue green deployment',
+      example: 'deepify blue-green publish',
+      args: {
+        path: {
+          description: 'The path app',
+          required: false,
+        },
+      },
+      opts: {
+        blue: {
+          alias: 'b',
+          description: 'Blue env hash',
+          required: true,
+        },
+        green: {
+          alias: 'g',
+          description: 'Green env hash',
+          required: true,
+        },
+        'green-hostname': {
+          alias: 'h',
+          description: 'Green Environemnt Hostname',
+          required: true,
+        },
+        'domain': {
+          alias: 'd',
+          description: 'Application domain. ',
+          required: false,
+        },
+        'blue-percentage': {
+          description: 'Percentage used to redirect users to blue environment',
+          required: false,
+        },
+        'green-percentage': {
+          alias: 'p',
+          description: 'Percentage used to redirect users to green environment',
+          required: false,
+        },
+        'replicate-data': {
+          alias: 'r',
+          description: 'Prepare and start replication streams for blue, green environments',
         },
       },
     },
