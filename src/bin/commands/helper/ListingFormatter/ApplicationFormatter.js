@@ -77,7 +77,7 @@ module.exports = class ApplicationFormatter {
         resourceId = resourceData.name;
         break;
       case 'CloudFront':
-        resourceId = resourceData.Comment;
+        resourceId = resourceData.DeepResourceId; // "DeepResourceId" is injected by CloudFront Listing Driver
         break;
       case 'IAM':
         resourceId = resourceData.RoleName;
