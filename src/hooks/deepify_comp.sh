@@ -201,7 +201,7 @@ __deepify_comp() {
       fi
     
         if [ "${COMP_CWORD}" -eq "1" ]; then
-          WORDS=( "helloworld"  "install"  "server"  "deploy"  "undeploy"  "registry"  "compile"  "lambda"  "list"  "generate"  "ssl"  "replicate" )
+          WORDS=( "helloworld"  "install"  "server"  "deploy"  "undeploy"  "registry"  "compile"  "lambda"  "list"  "generate"  "ssl"  "replicate"  "publish" )
 
           if [ "${CUR_WORD}" = "deepify" ]; then
             COMPREPLY=WORDS;
