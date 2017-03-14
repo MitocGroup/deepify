@@ -732,6 +732,47 @@ module.exports = {
             },
           },
         },
+        status: {
+          example: 'deepify replicate status --blue blueHash --green greenHash --tables User,Comments,Threads',
+          description: 'Dump the "Hello World" sample web app',
+          section: 'Prepare your local environment',
+          opts: {
+            raw: {
+              alias: 'r',
+              description: 'Return raw result',
+              required: false,
+            },
+            blue: {
+              alias: 'b',
+              description: 'Blue env hash',
+              required: true,
+            },
+            green: {
+              alias: 'g',
+              description: 'Green env hash',
+              required: true,
+            },
+            tables: {
+              alias: 't',
+              description: 'Tables to replicate',
+              required: true,
+            },
+            'private-ignore': {
+              description: 'Path to ignore file for private bucket replication',
+              required: false,
+            },
+            'public-ignore': {
+              description: 'Path to ignore file for public bucket replication',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path app',
+              required: false,
+            },
+          },
+        },
       },
     },
     publish: {

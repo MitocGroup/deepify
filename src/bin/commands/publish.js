@@ -87,19 +87,49 @@ module.exports = function(mainPath) {
   function waitForReplicationBackfill(tables) {
     console.debug('Waiting for resources backfill');
 
-    return new Promise(resolve => setTimeout(() => {
-      console.debug('Resource have been backfilled');
+    return execReplicateCommand('status', tables, ['--raw']).then(rawResult => {
+      let backfillStatus = JSON.parse(rawResult);
+      let resourceCount = 0;
+      let percentSum = 0;
 
-      resolve();
-    }, 10000, tables));
+      for (let service in backfillStatus) {
+        if (!backfillStatus.hasOwnProperty(service)) {
+          continue;
+        }
+
+        for (let resource in backfillStatus[service]) {
+          if (!backfillStatus[service].hasOwnProperty(resource)) {
+            continue;
+          }
+
+          resourceCount++;
+          percentSum += backfillStatus[service][resource];
+        }
+      }
+
+      let percent = percentSum / resourceCount;
+
+      if (percent < 1) {
+        console.debug(`${percent * 100}% resources have been backfilled`);
+
+        return new Promise((resolve, reject) => setTimeout(() => {
+          waitForReplicationBackfill(tables)
+            .then(resolve)
+            .catch(reject);
+        }, 10000));
+      } else {
+        return Promise.resolve();
+      }
+    });
   }
 
   /**
    * @param {String} cmdName
    * @param {String[]} tables
+   * @param {String[]} [extraArgs=[]]
    * @returns {Promise}
    */
-  function execReplicateCommand(cmdName, tables) {
+  function execReplicateCommand(cmdName, tables, extraArgs) {
     let exec = new Exec(
       Bin.node,
       scriptPath,
@@ -111,15 +141,17 @@ module.exports = function(mainPath) {
       mainPath
     );
 
+    (extraArgs || []).forEach(exec.addArg.bind(exec));
+
     console.debug(`Executing "deepify replicate ${cmdName}"`);
 
     return new Promise((resolve, reject) => {
-      exec.run(result => {
-        if (result.failed) {
+      exec.run(cmd => {
+        if (cmd.failed) {
           reject(new Error(`"deepify replicate "${cmdName}" failed.`));
         }
 
-        resolve(result);
+        resolve(cmd.result);
       }, true);
     });
   }
