@@ -34,6 +34,10 @@ module.exports = function(mainPath) {
   validateNodeVersion.call(this);
 
   let installFromCache = (lambdas, callback) => {
+    if (debugBuild) {
+      return callback();
+    }
+
     let doInstall = (lambdaIdx) => {
       let lambdaPath = lambdas.path[lambdaIdx];
       let lambdaTmpPath = lambdas.tmpPath[lambdaIdx];
@@ -115,17 +119,22 @@ module.exports = function(mainPath) {
       }
 
       try {
-        new Exec(
+        let exec = new Exec(
           'rsync',
           '-ar',
           '--update',
           '--delete',
           '--no-links',
-          '--exclude node_modules',
-          '--exclude deep_modules',
           path.join(lambdaPath, '/'),
           lambdaTmpPath
-        ).runSync();
+        );
+
+        if (!debugBuild) {
+          exec.addArg('--exclude node_modules')
+            .addArg('--exclude deep_modules');
+        }
+
+        exec.runSync();
       } catch (error) {
         console.error(error);
 
@@ -337,6 +346,10 @@ module.exports = function(mainPath) {
   };
 
   let cacheDeepDeps = (lambdaPath, callback) => {
+    if (debugBuild) {
+      return callback();
+    }
+
     deepDepsCache.cacheFrom(lambdaPath, 86400 * 3, callback); // cache deps for 3 days
   };
 
@@ -367,6 +380,7 @@ module.exports = function(mainPath) {
   let skipCache = this.opts.locate('skip-cache').exists;
   let invalidateCache = this.opts.locate('invalidate-cache').exists;
   let deepDepsCache = new DeepDepsCache(DeepDepsCache.DEFAULT_CACHE_DIRECTORY, {});
+  let debugBuild = this.opts.locate('debug-build').exists;
 
   mainPath = this.normalizeInputPath(mainPath);
   let property = Property.create(mainPath);
@@ -414,17 +428,22 @@ module.exports = function(mainPath) {
             '--loglevel silent',
             '--production',
             '--save'
-          )
+          ).dry(debugBuild)
       );
 
       chain.add(
         new NpmPrune(lambdas.tmpPath)
           .addExtraArg('--production')
+          .dry(debugBuild)
       );
 
+      let fakeOptimizer = (cb) => cb();
+
+      let depsOptimizer = debugBuild ? fakeOptimizer : optimizeDeps;
+
       chain.runChunk(() => {
-        optimize(() => {
-          optimizeDeps(() => {
+        optimize(() => { //use fake optimizer for framework as well?
+          depsOptimizer(() => {
             pack(() => {
               lambdas.tmpPath.forEach((lambdaTmpPath) => {
                 fse.removeSync(lambdaTmpPath);
@@ -461,6 +480,10 @@ module.exports = function(mainPath) {
 
       if (skipCache) {
         cmd.addArg('--skip-cache');
+      }
+
+      if (debugBuild) {
+        cmd.addArg('--debug-build');
       }
 
       cmd.addArg('--linear');
