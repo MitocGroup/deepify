@@ -42,7 +42,7 @@ module.exports = {
         partial: {
           alias: 'm',
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
-          required: false,
+          required: true,
         },
       },
       args: {},
