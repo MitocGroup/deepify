@@ -45,7 +45,9 @@ module.exports = function(commandParams) {
 
     return commandParams.afterLoad(replication, params, blueHash, greenHash);
   }).catch(e => {
-    console.error(e.toString(), e.stack);
+    setImmediate(() => {
+      throw e;
+    });
   });
 
   function loadPropertyConfig(property) {

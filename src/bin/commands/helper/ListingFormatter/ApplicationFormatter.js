@@ -72,10 +72,12 @@ module.exports = class ApplicationFormatter {
 
     switch (service) {
       case 'APIGateway':
+      case 'APIGatewayKey':
+      case 'APIGatewayPlan':
         resourceId = resourceData.name;
         break;
       case 'CloudFront':
-        resourceId = resourceData.Comment;
+        resourceId = resourceData.DeepResourceId; // "DeepResourceId" is injected by CloudFront Listing Driver
         break;
       case 'IAM':
         resourceId = resourceData.RoleName;
@@ -222,6 +224,8 @@ module.exports = class ApplicationFormatter {
       case 'CloudWatchEvents':
       case 'Lambda':
       case 'APIGateway':
+      case 'APIGatewayKey':
+      case 'APIGatewayPlan':
         return ApplicationFormatter.BACKEND_TIER;
       case 'S3':
       case 'CloudFront':
@@ -245,6 +249,8 @@ module.exports = class ApplicationFormatter {
       'S3',
       'CloudFront',
       'APIGateway',
+      'APIGatewayKey',
+      'APIGatewayPlan',
       'Lambda',
       'CloudWatchEvents',
       'DynamoDB',
@@ -273,6 +279,8 @@ module.exports = class ApplicationFormatter {
       case 'CloudFront':
         return `${resourceData.DomainName} | ${resourceData.Enabled ? 'Enabled' : 'Disabled'}`;
       case 'APIGateway':
+      case 'APIGatewayKey':
+      case 'APIGatewayPlan':
         return resourceData.name;
       case 'Lambda':
         return resourceData.FunctionName;

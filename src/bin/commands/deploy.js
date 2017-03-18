@@ -104,6 +104,8 @@ module.exports = function(mainPath) {
       return cb(null); // @todo: undeploy either the update?
     }
 
+    undeployRunning = true;
+
     hasDeployedResources(has => {
       if (!has) {
         return cb(null);
@@ -139,8 +141,6 @@ module.exports = function(mainPath) {
 
           cb(null);
         }, true);
-
-        undeployRunning = true;
       });
     });
   };

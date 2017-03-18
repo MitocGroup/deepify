@@ -1,7 +1,7 @@
 {
   "name": "deepify",
-  "version": "2.0.0",
-  "buildDate": "Fri Feb 24 12:04:24 EET 2017",
+  "version": "2.0.11",
+  "buildDate": "Wed Mar 15 16:25:07 EET 2017",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -55,7 +55,7 @@
     "prepublish": "bash node-bin/assure-deps.sh && bash node-bin/compile.sh && node hooks/dump_comp.js && bash node-bin/obfuscate-compiled.sh"
   },
   "dependencies": {
-    "aws-sdk": "^2.4.x",
+    "aws-sdk": "^2.22.x",
     "babel-cli": "^6.10.x",
     "babel-plugin-add-module-exports": "^0.2.x",
     "babel-plugin-transform-es2015-classes": "^6.9.x",
@@ -68,19 +68,20 @@
     "deep-fs": "^1.x.x",
     "deep-log": "^1.x.x",
     "deep-package-manager": "^1.x.x",
-    "dtrace-provider": "^0.6.x",
-    "fs-extra": "^0.30.x",
+    "dtrace-provider": "^0.8.x",
+    "fs-extra": "2.0.x",
     "gather-dependencies": "^1.0.x",
-    "inquirer": "^1.1.x",
-    "joi": "^8.4.x",
-    "jsonfile": "^1.2.x",
+    "inquirer": "^3.0.x",
+    "joi": "^10.2.x",
+    "jsonfile": "^2.4.x",
     "lockfile": "^1.0.x",
     "mime": "^1.3.x",
+    "multi-progress": "^2.0.0",
     "object-merge": "^2.5.x",
     "open": "^0.0.x",
     "semver": "^5.2.x",
     "tmp": "^0.0.x",
-    "twig": "^0.9.x",
+    "twig": "^1.10.x",
     "uglify-js": "^2.7.x"
   },
   "devDependencies": {

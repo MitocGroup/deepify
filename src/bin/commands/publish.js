@@ -1,112 +1,266 @@
-#!/usr/bin/env node
-
 /**
- * Created by AlexanderC on 6/21/16.
- *
- * DO NOT USE IT!
+ * Created by CCristi on 3/7/17.
  */
 
 'use strict';
 
-module.exports = function() {
-  let path = require('path');
-  let fse = require('fs-extra');
-  let fs = require('fs');
-  let inquirer = require('inquirer');
-  let Config = require('deep-package-manager').Replication_Config;
-  let EnvConfigLoader = require('deep-package-manager').Replication_EnvConfigLoader;
-  let FileWalker = require('deep-package-manager').Helpers_FileWalker;
+const DEFAULT_ENV = 'dev';
+const BLUE_GREEN_MICROSERVICE = 'deep-blue-green';
 
-  let domain = this.opts.locate('domain-name').value;
-  let blueEnv = this.opts.locate('blue-env').value;
-  let greenEnv = this.opts.locate('green-env').value;
+module.exports = function(mainPath) {
+  let URL = require('url');
+  let Replication = require('deep-package-manager').Replication_Instance;
+  let Property = require('deep-package-manager').Property_Instance;
+  let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
+  let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
 
-  blueEnv = blueEnv ? Config.parseEnvString(blueEnv) : null;
-  greenEnv = greenEnv ? Config.parseEnvString(greenEnv) : null;
+  let scriptPath = this.scriptPath;
+  let blueHash = this.opts.locate('blue').value;
+  let greenHash = this.opts.locate('green').value;
+  let domain = this.opts.locate('domain').value;
+  let greenHostName = normalizeHostname(this.opts.locate('green-hostname').value);
+  let bluePercentage = this.opts.locate('blue-percentage').value;
+  let greenPercentage = this.opts.locate('green-percentage').value;
+  let hasToReplicate = this.opts.locate('replicate-data').exists;
 
-  let configFile = path.join(process.cwd(), Config.DEFAULT_FILENAME);
-  let configFileExists = fs.existsSync(configFile);
+  mainPath = this.normalizeInputPath(mainPath);
+  let blueProperty = createProperty(blueHash);
+  let greenProperty = createProperty(greenHash);
+
+  Promise.all([
+    loadPropertyConfig(blueProperty),
+    loadPropertyConfig(greenProperty),
+  ]).then(result => {
+    let blueConfig = result[0];
+    let greenConfig = result[1];
+    let percentage = getPercentage();
+
+    // @todo: add a parameter for tables to replicate?
+    let tables = blueConfig.modelsSettings.reduce((tables, modelObj) => {
+      return tables.concat(Object.keys(modelObj));
+    }, []);
+
+    greenHostName = greenHostName || `https://${greenConfig.provisioning.cloudfront.domain}`;
+
+    if (!blueConfig.microservices.hasOwnProperty(BLUE_GREEN_MICROSERVICE)) {
+      throw new Error(
+        `Missing "${BLUE_GREEN_MICROSERVICE}" microservice. ` +
+        `Please make sure you have installed "${BLUE_GREEN_MICROSERVICE}" microservice in your application.`
+      );
+    }
+
+    let replication = new Replication(blueConfig, greenConfig);
+
+    return (
+      hasToReplicate
+        ? replicateData(tables)
+        : Promise.resolve()
+    ).then(() => replication.publish(
+      greenHostName,
+      guessAppDomain(),
+      percentage
+    ).then(() => {
+      console.info(
+        `Blue green traffic management has been enabled. ${blueConfig.provisioning.cloudfront.domain} ` +
+        `(${100 - percentage}%) AND ${greenConfig.provisioning.cloudfront.domain} (${percentage}%)`
+      );
+    }));
+  }).catch(e => {
+    console.error(e.toString(), e.stack);
+  });
 
   /**
-   * @returns {*}
+   * @param {String[]} tables
+   * @returns {Promise.<Promise>}
    */
-  function getProvisionDumpFiles() {
-    return (new FileWalker()).walk(
-      process.cwd(),
-        f => /^\.[a-z0-9]+\.[a-z]+\.provisioning\.json$/i.test(path.basename(f))
-    );
+  function replicateData(tables) {
+    return execReplicateCommand('prepare', tables)
+      .then(() => waitForReplicationBackfill(tables))
+      .then(() => execReplicateCommand('start', tables));
   }
 
   /**
-   * @param {Function} cb
-   * @returns {*}
+   * @todo: implement deepify replicate status
+   * @param tables
+   * @returns {Promise}
    */
-  function prepareEnvs(cb) {
-    if (blueEnv && greenEnv) {
-      return cb();
-    }
+  function waitForReplicationBackfill(tables) {
+    console.debug('Waiting for resources backfill');
 
-    let provisioningFiles = getProvisionDumpFiles().map(f => path.basename(f));
+    return execReplicateCommand('status', tables, ['--raw']).then(rawResult => {
+      let backfillStatus = JSON.parse(rawResult);
+      let resourceCount = 0;
+      let percentSum = 0;
 
-    if (provisioningFiles.length <= 0) {
-      return cb();
-    }
+      for (let service in backfillStatus) {
+        if (!backfillStatus.hasOwnProperty(service)) {
+          continue;
+        }
 
-    let questions = [];
+        for (let resource in backfillStatus[service]) {
+          if (!backfillStatus[service].hasOwnProperty(resource)) {
+            continue;
+          }
 
-    if (!blueEnv) {
-      questions.push({
-        type: 'list',
-        name: 'blue',
-        message: 'Select the config you\'d like to use for Blue environment: ',
-        choices: provisioningFiles,
-      });
-    }
-
-    if (!greenEnv) {
-      questions.push({
-        type: 'list',
-        name: 'green',
-        message: 'Select the config you\'d like to use for Green environment: ',
-        choices: provisioningFiles,
-      });
-    }
-
-    inquirer.prompt(questions).then(answers => {
-      if (answers.hasOwnProperty('blue')) {
-        blueEnv = Config.parseProvisionConfigFilename(answers.blue);
+          resourceCount++;
+          percentSum += backfillStatus[service][resource];
+        }
       }
 
-      if (answers.hasOwnProperty('green')) {
-        greenEnv = Config.parseProvisionConfigFilename(answers.green);
-      }
+      let percent = percentSum / resourceCount;
 
-      cb();
+      if (percent < 1) {
+        console.debug(`${percent * 100}% resources have been backfilled`);
+
+        return new Promise((resolve, reject) => setTimeout(() => {
+          waitForReplicationBackfill(tables)
+            .then(resolve)
+            .catch(reject);
+        }, 10000));
+      } else {
+        return Promise.resolve();
+      }
     });
   }
 
-  (configFileExists ? cb => cb() : prepareEnvs)(() => {
-    let defaultConfig = {
-      domain: domain,
-      environments: {
-        blue: blueEnv,
-        green: greenEnv,
-      },
-    };
+  /**
+   * @param {String} cmdName
+   * @param {String[]} tables
+   * @param {String[]} [extraArgs=[]]
+   * @returns {Promise}
+   */
+  function execReplicateCommand(cmdName, tables, extraArgs) {
+    let exec = new Exec(
+      Bin.node,
+      scriptPath,
+      'replicate',
+      cmdName,
+      `--tables="${tables.join(',')}"`,
+      `--blue=${blueHash}`,
+      `--green=${greenHash}`,
+      mainPath
+    );
 
-    if (!configFileExists) {
-      fse.outputJsonSync(configFile, Config.generate(defaultConfig), {spaces: 2});
+    (extraArgs || []).forEach(exec.addArg.bind(exec));
+
+    console.debug(`Executing "deepify replicate ${cmdName}"`);
+
+    return new Promise((resolve, reject) => {
+      exec.run(cmd => {
+        if (cmd.failed) {
+          reject(new Error(`"deepify replicate "${cmdName}" failed.`));
+        }
+
+        resolve(cmd.result);
+      }, true);
+    });
+  }
+
+  function loadPropertyConfig(property) {
+    return new Promise((resolve, reject) => {
+      property.configObj.tryLoadConfig(error => {
+        if (error) {
+          return reject(error);
+        }
+
+        resolve(property.config);
+      }, generatePrivateBucketName(property))
+    });
+  }
+
+  /**
+   * @param {Object} property
+   * @returns {string}
+   */
+  function generatePrivateBucketName(property) {
+    return `deep.${property.config.env}.private.${property.configObj.baseHash}`;
+  }
+
+  /**
+   * Dirty algorithm to extract app domain
+   * @returns {String}
+   */
+  function guessAppDomain() {
+    if (domain) {
+      return domain;
     }
 
-    let config = Config.createFromJsonFile(configFile);
+    let host = URL.parse(greenHostName).host;
+    let hostParts = host.split('.');
 
-    (new EnvConfigLoader(config, process.cwd())).load()
-      .catch(error => {
-        console.error(error, error.stack);
-        this.exit(1);
-      })
-      .then(envProvisioningConfig => {
-        console.log('envProvisioningConfig', envProvisioningConfig);//TODO:remove
-      });
-  });
+    return hostParts.length >= 3
+      ? hostParts.slice(1).join('.')
+      : host;
+  }
+
+  /**
+   * @returns {Number}
+   */
+  function getPercentage() {
+    let bPercentage = normalizePercentageNumber(bluePercentage);
+    let gPercentage = normalizePercentageNumber(greenPercentage);
+
+    if (bPercentage && gPercentage) {
+      if (bPercentage + gPercentage !== 100) {
+        throw new Error(`Invalid percentage sum: ${bPercentage} + ${gPercentage} != 100`);
+      }
+
+      return gPercentage;
+    } else if (gPercentage) {
+      return gPercentage;
+    } else if (bPercentage) {
+      return 100 - bPercentage;
+    }
+
+    throw new Error(`You must specify --blue-percentage, either --green-percentage`);
+  }
+
+  /**
+   * @param {String} rawNumber
+   * @returns {Number|null}
+   */
+  function normalizePercentageNumber(rawNumber) {
+    let number = null;
+
+    if (rawNumber) {
+      number = parseInt(rawNumber);
+
+      if (isNaN(number)) {
+        throw new Error(`Invalid percentage number: ${rawNumber}`);
+      }
+
+      if (number < 0 !== number > 100) {
+        throw new Error(`Out of range percentage number: ${rawNumber}`);
+      }
+    }
+
+    return number;
+  }
+
+  /**
+   * @param {String} hostname
+   * @param {String} [preferredProtocol='https'] preferredProtocol
+   * @returns {*}
+   */
+  function normalizeHostname(hostname, preferredProtocol) {
+    preferredProtocol = preferredProtocol || 'https';
+
+    return hostname && !/^\s*https?:\/\//.test(preferredProtocol)
+      ? `${preferredProtocol}://${hostname}`
+      : hostname;
+  }
+
+  /**
+   * @param {String} baseHash
+   * @returns {Object}
+   */
+  function createProperty(baseHash) {
+    let hashParts = baseHash.split(':');
+    let property = Property.create(mainPath);
+
+    property.configObj.baseHash = hashParts[0];
+    property.config.env = hashParts[1] || DEFAULT_ENV;
+
+    return property;
+  }
 };
