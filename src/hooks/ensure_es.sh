@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
 SCRIPT_PATH=$(cd $(dirname $0); pwd -P);
-ES_VERSION="2.3.5"; # If you change this, ensure to change 'src/lib/Elasticsearch/Server::DEFAULT_BINARY_PATH' also
+
+# If you change this, ensure to change 
+#   deepify: 'src/lib/Elasticsearch/Server::DEFAULT_BINARY_PATH'
+#   deep-framework: 'src/deep-search/lib/Client/Elasticsearch.js'
+#   deep-framework: 'src/deep-search/node-bin/cleanup.sh'
+ES_VERSION="2.3.5";
 ES_DIR=${SCRIPT_PATH}/../resources/elasticsearch-${ES_VERSION};
 ES_ZIP="${ES_DIR}/es.tar.gz"
 
