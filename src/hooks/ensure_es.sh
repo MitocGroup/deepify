@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 SCRIPT_PATH=$(cd $(dirname $0); pwd -P);
-ES_VERSION="2.1.2"; # If you change this, ensure to change 'src/lib/Elasticsearch/Server::DEFAULT_BINARY_PATH' also
+ES_VERSION="2.3.5"; # If you change this, ensure to change 'src/lib/Elasticsearch/Server::DEFAULT_BINARY_PATH' also
 ES_DIR=${SCRIPT_PATH}/../resources/elasticsearch-${ES_VERSION};
 ES_ZIP="${ES_DIR}/es.tar.gz"
 
