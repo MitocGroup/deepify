@@ -16,6 +16,7 @@ module.exports = function(mainPath) {
   let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
   let Prompt = require('../../lib.compiled/Terminal/Prompt').Prompt;
+  let LambdasExtractor = require('../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   let Property = require('deep-package-manager').Property_Instance;
   let SharedAwsConfig = require('deep-package-manager').Helpers_SharedAwsConfig;
   let Config = require('deep-package-manager').Property_Config;
@@ -25,6 +26,7 @@ module.exports = function(mainPath) {
   let DeployConfig = require('deep-package-manager').Property_DeployConfig;
   let Listing = require('deep-package-manager').Provisioning_Listing;
 
+  let resourcesToUpdate = this.opts.locate('action').value;
   let isProd = this.opts.locate('prod').exists;
   let localOnly = this.opts.locate('dry-run').exists;
   let invalidateCache = this.opts.locate('invalidate-cache').exists;
@@ -34,6 +36,7 @@ module.exports = function(mainPath) {
   let microservicesToDeploy = this.opts.locate('partial').value;
   let frontendOnly = this.opts.locate('frontend').exists ? Property.DEPLOY_FRONTEND : 0;
   let backendOnly = this.opts.locate('backend').exists ? Property.DEPLOY_BACKEND : 0;
+  let debugBuild = this.opts.locate('debug-build').exists;
   let validateNodeVersion = require('./helper/validate-node-version');
   let undeployRunning = false;
 
@@ -273,6 +276,16 @@ module.exports = function(mainPath) {
     return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
   };
 
+  let getResourcesToUpdate = () => {
+    if (!resourcesToUpdate) {
+      return null;
+    }
+
+    let msIdentifiers = arrayUnique(resourcesToUpdate.split(',').map(id => id.trim()));
+
+    return typeof msIdentifiers === 'string' ? [msIdentifiers] : msIdentifiers;
+  };
+
   let doDeploy = () => {
     propertyInstance.localDeploy = localOnly;
 
@@ -365,8 +378,14 @@ module.exports = function(mainPath) {
       propertyPath
     );
 
+    let resourcesToCompile = microservicesToDeploy || resourcesToUpdate;
+
     invalidateCache && cmd.addArg('--invalidate-cache');
-    microservicesToDeploy && cmd.addArg('--partial ' + microservicesToDeploy);
+    resourcesToCompile && cmd.addArg(`--partial="${resourcesToCompile}"`);
+
+    if (debugBuild) {
+      cmd.addArg('--debug-build');
+    }
 
     cmd.run((result) => {
       if (result.failed) {
@@ -433,6 +452,70 @@ module.exports = function(mainPath) {
       }
     }
   };
+
+  let askForProductionPrepare = (cb) => {
+    if (debugBuild) {
+      // if --debug-build is present,
+      // run 'compile prod' with --debug-build flag, without asking
+      return cb(true);
+    }
+
+    let prompt = new Prompt(`Prepare for production "${resourcesToUpdate}"?`);
+
+    prompt.readConfirm(cb);
+  };
+
+  let updateResources = (resourcesIdentifiers) => {
+    propertyInstance.configObj.tryLoadConfig(() => {
+      if (!propertyInstance.configObj.configExists) {
+        throw new Error('Action deploy is available only on application update');
+      }
+
+      let prepareResources = (path, cb) => {
+        console.debug(`Skipping "${resourcesToUpdate}" production preparation...`);
+
+        cb();
+      };
+
+      askForProductionPrepare((result) => {
+        if (result) {
+          prepareResources = doCompileProd.bind(this);
+        }
+
+        prepareResources(propertyInstance.path, () => {
+          Promise.all(
+            resourcesIdentifiers.map(resource => {
+              return new Promise((resolve, reject) => {
+                try {
+                  propertyInstance.deployAction('@' + resource, () => {
+                    console.info(`"${resource}" has been updated.`);
+                    resolve();
+                  });
+                } catch(e) {
+                  reject(e);
+                }
+              });
+            })
+          ).then(() => {
+            console.info('All resources have been updated.');
+          }).catch(e => {
+            setImmediate(() => {
+              throw e;
+            });
+          });
+        });
+      });
+    });
+  };
+
+  if (resourcesToUpdate) {
+    let resourcesIdentifiers = Object.keys(
+      new LambdasExtractor(propertyInstance, getResourcesToUpdate())
+        .extract(LambdasExtractor.NPM_PACKAGE_FILTER, LambdasExtractor.EXTRACT_OBJECT)
+    );
+
+    return updateResources(resourcesIdentifiers);
+  }
 
   process.on('exit', () => {
     new Exec('rm', '-rf', path.join(propertyInstance.path, '_public'))

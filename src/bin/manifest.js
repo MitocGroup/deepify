@@ -29,24 +29,6 @@ module.exports = {
         },
       },
     },
-    'update': {
-      example: 'deepify update path/to/web_app -m deep-todomvc:task:create',
-      description: 'Update resource',
-      section: 'Run in the cloud',
-      opts: {
-        'debug-build': {
-          alias: 'd',
-          required: false,
-          description: 'Skip installing/optimizing node_modules and keep existing ones in lambda directory',
-        },
-        partial: {
-          alias: 'm',
-          description: 'Partial deploy (one or several comma separated microservices identifiers)',
-          required: true,
-        },
-      },
-      args: {},
-    },
     'install': {
       example: 'deepify install github://MitocGroup/deep-microservices-todo-app',
       description: 'Install any DEEP microservice or microapplication from DEEP registry or GitHub repository',
@@ -155,6 +137,11 @@ module.exports = {
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
           required: false,
         },
+        action: {
+          alias: 'a',
+          description: 'Update one or more backend action. Works only on application update',
+          required: false,
+        },
         'invalidate-cache': {
           description: 'Invalidate deep dependencies cache',
           required: false,
@@ -167,6 +154,10 @@ module.exports = {
           description: 'Deploy only backend resource',
           required: false,
         },
+        'debug-build': {
+          description: 'Use existing node_modules in lambdas, instead of (re)installing them',
+          required: false,
+        }
       },
       args: {
         path: {
