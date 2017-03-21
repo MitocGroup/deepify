@@ -358,7 +358,7 @@ module.exports = function(mainPath) {
         }
 
         propertyInstance.install(() => {
-          console.info(`CloudFront (CDN) domain: ${getfDomain(propertyInstance)}`);
+          console.info(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
           console.info(`Website address: ${getPublicWebsite(propertyInstance)}`);
 
           dumpConfig(propertyInstance, dumpCode);
