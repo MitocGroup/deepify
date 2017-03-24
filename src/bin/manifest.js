@@ -791,7 +791,7 @@ module.exports = {
     publish: {
       description: 'Blue Green traffic management',
       section: 'Start managing blue green enironments traffic',
-      example: 'deepify blue-green publish --blue blueHash --green greenHash --ration 3:1 --replicate-data',
+      example: 'deepify blue-green publish --blue blueHash --green greenHash --ratio 3:1 --replicate-data',
       args: {
         path: {
           description: 'The path app',
