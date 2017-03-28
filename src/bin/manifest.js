@@ -29,24 +29,6 @@ module.exports = {
         },
       },
     },
-    'update': {
-      example: 'deepify update path/to/web_app -m deep-todomvc:task:create',
-      description: 'Update resource',
-      section: 'Run in the cloud',
-      opts: {
-        'debug-build': {
-          alias: 'd',
-          required: false,
-          description: 'Skip installing/optimizing node_modules and keep existing ones in lambda directory',
-        },
-        partial: {
-          alias: 'm',
-          description: 'Partial deploy (one or several comma separated microservices identifiers)',
-          required: true,
-        },
-      },
-      args: {},
-    },
     'install': {
       example: 'deepify install github://MitocGroup/deep-microservices-todo-app',
       description: 'Install any DEEP microservice or microapplication from DEEP registry or GitHub repository',
@@ -155,6 +137,11 @@ module.exports = {
           description: 'Partial deploy (one or several comma separated microservices identifiers)',
           required: false,
         },
+        action: {
+          alias: 'a',
+          description: 'Update one or more backend action. Works only on application update',
+          required: false,
+        },
         'invalidate-cache': {
           description: 'Invalidate deep dependencies cache',
           required: false,
@@ -167,6 +154,10 @@ module.exports = {
           description: 'Deploy only backend resource',
           required: false,
         },
+        'debug-build': {
+          description: 'Use existing node_modules in lambdas, instead of (re)installing them',
+          required: false,
+        }
       },
       args: {
         path: {
@@ -720,7 +711,7 @@ module.exports = {
         },
         prepare: {
           example: 'deepify replicate prepare --blue blueHash --green greenHash --tables User,Comments,Threads',
-          description: 'Dump the "Hello World" sample web app',
+          description: 'Prepare application resources for blue green deployment',
           section: 'Prepare your local environment',
           opts: {
             blue: {
@@ -756,7 +747,7 @@ module.exports = {
         },
         status: {
           example: 'deepify replicate status --blue blueHash --green greenHash --tables User,Comments,Threads',
-          description: 'Dump the "Hello World" sample web app',
+          description: 'Check application resources for blue green deployment',
           section: 'Prepare your local environment',
           opts: {
             raw: {
@@ -799,8 +790,8 @@ module.exports = {
     },
     publish: {
       description: 'Blue Green traffic management',
-      section: 'Blue green deployment',
-      example: 'deepify blue-green publish',
+      section: 'Start managing blue green enironments traffic',
+      example: 'deepify blue-green publish --blue blueHash --green greenHash --ratio 3:1 --replicate-data',
       args: {
         path: {
           description: 'The path app',
@@ -818,24 +809,8 @@ module.exports = {
           description: 'Green env hash',
           required: true,
         },
-        'green-hostname': {
-          alias: 'h',
-          description: 'Green Environemnt Hostname',
-          required: true,
-        },
-        'domain': {
-          alias: 'd',
-          description: 'Application domain. ',
-          required: false,
-        },
-        'blue-percentage': {
-          description: 'Percentage used to redirect users to blue environment',
-          required: false,
-        },
-        'green-percentage': {
-          alias: 'p',
-          description: 'Percentage used to redirect users to green environment',
-          required: false,
+        'ration': {
+          description: 'Blue Green traffic ration. Ex 20%: --ration="4:1"'
         },
         'replicate-data': {
           alias: 'r',

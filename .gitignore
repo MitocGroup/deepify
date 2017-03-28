@@ -111,4 +111,4 @@ npm-debug.log
 lib.compiled
 /tests/*
 config.gypi
-**/test/bin/**/*.js
+**/bin/test/**/*.js

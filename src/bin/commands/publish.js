@@ -17,10 +17,7 @@ module.exports = function(mainPath) {
   let scriptPath = this.scriptPath;
   let blueHash = this.opts.locate('blue').value;
   let greenHash = this.opts.locate('green').value;
-  let domain = this.opts.locate('domain').value;
-  let greenHostName = normalizeHostname(this.opts.locate('green-hostname').value);
-  let bluePercentage = this.opts.locate('blue-percentage').value;
-  let greenPercentage = this.opts.locate('green-percentage').value;
+  let trafficRatio = this.opts.locate('ration').value;
   let hasToReplicate = this.opts.locate('replicate-data').exists;
 
   mainPath = this.normalizeInputPath(mainPath);
@@ -40,7 +37,6 @@ module.exports = function(mainPath) {
       return tables.concat(Object.keys(modelObj));
     }, []);
 
-    greenHostName = greenHostName || `https://${greenConfig.provisioning.cloudfront.domain}`;
 
     if (!blueConfig.microservices.hasOwnProperty(BLUE_GREEN_MICROSERVICE)) {
       throw new Error(
@@ -51,20 +47,16 @@ module.exports = function(mainPath) {
 
     let replication = new Replication(blueConfig, greenConfig);
 
-    return (
-      hasToReplicate
-        ? replicateData(tables)
-        : Promise.resolve()
-    ).then(() => replication.publish(
-      greenHostName,
-      guessAppDomain(),
-      percentage
-    ).then(() => {
+    return (hasToReplicate
+      ? replicateData(tables)
+      : Promise.resolve())
+      .then(() => replication.publish(percentage))
+      .then(() => {
       console.info(
         `Blue green traffic management has been enabled. ${blueConfig.provisioning.cloudfront.domain} ` +
         `(${100 - percentage}%) AND ${greenConfig.provisioning.cloudfront.domain} (${percentage}%)`
       );
-    }));
+    });
   }).catch(e => {
     console.error(e.toString(), e.stack);
   });
@@ -177,77 +169,25 @@ module.exports = function(mainPath) {
   }
 
   /**
-   * Dirty algorithm to extract app domain
-   * @returns {String}
-   */
-  function guessAppDomain() {
-    if (domain) {
-      return domain;
-    }
-
-    let host = URL.parse(greenHostName).host;
-    let hostParts = host.split('.');
-
-    return hostParts.length >= 3
-      ? hostParts.slice(1).join('.')
-      : host;
-  }
-
-  /**
    * @returns {Number}
    */
   function getPercentage() {
-    let bPercentage = normalizePercentageNumber(bluePercentage);
-    let gPercentage = normalizePercentageNumber(greenPercentage);
+    let rationMatches = trafficRatio.match(/^\s*(\d+)[:\/\|](\d+)\s*$/);
 
-    if (bPercentage && gPercentage) {
-      if (bPercentage + gPercentage !== 100) {
-        throw new Error(`Invalid percentage sum: ${bPercentage} + ${gPercentage} != 100`);
-      }
-
-      return gPercentage;
-    } else if (gPercentage) {
-      return gPercentage;
-    } else if (bPercentage) {
-      return 100 - bPercentage;
+    if (!rationMatches) {
+      throw new Error(`Invalid --ration ${trafficRatio} option. Expected --ration [blue-number]:[green-number] format`);
     }
 
-    throw new Error(`You must specify --blue-percentage, either --green-percentage`);
-  }
+    let blueRation = parseInt(rationMatches[1]);
+    let greenRation = parseInt(rationMatches[2]);
 
-  /**
-   * @param {String} rawNumber
-   * @returns {Number|null}
-   */
-  function normalizePercentageNumber(rawNumber) {
-    let number = null;
+    let sum = blueRation + greenRation;
 
-    if (rawNumber) {
-      number = parseInt(rawNumber);
-
-      if (isNaN(number)) {
-        throw new Error(`Invalid percentage number: ${rawNumber}`);
-      }
-
-      if (number < 0 !== number > 100) {
-        throw new Error(`Out of range percentage number: ${rawNumber}`);
-      }
+    if (sum === 0) {
+      throw new Error('Blue ration plus Green ration must be greater than 0');
     }
 
-    return number;
-  }
-
-  /**
-   * @param {String} hostname
-   * @param {String} [preferredProtocol='https'] preferredProtocol
-   * @returns {*}
-   */
-  function normalizeHostname(hostname, preferredProtocol) {
-    preferredProtocol = preferredProtocol || 'https';
-
-    return hostname && !/^\s*https?:\/\//.test(preferredProtocol)
-      ? `${preferredProtocol}://${hostname}`
-      : hostname;
+    return greenRation / sum * 100;
   }
 
   /**

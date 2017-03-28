@@ -32,7 +32,7 @@ module.exports = function(mainPath) {
                 continue;
               }
 
-              let resourcePercentage = 0.5 || status[service][resource];
+              let resourcePercentage = status[service][resource];
 
               if (resourcePercentage < 1) {
                 isReady = false;
