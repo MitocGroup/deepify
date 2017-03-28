@@ -471,7 +471,7 @@ module.exports = function(mainPath) {
         throw new Error('Action deploy is available only on application update');
       }
 
-      let prepareResources = (__, cb) => {
+      let prepareResources = (path, cb) => {
         console.debug(`Skipping "${resourcesToUpdate}" production preparation...`);
 
         cb();
