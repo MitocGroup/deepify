@@ -17,8 +17,9 @@ module.exports = function(mainPath) {
   let scriptPath = this.scriptPath;
   let blueHash = this.opts.locate('blue').value;
   let greenHash = this.opts.locate('green').value;
-  let trafficRatio = this.opts.locate('ration').value;
-  let hasToReplicate = this.opts.locate('replicate-data').exists;
+  let trafficRatio = this.opts.locate('ratio').value;
+  let hasToReplicate = this.opts.locate('data-replicate').exists;
+  let skipRoute53 = this.opts.locate('skip-route53').exists;
 
   mainPath = this.normalizeInputPath(mainPath);
   let blueProperty = createProperty(blueHash);
@@ -47,10 +48,8 @@ module.exports = function(mainPath) {
 
     let replication = new Replication(blueConfig, greenConfig);
 
-    return (hasToReplicate
-      ? replicateData(tables)
-      : Promise.resolve())
-      .then(() => replication.publish(percentage))
+    return (hasToReplicate ? replicateData(tables) : Promise.resolve())
+      .then(() => replication.publish(percentage, skipRoute53))
       .then(() => {
       console.info(
         `Blue green traffic management has been enabled. ${blueConfig.provisioning.cloudfront.domain} ` +
