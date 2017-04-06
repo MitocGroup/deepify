@@ -639,7 +639,7 @@ module.exports = {
     'replicate': {
       description: 'Blue Green replication management',
       commandsPath: './commands/replicate',
-      section: 'Blue green deployment',
+      section: 'Blue green deployments',
       commands: {
         stop: {
           example: 'deepify replicate stop --tables',
@@ -790,7 +790,7 @@ module.exports = {
     },
     publish: {
       description: 'Blue Green traffic management',
-      section: 'Start managing blue green enironments traffic',
+      section: 'Blue green deployments',
       example: 'deepify blue-green publish --blue blueHash --green greenHash --ratio 3:1 --replicate-data',
       args: {
         path: {
@@ -809,13 +809,20 @@ module.exports = {
           description: 'Green env hash',
           required: true,
         },
-        'ration': {
-          description: 'Blue Green traffic ration. Ex 20%: --ration="4:1"'
-        },
-        'replicate-data': {
+        'ratio': {
           alias: 'r',
-          description: 'Prepare and start replication streams for blue, green environments',
+          description: 'Blue Green traffic ration. Ex 20%: --ratio="4:1"',
+          required: false,
         },
+        'data-replicate': {
+          alias: 'd',
+          description: 'Prepare and start replication streams for blue, green environments',
+          required: false,
+        },
+        'skip-route53': {
+          description: 'Skip checking for route53 environments record',
+          required: false,
+        }
       },
     },
   },
