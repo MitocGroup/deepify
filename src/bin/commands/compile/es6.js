@@ -12,16 +12,16 @@ module.exports = function(mainPath) {
   mainPath = this.normalizeInputPath(mainPath);
   let extension = this.opts.locate('extension').value || '.es6';
   let outDirectory = this.opts.locate('out-dir').value || mainPath;
-  let compileEs5 = this.opts.locate('es5').exists;
+  let compileBrowser = this.opts.locate('browser').exists || this.opts.locate('es5').exists;
   let pipeSource = this.opts.locate('source').exists;
   let nodeModules = path.join(__dirname, '../../../node_modules');
 
   let babelCompileCommand = () => {
     let babelCmd = path.join(nodeModules, 'babel-cli/bin/babel.js');
-    let presets = [path.join(nodeModules, `babel-preset-es2015${ compileEs5 ? '' : '-node4' }`)];
-    let plugins = [
-      path.join(nodeModules, 'babel-plugin-transform-es2015-classes'),
-      path.join(nodeModules, 'babel-plugin-add-module-exports'),
+    let presets = [
+      compileBrowser 
+        ? path.join(nodeModules, 'babel-preset-modern-browsers')
+        : path.join(nodeModules, 'babel-preset-node6'),
     ];
 
     let compileCmd = new Exec(
@@ -32,8 +32,7 @@ module.exports = function(mainPath) {
 
     compileCmd
       .addArg(`--extensions=${extension}`)
-      .addArg(`--presets=${presets.join(',')}`)
-      .addArg(`--plugins=${plugins.join(',')}`);
+      .addArg(`--presets=${presets.join(',')}`);
 
     if (!pipeSource) {
       compileCmd.addArg(`--out-dir=${outDirectory}`);
