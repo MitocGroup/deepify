@@ -11,7 +11,7 @@ const tmp = require('tmp');
 const path = require('path');
 const webpackConfig = require('./webpack.prod');
 const fse = require('fs-extra');
-const Core = require('deep-core');
+const pify = require('pify');
 
 module.exports = function (lambdaPath, debug) {
   const dry = debug ? '[DRY] ' : '';
@@ -22,6 +22,7 @@ module.exports = function (lambdaPath, debug) {
   return helpers.npmInstall(lambdaPath, debug) 
     .then(() => {
       console.debug(`${dry}Running "npm prune" on "${lambdaPath}"`);
+      
       return helpers.npmPrune(lambdaPath, debug);
     })
     .then(() => {
@@ -31,21 +32,30 @@ module.exports = function (lambdaPath, debug) {
       );
       const configFile = path.join(buildPath, 'webpack.prod.js');
       const bundlePath = path.join(buildPath, 'bundle');
+
+      console.debug(`Ensure working env in "${buildPath}"`);
       
-      const schemasPath = path.join(lambdaPath, Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR);
-      
-      if (fs.existsSync(schemasPath)) {
-        // @todo move folder to bundlePath...
-      } else {
-        console.debug('No validation schemas found. Skipping...');
-      }
-      
-      console.debug(`Bundle "${lambdaPath}" using Webpack to "${bundlePath}"`);
-      
-      fse.ensureDirSync(bundlePath);
-      fse.outputFileSync(configFile, webpackConfig(lambdaPath, bundlePath, debug));
-      
-      return helpers.bundle(configFile, debug)
+      return pify(fse.ensureDir)(bundlePath)
+        .then(() => {
+          return webpackConfig(lambdaPath, bundlePath, debug)
+            .then(webpackConfig => {
+              const { rawConfig, tmpBootstrapJs } = webpackConfig;
+              
+              return pify(fse.outputFile)(configFile, rawConfig)
+                .then(() => Promise.resolve(tmpBootstrapJs));
+            });
+        })
+        .then(tmpBootstrapJs => {
+          console.debug(`Bundle "${lambdaPath}" using Webpack to "${bundlePath}"`);
+          
+          return helpers.bundle(configFile, debug)
+            .then(() => {
+              console.debug(`Removing temporary bootstrap file "${tmpBootstrapJs}"`);
+              
+              return pify(fse.remove)(tmpBootstrapJs)
+                .catch(() => Promise.resolve());
+            });
+        })
         .then(() => Promise.resolve({ bundlePath, buildPath }));
     })
     .then(result => {
@@ -56,14 +66,11 @@ module.exports = function (lambdaPath, debug) {
         `${path.basename(lambdaPath)}.zip`
       );
       
-      // Remove old build if exists
-      try {
-        fse.removeSync(bundleDestination);
-      } catch (error) { }
-      
       console.debug(`Archive "${lambdaPath}" build to "${bundleDestination}"`);
       
-      return helpers.zip(bundlePath, bundleDestination)
+      return pify(fse.remove)(bundleDestination)
+        .catch(() => Promise.resolve())
+        .then(() => helpers.zip(bundlePath, bundleDestination))
         .then(() => Promise.resolve(buildPath));
     })
     .then(buildPath => {

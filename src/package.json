@@ -79,7 +79,8 @@
     "semver": "^5.2.x",
     "tmp": "^0.0.x",
     "twig": "^1.10.x",
-    "webpack-merge": "^4.1.x"
+    "webpack-merge": "^4.1.x",
+    "pify": "^2.3.x"
   },
   "devDependencies": {
     "chai": "^3.5.x",

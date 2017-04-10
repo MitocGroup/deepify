@@ -8,6 +8,8 @@ const fse = require('fs-extra');
 const fs = require('fs');
 const webpackMerge = require('webpack-merge');
 const Bin = require('../../../../lib.compiled/NodeJS/Bin').Bin;
+const Core = require('deep-core');
+const pify = require('pify');
 
 // @todo Resolve webpack dynamically (maybe link it?)
 const WEBPACK_LIB = path.join(
@@ -33,36 +35,64 @@ new webpack.optimize.OccurrenceOrderPlugin(),
 }
 
 module.exports = function (lambdaPath, outputPath, debug) {
+  const schemasPath = path.join(lambdaPath, Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR);
   const customWebpackConfigPath = path.join(lambdaPath, 'deep.webpack.json');
-  const defaultConfig = {
-    entry: path.join(lambdaPath, ENTRY_POINT),
-    output: {
-      path: outputPath,
-      filename: ENTRY_POINT,
-      libraryTarget: 'commonjs2', // @see https://github.com/webpack/webpack/issues/1114
-    },
-    resolve: {
-      modules: [ lambdaPath, 'node_modules' ],
-      extensions: [ '.js', '.json' ],
-      alias: {},
-    },
-    target: 'node',
-    externals: [ 'aws-sdk' ],
-    devtool: false,
-    stats: 'errors-only',
-  };
+  const tmpBootstrapJs = path.join(lambdaPath, `deep-tmp-${Date.now()}-${ENTRY_POINT}`);
+  let preparePromise = Promise.resolve();
   
-  try {
-    return plainify(webpackMerge.smart(
-      defaultConfig, 
-      fse.readJsonSync(
-        customWebpackConfigPath, 
-        { throws: false }
-      ) || {}
-    ), debug);
-  } catch (error) {
-    console.debug(`Missing or broken custom Webpack config ${customWebpackConfigPath}. Using default one...`);
+  if (fs.existsSync(schemasPath)) {
+    preparePromise = pify(fse.copy)(
+        path.join(lambdaPath, ENTRY_POINT),
+        tmpBootstrapJs
+      )
+      .then(() => pify(fs.readdir)(schemasPath))
+      .then(files => {
+        const schemaImports = files
+          .filter(file => /\.js(on)?$/i)
+          .map(file => {
+            return `require('./${Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR}/${file}');`;
+          })
+          .join('\n');
+          
+        return pify(fs.appendFile)(tmpBootstrapJs, schemaImports);
+      });
   }
   
-  return plainify(defaultConfig, debug);
+  return preparePromise.then(() => {
+    const defaultConfig = {
+      entry: tmpBootstrapJs,
+      output: {
+        path: outputPath,
+        filename: ENTRY_POINT,
+        libraryTarget: 'commonjs2', // @see https://github.com/webpack/webpack/issues/1114
+      },
+      resolve: {
+        modules: [ lambdaPath, 'node_modules' ],
+        extensions: [ '.js', '.json' ],
+        alias: {},
+      },
+      target: 'node',
+      externals: [ 'aws-sdk' ],
+      devtool: false,
+      stats: 'errors-only',
+    };
+    
+    try {
+      const rawConfig = plainify(webpackMerge.smart(
+        defaultConfig, 
+        fse.readJsonSync(
+          customWebpackConfigPath, 
+          { throws: false }
+        ) || {}
+      ), debug);
+      
+      return Promise.resolve({ rawConfig, tmpBootstrapJs });
+    } catch (error) {
+      console.debug(`Missing or broken custom Webpack config ${customWebpackConfigPath}. Using default one...`);
+    }
+    
+    const rawConfig = plainify(defaultConfig, debug);
+    
+    return Promise.resolve({ rawConfig, tmpBootstrapJs });
+  });
 };
