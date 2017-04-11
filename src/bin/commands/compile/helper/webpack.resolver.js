@@ -1,0 +1,140 @@
+/**
+ * Created by AlexanderC on 8/4/15.
+ */
+
+'use strict';
+
+function DeepResolver(options) {
+  this.options = Object.assign({
+    dependencyContainer: '__deep_dyn_modules__',
+  }, options);
+  
+  this._idx = 0;
+  this._depContainer = {};
+}
+
+DeepResolver.prototype.addDep = function(depValue, originalRange) {
+  const id = `__deep_dep${this._idx++}__`;
+  const value = this.inlineRequire(depValue);
+  
+  this._depContainer[id] = value;
+  
+  return { id, value };
+};
+
+DeepResolver.prototype.hasDep = function(depId) {
+  return this._depContainer.hasOwnProperty(depId);
+};
+
+DeepResolver.prototype.getDep = function(depId) {
+  return this._depContainer[depId];
+};
+
+DeepResolver.prototype.inlineRequire = function(dep) {
+  const containerId = this.options.dependencyContainer;
+  
+  return [
+    `(function() {`,
+    ` const dep = ${dep};`, 
+    ` const container = global.${containerId} || {};`,
+    ` if (container.hasOwnProperty(dep)) {`,
+    `   return container[dep];`,
+    ` }`,
+    ` return global.require(dep);`,
+    `})()`,
+  ].join('\n');
+};
+
+DeepResolver.prototype.extend = function(config) {    
+  const plugin = this;
+  
+  config.externals = (config.externals || []).concat([
+    function(context, request, callback) { 
+      
+      // @todo extend external deps if needed     
+      callback();
+    }
+  ]);
+  
+  return config;
+};
+
+DeepResolver.prototype.rawRequire = function(dep, value = false) {
+  const content = dep.module.issuer._source._value;
+  const range = value ? dep.valueRange : dep.range;
+  
+  return content.substring(...range);
+}
+
+DeepResolver.prototype.hookRequire = function(dep) {
+  const depValue = this.rawRequire(dep, true);
+  const deepDep = this.addDep(depValue, dep.valueRange);
+  const { id, value } = deepDep;
+  
+  dep.rawRequest = id;
+  dep.request = id;
+  dep.userRequest = id;
+  dep.recursive = false;
+  delete dep.critical;
+  
+  console.log(`[DEEP-RSLVR] Swapping ${id} with ${depValue}`);
+}
+
+DeepResolver.prototype.DEPS_TO_HOOK = [
+  /node_modules\/deep-framework\/lib\.compiled\/Framework.js$/i
+];
+
+DeepResolver.prototype.apply = function(compiler) {
+  const plugin = this;
+  
+  compiler.plugin('compilation', function(compilation, params) {
+    compilation.plugin('seal', function() {
+      for (let templateKey of compilation.dependencyTemplates.keys()) {
+        if (templateKey.name === 'CommonJsRequireContextDependency') {
+          console.log(`\n[DEEP-RSLVR] Extending "${templateKey.name}" template`);
+          
+          const template = compilation.dependencyTemplates.get(templateKey);
+          
+          class DeepRequireTemplate extends template.constructor {
+            apply(dep, source, outputOptions, requestShortener) {
+              const containsDeps = dep.module && dep.module.dependencies && dep.module.dependencies.length > 0;
+		          const isAsync = dep.module && dep.module.async;
+              
+              if (!(dep.module && (isAsync || containsDeps)) && plugin.hasDep(dep.request)) {
+                const replacement = plugin.getDep(dep.request);
+                
+                console.log(`\n[DEEP-RSLVR] Replacing ${dep.request}`);
+                
+                source.replace(dep.range[0], dep.range[1] - 1, replacement);
+                return;
+              }
+              
+              super.apply(dep, source, outputOptions, requestShortener);
+            }
+          }
+          
+          compilation.dependencyTemplates.set(templateKey, new DeepRequireTemplate());
+          break;
+        }
+      }
+      
+      compilation.modules.forEach(mod => {
+        for (let depRegexp of plugin.DEPS_TO_HOOK) {
+          if (depRegexp.test(mod.resource)) {
+            console.log(`[DEEP-RSLVR] Hooking "${mod.resource}"`);
+            
+            const criticalDeps = mod.dependencies.filter(dep => !!dep.critical);
+            
+            criticalDeps.forEach(dep => {
+              plugin.hookRequire(dep);
+            });
+            
+            break;
+          }
+        }
+      });
+    });
+  });
+};
+
+module.exports = DeepResolver;

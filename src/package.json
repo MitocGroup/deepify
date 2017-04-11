@@ -85,7 +85,8 @@
   "devDependencies": {
     "chai": "^3.5.x",
     "sinon": "^1.17.x",
-    "sinon-chai": "^2.8.x"
+    "sinon-chai": "^2.8.x",
+    "jsvardump": "^1.0.x"
   },
   "engines": {
     "node": ">=6.0 <7.0",

@@ -51,7 +51,7 @@ module.exports = function (lambdaPath, debug) {
           return helpers.bundle(configFile, debug)
             .then(() => {
               console.debug(`Removing temporary bootstrap file "${tmpBootstrapJs}"`);
-              
+
               return pify(fse.remove)(tmpBootstrapJs)
                 .catch(() => Promise.resolve());
             });

@@ -35,12 +35,14 @@ function bundle (configFile, debug) {
       Bin.resolve('webpack'),
       '--env.production',
       '--progress',
-      '--hide-modules',
+      '--color',
       `--config=${path.basename(configFile)}`,
     ];
     
     if (debug) {
       execOpts.push('--display-error-details', '--debug=true');
+    } else {
+      execOpts.push('--hide-modules');
     }
     
     const webpack = new Exec(...execOpts);
