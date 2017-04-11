@@ -8,8 +8,6 @@ const EXTERNALS = [
   'aws-sdk',      // @preloaded
 ];
 const NULL_MODULES = [
-  'bunyan',       // @package aws-sdk 
-  'vertx',        // @package es6-promise
   'store',        // @browser
   'relative-fs',  // @local
   'dynalite',     // @local
@@ -60,6 +58,7 @@ module.exports = function (lambdaPath, outputPath, debug) {
   const customWebpackConfigPath = path.join(lambdaPath, 'deep.webpack.json');
   const tmpBootstrapJs = path.join(lambdaPath, `.deep-tmp-${Date.now()}-${ENTRY_POINT}`);
   const deepFrameworkPackage = path.join(lambdaPath, 'node_modules', 'deep-framework', 'package.json');
+  const nullModulePath = path.join(__dirname, 'webpack.null-module.js');
   const defaultConfig = {
     entry: tmpBootstrapJs,
     output: {
@@ -70,7 +69,7 @@ module.exports = function (lambdaPath, outputPath, debug) {
     resolve: {
       modules: [ lambdaPath, 'node_modules' ],
       extensions: [ '.js', '.json' ],
-      alias: {  },
+      alias: {},
     },
     target: 'node',
     externals: EXTERNALS,
@@ -78,6 +77,10 @@ module.exports = function (lambdaPath, outputPath, debug) {
     stats: 'errors-only',
   };
   const deepDeps = {};
+  
+  NULL_MODULES.forEach(nullModule => {
+    defaultConfig.resolve.alias[nullModule] = nullModulePath;
+  });
   
   return pify(fse.copy)(path.join(lambdaPath, ENTRY_POINT), tmpBootstrapJs)
     .then(() => {
@@ -127,7 +130,7 @@ module.exports = function (lambdaPath, outputPath, debug) {
           return pify(fs.writeFile)(tmpBootstrapJs, deepDepsInject + bootstrapContent);
         });
     })
-    .then(() => {
+    .then(() => {      
       try {
         const rawConfig = plainify(webpackMerge.smart(
           defaultConfig, 

@@ -13,13 +13,18 @@ const webpackConfig = require('./webpack.prod');
 const fse = require('fs-extra');
 const pify = require('pify');
 
-module.exports = function (lambdaPath, debug) {
+module.exports = function (lambdaPath, debug, purge) {
   const dry = debug ? '[DRY] ' : '';
   
-  console.log(`Compiling lambda "${lambdaPath}"`);
+  console.log(`Compiling lambda "${lambdaPath}" (purge=${purge ? 'true' : 'false'})`);
   console.debug(`${dry}Running "npm install" on "${lambdaPath}"`);
   
-  return helpers.npmInstall(lambdaPath, debug) 
+  const prepare = (purge && !debug)
+    ? pify(fse.remove)(path.join(lambdaPath, 'node_module'))
+    : Promise.resolve();
+  
+  return prepare
+    .then(() => helpers.npmInstall(lambdaPath, debug))
     .then(() => {
       console.debug(`${dry}Running "npm prune" on "${lambdaPath}"`);
       
@@ -66,7 +71,7 @@ module.exports = function (lambdaPath, debug) {
         `${path.basename(lambdaPath)}.zip`
       );
       
-      console.debug(`Archive "${lambdaPath}" build to "${bundleDestination}"`);
+      console.info(`Archive "${lambdaPath}" build to "${bundleDestination}"`);
       
       return pify(fse.remove)(bundleDestination)
         .catch(() => Promise.resolve())
@@ -76,8 +81,6 @@ module.exports = function (lambdaPath, debug) {
     .then(buildPath => {
       console.debug(`Cleanup temporary data for "${lambdaPath}"`);
       
-      fse.removeSync(buildPath);
-      
-      return Promise.resolve();
+      return pify(fse.remove)(buildPath);
     });
 };

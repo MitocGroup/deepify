@@ -306,6 +306,10 @@ module.exports = {
               description: 'Partial deploy (one or several comma separated microservices identifiers)',
               required: false,
             },
+            purge: {
+              description: 'Purge lambdas cache including vendor folder',
+              required: false,
+            },
             'debug-build': {
               description: 'Skip npm install in lambdas',
               required: false,

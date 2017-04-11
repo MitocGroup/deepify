@@ -18,11 +18,15 @@ module.exports = function(mainPath) {
 
   let babelCompileCommand = () => {
     let babelCmd = path.join(nodeModules, 'babel-cli/bin/babel.js');
-    let presets = [
-      compileBrowser 
-        ? path.join(nodeModules, 'babel-preset-modern-browsers')
-        : path.join(nodeModules, 'babel-preset-node6'),
-    ];
+    let presets = [];
+    let plugins = [];
+    
+    if (compileBrowser) {
+      presets.push(path.join(nodeModules, 'babel-preset-modern-browsers'));
+    } else {
+      presets.push(path.join(nodeModules, 'babel-preset-node6'));
+      plugins.push(path.join(nodeModules, 'babel-plugin-add-module-exports'));
+    }
 
     let compileCmd = new Exec(
       this.nodeBinary,
@@ -30,9 +34,15 @@ module.exports = function(mainPath) {
       mainPath
     );
 
-    compileCmd
-      .addArg(`--extensions=${extension}`)
-      .addArg(`--presets=${presets.join(',')}`);
+    compileCmd.addArg(`--extensions=${extension}`);
+    
+    if (presets.length > 0) {
+      compileCmd.addArg(`--presets=${presets.join(',')}`);
+    }
+      
+    if (plugins.length > 0) {
+      compileCmd.addArg(`--plugins=${plugins.join(',')}`);
+    }
 
     if (!pipeSource) {
       compileCmd.addArg(`--out-dir=${outDirectory}`);

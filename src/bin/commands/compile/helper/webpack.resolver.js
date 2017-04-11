@@ -77,11 +77,13 @@ DeepResolver.prototype.hookRequire = function(dep) {
   dep.recursive = false;
   delete dep.critical;
   
-  console.log(`[DEEP-RSLVR] Swapping ${id} with ${depValue}`);
+  console.log(`[DEEP-RSLVR] Swapping "${depValue}" with "${id}"`);
 }
 
+// @todo Add other libraries loaded dynamically
 DeepResolver.prototype.DEPS_TO_HOOK = [
-  /node_modules\/deep-framework\/lib\.compiled\/Framework.js$/i
+  /node_modules\/deep-framework\/lib\.compiled\/Framework.js$/i,
+  /node_modules\/deep-validation\/lib\.compiled\/Validation.js$/i
 ];
 
 DeepResolver.prototype.apply = function(compiler) {
@@ -103,7 +105,7 @@ DeepResolver.prototype.apply = function(compiler) {
               if (!(dep.module && (isAsync || containsDeps)) && plugin.hasDep(dep.request)) {
                 const replacement = plugin.getDep(dep.request);
                 
-                console.log(`\n[DEEP-RSLVR] Replacing ${dep.request}`);
+                console.log(`\n[DEEP-RSLVR] Replacing "${dep.request}" with original value`);
                 
                 source.replace(dep.range[0], dep.range[1] - 1, replacement);
                 return;
