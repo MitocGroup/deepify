@@ -7,6 +7,8 @@
 'use strict';
 
 module.exports = function(mainPath) {
+  const LIBS_TO_LINK = [ 'deep-framework' ];
+  
   const LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   const NpmInstall = require('../../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
   const Prompt = require('../../../lib.compiled/Terminal/Prompt').Prompt;
@@ -74,6 +76,14 @@ module.exports = function(mainPath) {
     });
   }))
   .then(property => {
+    const dry = buildOpts.debug ? '[DRY] ' : '';
+    
+    console.info(`${dry}Ensure shared libraries are globally available (${LIBS_TO_LINK.join(', ')})`);
+    
+    return helpers.npmInstallLib(LIBS_TO_LINK, true, buildOpts.debug)
+      .then(() => Promise.resolve(property));
+  })
+  .then(property => {
     console.info('Extracting lambdas');
     
     const lambdasObj = new LambdaExtractor(property, buildOpts.microservices)
@@ -119,7 +129,7 @@ module.exports = function(mainPath) {
     const lambdasIterator = function *() {
       for (let lambdaPath of lambdas) {
         if (compiledLambdas.indexOf(lambdaPath) === -1) {
-          yield compileLambda(lambdaPath, buildOpts.debug, buildOpts.purge)
+          yield compileLambda(lambdaPath, buildOpts.debug, buildOpts.purge, LIBS_TO_LINK)
             .then(() => {
               compiledLambdas.push(lambdaPath);
               

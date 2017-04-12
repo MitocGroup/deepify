@@ -78,8 +78,6 @@ DeepResolver.prototype.hookRequire = function(dep) {
   dep.userRequest = id;
   dep.recursive = false;
   delete dep.critical;
-  
-  console.log(`[DEEP-RSLVR] Swapping "${depValue}" with "${id}"`);
 }
 
 // @todo Add other libraries loaded dynamically
@@ -110,8 +108,6 @@ DeepResolver.prototype.apply = function(compiler) {
     compilation.plugin('seal', function() {
       for (let templateKey of compilation.dependencyTemplates.keys()) {
         if (templateKey.name === 'CommonJsRequireContextDependency') {
-          console.log(`\n[DEEP-RSLVR] Extending "${templateKey.name}" template`);
-          
           const template = compilation.dependencyTemplates.get(templateKey);
           
           class DeepRequireTemplate extends template.constructor {
@@ -121,8 +117,6 @@ DeepResolver.prototype.apply = function(compiler) {
               
               if (!(dep.module && (isAsync || containsDeps)) && plugin.hasDep(dep.request)) {
                 const replacement = plugin.getDep(dep.request);
-                
-                console.log(`\n[DEEP-RSLVR] Replacing "${dep.request}" with original value`);
                 
                 source.replace(dep.range[0], dep.range[1] - 1, replacement);
                 return;
@@ -140,7 +134,7 @@ DeepResolver.prototype.apply = function(compiler) {
       compilation.modules.forEach(mod => {
         for (let depRegexp of plugin.DEPS_TO_HOOK) {
           if (depRegexp.test(mod.resource)) {
-            console.log(`[DEEP-RSLVR] Hooking "${mod.resource}"`);
+            console.log(`[DEEP-RSLVR] Fixing "Critical dependency" issue in "${mod.resource}"`);
             
             const criticalDeps = mod.dependencies.filter(dep => !!dep.critical);
             

@@ -4,11 +4,11 @@
 # Fixing "spawn sh ENOENT" issue
 cd /
 
-REQUIRED_DEPS=("babel-cli" "babel-preset-node6" "babel-plugin-add-module-exports" "webpack");
+REQUIRED_DEPS=("babel-cli" "aws-sdk" "babel-preset-node6" "babel-plugin-add-module-exports" "webpack");
 NPM_BIN=`which npm`
 NPM_GLOBAL_NM=`$NPM_BIN root -g`
 
-echo "Checking babel-* and webpack* dependencies in $NPM_GLOBAL_NM"
+echo "Checking babel-*, webpack* and aws-* dependencies in $NPM_GLOBAL_NM"
 
 for DEP in ${REQUIRED_DEPS[@]}; do
   if [ ! -d "$NPM_GLOBAL_NM/$DEP" ]; then

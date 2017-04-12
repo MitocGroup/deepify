@@ -13,25 +13,33 @@ const webpackConfig = require('./webpack.prod');
 const fse = require('fs-extra');
 const pify = require('pify');
 
-module.exports = function (lambdaPath, debug, purge) {
+module.exports = function (lambdaPath, debug, purge, libsToLink) {
   const dry = debug ? '[DRY] ' : '';
   
   console.log(`Compiling lambda "${lambdaPath}" (purge=${purge ? 'true' : 'false'})`);
-  console.debug(`${dry}Running "npm install" on "${lambdaPath}"`);
+  console.debug(`${dry}Purge "node_modules" in "${lambdaPath}"`);
   
   const prepare = (purge && !debug)
-    ? pify(fse.remove)(path.join(lambdaPath, 'node_module'))
+    ? pify(fse.remove)(path.join(lambdaPath, 'node_modules'))
     : Promise.resolve();
   
   return prepare
-    .then(() => helpers.npmInstall(lambdaPath, debug))
-    
-    // @todo figure out why it's breaking functionality
-    // .then(() => {
-    //   console.debug(`${dry}Running "npm prune" on "${lambdaPath}"`);
-    //   
-    //   return helpers.npmPrune(lambdaPath, debug);
-    // })
+    .then(() => {
+      if (libsToLink.length <= 0) {
+        console.debug(`No global libraries available to link for "${lambdaPath}"`);
+        
+        return Promise.resolve();
+      }
+      
+      console.debug(`${dry}Linking global libraries in "${lambdaPath}" (${libsToLink.join(', ')})`);
+      
+      return helpers.npmLink(lambdaPath, libsToLink, debug);
+    })
+    .then(() => {
+      console.debug(`${dry}Running "npm install" on "${lambdaPath}"`);
+      
+      return helpers.npmInstall(lambdaPath, debug);
+    })
     .then(() => {
       const buildPath = path.join(
         tmp.dirSync().name,
@@ -44,7 +52,7 @@ module.exports = function (lambdaPath, debug, purge) {
       
       return pify(fse.ensureDir)(bundlePath)
         .then(() => {
-          return webpackConfig(lambdaPath, bundlePath, debug)
+          return webpackConfig(lambdaPath, bundlePath, libsToLink, debug)
             .then(webpackConfig => {
               const { rawConfig, tmpBootstrapJs } = webpackConfig;
               
@@ -55,12 +63,18 @@ module.exports = function (lambdaPath, debug, purge) {
         .then(tmpBootstrapJs => {
           console.debug(`Bundle "${lambdaPath}" using Webpack to "${bundlePath}"`);
           
-          return helpers.bundle(configFile, debug)
-            .then(() => {
-              console.debug(`Removing temporary bootstrap file "${tmpBootstrapJs}"`);
+          const removeTmpBootstrap = () => {
+            console.debug(`Removing temporary bootstrap file "${tmpBootstrapJs}"`);
 
-              return pify(fse.remove)(tmpBootstrapJs)
-                .catch(() => Promise.resolve());
+            return pify(fse.remove)(tmpBootstrapJs)
+              .catch(() => Promise.resolve());
+          };
+          
+          return helpers.bundle(configFile, debug)
+            .then(() => removeTmpBootstrap())
+            .catch(error => {
+              return removeTmpBootstrap()
+                .then(() => Promise.reject(error));
             });
         })
         .then(() => Promise.resolve({ bundlePath, buildPath }));

@@ -56,9 +56,11 @@ ${regexpExternals.join(';\n')};
 module.exports = resolver.extend(webpackConfig);
 `;
   const plugins = `
-new webpack.optimize.DedupePlugin(),
+new webpack.optimize.OccurrenceOrderPlugin(),
 new webpack.DefinePlugin({
-  'process.env.NODE_ENV': '"production"',
+  'process.env': {
+    'NODE_ENV': JSON.stringify('production'),
+  },
 }),
 new webpack.LoaderOptionsPlugin({
   minimize: ${debug ? 'false' : 'true'},
@@ -70,7 +72,7 @@ resolver,
   return plainConfig.replace(`"${PLUGINS_PLACEHOLDER}"`, plugins);
 }
 
-module.exports = function (lambdaPath, outputPath, debug) {
+module.exports = function (lambdaPath, outputPath, linkedLibs, debug) {
   const schemasPath = path.join(lambdaPath, Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR);
   const customWebpackConfigPath = path.join(lambdaPath, 'deep.webpack.json');
   const tmpBootstrapName = `.deep-tmp-${Date.now()}-${ENTRY_POINT}`;
@@ -106,6 +108,12 @@ module.exports = function (lambdaPath, outputPath, debug) {
     stats: 'errors-only',
   };
   const deepDeps = {};
+  
+  linkedLibs.forEach(linkedLib => {
+    const modulePath = path.resolve(lambdaPath, 'node_modules', linkedLib, 'node_modules');
+    
+    defaultConfig.resolve.modules.push(modulePath);
+  });
   
   NULL_MODULES.forEach(nullModule => {
     defaultConfig.resolve.alias[nullModule] = nullModulePath;

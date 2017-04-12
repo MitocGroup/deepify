@@ -3,7 +3,8 @@
 const path = require('path');
 const Bin = require('../../../../lib.compiled/NodeJS/Bin').Bin;
 const NpmInstall = require('../../../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
-const NpmPrune = require('../../../../lib.compiled/NodeJS/NpmPrune').NpmPrune;
+const NpmInstallLibs = require('../../../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
+const NpmLink = require('../../../../lib.compiled/NodeJS/NpmLink').NpmLink;
 const Exec = require('../../../../lib.compiled/Helpers/Exec').Exec;
 
 function zip (workingDir, outputFile) {
@@ -82,12 +83,45 @@ function objectValues (object) {
   return Object.keys(object).map(key => object[key]);
 }
 
+function npmInstallLib(libs, global, dryRun) {
+  return new Promise(resolve => {
+    const cmd = new NpmInstallLibs()
+      .addExtraArg(
+        '--no-bin-links',
+        '--only=prod',
+        '--silent',
+        '--depth=0'
+      )
+      .dry(dryRun);
+    
+    cmd.global = global;
+    cmd.libs = libs;
+    
+    cmd.run(resolve);
+  });
+}
+
+function npmLink (packagePath, libs, dryRun) {
+  return new Promise(resolve => {
+    const cmd = new NpmLink(packagePath)
+      .addExtraArg(
+        '--silent',
+        '--depth=0'
+      )
+      .dry(dryRun);
+      
+    cmd.libs = libs;
+    
+    cmd.run(resolve);
+  });
+}
+
 function npmInstall (packagePath, dryRun) {
   return new Promise(resolve => {
     new NpmInstall(packagePath)
       .addExtraArg(
         '--no-bin-links',
-        '--production',
+        '--only=prod',
         '--silent',
         '--depth=0'
       )
@@ -96,16 +130,4 @@ function npmInstall (packagePath, dryRun) {
   });
 }
 
-function npmPrune (packagePath, dryRun) {
-  return new Promise(resolve => {
-    new NpmPrune(packagePath)
-      .addExtraArg(
-        '--production', 
-        '--silent'
-      )
-      .dry(dryRun)
-      .run(resolve);
-  });
-}
-
-module.exports = { arrayUnique, getMicroservicesToCompile, objectValues, npmInstall, npmPrune, bundle, zip };
+module.exports = { arrayUnique, getMicroservicesToCompile, objectValues, npmInstall, npmInstallLib, npmLink, bundle, zip };
