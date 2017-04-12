@@ -25,11 +25,13 @@ module.exports = function (lambdaPath, debug, purge) {
   
   return prepare
     .then(() => helpers.npmInstall(lambdaPath, debug))
-    .then(() => {
-      console.debug(`${dry}Running "npm prune" on "${lambdaPath}"`);
-      
-      return helpers.npmPrune(lambdaPath, debug);
-    })
+    
+    // @todo figure out why it's breaking functionality
+    // .then(() => {
+    //   console.debug(`${dry}Running "npm prune" on "${lambdaPath}"`);
+    //   
+    //   return helpers.npmPrune(lambdaPath, debug);
+    // })
     .then(() => {
       const buildPath = path.join(
         tmp.dirSync().name,

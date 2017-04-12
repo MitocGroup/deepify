@@ -87,7 +87,6 @@ function npmInstall (packagePath, dryRun) {
     new NpmInstall(packagePath)
       .addExtraArg(
         '--no-bin-links',
-        '--no-optional',
         '--production',
         '--silent',
         '--depth=0'

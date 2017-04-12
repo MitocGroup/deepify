@@ -4,7 +4,9 @@
 
 'use strict';
 
-function DeepResolver(options) {
+function DeepResolver(options, webpack, ConstDependency) {
+  this.ConstDependency = ConstDependency;
+  this.webpack = webpack;
   this.options = Object.assign({
     dependencyContainer: '__deep_dyn_modules__',
   }, options);
@@ -82,14 +84,29 @@ DeepResolver.prototype.hookRequire = function(dep) {
 
 // @todo Add other libraries loaded dynamically
 DeepResolver.prototype.DEPS_TO_HOOK = [
-  /node_modules\/deep-framework\/lib\.compiled\/Framework.js$/i,
-  /node_modules\/deep-validation\/lib\.compiled\/Validation.js$/i
+  /deep-framework\/lib\.compiled\/Framework\.js$/i,
+  /deep-core\/lib\.compiled\/Generic\/UniversalRequire\.js$/i,
+  /deep-validation\/lib\.compiled\/Validation\.js$/i,
 ];
 
 DeepResolver.prototype.apply = function(compiler) {
   const plugin = this;
   
   compiler.plugin('compilation', function(compilation, params) {
+    params.normalModuleFactory.plugin('parser', function(parser, parserOptions) {
+      parser.plugin('expression require.main', function(expr) {
+        const value = '((__webpack_require__.c[__webpack_require__.s] && __webpack_require__.c[__webpack_require__.s].filename) ' +
+          '? __webpack_require__.c[__webpack_require__.s] : undefined)';
+          
+        const dep = new plugin.ConstDependency(value, expr.range);
+        
+    		dep.loc = expr.loc;
+    		this.state.current.addDependency(dep);
+        
+    		return true;
+      });
+    });
+    
     compilation.plugin('seal', function() {
       for (let templateKey of compilation.dependencyTemplates.keys()) {
         if (templateKey.name === 'CommonJsRequireContextDependency') {
