@@ -17,6 +17,7 @@ module.exports = function(mainPath) {
   const validateNodeVersion = require('../helper/validate-node-version');
   const helpers = require('./helper/compile-prod');
   const compileLambda = require('./helper/compile-lambda');
+  const SemaphoreLambda = require('./helper/semaphore-lambda');
   const fse = require('fs-extra');
   const fs = require('fs');
   const PromisePool = require('es6-promise-pool');
@@ -126,15 +127,19 @@ module.exports = function(mainPath) {
     console.log(`Start compiling ${lambdas.length} lambdas`);
     console.info(`Setting max threads to ${maxThreads}`);
     
+    const semaphor = new SemaphoreLambda();
+    
     const lambdasIterator = function *() {
       for (let lambdaPath of lambdas) {
         if (compiledLambdas.indexOf(lambdaPath) === -1) {
-          yield compileLambda(lambdaPath, buildOpts.debug, buildOpts.purge, LIBS_TO_LINK)
-            .then(() => {
-              compiledLambdas.push(lambdaPath);
-              
-              return Promise.resolve();
-            });
+          yield semaphor.wrap(
+            compileLambda(lambdaPath, buildOpts.debug, buildOpts.purge, LIBS_TO_LINK),
+            lambdaPath
+          ).then(() => {
+            compiledLambdas.push(lambdaPath);
+            
+            return Promise.resolve();
+          });
         } else {
           console.info(`Lambda ${lambdaPath} already compiled. Skipping...`);
           
