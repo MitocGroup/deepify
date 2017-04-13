@@ -133,7 +133,7 @@ module.exports = function(mainPath) {
       for (let lambdaPath of lambdas) {
         if (compiledLambdas.indexOf(lambdaPath) === -1) {
           yield semaphor.wrap(
-            compileLambda(lambdaPath, buildOpts.debug, buildOpts.purge, LIBS_TO_LINK),
+            () => compileLambda(lambdaPath, buildOpts.debug, buildOpts.purge, LIBS_TO_LINK),
             lambdaPath
           ).then(() => {
             compiledLambdas.push(lambdaPath);
