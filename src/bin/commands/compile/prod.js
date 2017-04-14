@@ -59,7 +59,7 @@ module.exports = function(mainPath) {
     microservices: helpers.getMicroservicesToCompile(this.opts.locate('partial').value),
     debug: this.opts.locate('debug-build').exists,
     purge: this.opts.locate('purge').exists,
-  }
+  };
   
   console.log('Compilation start');
   
