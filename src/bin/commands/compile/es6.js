@@ -12,20 +12,20 @@ module.exports = function(mainPath) {
   mainPath = this.normalizeInputPath(mainPath);
   let extension = this.opts.locate('extension').value || '.es6';
   let outDirectory = this.opts.locate('out-dir').value || mainPath;
-  let compileBrowser = this.opts.locate('browser').exists || this.opts.locate('es5').exists;
+  let compileES5 = this.opts.locate('es5').exists;
   let pipeSource = this.opts.locate('source').exists;
   let nodeModules = path.join(__dirname, '../../../node_modules');
 
   let babelCompileCommand = () => {
     let babelCmd = path.join(nodeModules, 'babel-cli/bin/babel.js');
     let presets = [];
-    let plugins = [];
+    let plugins = [ path.join(nodeModules, 'babel-plugin-add-module-exports') ];
     
-    if (compileBrowser) {
-      presets.push(path.join(nodeModules, 'babel-preset-modern-browsers'));
+    if (compileES5) {
+      presets.push(path.join(nodeModules, 'babel-preset-es2015'));
+      plugins.push(path.join(nodeModules, 'babel-plugin-transform-es2015-classes'));
     } else {
       presets.push(path.join(nodeModules, 'babel-preset-node6'));
-      plugins.push(path.join(nodeModules, 'babel-plugin-add-module-exports'));
     }
 
     let compileCmd = new Exec(

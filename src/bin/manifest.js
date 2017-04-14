@@ -277,12 +277,8 @@ module.exports = {
               description: 'Compile an input directory of modules into an output directory',
               required: false,
             },
-            'browser': {
-              description: 'Compile using preset compatible with modern browsers',
-              required: false,
-            },
             'es5': {
-              description: '[DEPRECATED] Alias of "--browser" option',
+              description: 'Compile using preset compatible with es5 (including modern browsers)',
               required: false,
             },
             'source': {
