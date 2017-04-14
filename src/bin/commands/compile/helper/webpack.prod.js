@@ -56,6 +56,7 @@ ${regexpExternals.join(';\n')};
 module.exports = resolver.extend(webpackConfig);
 `;
   const plugins = `
+new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),  
 new webpack.optimize.OccurrenceOrderPlugin(),
 new webpack.DefinePlugin({
   'process.env': {
