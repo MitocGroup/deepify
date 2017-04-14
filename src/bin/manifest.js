@@ -142,10 +142,6 @@ module.exports = {
           description: 'Update one or more backend action. Works only on application update',
           required: false,
         },
-        'invalidate-cache': {
-          description: 'Invalidate deep dependencies cache',
-          required: false,
-        },
         frontend: {
           description: 'Deploy only frontend resource',
           required: false,
@@ -155,9 +151,9 @@ module.exports = {
           required: false,
         },
         'debug-build': {
-          description: 'Use existing node_modules in lambdas, instead of (re)installing them',
+          description: 'Skip npm install in lambdas',
           required: false,
-        }
+        },
       },
       args: {
         path: {
@@ -281,8 +277,12 @@ module.exports = {
               description: 'Compile an input directory of modules into an output directory',
               required: false,
             },
+            'browser': {
+              description: 'Compile using preset compatible with modern browsers',
+              required: false,
+            },
             'es5': {
-              description: 'Compile using es5 preset, instead of the node4 compatible',
+              description: '[DEPRECATED] Alias of "--browser" option',
               required: false,
             },
             'source': {
@@ -301,30 +301,17 @@ module.exports = {
           example: 'deepify compile prod path/to/web_app',
           description: 'Compile lambdas for production',
           opts: {
-            'remove-source': {
-              alias: 's',
-              description: 'Remove original Lambda source',
-              required: false,
-            },
             partial: {
               alias: 'm',
               description: 'Partial deploy (one or several comma separated microservices identifiers)',
               required: false,
             },
-            'linear': {
-              description: 'Compile lambdas linerar',
-              required: false,
-            },
-            'skip-cache': {
-              description: 'Skip loading lambda dependencies from cache',
-              required: false,
-            },
-            'invalidate-cache': {
-              description: 'Invalidate deep dependencies cache',
+            purge: {
+              description: 'Purge lambdas cache including vendor folder',
               required: false,
             },
             'debug-build': {
-              description: 'Skip installing/optimizing node_modules and keep existing ones in lambda directory',
+              description: 'Skip npm install in lambdas',
               required: false,
             },
           },

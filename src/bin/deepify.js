@@ -12,6 +12,18 @@ let path = require('path');
 let manifest = require('./manifest');
 let cli = new Program('deepify', manifest.version, manifest.description);
 
+try {
+  global._var_dump = require('jsvardump');
+} catch (error) {
+  global._var_dump = {
+    dump() {
+      throw new Error('You must install dev dependencies in order to use global._var_dump()');
+    }
+  };
+}
+
+global.console.dump = (...vals) => { vals.map(val => global._var_dump(val)) };
+
 /**
  * @param {String} name
  * @returns {string}
