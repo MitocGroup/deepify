@@ -28,6 +28,7 @@ const webpackMerge = require('webpack-merge');
 const Bin = require('../../../../lib.compiled/NodeJS/Bin').Bin;
 const Core = require('deep-core');
 const pify = require('pify');
+const helpers = require('./compile-prod');
 
 // @todo Resolve webpack dynamically (maybe link it?)
 const WEBPACK_LIB = path.join(
@@ -58,11 +59,6 @@ module.exports = resolver.extend(webpackConfig);
   const plugins = `
 new webpack.ContextReplacementPlugin(/moment[\\\/\\\\]locale$/, /en/),  
 new webpack.optimize.OccurrenceOrderPlugin(),
-new webpack.DefinePlugin({
-  'process.env': {
-    'NODE_ENV': JSON.stringify('production'),
-  },
-}),
 new webpack.LoaderOptionsPlugin({
   minimize: ${debug ? 'false' : 'true'},
   debug: ${debug ? 'true' : 'false'},
@@ -93,15 +89,6 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug) {
       extensions: [ '.js', '.json' ],
       alias: {},
     },
-    node: {
-      console: true,
-      global: true,
-      process: true,
-      Buffer: true,
-      __filename: 'mock',
-      __dirname: 'mock',
-      setImmediate: true
-    },
     watch: false,
     target: 'node',
     externals: EXTERNALS,
@@ -122,38 +109,44 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug) {
   
   return pify(fse.copy)(path.join(lambdaPath, ENTRY_POINT), tmpBootstrapJs)
     .then(() => {
-      if (!fs.existsSync(deepFrameworkPackage)) {
-        return Promise.resolve();
-      }
-      
-      return pify(fse.readJson)(deepFrameworkPackage)
-        .then(frameworkPackage => {
-          Object.keys((frameworkPackage.dependencies || {}))
-            .filter(deepLibrary => /^deep-/i.test(deepLibrary))
-            .forEach(deepLibrary => {
-              deepDeps[deepLibrary] = deepLibrary;
+      return helpers.fileExists(deepFrameworkPackage)
+        .then(hasDeepFramework => {
+          if (!hasDeepFramework) {
+            return Promise.resolve();
+          }
+          
+          return pify(fse.readJson)(deepFrameworkPackage)
+            .then(frameworkPackage => {
+              Object.keys((frameworkPackage.dependencies || {}))
+                .filter(deepLibrary => /^deep-/i.test(deepLibrary))
+                .forEach(deepLibrary => {
+                  deepDeps[deepLibrary] = deepLibrary;
+                });
+                
+              return Promise.resolve();  
             });
-            
-          return Promise.resolve();  
         });
     })
     .then(() => {
-      if (!fs.existsSync(schemasPath)) {
-        return Promise.resolve();
-      }
-      
-      return pify(fs.readdir)(schemasPath)
-        .then(files => {
-          files
-            .filter(file => /\.js(on)?$/i)
-            .forEach(file => {
-              const schemasDir = Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR;
-              const schemaInclude = `${LAMBDA_ROOT}/${schemasDir}/${file}`;
-              
-              deepDeps[schemaInclude] = `./${schemasDir}/${file}`;
+      return helpers.fileExists(schemasPath)
+        .then(hasSchemas => {
+          if (!hasSchemas) {
+            return Promise.resolve();
+          }
+          
+          return pify(fs.readdir)(schemasPath)
+            .then(files => {
+              files
+                .filter(file => /\.js(on)?$/i)
+                .forEach(file => {
+                  const schemasDir = Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR;
+                  const schemaInclude = `${LAMBDA_ROOT}/${schemasDir}/${file}`;
+                  
+                  deepDeps[schemaInclude] = `./${schemasDir}/${file}`;
+                });
+                
+              return Promise.resolve(); 
             });
-            
-          return Promise.resolve(); 
         });
     })
     .then(() => {
@@ -168,23 +161,22 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug) {
           return pify(fs.writeFile)(tmpBootstrapJs, deepDepsInject + bootstrapContent);
         });
     })
-    .then(() => {      
-      try {
-        const rawConfig = plainify(webpackMerge.smart(
-          defaultConfig, 
-          fse.readJsonSync(
-            customWebpackConfigPath, 
-            { throws: false }
-          ) || {}
-        ), debug);
-        
+    .then(() => helpers.fileExists(customWebpackConfigPath))
+    .then(hasCustomWebpackConfig => {
+      if (!hasCustomWebpackConfig) {
+        const rawConfig = plainify(defaultConfig, debug);
+
         return Promise.resolve({ rawConfig, tmpBootstrapJs });
-      } catch (error) {
-        console.debug(`Missing or broken custom Webpack config ${customWebpackConfigPath}. Using default one...`);
       }
       
-      const rawConfig = plainify(defaultConfig, debug);
-
-      return Promise.resolve({ rawConfig, tmpBootstrapJs });
+      return pify(fse.readJson)(customWebpackConfigPath)
+        .then(customWebpackConfig => {
+          const rawConfig = plainify(webpackMerge.smart(
+            defaultConfig, 
+            customWebpackConfig || {}
+          ), debug);
+          
+          return Promise.resolve({ rawConfig, tmpBootstrapJs });
+        });
     });
 };

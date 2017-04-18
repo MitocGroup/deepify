@@ -33,7 +33,26 @@ module.exports = function (lambdaPath, debug, purge, libsToLink) {
       
       console.debug(`${dry}Linking global libraries in "${lambdaPath}" (${libsToLink.join(', ')})`);
       
-      return helpers.npmLink(lambdaPath, libsToLink, debug);
+      return Promise.all(libsToLink.map(lib => {
+        return helpers.hasDependency(lambdaPath, lib)
+          .then(hasLib => {
+            if (!hasLib) {
+              console.debug(`Skip linking extraneous library "${lib}" in "${lambdaPath}"`);
+            }
+            
+            return Promise.resolve(hasLib);
+          });
+      })).then(libsVector => {
+        const libs = libsToLink.filter((lib, i) => {
+          return libsVector[i];
+        });
+        
+        if (libs.length <= 0) {
+          return Promise.resolve();
+        }
+        
+        return helpers.npmLink(lambdaPath, libs, debug);
+      });
     })
     .then(() => {
       console.debug(`${dry}Running "npm install" on "${lambdaPath}"`);
