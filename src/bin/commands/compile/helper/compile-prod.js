@@ -1,11 +1,22 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
+const fse = require('fs-extra');
+const pify = require('pify');
 const Bin = require('../../../../lib.compiled/NodeJS/Bin').Bin;
 const NpmInstall = require('../../../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
 const NpmInstallLibs = require('../../../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
 const NpmLink = require('../../../../lib.compiled/NodeJS/NpmLink').NpmLink;
 const Exec = require('../../../../lib.compiled/Helpers/Exec').Exec;
+
+function fileExists(filePath) {
+  return new Promise(resolve => {
+    fs.exists(filePath, exists => {
+      resolve(exists);
+    });
+  });
+}
 
 function zip (workingDir, outputFile) {
   return new Promise((resolve, reject) => {
@@ -101,6 +112,37 @@ function npmInstallLib(libs, global, dryRun) {
   });
 }
 
+function hasDependency (packagePath, lib) {
+  const packageJsonPath = path.join(packagePath, 'package.json');
+  
+  return fileExists(packageJsonPath)
+    .then(hasPackageJson => {
+      if (!hasPackageJson) {
+        return Promise.resolve(false);
+      }
+      
+      return pify(fse.readJson)(packageJsonPath)
+        .then(packageJsonContent => {
+          let deps = [];
+          
+          [
+            'dependencies',
+            'devDependencies',
+            'peerDependencies',
+            'optionalDependencies',
+          ].map(depKey => {
+            if (packageJsonContent.hasOwnProperty(depKey)) {
+              const localDeps = packageJsonContent[depKey] || {};
+              
+              deps = deps.concat(Object.keys(localDeps));
+            }
+          });
+          
+          return Promise.resolve(deps.indexOf(lib) !== -1);
+        });
+    });
+}
+
 function npmLink (packagePath, libs, dryRun) {
   return new Promise(resolve => {
     const cmd = new NpmLink(packagePath)
@@ -123,6 +165,8 @@ function npmInstall (packagePath, dryRun) {
         '--no-bin-links',
         '--only=prod',
         '--silent',
+        '--link',
+        '--no-shrinkwrap',
         '--depth=0'
       )
       .dry(dryRun)
@@ -130,4 +174,8 @@ function npmInstall (packagePath, dryRun) {
   });
 }
 
-module.exports = { arrayUnique, getMicroservicesToCompile, objectValues, npmInstall, npmInstallLib, npmLink, bundle, zip };
+module.exports = {
+  arrayUnique, getMicroservicesToCompile, 
+  objectValues, npmInstall, npmInstallLib, 
+  npmLink, bundle, zip, fileExists, hasDependency,
+};
