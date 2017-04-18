@@ -210,13 +210,13 @@ export class NpmInstall {
    * @returns {Number}
    */
   static get DEFAULT_CHUNK_SIZE() {
-    let calculatedChunkSize = Math.min(
-      Math.ceil(OS.freemem() * 2 / Math.pow(1024, 3)),
-      OS.cpus().length,
-      16
+    return Math.max(
+      Math.min(
+        Math.ceil(OS.freemem() / 1024 / 1024 / 100),
+        OS.cpus().length,
+        16
+      ),
+      2
     );
-
-    return (calculatedChunkSize < 2) ? 2 : calculatedChunkSize;
-
   }
 }
