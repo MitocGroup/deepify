@@ -21,7 +21,7 @@ function fileExists(filePath) {
 function zip (workingDir, outputFile) {
   return new Promise((resolve, reject) => {
     const zip = new Exec(
-      Bin.resolve('zip'),
+      Bin.resolve('zip', true),
       '-q',
       '-y',
       '-r',
@@ -44,7 +44,7 @@ function zip (workingDir, outputFile) {
 function bundle (configFile, debug) {
   return new Promise((resolve, reject) => {
     const execOpts = [
-      Bin.resolve('webpack'),
+      Bin.resolve('webpack', true),
       '--env.production',
       '--progress',
       '--color',
