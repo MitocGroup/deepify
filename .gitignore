@@ -112,3 +112,5 @@ lib.compiled
 /tests/*
 config.gypi
 **/bin/test/**/*.js
+
+/vendor
