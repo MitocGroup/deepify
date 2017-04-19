@@ -1,6 +1,6 @@
 {
   "name": "deepify",
-  "version": "3.0.18",
+  "version": "3.0.19",
   "buildDate": "Thu Apr  6 18:07:30 EEST 2017",
   "description": "DEEP Development Tools",
   "keywords": [
@@ -48,7 +48,7 @@
     "url": "https://github.com/MitocGroup/deepify.git"
   },
   "scripts": {
-    "postinstall": "bash hooks/autocomplete_deepify.sh && bash hooks/install_templates.sh && bash hooks/ensure_es.sh",
+    "postinstall": "bash hooks/autocomplete_deepify.sh && bash hooks/install_templates.sh && bash hooks/ensure_es.sh && bash node-bin/assure-deps.sh",
     "test": "bash node-bin/test.sh",
     "compile": "bash node-bin/compile.sh",
     "prepublish": "bash node-bin/assure-deps.sh && bash node-bin/compile.sh && node hooks/dump_comp.js"
