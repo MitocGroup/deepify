@@ -148,7 +148,7 @@ module.exports = function(dependency, dumpPath) {
     // @todo: remove on the next major release
     // the following code is here for back compatibility
     depName = depName.replace(/^(?:https?:\/\/)github\.com\/([^\/]+\/[^\/]+)(?:\.git)$/i, 'github://$1');
-    depName = depName.replace(/^github:\/\/([^#]+)(#[\w\.]+)?$/, (_, _depRepo, _depVersion) => {
+    depName = depName.replace(/^github:\/\/([^#]+)(#[\w\-\.]+)?$/, (_, _depRepo, _depVersion) => {
       let depName = path.basename(_depRepo.replace('/', path.sep));
       depName = depName.replace(/-microservices?/, '');
       depVersion = `github://${_depRepo}${_depVersion || '#*'}`;

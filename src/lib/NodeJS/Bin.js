@@ -79,14 +79,24 @@ export class Bin {
 
   /**
    * @param {String} bin
+   * @param {Boolean} cached
    * @returns {String}
    */
-  static resolve(bin) {
+  static resolve(bin, cached = false) {
+    if (cached && Bin._bin_ && Bin._bin_.hasOwnProperty(bin)) {
+      return Bin._bin_[bin];
+    }
+    
     let locatorCmd = (Bin._isWin) ? 'where': 'which';
     let cmd = new Exec(locatorCmd, bin).runSync();
 
     if (cmd.failed) {
       throw cmd.error;
+    }
+    
+    if (cached) {
+      Bin._bin_ = Bin._bin_ || {};
+      Bin._bin_[bin] = cmd.result;
     }
 
     return cmd.result;
