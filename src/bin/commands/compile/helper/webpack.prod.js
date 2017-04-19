@@ -104,7 +104,9 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug) {
     resolve: {
       modules: [ lambdaPath, 'node_modules' ],
       extensions: [ '.js', '.json' ],
-      alias: {},
+      alias: {
+        'deep-framework$': 'deep-framework/lib.es6/bootstrap.js',
+      },
     },
     watch: false,
     target: 'node',
@@ -140,7 +142,7 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug) {
                     && !/^deep-(core|kernel)/i.test(deepLibrary);
                 })
                 .forEach(deepLibrary => {
-                  deepDeps[deepLibrary] = `${deepLibrary}/lib.es6/bootstrap.js`;
+                  deepDeps[`${deepLibrary}$`] = `${deepLibrary}/lib.es6/bootstrap.js`;
                 });
                 
               return Promise.resolve();
