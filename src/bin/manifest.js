@@ -306,8 +306,17 @@ module.exports = {
               description: 'Purge lambdas cache including vendor folder',
               required: false,
             },
+            'skip-optimize-retry': {
+              description: 'Skip build retry without optimizations if failed',
+              required: false,
+            },
+            'optimize': {
+              alias: 'o',
+              description: 'Optimize lambda webpack build (highly experimental)',
+              required: false,
+            },
             'debug-build': {
-              description: 'Skip npm install in lambdas',
+              description: 'Skip npm install and optimizations of lambdas',
               required: false,
             },
           },

@@ -13,7 +13,7 @@ const webpackConfig = require('./webpack.prod');
 const fse = require('fs-extra');
 const pify = require('pify');
 
-module.exports = function (lambdaPath, debug, purge, libsToLink) {
+module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
   const dry = debug ? '[DRY] ' : '';
   
   console.log(`Compiling lambda "${lambdaPath}" (purge=${purge ? 'true' : 'false'})`);
@@ -71,9 +71,9 @@ module.exports = function (lambdaPath, debug, purge, libsToLink) {
       
       return pify(fse.ensureDir)(bundlePath)
         .then(() => {
-          return webpackConfig(lambdaPath, bundlePath, libsToLink, debug)
-            .then(webpackConfig => {
-              const { rawConfig, tmpBootstrapJs } = webpackConfig;
+          return webpackConfig(lambdaPath, bundlePath, libsToLink, debug, optimize)
+            .then(webpackConfigResult => {
+              const { rawConfig, tmpBootstrapJs } = webpackConfigResult;
               
               return pify(fse.outputFile)(configFile, rawConfig)
                 .then(() => Promise.resolve(tmpBootstrapJs));

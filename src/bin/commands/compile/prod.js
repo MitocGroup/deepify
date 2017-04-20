@@ -18,6 +18,7 @@ module.exports = function(mainPath) {
   const helpers = require('./helper/compile-prod');
   const compileLambda = require('./helper/compile-lambda');
   const SemaphoreLambda = require('./helper/semaphore-lambda');
+  const BundleException = require('./helper/exception/bundle-exception');
   const fse = require('fs-extra');
   const fs = require('fs');
   const PromisePool = require('es6-promise-pool');
@@ -59,6 +60,8 @@ module.exports = function(mainPath) {
     microservices: helpers.getMicroservicesToCompile(this.opts.locate('partial').value),
     debug: this.opts.locate('debug-build').exists,
     purge: this.opts.locate('purge').exists,
+    optimize: this.opts.locate('optimize').exists,
+    optimizeRetry: !this.opts.locate('skip-optimize-retry').exists,
   };
   
   console.log('Compilation start');
@@ -133,7 +136,33 @@ module.exports = function(mainPath) {
       for (let lambdaPath of lambdas) {
         if (compiledLambdas.indexOf(lambdaPath) === -1) {
           yield semaphor.wrap(
-            () => compileLambda(lambdaPath, buildOpts.debug, buildOpts.purge, LIBS_TO_LINK),
+            () => {
+              return compileLambda(
+                lambdaPath, 
+                buildOpts.debug, 
+                buildOpts.optimize, 
+                buildOpts.purge, 
+                LIBS_TO_LINK
+              ).catch(error => {
+                if (error instanceof BundleException
+                  && buildOpts.optimize
+                  && buildOpts.optimizeRetry) {
+
+                  console.error(error);
+                  console.info(`Retry compiling ${lambdaPath} lambda without optimizations...`);
+                  
+                  return compileLambda(
+                    lambdaPath, 
+                    buildOpts.debug, 
+                    false, // force buildOpts.optimize=false
+                    buildOpts.purge, 
+                    LIBS_TO_LINK
+                  );
+                }
+                
+                return Promise.reject(error);
+              });
+            },
             lambdaPath
           ).then(() => {
             compiledLambdas.push(lambdaPath);

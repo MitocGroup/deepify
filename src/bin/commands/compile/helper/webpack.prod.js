@@ -42,7 +42,7 @@ console.debug('WEBPACK_LIB', WEBPACK_LIB);
 console.debug('WEBPACK_CONST_DEP_LIB', WEBPACK_CONST_DEP_LIB);
 console.debug('UGLIFYJS_PLUGIN', UGLIFYJS_PLUGIN);
 
-function plainify (config, debug) {
+function plainify (config, debug, optimize) {
   config.plugins = [ PLUGINS_PLACEHOLDER ];
   const regexpExternals = config.externals
     .filter(external => external instanceof RegExp)
@@ -73,7 +73,7 @@ new webpack.LoaderOptionsPlugin({
 resolver,
 `;
 
-  if (!debug) {
+  if (!debug && optimize) {
     plugins += `new UglifyJSPlugin({
       comments: false,
       mangle: {
@@ -86,7 +86,7 @@ resolver,
   return plainConfig.replace(`"${PLUGINS_PLACEHOLDER}"`, plugins);
 }
 
-module.exports = function (lambdaPath, outputPath, linkedLibs, debug) {
+module.exports = function (lambdaPath, outputPath, linkedLibs, debug, optimize) {
   const schemasPath = path.join(lambdaPath, Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR);
   const customWebpackConfigPath = path.join(lambdaPath, 'deep.webpack.json');
   const tmpBootstrapName = `.deep-tmp-${Date.now()}-${ENTRY_POINT}`;
@@ -106,6 +106,8 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug) {
       extensions: [ '.js', '.json' ],
       alias: {
         'deep-framework$': 'deep-framework/lib.es6/bootstrap.js',
+        'deep-core$': 'deep-core/lib.es6/bootstrap.js',
+        'deep-kernel$': 'deep-kernel/lib.es6/bootstrap.js',
       },
     },
     watch: false,
@@ -188,7 +190,7 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug) {
     .then(() => helpers.fileExists(customWebpackConfigPath))
     .then(hasCustomWebpackConfig => {
       if (!hasCustomWebpackConfig) {
-        const rawConfig = plainify(defaultConfig, debug);
+        const rawConfig = plainify(defaultConfig, debug, optimize);
 
         return Promise.resolve({ rawConfig, tmpBootstrapJs });
       }
@@ -198,7 +200,7 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug) {
           const rawConfig = plainify(webpackMerge.smart(
             defaultConfig, 
             customWebpackConfig || {}
-          ), debug);
+          ), debug, optimize);
           
           return Promise.resolve({ rawConfig, tmpBootstrapJs });
         });

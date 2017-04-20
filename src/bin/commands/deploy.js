@@ -495,6 +495,8 @@ module.exports = function(mainPath) {
               });
             })
           ).then(() => {
+            removePackedLambdas();
+            
             console.info('All resources have been updated.');
           }).catch(e => {
             setImmediate(() => {

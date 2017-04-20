@@ -9,6 +9,7 @@ const NpmInstall = require('../../../../lib.compiled/NodeJS/NpmInstall').NpmInst
 const NpmInstallLibs = require('../../../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
 const NpmLink = require('../../../../lib.compiled/NodeJS/NpmLink').NpmLink;
 const Exec = require('../../../../lib.compiled/Helpers/Exec').Exec;
+const BundleException = require('./exception/bundle-exception');
 
 function fileExists(filePath) {
   return new Promise(resolve => {
@@ -62,7 +63,7 @@ function bundle (configFile, debug) {
     
     webpack.run((result) => {
       if (result.failed) {
-        return reject(result.error);
+        return reject(new BundleException(result.error));
       }
   
       resolve();
@@ -95,7 +96,7 @@ function objectValues (object) {
 }
 
 function npmInstallLib(libs, global, dryRun) {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const cmd = new NpmInstallLibs()
       .addExtraArg(
         '--no-bin-links',
@@ -108,7 +109,13 @@ function npmInstallLib(libs, global, dryRun) {
     cmd.global = global;
     cmd.libs = libs;
     
-    cmd.run(resolve);
+    cmd.run((error) => {
+      if (error) {
+        return reject(error);
+      }
+  
+      resolve();
+    });
   });
 }
 
@@ -144,7 +151,7 @@ function hasDependency (packagePath, lib) {
 }
 
 function npmLink (packagePath, libs, dryRun) {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const cmd = new NpmLink(packagePath)
       .addExtraArg(
         '--silent',
@@ -154,23 +161,34 @@ function npmLink (packagePath, libs, dryRun) {
       
     cmd.libs = libs;
     
-    cmd.run(resolve);
+    cmd.run((error) => {
+      if (error) {
+        return reject(error);
+      }
+  
+      resolve();
+    });
   });
 }
 
 function npmInstall (packagePath, dryRun) {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     new NpmInstall(packagePath)
       .addExtraArg(
         '--no-bin-links',
         '--only=prod',
         '--silent',
-        '--link',
         '--no-shrinkwrap',
         '--depth=0'
       )
       .dry(dryRun)
-      .run(resolve);
+      .run((error) => {
+        if (error) {
+          return reject(error);
+        }
+    
+        resolve();
+      });
   });
 }
 

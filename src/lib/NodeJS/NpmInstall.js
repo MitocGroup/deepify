@@ -119,8 +119,11 @@ export class NpmInstall {
    * @returns {NpmInstall}
    */
   run(cb, silent = NpmInstall.DEFAULT_SILENT_STATE) {
+    let error = null;
+    
     if (this._dry) {
-      cb();
+      cb(error);
+      
       return this;
     }
     
@@ -153,14 +156,14 @@ export class NpmInstall {
     cmdStack.forEach((cmd) => {
       cmd.run((result) => {
         if (result.failed && !this._silent) {
-          console.error(result.error);
+          error = result.error;
         }
 
         remaining--;
       }, !silent);
     });
 
-    wait.ready(cb);
+    wait.ready(() => cb(error));
 
     return this;
   }
