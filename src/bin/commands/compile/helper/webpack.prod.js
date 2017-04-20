@@ -73,13 +73,11 @@ new webpack.LoaderOptionsPlugin({
 resolver,
 `;
 
+  // @todo enable mangle when stable
   if (!debug && optimize) {
     plugins += `new UglifyJSPlugin({
       comments: false,
-      mangle: {
-        keep_quoted: true,
-        keep_fnames: true,
-      },
+      mangle: false,
     }),`;
   }
 

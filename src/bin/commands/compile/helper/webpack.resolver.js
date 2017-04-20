@@ -82,9 +82,9 @@ DeepResolver.prototype.hookRequire = function(dep) {
 
 // @todo Add other libraries loaded dynamically
 DeepResolver.prototype.DEPS_TO_HOOK = [
-  /deep-framework\/lib\.compiled\/Framework\.js$/i,
-  /deep-core\/lib\.compiled\/Generic\/UniversalRequire\.js$/i,
-  /deep-validation\/lib\.compiled\/Validation\.js$/i,
+  /deep-framework\/lib(\.[a-z0-9]+)?\/Framework\.js$/i,
+  /deep-core\/lib(\.[a-z0-9]+)?\/Generic\/UniversalRequire\.js$/i,
+  /deep-validation\/lib(\.[a-z0-9]+)?\/Validation\.js$/i,
 ];
 
 DeepResolver.prototype.apply = function(compiler) {

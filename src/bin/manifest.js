@@ -310,9 +310,9 @@ module.exports = {
               description: 'Skip build retry without optimizations if failed',
               required: false,
             },
-            'optimize': {
-              alias: 'o',
-              description: 'Optimize lambda webpack build (highly experimental)',
+            'skip-optimize': {
+              alias: 's',
+              description: 'Skip build optimizations step',
               required: false,
             },
             'debug-build': {

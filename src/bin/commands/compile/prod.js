@@ -60,7 +60,7 @@ module.exports = function(mainPath) {
     microservices: helpers.getMicroservicesToCompile(this.opts.locate('partial').value),
     debug: this.opts.locate('debug-build').exists,
     purge: this.opts.locate('purge').exists,
-    optimize: this.opts.locate('optimize').exists,
+    optimize: !this.opts.locate('skip-optimize').exists,
     optimizeRetry: !this.opts.locate('skip-optimize-retry').exists,
   };
   
