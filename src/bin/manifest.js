@@ -634,6 +634,7 @@ module.exports = {
       section: 'Blue green deployments',
       commands: {
         stop: {
+          description: 'Stop real-time replication of DynamoDB tables or S3 buckets',
           example: 'deepify replicate stop --tables',
           args: {
             path: {
@@ -655,7 +656,6 @@ module.exports = {
             tables: {
               alias: 't',
               description: 'Tables to replicate',
-              required: true,
             },
             'private-ignore': {
               description: 'Path to ignore file for private bucket replication',
@@ -669,6 +669,7 @@ module.exports = {
         },
         start: {
           example: 'deepify replicate start --tables',
+          description: 'Start real-time replication of DynamoDB or S3 resources',
           args: {
             path: {
               description: 'The path app',
@@ -689,7 +690,6 @@ module.exports = {
             tables: {
               alias: 't',
               description: 'Tables to replicate',
-              required: true,
             },
             'private-ignore': {
               description: 'Path to ignore file for private bucket replication',
@@ -703,8 +703,7 @@ module.exports = {
         },
         prepare: {
           example: 'deepify replicate prepare --blue blueHash --green greenHash --tables User,Comments,Threads',
-          description: 'Prepare application resources for blue green deployment',
-          section: 'Prepare your local environment',
+          description: 'Enable replication for existing DynamoDB tables or S3 buckets',
           opts: {
             blue: {
               alias: 'b',
@@ -719,7 +718,6 @@ module.exports = {
             tables: {
               alias: 't',
               description: 'Tables to replicate',
-              required: true,
             },
             'private-ignore': {
               description: 'Path to ignore file for private bucket replication',
@@ -739,8 +737,7 @@ module.exports = {
         },
         status: {
           example: 'deepify replicate status --blue blueHash --green greenHash --tables User,Comments,Threads',
-          description: 'Check application resources for blue green deployment',
-          section: 'Prepare your local environment',
+          description: 'Check replication status',
           opts: {
             raw: {
               alias: 'r',
@@ -760,7 +757,6 @@ module.exports = {
             tables: {
               alias: 't',
               description: 'Tables to replicate',
-              required: true,
             },
             'private-ignore': {
               description: 'Path to ignore file for private bucket replication',

@@ -40,7 +40,7 @@ module.exports = function(commandParams) {
     let replication = new Replication(blueConfig, greenConfig);
 
     let params = {
-      DB: getTables(),
+      DB: getTables(blueConfig),
       FS: getIgnoreGlobs(),
     };
 
@@ -81,8 +81,35 @@ module.exports = function(commandParams) {
   /**
    * @returns {Array}
    */
-  function getTables() {
-    return tablesRaw.split(',') || [];
+  function getTables(appConfig) {
+    let allTables = appConfig.modelsSettings.reduce((tables, modelObj) => {
+      return tables.concat(Object.keys(modelObj));
+    }, []);
+
+    if (tablesRaw) {
+      let tablesToReplicateRaw = tablesRaw.split(',');
+      let tablesToReplicate = [];
+
+      for (let tableToReplicate of tablesToReplicateRaw) {
+        let tableFound = false;
+
+        for (let table of allTables) {
+          if (tableToReplicate.toLowerCase() === table.toLowerCase()) {
+            tablesToReplicate.push(table);
+            tableFound = true;
+            break;
+          }
+        }
+
+        if (!tableFound) {
+          throw new Error(`Missing "${tableToReplicate}" model in application`);
+        }
+      }
+
+      return tablesToReplicate;
+    }
+
+    return allTables;
   }
 
   /**
