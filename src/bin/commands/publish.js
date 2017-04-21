@@ -218,9 +218,16 @@ module.exports = function(mainPath) {
         if (!property.config.aws) {
           console.debug('Missing aws config in snapshot. Using aws config from deeploy.json');
 
-          let deeployJson = require(path.join(mainPath, 'deeploy.json'));
+          try {
+            let deeployJson = require(path.join(mainPath, 'deeploy.json'));
 
-          property.config.aws = deeployJson.aws;
+            property.config.aws = deeployJson.aws;
+          } catch (e) {
+            throw new Error(
+              `Missing "deeploy.json file in ${mainPath}". ` +
+              `Please ensure you are running "deepify ${this.name}" in property directory`
+            );
+          }
         }
 
         resolve(property.config);
