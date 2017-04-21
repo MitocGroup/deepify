@@ -67,7 +67,7 @@ module.exports = function(mainPath) {
       );
     });
   }).catch(e => {
-    console.error(e.toString(), e.stack);
+    console.error(e.stack);
     publishCommand.exit(1);
   });
 
