@@ -10,6 +10,7 @@ const BLUE_GREEN_MICROSERVICE = 'deep-blue-green';
 module.exports = function(commandParams) {
   let fs = require('fs');
   let os = require('os');
+  let path = require('path');
   let Replication = require('deep-package-manager').Replication_Instance;
   let Property = require('deep-package-manager').Property_Instance;
   let tablesRaw = commandParams.context.opts.locate('tables').value;
@@ -55,6 +56,21 @@ module.exports = function(commandParams) {
       property.configObj.tryLoadConfig(error => {
         if (error) {
           return reject(error);
+        }
+
+        if (!property.config.aws) {
+          console.debug('Missing aws config in snapshot. Using aws config from deeploy.json');
+
+          try {
+            let deeployJson = require(path.join(mainPath, 'deeploy.json'));
+
+            property.config.aws = deeployJson.aws;
+          } catch (e) {
+            throw new Error(
+              `Missing "deeploy.json file in ${mainPath}". ` +
+              `Please ensure you are running "deepify ${this.name}" in property directory`
+            );
+          }
         }
 
         resolve(property.config);
