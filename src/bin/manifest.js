@@ -629,28 +629,22 @@ module.exports = {
       },
     },
     'replicate': {
-      description: 'Blue Green replication management',
+      description: 'Manage replication for blue green deployments',
       commandsPath: './commands/replicate',
       section: 'Blue green deployments',
       commands: {
-        stop: {
-          description: 'Stop real-time replication of DynamoDB tables or S3 buckets',
-          example: 'deepify replicate stop --tables',
-          args: {
-            path: {
-              description: 'The path app',
-              required: false,
-            },
-          },
+        prepare: {
+          example: 'deepify replicate prepare --blue blueHash --green greenHash --tables User,Comments,Threads',
+          description: 'Enable replication (backfill) for existing DynamoDB tables or S3 buckets',
           opts: {
             blue: {
               alias: 'b',
-              description: 'Blue env hash',
+              description: 'Blue environment hash',
               required: true,
             },
             green: {
               alias: 'g',
-              description: 'Green env hash',
+              description: 'Green environment hash',
               required: true,
             },
             tables: {
@@ -663,6 +657,12 @@ module.exports = {
             },
             'public-ignore': {
               description: 'Path to ignore file for public bucket replication',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path app',
               required: false,
             },
           },
@@ -679,12 +679,12 @@ module.exports = {
           opts: {
             blue: {
               alias: 'b',
-              description: 'Blue env hash',
+              description: 'Blue environment hash',
               required: true,
             },
             green: {
               alias: 'g',
-              description: 'Green env hash',
+              description: 'Green environment hash',
               required: true,
             },
             tables: {
@@ -701,18 +701,24 @@ module.exports = {
             },
           },
         },
-        prepare: {
-          example: 'deepify replicate prepare --blue blueHash --green greenHash --tables User,Comments,Threads',
-          description: 'Enable replication for existing DynamoDB tables or S3 buckets',
+        stop: {
+          description: 'Stop real-time replication of DynamoDB tables or S3 buckets',
+          example: 'deepify replicate stop --tables',
+          args: {
+            path: {
+              description: 'The path app',
+              required: false,
+            },
+          },
           opts: {
             blue: {
               alias: 'b',
-              description: 'Blue env hash',
+              description: 'Blue environment hash',
               required: true,
             },
             green: {
               alias: 'g',
-              description: 'Green env hash',
+              description: 'Green environment hash',
               required: true,
             },
             tables: {
@@ -725,12 +731,6 @@ module.exports = {
             },
             'public-ignore': {
               description: 'Path to ignore file for public bucket replication',
-              required: false,
-            },
-          },
-          args: {
-            path: {
-              description: 'The path app',
               required: false,
             },
           },
@@ -746,12 +746,12 @@ module.exports = {
             },
             blue: {
               alias: 'b',
-              description: 'Blue env hash',
+              description: 'Blue environment hash',
               required: true,
             },
             green: {
               alias: 'g',
-              description: 'Green env hash',
+              description: 'Green environment hash',
               required: true,
             },
             tables: {
@@ -779,7 +779,7 @@ module.exports = {
     publish: {
       description: 'Blue Green traffic management',
       section: 'Blue green deployments',
-      example: 'deepify blue-green publish --blue blueHash --green greenHash --ratio 3:1 --replicate-data',
+      example: 'deepify publish --blue blueHash --green greenHash --ratio 4:1 --data-replicate',
       args: {
         path: {
           description: 'The path app',
@@ -789,12 +789,12 @@ module.exports = {
       opts: {
         blue: {
           alias: 'b',
-          description: 'Blue env hash',
+          description: 'Blue environment hash',
           required: true,
         },
         green: {
           alias: 'g',
-          description: 'Green env hash',
+          description: 'Green environment hash',
           required: true,
         },
         'ratio': {
@@ -808,7 +808,7 @@ module.exports = {
           required: false,
         },
         'skip-route53': {
-          description: 'Skip checking for route53 environments record',
+          description: 'Skip checking for DNS records in Route53',
           required: false,
         }
       },
