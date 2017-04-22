@@ -42,7 +42,7 @@ DeepResolver.prototype.inlineRequire = function(dep) {
     ` if (container.hasOwnProperty(dep)) {`,
     `   return container[dep];`,
     ` }`,
-    ` return global.require(dep);`,
+    ` throw new Error('Missing dependency ' + dep);`,
     `})()`,
   ].join('\n');
 };
@@ -82,8 +82,6 @@ DeepResolver.prototype.hookRequire = function(dep) {
 
 // @todo Add other libraries loaded dynamically
 DeepResolver.prototype.DEPS_TO_HOOK = [
-  /deep-framework\/lib(\.[a-z0-9]+)?\/Framework\.js$/i,
-  /deep-core\/lib(\.[a-z0-9]+)?\/Generic\/UniversalRequire\.js$/i,
   /deep-validation\/lib(\.[a-z0-9]+)?\/Validation\.js$/i,
 ];
 

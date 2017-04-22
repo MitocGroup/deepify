@@ -61,7 +61,7 @@ module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
     })
     .then(() => {
       const buildPath = path.join(
-        tmp.dirSync().name,
+        helpers.__tmpDir,
         `${Hash.md5(lambdaPath)}_${new Date().getTime()}`
       );
       const configFile = path.join(buildPath, 'webpack.prod.js');
@@ -71,7 +71,13 @@ module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
       
       return pify(fse.ensureDir)(bundlePath)
         .then(() => {
-          return webpackConfig(lambdaPath, bundlePath, libsToLink, debug, optimize)
+          return webpackConfig(
+              lambdaPath, 
+              bundlePath, 
+              libsToLink, 
+              debug, 
+              optimize
+            )
             .then(webpackConfigResult => {
               const { rawConfig, tmpBootstrapJs } = webpackConfigResult;
               
@@ -110,12 +116,6 @@ module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
       
       return pify(fse.remove)(bundleDestination)
         .catch(() => Promise.resolve())
-        .then(() => helpers.zip(bundlePath, bundleDestination))
-        .then(() => Promise.resolve(buildPath));
-    })
-    .then(buildPath => {
-      console.debug(`Cleanup temporary data for "${lambdaPath}"`);
-      
-      return pify(fse.remove)(buildPath);
+        .then(() => helpers.zip(bundlePath, bundleDestination));
     });
 };

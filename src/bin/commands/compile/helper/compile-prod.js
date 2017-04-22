@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
 const pify = require('pify');
+const tmp = require('tmp');
 const Bin = require('../../../../lib.compiled/NodeJS/Bin').Bin;
 const NpmInstall = require('../../../../lib.compiled/NodeJS/NpmInstall').NpmInstall;
 const NpmInstallLibs = require('../../../../lib.compiled/NodeJS/NpmInstallLibs').NpmInstallLibs;
@@ -192,7 +193,12 @@ function npmInstall (packagePath, dryRun) {
   });
 }
 
+// think on more flexible way of generating it
+const __tmpDir = path.join(tmp.dirSync().name, `.deepify-${Date.now()}`);
+fse.ensureDirSync(__tmpDir);
+
 module.exports = {
+  __tmpDir, // this is used internally!!!
   arrayUnique, getMicroservicesToCompile, 
   objectValues, npmInstall, npmInstallLib, 
   npmLink, bundle, zip, fileExists, hasDependency,

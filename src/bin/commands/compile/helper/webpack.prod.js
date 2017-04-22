@@ -19,6 +19,7 @@ const NULL_MODULES = [
   'relative-fs',            // @local
   'dynalite',               // @local
   'local-dynamo',           // @local
+  'leveldb',                // @junk (leveldb)
 ];
 
 const path = require('path');
@@ -36,7 +37,6 @@ const WEBPACK_LIB = path.join(GLOBAL_NODE_LIBS, 'webpack/lib/webpack.js');
 const WEBPACK_CONST_DEP_LIB = path.join(GLOBAL_NODE_LIBS, 'webpack/lib/dependencies/ConstDependency.js');
 const UGLIFYJS_PLUGIN = path.join(GLOBAL_NODE_LIBS, 'uglifyjs-webpack-plugin/dist/index.js');
 
-// @todo remove it?
 console.debug('GLOBAL_NODE_LIBS', GLOBAL_NODE_LIBS);
 console.debug('WEBPACK_LIB', WEBPACK_LIB);
 console.debug('WEBPACK_CONST_DEP_LIB', WEBPACK_CONST_DEP_LIB);
@@ -89,7 +89,6 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug, optimize) 
   const customWebpackConfigPath = path.join(lambdaPath, 'deep.webpack.json');
   const tmpBootstrapName = `.deep-tmp-${Date.now()}-${ENTRY_POINT}`;
   const tmpBootstrapJs = path.join(lambdaPath, tmpBootstrapName);
-  const deepFrameworkPackage = path.join(lambdaPath, 'node_modules', 'deep-framework', 'package.json');
   const nullModulePath = path.join(__dirname, 'webpack.null-module.js');
   const defaultConfig = {
     entry: tmpBootstrapName,
@@ -100,12 +99,24 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug, optimize) 
       libraryTarget: 'commonjs2', // @see https://github.com/webpack/webpack/issues/1114
     },
     resolve: {
+      unsafeCache: /mode_modules\//,
+      symlinks: true,
       modules: [ lambdaPath, 'node_modules' ],
       extensions: [ '.js', '.json' ],
       alias: {
         'deep-framework$': 'deep-framework/lib.es6/bootstrap.js',
         'deep-core$': 'deep-core/lib.es6/bootstrap.js',
         'deep-kernel$': 'deep-kernel/lib.es6/bootstrap.js',
+        'deep-asset$': 'deep-asset/lib.es6/bootstrap.js',
+        'deep-cache$': 'deep-cache/lib.es6/bootstrap.js',
+        'deep-security$': 'deep-security/lib.es6/bootstrap.js',
+        'deep-resource$': 'deep-resource/lib.es6/bootstrap.js',
+        'deep-log$': 'deep-log/lib.es6/bootstrap.js',
+        'deep-event$': 'deep-event/lib.es6/bootstrap.js',
+        'deep-validation$': 'deep-validation/lib.es6/bootstrap.js',
+        'deep-search$': 'deep-search/lib.es6/bootstrap.js',
+        'deep-db$': 'deep-db/lib.es6/bootstrap.js',
+        'deep-fs$': 'deep-fs/lib.es6/bootstrap.js',
       },
     },
     watch: false,
@@ -113,6 +124,15 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug, optimize) 
     externals: EXTERNALS,
     devtool: false,
     stats: 'errors-only',
+    node: { // avoid polyfill node libraries and internals
+      console: false, process: false, global: false, __filename: true,
+      __dirname: true, buffer: false, setImmediate: false, assert: false,
+      constants: false, crypto: false, domain: false, events: false,
+      http: false, https: false, os: false, path: false, punycode: false,
+      querystring: false, stream: false, string_decoder: false, sys: false,
+      timers: false, tty: false, url: false, util: false, vm: false, zlib: false,
+    },
+    cache: true,
   };
   const deepDeps = {};
   
@@ -127,28 +147,6 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug, optimize) 
   });
   
   return pify(fse.copy)(path.join(lambdaPath, ENTRY_POINT), tmpBootstrapJs)
-    .then(() => {
-      return helpers.fileExists(deepFrameworkPackage)
-        .then(hasDeepFramework => {
-          if (!hasDeepFramework) {
-            return Promise.resolve();
-          }
-          
-          return pify(fse.readJson)(deepFrameworkPackage)
-            .then(frameworkPackage => {
-              Object.keys((frameworkPackage.dependencies || {}))
-                .filter(deepLibrary => {
-                  return  /^deep-/i.test(deepLibrary) 
-                    && !/^deep-(core|kernel)/i.test(deepLibrary);
-                })
-                .forEach(deepLibrary => {
-                  deepDeps[`${deepLibrary}$`] = `${deepLibrary}/lib.es6/bootstrap.js`;
-                });
-                
-              return Promise.resolve();
-            });
-        });
-    })
     .then(() => {
       return helpers.fileExists(schemasPath)
         .then(hasSchemas => {
@@ -167,7 +165,7 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug, optimize) 
                   deepDeps[schemaInclude] = `./${schemasDir}/${file}`;
                 });
                 
-              return Promise.resolve(); 
+              return Promise.resolve();
             });
         });
     })

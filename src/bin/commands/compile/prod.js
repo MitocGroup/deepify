@@ -24,6 +24,7 @@ module.exports = function(mainPath) {
   const PromisePool = require('es6-promise-pool');
   const prettyMs = require('pretty-ms');
   const path = require('path');
+  const pify = require('pify');
 
   validateNodeVersion.call(this);
 
@@ -182,21 +183,29 @@ module.exports = function(mainPath) {
       maxThreads
     ).start();
   })
-  .then(() => {
-    
-    // remove if accidentally dumped
-    try {
-      fse.removeSync(compiledLambdasPath);
-    } catch (error) { }
-    
+  .then(() => pify(fse.remove)(compiledLambdasPath))
+  .then(() => {    
     const runTime = prettyMs(Date.now() - startTime, {compact: true});
     
     console.log(`Compilation of ${compiledLambdas.length} lambdas finished in ${runTime}`);
+    
+    return Promise.resolve(0);
   })
   .catch(error => {
-    fse.outputJsonSync(compiledLambdasPath, compiledLambdas);
-    
     console.error(error);
-    this.exit(1);
+    
+    return pify(fse.outputJson)(compiledLambdasPath, compiledLambdas)
+      .catch(error => {
+        console.error(`Error dumping compiled lambdas: ${error}`);
+      })
+      .then(() => {
+        return Promise.resolve(1);
+      });
+  })
+  .then(exitCode => {
+    console.log(`Cleaning up temporary directory ${helpers.__tmpDir}`);
+    
+    return pify(fse.remove)(helpers.__tmpDir)
+      .then(() => this.exit(exitCode))
   });
 };

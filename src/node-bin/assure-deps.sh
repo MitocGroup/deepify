@@ -4,7 +4,7 @@
 # Fixing "spawn sh ENOENT" issue
 cd /
 
-REQUIRED_DEPS=("babel-cli" "aws-sdk" "babel-preset-node6" "babel-plugin-add-module-exports" "uglifyjs-webpack-plugin" "mishoo/UglifyJS2#harmony" "webpack" "node-pre-gyp");
+REQUIRED_DEPS=("babel-cli" "aws-sdk" "babel-preset-node6" "babel-plugin-add-module-exports" "uglifyjs-webpack-plugin" "mishoo/UglifyJS2#harmony" "webpack" "node-pre-gyp" "prebuild-install");
 NPM_BIN=`which npm`
 NPM_GLOBAL_NM=`$NPM_BIN root -g`
 
