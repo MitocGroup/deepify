@@ -11,6 +11,7 @@ const tmp = require('tmp');
 const path = require('path');
 const webpackConfig = require('./webpack.prod');
 const fse = require('fs-extra');
+const fs = require('fs');
 const pify = require('pify');
 
 module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
@@ -51,15 +52,17 @@ module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
           return Promise.resolve();
         }
         
-        return helpers.npmLink(lambdaPath, libs, debug);
+        return helpers.npmLink(lambdaPath, libs, debug)
+          .then(() => Promise.resolve(libs));
       });
     })
-    .then(() => {
+    .then(libsToUnlink => {
       console.debug(`${dry}Running "npm install" on "${lambdaPath}"`);
       
-      return helpers.npmInstall(lambdaPath, debug);
+      return helpers.npmInstall(lambdaPath, debug)
+        .then(() => Promise.resolve(libsToUnlink));
     })
-    .then(() => {
+    .then(libsToUnlink => {
       const buildPath = path.join(
         helpers.__tmpDir,
         `${Hash.md5(lambdaPath)}_${new Date().getTime()}`
@@ -102,10 +105,10 @@ module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
                 .then(() => Promise.reject(error));
             });
         })
-        .then(() => Promise.resolve({ bundlePath, buildPath }));
+        .then(() => Promise.resolve({ bundlePath, buildPath, libsToUnlink }));
     })
     .then(result => {
-      const { bundlePath, buildPath } = result;
+      const { bundlePath, buildPath, libsToUnlink } = result;
       const bundleDestination = path.join(
         lambdaPath, 
         '..', 
@@ -116,6 +119,18 @@ module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
       
       return pify(fse.remove)(bundleDestination)
         .catch(() => Promise.resolve())
-        .then(() => helpers.zip(bundlePath, bundleDestination));
+        .then(() => helpers.zip(bundlePath, bundleDestination))
+        .then(() => Promise.resolve(libsToUnlink));
+    })
+    .then(libsToUnlink => {
+      if (libsToUnlink.length <= 0) {
+        return Promise.resolve();
+      }
+      
+      console.debug(`${dry}Removed linked libraries from "${lambdaPath}" (${libsToUnlink.join(', ')})`);
+      
+      return Promise.all(libsToUnlink.map(lib => {
+        return pify(fs.unlink)(path.join(lambdaPath, 'node_modules', lib));
+      }));
     });
 };

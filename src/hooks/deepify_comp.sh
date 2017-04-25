@@ -178,7 +178,7 @@ __deepify_comp() {
           if [ "${COMP_WORDS[1]}" = "replicate" ]; then
         
         if [ "${COMP_CWORD}" -eq "2" ]; then
-          WORDS=( "stop"  "start"  "prepare"  "status" )
+          WORDS=( "prepare"  "start"  "stop"  "status" )
 
           if [ "${CUR_WORD}" = "replicate" ]; then
             COMPREPLY=WORDS;
