@@ -800,7 +800,7 @@ module.exports = {
         'ratio': {
           alias: 'r',
           description: 'Blue Green traffic ration. Ex 20%: --ratio="4:1"',
-          required: false,
+          required: true,
         },
         'data-replicate': {
           alias: 'd',
