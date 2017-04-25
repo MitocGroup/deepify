@@ -1,7 +1,7 @@
 {
   "name": "deepify",
-  "version": "3.0.27",
-  "buildDate": "Tue Apr 25 15:34:15 EEST 2017",
+  "version": "3.0.29",
+  "buildDate": "Tue Apr 25 16:57:04 EEST 2017",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -84,7 +84,8 @@
     "twig": "^1.10.x",
     "webpack-merge": "^4.1.x",
     "pify": "^2.3.x",
-    "pretty-ms": "^2.1.x"
+    "pretty-ms": "^2.1.x",
+    "glob": "^7.1.x"
   },
   "devDependencies": {
     "chai": "^3.5.x",

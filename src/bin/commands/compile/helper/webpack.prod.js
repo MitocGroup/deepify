@@ -1,5 +1,6 @@
 'use strict';
 
+const CUSTOM_WEBPACK_CONFIG = 'deep.bundle.json';
 const ENTRY_POINT = 'bootstrap.js';
 const R_DEEP_DYN_MODULES = '__deep_dyn_modules__';
 const LAMBDA_ROOT = '/var/task';
@@ -22,6 +23,7 @@ const NULL_MODULES = [
   'leveldb',                // @junk (leveldb)
 ];
 
+const glob = require('glob');
 const path = require('path');
 const fse = require('fs-extra');
 const fs = require('fs');
@@ -84,9 +86,60 @@ resolver,
   return plainConfig.replace(`"${PLUGINS_PLACEHOLDER}"`, plugins);
 }
 
+function processDeepConfig(lambdaPath, outputPath, deepConfig) {
+  if (deepConfig.hasOwnProperty('include_files')) {
+    let includeFiles = deepConfig.include_files || [];
+    
+    if (!Array.isArray(includeFiles)) {
+      includeFiles = [ includeFiles.toString() ];
+    }
+    
+    return Promise.all(includeFiles.map(includePattern => {
+      const globOptions = {
+        cwd: lambdaPath,
+        nosort: true,
+        realpath: false,
+        absolute: true,
+        nodir: true,
+      };
+      
+      console.debug(`Include additional assets to ${lambdaPath} build using pattern ${includePattern}`);
+
+      return pify(glob)(includePattern, globOptions)
+        .then(files => {
+          if ((files || []).length <= 0) {
+            return Promise.resolve();
+          }
+          
+          return Promise.all(files.map(file => {
+            const relativePath = file.substr(lambdaPath.length + 1);
+            const destination = path.join(outputPath, relativePath);
+            
+            console.debug(`Copy additional asset ${file} to ${destination}`);
+            
+            return pify(fse.copy)(file, destination);
+          }));
+        });
+    }));
+  }
+  
+  return Promise.resolve();
+}
+
+function preprocessCustomConfig(lambdaPath, outputPath, customConfig) {
+  customConfig.deep = customConfig.deep || {};
+  
+  return processDeepConfig(lambdaPath, outputPath, customConfig.deep)
+    .then(() => {
+      delete customConfig.deep;
+      
+      return Promise.resolve(customConfig);
+    });
+}
+
 module.exports = function (lambdaPath, outputPath, linkedLibs, debug, optimize) {
   const schemasPath = path.join(lambdaPath, Core.AWS.Lambda.Runtime.VALIDATION_SCHEMAS_DIR);
-  const customWebpackConfigPath = path.join(lambdaPath, 'deep.webpack.json');
+  const customWebpackConfigPath = path.join(lambdaPath, CUSTOM_WEBPACK_CONFIG);
   const tmpBootstrapName = `.deep-tmp-${Date.now()}-${ENTRY_POINT}`;
   const tmpBootstrapJs = path.join(lambdaPath, tmpBootstrapName);
   const nullModulePath = path.join(__dirname, 'webpack.null-module.js');
@@ -193,9 +246,16 @@ module.exports = function (lambdaPath, outputPath, linkedLibs, debug, optimize) 
       
       return pify(fse.readJson)(customWebpackConfigPath)
         .then(customWebpackConfig => {
+          return preprocessCustomConfig(
+            lambdaPath, 
+            outputPath, 
+            customWebpackConfig || {}
+          );
+        })
+        .then(customWebpackConfig => {
           const rawConfig = plainify(webpackMerge.smart(
             defaultConfig, 
-            customWebpackConfig || {}
+            customWebpackConfig
           ), debug, optimize);
           
           return Promise.resolve({ rawConfig, tmpBootstrapJs });
