@@ -121,6 +121,13 @@ function npmInstallLib(libs, global, dryRun) {
 }
 
 function hasDependency (packagePath, lib) {
+  return readDependencies(packagePath)
+    .then(deps => {
+      return Promise.resolve(Object.keys(deps).indexOf(lib) !== -1)
+    });
+}
+
+function readDependencies (packagePath) {
   const packageJsonPath = path.join(packagePath, 'package.json');
   
   return fileExists(packageJsonPath)
@@ -131,7 +138,7 @@ function hasDependency (packagePath, lib) {
       
       return pify(fse.readJson)(packageJsonPath)
         .then(packageJsonContent => {
-          let deps = [];
+          let deps = {};
           
           [
             'dependencies',
@@ -142,11 +149,17 @@ function hasDependency (packagePath, lib) {
             if (packageJsonContent.hasOwnProperty(depKey)) {
               const localDeps = packageJsonContent[depKey] || {};
               
-              deps = deps.concat(Object.keys(localDeps));
+              Object.keys(localDeps).map(depKey => {
+                if (!deps.hasOwnProperty(depKey)) {
+                  deps[depKey] = [];
+                }
+                
+                deps[depKey].push(localDeps[depKey]);
+              });
             }
           });
           
-          return Promise.resolve(deps.indexOf(lib) !== -1);
+          return Promise.resolve(deps);
         });
     });
 }
@@ -201,5 +214,6 @@ module.exports = {
   __tmpDir, // this is used internally!!!
   arrayUnique, getMicroservicesToCompile, 
   objectValues, npmInstall, npmInstallLib, 
-  npmLink, bundle, zip, fileExists, hasDependency,
+  npmLink, bundle, zip, fileExists,
+  hasDependency, readDependencies,
 };

@@ -25,6 +25,7 @@ module.exports = function(mainPath) {
   const prettyMs = require('pretty-ms');
   const path = require('path');
   const pify = require('pify');
+  const npmInstallCache = require('./helper/npm-install-cache');
 
   validateNodeVersion.call(this);
 
@@ -167,6 +168,10 @@ module.exports = function(mainPath) {
             lambdaPath
           ).then(() => {
             compiledLambdas.push(lambdaPath);
+            npmInstallCache.release(lambdaPath);
+            
+            // @todo remove cache stats?
+            npmInstallCache.stats();
             
             return Promise.resolve();
           });

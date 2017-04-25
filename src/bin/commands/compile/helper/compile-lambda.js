@@ -13,6 +13,7 @@ const webpackConfig = require('./webpack.prod');
 const fse = require('fs-extra');
 const fs = require('fs');
 const pify = require('pify');
+const npmInstall = require('./npm-install-cache').install;
 
 module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
   const dry = debug ? '[DRY] ' : '';
@@ -59,7 +60,7 @@ module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
     .then(libsToUnlink => {
       console.debug(`${dry}Running "npm install" on "${lambdaPath}"`);
       
-      return helpers.npmInstall(lambdaPath, debug)
+      return npmInstall(lambdaPath, debug)
         .then(() => Promise.resolve(libsToUnlink));
     })
     .then(libsToUnlink => {
