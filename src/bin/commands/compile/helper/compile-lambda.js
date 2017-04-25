@@ -124,7 +124,7 @@ module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
         .then(() => Promise.resolve(libsToUnlink));
     })
     .then(libsToUnlink => {
-      if (libsToUnlink.length <= 0) {
+      if ((libsToUnlink || []).length <= 0) {
         return Promise.resolve();
       }
       
