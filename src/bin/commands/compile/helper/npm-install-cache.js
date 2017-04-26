@@ -6,6 +6,7 @@
 
 const helpers = require('./compile-prod');
 const Hash = require('deep-package-manager').Helpers_Hash;
+const NpmRun = require('../../../../lib.compiled/NodeJS/NpmRun').NpmRun;
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
@@ -46,7 +47,38 @@ class NpmInstallCache {
             });
         }
         
-        return NpmInstallCache._linkDependencies(lambdaPath, cachedLambdaPath);
+        return NpmInstallCache._linkDependencies(lambdaPath, cachedLambdaPath)
+          .then(() => NpmInstallCache._runScripts(lambdaPath));
+      });
+  }
+  
+  /**
+   * @todo run other scripts
+   */
+  static _runScripts(lambdaPath) {
+    const packageJsonPath = path.join(lambdaPath, 'package.json');
+    
+    return helpers.fileExists(packageJsonPath)
+      .then(hasPackageJson => {
+        if (!hasPackageJson) {
+          return Promise.resolve();
+        }
+        
+        return pify(fse.readJson)(packageJsonPath)
+          .then(packageJsonContent => {
+            if (!packageJsonContent.hasOwnProperty('scripts')
+              || !packageJsonContent.scripts.hasOwnProperty('postinstall')) {
+              
+              return Promise.resolve();
+            }
+            
+            console.debug(`[CACHE] Running postinstall script in ${lambdaPath}`);
+            
+            const script = new NpmRun(lambdaPath);
+            script.cmd = 'postinstall';
+            
+            return pify(script.run.bind(script))();
+          });
       });
   }
   
