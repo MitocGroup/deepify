@@ -135,7 +135,7 @@ module.exports = function(mainPath) {
   function waitForReplicationBackfill(tables) {
     console.debug('Waiting for resources backfill');
 
-    return execReplicateCommand('status', tables, ['--raw']).then(rawResult => {
+    return execReplicateCommand('status', tables, ['--raw'], false).then(rawResult => {
       let backfillStatus = JSON.parse(rawResult);
       let resourceCount = 0;
       let percentSum = 0;
@@ -175,9 +175,10 @@ module.exports = function(mainPath) {
    * @param {String} cmdName
    * @param {String[]} tables
    * @param {String[]} [extraArgs=[]]
+   * @param {Boolean} pipeStdout
    * @returns {Promise}
    */
-  function execReplicateCommand(cmdName, tables, extraArgs) {
+  function execReplicateCommand(cmdName, tables, extraArgs, pipeStdout = true) {
     let exec = new Exec(
       Bin.node,
       scriptPath,
@@ -200,7 +201,7 @@ module.exports = function(mainPath) {
         }
 
         resolve(cmd.result);
-      }, true);
+      }, pipeStdout);
     });
   }
 
@@ -209,8 +210,15 @@ module.exports = function(mainPath) {
    * @returns {Promise}
    */
   function loadPropertyConfig(property) {
+    const privateBucketName = generatePrivateBucketName(property);
+
     return new Promise((resolve, reject) => {
       property.configObj.tryLoadConfig(error => {
+        if (!property.config.provisioning) {
+          error = new Error(`Missing config file in "${privateBucketName}"`);
+          error.stack = error.toString();
+        }
+
         if (error) {
           return reject(error);
         }
@@ -231,7 +239,7 @@ module.exports = function(mainPath) {
         }
 
         resolve(property.config);
-      }, generatePrivateBucketName(property))
+      }, privateBucketName)
     });
   }
 
