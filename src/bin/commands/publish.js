@@ -215,7 +215,7 @@ module.exports = function(mainPath) {
     return new Promise((resolve, reject) => {
       property.configObj.tryLoadConfig(error => {
         if (!property.config.provisioning) {
-          error = new Error(`Missing config file in "${privateBucketName}"`);
+          error = new Error(`Missing bucket or config file in "${privateBucketName}"`);
           error.stack = error.toString();
         }
 
