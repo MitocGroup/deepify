@@ -6,7 +6,6 @@
 
 import {AbstractGenerator} from './AbstractGenerator';
 import {AngularFrontendGenerator} from './AngularFrontendGenerator';
-import {Angular1FrontendGenerator} from './Angular1FrontendGenerator';
 import {VanillaFrontendGenerator} from './VanillaFrontendGenerator';
 import {EngineNotSupportedException} from './Exception/EngineNotSupportedException';
 import {Microservice_Instance as Microservice} from 'deep-package-manager';
@@ -91,10 +90,8 @@ export class MicroserviceGenerator extends AbstractGenerator {
     
     switch (frontendEngine) {
       case 'angular':
-        GeneratorClass = AngularFrontendGenerator;
-        break;
       case 'angular1':
-        GeneratorClass = Angular1FrontendGenerator;
+        GeneratorClass = AngularFrontendGenerator;
         break;
       case 'vanilla':
         GeneratorClass = VanillaFrontendGenerator;
