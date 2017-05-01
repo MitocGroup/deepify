@@ -142,10 +142,6 @@ module.exports = {
           description: 'Update one or more backend action. Works only on application update',
           required: false,
         },
-        'invalidate-cache': {
-          description: 'Invalidate deep dependencies cache',
-          required: false,
-        },
         frontend: {
           description: 'Deploy only frontend resource',
           required: false,
@@ -155,9 +151,9 @@ module.exports = {
           required: false,
         },
         'debug-build': {
-          description: 'Use existing node_modules in lambdas, instead of (re)installing them',
+          description: 'Skip npm install in lambdas',
           required: false,
-        }
+        },
       },
       args: {
         path: {
@@ -282,7 +278,7 @@ module.exports = {
               required: false,
             },
             'es5': {
-              description: 'Compile using es5 preset, instead of the node4 compatible',
+              description: 'Compile using preset compatible with es5 (including modern browsers)',
               required: false,
             },
             'source': {
@@ -301,30 +297,26 @@ module.exports = {
           example: 'deepify compile prod path/to/web_app',
           description: 'Compile lambdas for production',
           opts: {
-            'remove-source': {
-              alias: 's',
-              description: 'Remove original Lambda source',
-              required: false,
-            },
             partial: {
               alias: 'm',
               description: 'Partial deploy (one or several comma separated microservices identifiers)',
               required: false,
             },
-            'linear': {
-              description: 'Compile lambdas linerar',
+            purge: {
+              description: 'Purge lambdas cache including vendor folder',
               required: false,
             },
-            'skip-cache': {
-              description: 'Skip loading lambda dependencies from cache',
+            'skip-optimize-retry': {
+              description: 'Skip build retry without optimizations if failed',
               required: false,
             },
-            'invalidate-cache': {
-              description: 'Invalidate deep dependencies cache',
+            'skip-optimize': {
+              alias: 's',
+              description: 'Skip build optimizations step',
               required: false,
             },
             'debug-build': {
-              description: 'Skip installing/optimizing node_modules and keep existing ones in lambda directory',
+              description: 'Skip npm install and optimizations of lambdas',
               required: false,
             },
           },
@@ -637,11 +629,80 @@ module.exports = {
       },
     },
     'replicate': {
-      description: 'Blue Green replication management',
+      description: 'Manage replication for blue green deployments',
       commandsPath: './commands/replicate',
-      section: 'Blue green deployment',
+      section: 'Blue green deployments',
       commands: {
+        prepare: {
+          example: 'deepify replicate prepare --blue blueHash --green greenHash --tables User,Comments,Threads',
+          description: 'Enable replication (backfill) for existing DynamoDB tables or S3 buckets',
+          opts: {
+            blue: {
+              alias: 'b',
+              description: 'Blue environment hash',
+              required: true,
+            },
+            green: {
+              alias: 'g',
+              description: 'Green environment hash',
+              required: true,
+            },
+            tables: {
+              alias: 't',
+              description: 'Tables to replicate',
+            },
+            'private-ignore': {
+              description: 'Path to ignore file for private bucket replication',
+              required: false,
+            },
+            'public-ignore': {
+              description: 'Path to ignore file for public bucket replication',
+              required: false,
+            },
+          },
+          args: {
+            path: {
+              description: 'The path app',
+              required: false,
+            },
+          },
+        },
+        start: {
+          example: 'deepify replicate start --tables',
+          description: 'Start real-time replication of DynamoDB or S3 resources',
+          args: {
+            path: {
+              description: 'The path app',
+              required: false,
+            },
+          },
+          opts: {
+            blue: {
+              alias: 'b',
+              description: 'Blue environment hash',
+              required: true,
+            },
+            green: {
+              alias: 'g',
+              description: 'Green environment hash',
+              required: true,
+            },
+            tables: {
+              alias: 't',
+              description: 'Tables to replicate',
+            },
+            'private-ignore': {
+              description: 'Path to ignore file for private bucket replication',
+              required: false,
+            },
+            'public-ignore': {
+              description: 'Path to ignore file for public bucket replication',
+              required: false,
+            },
+          },
+        },
         stop: {
+          description: 'Stop real-time replication of DynamoDB tables or S3 buckets',
           example: 'deepify replicate stop --tables',
           args: {
             path: {
@@ -652,18 +713,17 @@ module.exports = {
           opts: {
             blue: {
               alias: 'b',
-              description: 'Blue env hash',
+              description: 'Blue environment hash',
               required: true,
             },
             green: {
               alias: 'g',
-              description: 'Green env hash',
+              description: 'Green environment hash',
               required: true,
             },
             tables: {
               alias: 't',
               description: 'Tables to replicate',
-              required: true,
             },
             'private-ignore': {
               description: 'Path to ignore file for private bucket replication',
@@ -671,84 +731,13 @@ module.exports = {
             },
             'public-ignore': {
               description: 'Path to ignore file for public bucket replication',
-              required: false,
-            },
-          },
-        },
-        start: {
-          example: 'deepify replicate start --tables',
-          args: {
-            path: {
-              description: 'The path app',
-              required: false,
-            },
-          },
-          opts: {
-            blue: {
-              alias: 'b',
-              description: 'Blue env hash',
-              required: true,
-            },
-            green: {
-              alias: 'g',
-              description: 'Green env hash',
-              required: true,
-            },
-            tables: {
-              alias: 't',
-              description: 'Tables to replicate',
-              required: true,
-            },
-            'private-ignore': {
-              description: 'Path to ignore file for private bucket replication',
-              required: false,
-            },
-            'public-ignore': {
-              description: 'Path to ignore file for public bucket replication',
-              required: false,
-            },
-          },
-        },
-        prepare: {
-          example: 'deepify replicate prepare --blue blueHash --green greenHash --tables User,Comments,Threads',
-          description: 'Prepare application resources for blue green deployment',
-          section: 'Prepare your local environment',
-          opts: {
-            blue: {
-              alias: 'b',
-              description: 'Blue env hash',
-              required: true,
-            },
-            green: {
-              alias: 'g',
-              description: 'Green env hash',
-              required: true,
-            },
-            tables: {
-              alias: 't',
-              description: 'Tables to replicate',
-              required: true,
-            },
-            'private-ignore': {
-              description: 'Path to ignore file for private bucket replication',
-              required: false,
-            },
-            'public-ignore': {
-              description: 'Path to ignore file for public bucket replication',
-              required: false,
-            },
-          },
-          args: {
-            path: {
-              description: 'The path app',
               required: false,
             },
           },
         },
         status: {
           example: 'deepify replicate status --blue blueHash --green greenHash --tables User,Comments,Threads',
-          description: 'Check application resources for blue green deployment',
-          section: 'Prepare your local environment',
+          description: 'Check replication status',
           opts: {
             raw: {
               alias: 'r',
@@ -757,18 +746,17 @@ module.exports = {
             },
             blue: {
               alias: 'b',
-              description: 'Blue env hash',
+              description: 'Blue environment hash',
               required: true,
             },
             green: {
               alias: 'g',
-              description: 'Green env hash',
+              description: 'Green environment hash',
               required: true,
             },
             tables: {
               alias: 't',
               description: 'Tables to replicate',
-              required: true,
             },
             'private-ignore': {
               description: 'Path to ignore file for private bucket replication',
@@ -790,8 +778,8 @@ module.exports = {
     },
     publish: {
       description: 'Blue Green traffic management',
-      section: 'Start managing blue green enironments traffic',
-      example: 'deepify blue-green publish --blue blueHash --green greenHash --ratio 3:1 --replicate-data',
+      section: 'Blue green deployments',
+      example: 'deepify publish --blue blueHash --green greenHash --ratio 4:1 --data-replicate',
       args: {
         path: {
           description: 'The path app',
@@ -801,21 +789,28 @@ module.exports = {
       opts: {
         blue: {
           alias: 'b',
-          description: 'Blue env hash',
+          description: 'Blue environment hash',
           required: true,
         },
         green: {
           alias: 'g',
-          description: 'Green env hash',
+          description: 'Green environment hash',
           required: true,
         },
-        'ration': {
-          description: 'Blue Green traffic ration. Ex 20%: --ration="4:1"'
-        },
-        'replicate-data': {
+        'ratio': {
           alias: 'r',
-          description: 'Prepare and start replication streams for blue, green environments',
+          description: 'Blue Green traffic ration. Ex 20%: --ratio="4:1"',
+          required: true,
         },
+        'data-replicate': {
+          alias: 'd',
+          description: 'Prepare and start replication streams for blue, green environments',
+          required: false,
+        },
+        'skip-route53': {
+          description: 'Skip checking for DNS records in Route53',
+          required: false,
+        }
       },
     },
   },

@@ -90,6 +90,7 @@ export class MicroserviceGenerator extends AbstractGenerator {
     
     switch (frontendEngine) {
       case 'angular':
+      case 'angular1':
         GeneratorClass = AngularFrontendGenerator;
         break;
       case 'vanilla':
@@ -145,6 +146,7 @@ export class MicroserviceGenerator extends AbstractGenerator {
   static get ALLOWED_ENGINES() {
     return [
       'angular',
+      'angular1',
       'vanilla',
     ];
   }

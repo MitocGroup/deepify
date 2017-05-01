@@ -88,7 +88,6 @@ lib-cov
 # Coverage directory used by tools like istanbul
 coverage
 coverages
-compile
 
 # Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
@@ -112,3 +111,5 @@ lib.compiled
 /tests/*
 config.gypi
 **/bin/test/**/*.js
+
+/vendor

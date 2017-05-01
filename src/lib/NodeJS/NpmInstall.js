@@ -119,8 +119,11 @@ export class NpmInstall {
    * @returns {NpmInstall}
    */
   run(cb, silent = NpmInstall.DEFAULT_SILENT_STATE) {
+    let error = null;
+    
     if (this._dry) {
-      cb();
+      cb(error);
+      
       return this;
     }
     
@@ -153,14 +156,14 @@ export class NpmInstall {
     cmdStack.forEach((cmd) => {
       cmd.run((result) => {
         if (result.failed && !this._silent) {
-          console.error(result.error);
+          error = result.error;
         }
 
         remaining--;
       }, !silent);
     });
 
-    wait.ready(cb);
+    wait.ready(() => cb(error));
 
     return this;
   }
@@ -210,13 +213,13 @@ export class NpmInstall {
    * @returns {Number}
    */
   static get DEFAULT_CHUNK_SIZE() {
-    let calculatedChunkSize = Math.min(
-      Math.ceil(OS.freemem() * 2 / Math.pow(1024, 3)),
-      OS.cpus().length,
-      16
+    return Math.max(
+      Math.min(
+        Math.ceil(OS.freemem() / 1024 / 1024 / 100),
+        OS.cpus().length,
+        16
+      ),
+      2
     );
-
-    return (calculatedChunkSize < 2) ? 2 : calculatedChunkSize;
-
   }
 }

@@ -29,7 +29,6 @@ module.exports = function(mainPath) {
   let resourcesToUpdate = this.opts.locate('action').value;
   let isProd = this.opts.locate('prod').exists;
   let localOnly = this.opts.locate('dry-run').exists;
-  let invalidateCache = this.opts.locate('invalidate-cache').exists;
   let dumpCodePath = this.opts.locate('dump-local').value;
   let cfgBucket = this.opts.locate('cfg-bucket').value;
   let appEnv = isProd ? 'prod' : this.opts.locate('env').value;
@@ -380,7 +379,6 @@ module.exports = function(mainPath) {
 
     let resourcesToCompile = microservicesToDeploy || resourcesToUpdate;
 
-    invalidateCache && cmd.addArg('--invalidate-cache');
     resourcesToCompile && cmd.addArg(`--partial="${resourcesToCompile}"`);
 
     if (debugBuild) {
@@ -497,6 +495,8 @@ module.exports = function(mainPath) {
               });
             })
           ).then(() => {
+            removePackedLambdas();
+            
             console.info('All resources have been updated.');
           }).catch(e => {
             setImmediate(() => {

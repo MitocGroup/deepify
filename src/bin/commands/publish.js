@@ -8,17 +8,20 @@ const DEFAULT_ENV = 'dev';
 const BLUE_GREEN_MICROSERVICE = 'deep-blue-green';
 
 module.exports = function(mainPath) {
-  let URL = require('url');
+  let path = require('path');
+  let fs = require('fs');
   let Replication = require('deep-package-manager').Replication_Instance;
   let Property = require('deep-package-manager').Property_Instance;
   let Exec = require('../../lib.compiled/Helpers/Exec').Exec;
   let Bin = require('../../lib.compiled/NodeJS/Bin').Bin;
+  let publishCommand = this;
 
   let scriptPath = this.scriptPath;
   let blueHash = this.opts.locate('blue').value;
   let greenHash = this.opts.locate('green').value;
-  let trafficRatio = this.opts.locate('ration').value;
-  let hasToReplicate = this.opts.locate('replicate-data').exists;
+  let trafficRatio = this.opts.locate('ratio').value;
+  let hasToReplicate = this.opts.locate('data-replicate').exists;
+  let skipRoute53 = this.opts.locate('skip-route53').exists;
 
   mainPath = this.normalizeInputPath(mainPath);
   let blueProperty = createProperty(blueHash);
@@ -37,20 +40,26 @@ module.exports = function(mainPath) {
       return tables.concat(Object.keys(modelObj));
     }, []);
 
-
     if (!blueConfig.microservices.hasOwnProperty(BLUE_GREEN_MICROSERVICE)) {
       throw new Error(
         `Missing "${BLUE_GREEN_MICROSERVICE}" microservice. ` +
-        `Please make sure you have installed "${BLUE_GREEN_MICROSERVICE}" microservice in your application.`
+        `Please make sure you have installed "${BLUE_GREEN_MICROSERVICE}" microservice BEFORE deploying any application.`
       );
     }
 
     let replication = new Replication(blueConfig, greenConfig);
 
-    return (hasToReplicate
-      ? replicateData(tables)
-      : Promise.resolve())
-      .then(() => replication.publish(percentage))
+    return (hasToReplicate ? replicateData(tables) : Promise.resolve())
+      .then(() => {
+        if (hasConfig(replication.hashCode)) {
+          let config = getConfig(replication.hashCode);
+
+          return replication.update(percentage, skipRoute53, config);
+        }
+
+        return replication.publish(percentage, skipRoute53);
+      })
+      .then(dumpConfig.bind(this))
       .then(() => {
       console.info(
         `Blue green traffic management has been enabled. ${blueConfig.provisioning.cloudfront.domain} ` +
@@ -58,8 +67,55 @@ module.exports = function(mainPath) {
       );
     });
   }).catch(e => {
-    console.error(e.toString(), e.stack);
+    console.error(e.stack);
+    publishCommand.exit(1);
   });
+
+  /**
+   * @param {String} hashCode
+   * @returns {String}
+   */
+  function buildConfigFileName(hashCode) {
+    return `.${hashCode}.blue-green.json`;
+  }
+
+  /**
+   * @param {String} hashCode
+   * @returns {Boolean}
+   */
+  function hasConfig(hashCode) {
+    return !!getConfig(hashCode);
+  }
+
+  /**
+   * @param {String} hashCode
+   * @returns {Object}
+   */
+  function getConfig(hashCode) {
+    let fileName = buildConfigFileName(hashCode);
+    let filePath = path.join(mainPath, fileName);
+
+    if (fs.existsSync(filePath)) {
+      try {
+        return JSON.parse(fs.readFileSync(filePath));
+      } catch (e) {
+        console.error(`Broken blue green config "${filePath}": ${e.toString()}`);
+
+        publishCommand.exit(1);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @param {Object} config
+   */
+  function dumpConfig(config) {
+    let fileName = buildConfigFileName(config.hash);
+
+    fs.writeFileSync(fileName, JSON.stringify(config, null, '  '));
+  }
 
   /**
    * @param {String[]} tables
@@ -79,7 +135,7 @@ module.exports = function(mainPath) {
   function waitForReplicationBackfill(tables) {
     console.debug('Waiting for resources backfill');
 
-    return execReplicateCommand('status', tables, ['--raw']).then(rawResult => {
+    return execReplicateCommand('status', tables, ['--raw'], false).then(rawResult => {
       let backfillStatus = JSON.parse(rawResult);
       let resourceCount = 0;
       let percentSum = 0;
@@ -119,9 +175,10 @@ module.exports = function(mainPath) {
    * @param {String} cmdName
    * @param {String[]} tables
    * @param {String[]} [extraArgs=[]]
+   * @param {Boolean} pipeStdout
    * @returns {Promise}
    */
-  function execReplicateCommand(cmdName, tables, extraArgs) {
+  function execReplicateCommand(cmdName, tables, extraArgs, pipeStdout = true) {
     let exec = new Exec(
       Bin.node,
       scriptPath,
@@ -144,19 +201,45 @@ module.exports = function(mainPath) {
         }
 
         resolve(cmd.result);
-      }, true);
+      }, pipeStdout);
     });
   }
 
+  /**
+   * @param {Object} property
+   * @returns {Promise}
+   */
   function loadPropertyConfig(property) {
+    const privateBucketName = generatePrivateBucketName(property);
+
     return new Promise((resolve, reject) => {
       property.configObj.tryLoadConfig(error => {
+        if (!property.config.provisioning) {
+          error = new Error(`Missing bucket or config file in "${privateBucketName}"`);
+          error.stack = error.toString();
+        }
+
         if (error) {
           return reject(error);
         }
 
+        if (!property.config.aws) {
+          console.debug('Missing aws config in snapshot. Using aws config from deeploy.json');
+
+          try {
+            let deeployJson = require(path.join(mainPath, 'deeploy.json'));
+
+            property.config.aws = deeployJson.aws;
+          } catch (e) {
+            throw new Error(
+              `Missing "deeploy.json file in ${mainPath}". ` +
+              `Please ensure you are running "deepify ${this.name}" in property directory`
+            );
+          }
+        }
+
         resolve(property.config);
-      }, generatePrivateBucketName(property))
+      }, privateBucketName)
     });
   }
 

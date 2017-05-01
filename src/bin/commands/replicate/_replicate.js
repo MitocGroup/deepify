@@ -10,6 +10,7 @@ const BLUE_GREEN_MICROSERVICE = 'deep-blue-green';
 module.exports = function(commandParams) {
   let fs = require('fs');
   let os = require('os');
+  let path = require('path');
   let Replication = require('deep-package-manager').Replication_Instance;
   let Property = require('deep-package-manager').Property_Instance;
   let tablesRaw = commandParams.context.opts.locate('tables').value;
@@ -39,7 +40,7 @@ module.exports = function(commandParams) {
     let replication = new Replication(blueConfig, greenConfig);
 
     let params = {
-      DB: getTables(),
+      DB: getTables(blueConfig),
       FS: getIgnoreGlobs(),
     };
 
@@ -57,6 +58,21 @@ module.exports = function(commandParams) {
           return reject(error);
         }
 
+        if (!property.config.aws) {
+          console.debug('Missing aws config in snapshot. Using aws config from deeploy.json');
+
+          try {
+            let deeployJson = require(path.join(mainPath, 'deeploy.json'));
+
+            property.config.aws = deeployJson.aws;
+          } catch (e) {
+            throw new Error(
+              `Missing "deeploy.json file in ${mainPath}". ` +
+              `Please ensure you are running "deepify ${this.name}" in property directory`
+            );
+          }
+        }
+
         resolve(property.config);
       }, generatePrivateBucketName(property))
     });
@@ -65,8 +81,35 @@ module.exports = function(commandParams) {
   /**
    * @returns {Array}
    */
-  function getTables() {
-    return tablesRaw.split(',') || [];
+  function getTables(appConfig) {
+    let allTables = appConfig.modelsSettings.reduce((tables, modelObj) => {
+      return tables.concat(Object.keys(modelObj));
+    }, []);
+
+    if (tablesRaw) {
+      let tablesToReplicateRaw = tablesRaw.split(',');
+      let tablesToReplicate = [];
+
+      for (let tableToReplicate of tablesToReplicateRaw) {
+        let tableFound = false;
+
+        for (let table of allTables) {
+          if (tableToReplicate.toLowerCase() === table.toLowerCase()) {
+            tablesToReplicate.push(table);
+            tableFound = true;
+            break;
+          }
+        }
+
+        if (!tableFound) {
+          throw new Error(`Missing "${tableToReplicate}" model in application`);
+        }
+      }
+
+      return tablesToReplicate;
+    }
+
+    return allTables;
   }
 
   /**
