@@ -17,7 +17,7 @@ module.exports = function(mainPath) {
   const validateNodeVersion = require('../helper/validate-node-version');
   const helpers = require('./helper/compile-prod');
   const compileLambda = require('./helper/compile-lambda');
-  const SemaphoreLambda = require('./helper/semaphore-lambda');
+  const Semaphore = require('deep-package-manager').Helpers_Semaphore;
   const BundleException = require('./helper/exception/bundle-exception');
   const fse = require('fs-extra');
   const fs = require('fs');
@@ -132,7 +132,7 @@ module.exports = function(mainPath) {
     console.log(`Start compiling ${lambdas.length} lambdas`);
     console.info(`Setting max threads to ${maxThreads}`);
     
-    const semaphor = new SemaphoreLambda();
+    const semaphor = new Semaphore('COMPILER');
     
     const lambdasIterator = function *() {
       for (let lambdaPath of lambdas) {
