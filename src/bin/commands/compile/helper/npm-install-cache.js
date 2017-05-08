@@ -11,6 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
 const pify = require('pify');
+const PromisePool = require('es6-promise-pool');
 
 class NpmInstallCache {
   static stats() {
@@ -93,20 +94,28 @@ class NpmInstallCache {
         
         console.debug(`[CACHE] Copying dependencies in ${lambdaPath}: ${moduleNames.join(', ')}`);
         
-        return Promise.all(cachedModules.map(cachedModule => {
-          const modulePath = path.join(
-            lambdaPath, 
-            'node_modules', 
-            path.basename(cachedModule)
-          );
-          
-          return pify(fse.copy)(cachedModule, modulePath, {
+        const pool = new PromisePool(function *() {
+          for (let cachedModule of cachedModules) {            
+            const modulePath = path.join(
+              lambdaPath, 
+              'node_modules', 
+              path.basename(cachedModule)
+            );
             
-            // @todo figure out it it works in all cases
-            overwrite: false,
-          });
-        }));
+            yield pify(fse.copy)(cachedModule, modulePath, {
+              
+              // @todo figure out it it works in all cases
+              overwrite: false,
+            });
+          }
+        }, NpmInstallCache.MAX_PARALLEL_LINK);
+        
+        return pool.start();
       });
+  }
+  
+  static get MAX_PARALLEL_LINK() {
+    return 5;
   }
   
   static _listDirs(dir) {
