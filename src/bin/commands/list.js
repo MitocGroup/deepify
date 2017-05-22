@@ -60,11 +60,11 @@ module.exports = function(mainPath) {
   };
 
   lister.hash = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP;
-  lister.list((listingResult) => {
-    if (Object.keys(listingResult.errors).length > 0) {
-      console.error(new ProvisioningCollisionsListingException(listingResult.errors).message);
+  lister.listAll((listingResult) => {
+    if (lister.resultHasErrors(listingResult)) {
+      console.error(new ProvisioningCollisionsListingException(listingResult).message);
       this.exit(1);
-    } else if (listingResult.matchedResources <= 0) {
+    } else if (lister.resultMatchedResources(listingResult) <= 0) {
       console.warn(`There are no DEEP resource on your AWS account ${resource ? `matching '${resource}' hash.` : '.'}`);
       this.exit(0);
     } else {
@@ -74,7 +74,7 @@ module.exports = function(mainPath) {
         let formatter = new FormatterClass(property);
         let levelsFlags = depthFlagsMap[depth] || depthFlagsMap[1];
 
-        formatter.format(listingResult.resources, levelsFlags).then((strResources) => {
+        formatter.format(listingResult, levelsFlags).then((strResources) => {
           if (depth === 1) {
             strResources = 'To get more details, run deepify list --depth=2 or deepify list --depth=3' + strResources;
           }

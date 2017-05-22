@@ -31,26 +31,36 @@ module.exports = class ApplicationFormatter {
     let formattedResult = {};
 
     return co(function* () {
-      for (let service in result) {
-        if (!result.hasOwnProperty(service)) {
+      for (let region in result) {
+        if (!result.hasOwnProperty(region)) {
           continue;
         }
 
-        let resources = result[service];
+        let regionName = `${region} applications list`;
+        let regionResources = result[region].resources;
 
-        for (let resourceName in resources) {
-          if (!resources.hasOwnProperty(resourceName)) {
+        for (let service in regionResources) {
+          if (!regionResources.hasOwnProperty(service)) {
             continue;
           }
 
-          let resourceData = resources[resourceName];
-          let appName = yield this._resolveAppName(service, resourceName, resourceData);
+          let resources = regionResources[service];
 
-          formattedResult[appName] = formattedResult[appName] || {};
-          formattedResult[appName][service] = formattedResult[appName][service] || [];
-          formattedResult[appName][service].push(this._findSuitableResourceName(
-            service, resourceData, resourceName
-          ));
+          for (let resourceName in resources) {
+            if (!resources.hasOwnProperty(resourceName)) {
+              continue;
+            }
+
+            let resourceData = resources[resourceName];
+            let appName = yield this._resolveAppName(service, resourceName, resourceData);
+
+            formattedResult[regionName] = formattedResult[regionName] || {};
+            formattedResult[regionName][appName] = formattedResult[regionName][appName] || {};
+            formattedResult[regionName][appName][service] = formattedResult[regionName][appName][service] || [];
+            formattedResult[regionName][appName][service].push(this._findSuitableResourceName(
+              service, resourceData, resourceName
+            ));
+          }
         }
       }
 
@@ -130,34 +140,38 @@ module.exports = class ApplicationFormatter {
     let output = os.EOL;
     let appIndex = 0;
 
-    Object.keys(result).sort().forEach((appName) => {
-      let serviceIndex = 0;
-      let servicesObj = result[appName];
-      let servicesNames = Object.keys(servicesObj);
+    Object.keys(result).sort().forEach((regionName) => {
+      let appResult = result[regionName];
 
-      if (levelsFlags & ApplicationFormatter.APP_LEVEL) {
-        appName += ` | using ${servicesNames.length} cloud services`;
-        output += `${os.EOL}#${++appIndex}. ${appName} ${os.EOL}`;
-        output += `    ${'-'.repeat(appName.length)} ${os.EOL}`;
-      }
+      Object.keys(appResult).sort().forEach((appName) => {
+        let serviceIndex = 0;
+        let servicesObj = appResult[appName];
+        let servicesNames = Object.keys(servicesObj);
 
-      servicesNames.sort(ApplicationFormatter.serviceSorting).forEach((serviceName) => {
-        let resourceIndex = 0;
-        let resourcesArr = servicesObj[serviceName];
-
-        if (levelsFlags & ApplicationFormatter.SERVICE_LEVEL) {
-          output += `${os.EOL}${TAB.repeat(2)}${++serviceIndex}. ${this._humanizeAwsServiceName(serviceName)} `;
-          output += `| using ${resourcesArr.length} cloud resources: ${os.EOL}`;
+        if (levelsFlags & ApplicationFormatter.APP_LEVEL) {
+          appName += ` | using ${servicesNames.length} cloud services`;
+          output += `${os.EOL}#${++appIndex}. ${appName} ${os.EOL}`;
+          output += `    ${'-'.repeat(appName.length)} ${os.EOL}`;
         }
 
-        if (levelsFlags & ApplicationFormatter.RESOURCE_LEVEL) {
-          for (let resource of resourcesArr) {
-            output += `${TAB.repeat(3)}${serviceIndex}.${++resourceIndex}. ${resource}${os.EOL}`;
+        servicesNames.sort(ApplicationFormatter.serviceSorting).forEach((serviceName) => {
+          let resourceIndex = 0;
+          let resourcesArr = servicesObj[serviceName];
+
+          if (levelsFlags & ApplicationFormatter.SERVICE_LEVEL) {
+            output += `${os.EOL}${TAB.repeat(2)}${++serviceIndex}. ${this._humanizeAwsServiceName(serviceName)} `;
+            output += `| using ${resourcesArr.length} cloud resources: ${os.EOL}`;
           }
-        }
-      });
 
-      output += os.EOL;
+          if (levelsFlags & ApplicationFormatter.RESOURCE_LEVEL) {
+            for (let resource of resourcesArr) {
+              output += `${TAB.repeat(3)}${serviceIndex}.${++resourceIndex}. ${resource}${os.EOL}`;
+            }
+          }
+        });
+
+        output += os.EOL;
+      });
     });
 
     return output;
