@@ -36,7 +36,6 @@ module.exports = class ApplicationFormatter {
           continue;
         }
 
-        let regionName = `${region} applications list`;
         let regionResources = result[region].resources;
 
         for (let service in regionResources) {
@@ -54,10 +53,10 @@ module.exports = class ApplicationFormatter {
             let resourceData = resources[resourceName];
             let appName = yield this._resolveAppName(service, resourceName, resourceData);
 
-            formattedResult[regionName] = formattedResult[regionName] || {};
-            formattedResult[regionName][appName] = formattedResult[regionName][appName] || {};
-            formattedResult[regionName][appName][service] = formattedResult[regionName][appName][service] || [];
-            formattedResult[regionName][appName][service].push(this._findSuitableResourceName(
+            formattedResult[region] = formattedResult[region] || {};
+            formattedResult[region][appName] = formattedResult[region][appName] || {};
+            formattedResult[region][appName][service] = formattedResult[region][appName][service] || [];
+            formattedResult[region][appName][service].push(this._findSuitableResourceName(
               service, resourceData, resourceName
             ));
           }
@@ -142,6 +141,8 @@ module.exports = class ApplicationFormatter {
 
     Object.keys(result).sort().forEach((regionName) => {
       let appResult = result[regionName];
+
+      output += `${regionName} applications: ${os.EOL}`;
 
       Object.keys(appResult).sort().forEach((appName) => {
         let serviceIndex = 0;
