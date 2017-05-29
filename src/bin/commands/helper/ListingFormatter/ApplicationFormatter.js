@@ -9,6 +9,7 @@ let AbstractService = require('deep-package-manager').Provisioning_Service_Abstr
 let CognitoIdentityProviderService = require('deep-package-manager')
   .Provisioning_Service_CognitoIdentityProviderService;
 let S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
+let Listing = require('deep-package-manager').Provisioning_Listing;
 let DeployConfig = require('deep-package-manager').Property_DeployConfig;
 let co = require('co');
 let os = require('os');
@@ -29,12 +30,15 @@ module.exports = class ApplicationFormatter {
    */
   format(result, levelsFlags) {
     let formattedResult = {};
+    let regionAppHashes = {};
 
     return co(function* () {
       for (let region in result) {
         if (!result.hasOwnProperty(region)) {
           continue;
         }
+
+        regionAppHashes[region] = [];
 
         let regionResources = result[region].resources;
 
@@ -43,27 +47,42 @@ module.exports = class ApplicationFormatter {
             continue;
           }
 
-          let resources = regionResources[service];
+          let serviceApps = regionResources[service];
 
-          for (let resourceName in resources) {
-            if (!resources.hasOwnProperty(resourceName)) {
+          for (let appHash in serviceApps) {
+            if (!serviceApps.hasOwnProperty(appHash)) {
               continue;
             }
 
-            let resourceData = resources[resourceName];
-            let appName = yield this._resolveAppName(service, resourceName, resourceData);
+            let resources = serviceApps[appHash];
 
-            formattedResult[region] = formattedResult[region] || {};
-            formattedResult[region][appName] = formattedResult[region][appName] || {};
-            formattedResult[region][appName][service] = formattedResult[region][appName][service] || [];
-            formattedResult[region][appName][service].push(this._findSuitableResourceName(
-              service, resourceData, resourceName
-            ));
+            for (let resourceName in resources) {
+              if (!resources.hasOwnProperty(resourceName)) {
+                continue;
+              }
+
+              // is global service and there are
+              if (!Listing.isGlobalService(service)) {
+                regionAppHashes[region].push(appHash);
+              }
+
+              let resourceData = resources[resourceName];
+
+              // let appName = yield this._resolveAppName(service, resourceName, resourceData);
+              let appName = appHash;
+
+              formattedResult[region] = formattedResult[region] || {};
+              formattedResult[region][appName] = formattedResult[region][appName] || {};
+              formattedResult[region][appName][service] = formattedResult[region][appName][service] || [];
+              formattedResult[region][appName][service].push(this._findSuitableResourceName(
+                service, resourceData, resourceName
+              ));
+            }
           }
         }
       }
 
-      return this._stringifyResult(formattedResult, levelsFlags);
+      return this._stringifyResult(formattedResult, regionAppHashes, levelsFlags);
     }.bind(this));
   }
 
@@ -130,23 +149,31 @@ module.exports = class ApplicationFormatter {
 
   /**
    * @param {Object} result
+   * @param {Object} regionAppHashes
    * @param {Number} levelsFlags
    * @returns {*}
    * @private
    */
-  _stringifyResult(result, levelsFlags) {
+  _stringifyResult(result, regionAppHashes, levelsFlags) {
     let TAB = '  ';
     let output = os.EOL;
-    let appIndex = 0;
 
     Object.keys(result).sort().forEach((regionName) => {
       let appResult = result[regionName];
+      let appIndex = 0;
 
       output += `${regionName} applications: ${os.EOL}`;
 
-      Object.keys(appResult).sort().forEach((appName) => {
+      Object.keys(appResult).sort().forEach((appHash) => {
+        // this app is not part of this region
+        if (regionAppHashes[regionName].indexOf(appHash) === -1) {
+          return;
+        }
+
+        let appName = `Application ${appHash}`;
+
         let serviceIndex = 0;
-        let servicesObj = appResult[appName];
+        let servicesObj = appResult[appHash];
         let servicesNames = Object.keys(servicesObj);
 
         if (levelsFlags & ApplicationFormatter.APP_LEVEL) {
