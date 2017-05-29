@@ -48,10 +48,9 @@
     "url": "https://github.com/MitocGroup/deepify.git"
   },
   "scripts": {
-    "postinstall": "bash hooks/autocomplete_deepify.sh && bash hooks/install_templates.sh && bash hooks/ensure_es.sh && bash node-bin/assure-deps.sh",
-    "test": "bash node-bin/test.sh",
+    "compile-travis": "bash ../bin/compile-lib.sh .",
     "compile": "bash node-bin/compile.sh",
-    "prepublish": "bash node-bin/assure-deps.sh && bash node-bin/compile.sh && node hooks/dump_comp.js"
+    "prepublish": "npm run compile"
   },
   "dependencies": {
     "aws-sdk": "^2.39.x",
@@ -88,9 +87,6 @@
     "glob": "^7.1.x"
   },
   "devDependencies": {
-    "chai": "^3.5.x",
-    "sinon": "^1.17.x",
-    "sinon-chai": "^2.8.x",
     "jsvardump": "^1.0.x"
   },
   "engines": {
