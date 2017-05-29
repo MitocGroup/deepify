@@ -9,7 +9,6 @@ let AbstractService = require('deep-package-manager').Provisioning_Service_Abstr
 let CognitoIdentityProviderService = require('deep-package-manager')
   .Provisioning_Service_CognitoIdentityProviderService;
 let S3Service = require('deep-package-manager').Provisioning_Service_S3Service;
-let Listing = require('deep-package-manager').Provisioning_Listing;
 let DeployConfig = require('deep-package-manager').Property_DeployConfig;
 let co = require('co');
 let os = require('os');
@@ -30,15 +29,12 @@ module.exports = class ApplicationFormatter {
    */
   format(result, levelsFlags) {
     let formattedResult = {};
-    let regionAppHashes = {};
 
     return co(function* () {
       for (let region in result) {
         if (!result.hasOwnProperty(region)) {
           continue;
         }
-
-        regionAppHashes[region] = [];
 
         let regionResources = result[region].resources;
 
@@ -54,16 +50,15 @@ module.exports = class ApplicationFormatter {
               continue;
             }
 
+            if (result[region].apps[appHash] === 0 && this._appExistsInOtherRegion(appHash, result)) {
+              continue;
+            }
+
             let resources = serviceApps[appHash];
 
             for (let resourceName in resources) {
               if (!resources.hasOwnProperty(resourceName)) {
                 continue;
-              }
-
-              // is global service and there are
-              if (!Listing.isGlobalService(service)) {
-                regionAppHashes[region].push(appHash);
               }
 
               let resourceData = resources[resourceName];
@@ -82,8 +77,30 @@ module.exports = class ApplicationFormatter {
         }
       }
 
-      return this._stringifyResult(formattedResult, regionAppHashes, levelsFlags);
+      return this._stringifyResult(formattedResult, levelsFlags);
     }.bind(this));
+  }
+
+  /**
+   * @param {String} appHash
+   * @param {*} result
+   * @returns {Boolean}
+   * @private
+   */
+  _appExistsInOtherRegion(appHash, result) {
+    for (let region in result) {
+      if (!result.hasOwnProperty(region)) {
+        continue;
+      }
+
+      let regionApps = result[region].apps;
+
+      if (regionApps.hasOwnProperty(appHash) && regionApps[appHash] > 0) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -149,12 +166,11 @@ module.exports = class ApplicationFormatter {
 
   /**
    * @param {Object} result
-   * @param {Object} regionAppHashes
    * @param {Number} levelsFlags
    * @returns {*}
    * @private
    */
-  _stringifyResult(result, regionAppHashes, levelsFlags) {
+  _stringifyResult(result, levelsFlags) {
     let TAB = '  ';
     let output = os.EOL;
 
@@ -165,11 +181,6 @@ module.exports = class ApplicationFormatter {
       output += `${regionName} applications: ${os.EOL}`;
 
       Object.keys(appResult).sort().forEach((appHash) => {
-        // this app is not part of this region
-        if (regionAppHashes[regionName].indexOf(appHash) === -1) {
-          return;
-        }
-
         let appName = `Application ${appHash}`;
 
         let serviceIndex = 0;
