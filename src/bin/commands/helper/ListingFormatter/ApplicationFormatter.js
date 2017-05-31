@@ -50,8 +50,25 @@ module.exports = class ApplicationFormatter {
               continue;
             }
 
-            if (result[region].apps[appHash] === 0 && this._appExistsInOtherRegion(appHash, result)) {
-              continue;
+            // @todo: check why this kind of s3 buckets are included into list result
+            /**
+             * #2. Application oudtrail | using 1 cloud services
+             ---------------------------------------------
+
+             1. Frontend Tier / Amazon S3 | using 1 cloud resources:
+             1.1. deep.cloudtrail
+             */
+
+            let regionKey = region;
+
+            if (result[region].apps[appHash] === 0) {
+              if (this._appExistsInOtherRegion(appHash, result)) {
+                continue;
+              } else {
+                // display globally available resources like IAM, S3 etc, into "global" region
+                // to avoid repeating them into all regions
+                regionKey = 'global';
+              }
             }
 
             let resources = serviceApps[appHash];
@@ -66,12 +83,15 @@ module.exports = class ApplicationFormatter {
               // let appName = yield this._resolveAppName(service, resourceName, resourceData);
               let appName = appHash;
 
-              formattedResult[region] = formattedResult[region] || {};
-              formattedResult[region][appName] = formattedResult[region][appName] || {};
-              formattedResult[region][appName][service] = formattedResult[region][appName][service] || [];
-              formattedResult[region][appName][service].push(this._findSuitableResourceName(
-                service, resourceData, resourceName
-              ));
+              formattedResult[regionKey] = formattedResult[regionKey] || {};
+              formattedResult[regionKey][appName] = formattedResult[regionKey][appName] || {};
+              formattedResult[regionKey][appName][service] = formattedResult[regionKey][appName][service] || [];
+
+              let suitableResourceName = this._findSuitableResourceName(service, resourceData, resourceName);
+
+              if (formattedResult[regionKey][appName][service].indexOf(suitableResourceName) === -1) {
+                formattedResult[regionKey][appName][service].push(suitableResourceName);
+              }
             }
           }
         }
@@ -178,7 +198,7 @@ module.exports = class ApplicationFormatter {
       let appResult = result[regionName];
       let appIndex = 0;
 
-      output += `${regionName} applications: ${os.EOL}`;
+      output += `${regionName} region applications: ${os.EOL}`;
 
       Object.keys(appResult).sort().forEach((appHash) => {
         let appName = `Application ${appHash}`;
