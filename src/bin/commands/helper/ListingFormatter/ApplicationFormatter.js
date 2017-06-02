@@ -50,27 +50,6 @@ module.exports = class ApplicationFormatter {
               continue;
             }
 
-            // @todo: check why this kind of s3 buckets are included into list result
-            /**
-             * #2. Application oudtrail | using 1 cloud services
-             ---------------------------------------------
-
-             1. Frontend Tier / Amazon S3 | using 1 cloud resources:
-             1.1. deep.cloudtrail
-             */
-
-            let regionKey = region;
-
-            if (result[region].apps[appHash] === 0) {
-              if (this._appExistsInOtherRegion(appHash, result)) {
-                continue;
-              } else {
-                // display globally available resources like IAM, S3 etc, into "global" region
-                // to avoid repeating them into all regions
-                regionKey = 'global';
-              }
-            }
-
             let resources = serviceApps[appHash];
 
             for (let resourceName in resources) {
@@ -80,17 +59,18 @@ module.exports = class ApplicationFormatter {
 
               let resourceData = resources[resourceName];
 
+              // @todo: display app name for each app hash
               // let appName = yield this._resolveAppName(service, resourceName, resourceData);
               let appName = appHash;
 
-              formattedResult[regionKey] = formattedResult[regionKey] || {};
-              formattedResult[regionKey][appName] = formattedResult[regionKey][appName] || {};
-              formattedResult[regionKey][appName][service] = formattedResult[regionKey][appName][service] || [];
+              formattedResult[region] = formattedResult[region] || {};
+              formattedResult[region][appName] = formattedResult[region][appName] || {};
+              formattedResult[region][appName][service] = formattedResult[region][appName][service] || [];
 
               let suitableResourceName = this._findSuitableResourceName(service, resourceData, resourceName);
 
-              if (formattedResult[regionKey][appName][service].indexOf(suitableResourceName) === -1) {
-                formattedResult[regionKey][appName][service].push(suitableResourceName);
+              if (formattedResult[region][appName][service].indexOf(suitableResourceName) === -1) {
+                formattedResult[region][appName][service].push(suitableResourceName);
               }
             }
           }
@@ -99,28 +79,6 @@ module.exports = class ApplicationFormatter {
 
       return this._stringifyResult(formattedResult, levelsFlags);
     }.bind(this));
-  }
-
-  /**
-   * @param {String} appHash
-   * @param {*} result
-   * @returns {Boolean}
-   * @private
-   */
-  _appExistsInOtherRegion(appHash, result) {
-    for (let region in result) {
-      if (!result.hasOwnProperty(region)) {
-        continue;
-      }
-
-      let regionApps = result[region].apps;
-
-      if (regionApps.hasOwnProperty(appHash) && regionApps[appHash] > 0) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   /**
