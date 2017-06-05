@@ -59,7 +59,7 @@ module.exports = function(mainPath) {
     get 3() { return this[2] | ApplicationFormatter.RESOURCE_LEVEL; },
   };
 
-  lister.hash = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP;
+  lister.hash = resource || AbstractService.AWS_RESOURCE_LISTING_REGEXP;
   lister.listAll((listingResult) => {
     if (lister.resultHasErrors(listingResult)) {
       console.error(new ProvisioningCollisionsListingException(listingResult).message);
