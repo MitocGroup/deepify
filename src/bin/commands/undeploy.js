@@ -105,6 +105,6 @@ module.exports = function(mainPath) {
       }
 
       this.exit(0);
-    }, resource = resource || AbstractService.AWS_RESOURCE_GENERALIZED_REGEXP);
+    }, resource = resource || AbstractService.AWS_RESOURCE_LISTING_REGEXP);
   }, cfgBucket);
 };
