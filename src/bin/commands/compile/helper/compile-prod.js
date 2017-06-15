@@ -103,6 +103,7 @@ function npmInstallLib(libs, global, dryRun) {
         '--no-bin-links',
         '--only=prod',
         '--silent',
+        '--no-shrinkwrap',
         '--depth=0'
       )
       .dry(dryRun);

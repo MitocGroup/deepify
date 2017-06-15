@@ -130,7 +130,7 @@ module.exports = function (lambdaPath, debug, optimize, purge, libsToLink) {
       
       console.debug(`${dry}Removed linked libraries from "${lambdaPath}" (${libsToUnlink.join(', ')})`);
       
-      return Promise.all(libsToUnlink.map(lib => {
+      return debug ? Promise.resolve() : Promise.all(libsToUnlink.map(lib => {
         return pify(fs.unlink)(path.join(lambdaPath, 'node_modules', lib));
       }));
     });
