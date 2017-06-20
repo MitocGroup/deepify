@@ -121,7 +121,7 @@ module.exports = function(mainPath) {
         }
 
         let baseHash = propertyInstance.configObj.baseHash;
-        let env = propertyInstance.configObj.env;
+        let env = propertyInstance.config.env;
 
         console.log(`Start undeploying resources for ${baseHash}/${env}`);
 
