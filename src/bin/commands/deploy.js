@@ -121,15 +121,19 @@ module.exports = function(mainPath) {
         }
 
         let baseHash = propertyInstance.configObj.baseHash;
+        let env = propertyInstance.config.env;
 
-        console.log(`Start undeploying resources for ${baseHash}`);
+        console.log(`Start undeploying resources for ${baseHash}/${env}`);
+
+        // generate a fake resource name to use both env and baseHash on undeploy
+        let fakeResourceName = `deep.${env}.public.${baseHash}`;
 
         let undeployCmd = new Exec(
           Bin.node,
           this.scriptPath,
           'undeploy',
           propertyInstance.path,
-          `--resource=${baseHash}`
+          `--resource=${fakeResourceName}`
         );
 
         if (isProd) {
