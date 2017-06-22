@@ -7,6 +7,7 @@ $:
    '$.cache.options.1.region': 'eval'
    '$.cache.options.1.accessKeyId': 'eval'
    '$.cache.options.1.secretAccessKey': 'eval'
+   '$.codeclimate.token': 'eval'
   cache:
     driver: 's3'                                                          # Available drivers: void, s3
     options:
@@ -54,6 +55,9 @@ $:
             region: 'process.env.JST_AWS_REGION'
             accessKeyId: 'process.env.JST_AWS_ACCESS_KEY_ID'
             secretAccessKey: 'process.env.JST_AWS_SECRET_ACCESS_KEY'
+  codeclimate:
+    token: 'process.env.JST_CODECLIMATE_REPO_TOKEN'
+
 plugin:                                                                       # Main module definition
   root: 'src/'                                                                 # Root package directory (containing package.json and tests)
   dependencies: ~                                                           # Dependencies to add/overwrite (over $.npm.dependencies config)
