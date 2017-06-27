@@ -347,7 +347,13 @@ module.exports = function(mainPath) {
       });
     })();
 
-    propertyInstance.configObj.tryLoadConfig(() => {
+    propertyInstance.configObj.tryLoadConfig((error) => {
+      if (error) {
+        console.warn(error.message);
+        this.exit(1);
+        return;
+      }
+
       if (propertyInstance.configObj.configExists) {
         propertyInstance.update(() => {
           console.info(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
@@ -468,7 +474,13 @@ module.exports = function(mainPath) {
   };
 
   let updateResources = (resourcesIdentifiers) => {
-    propertyInstance.configObj.tryLoadConfig(() => {
+    propertyInstance.configObj.tryLoadConfig((error) => {
+      if (error) {
+        console.warn(error.message);
+        this.exit(1);
+        return;
+      }
+
       if (!propertyInstance.configObj.configExists) {
         throw new Error('Action deploy is available only on application update');
       }
