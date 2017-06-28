@@ -1,13 +1,28 @@
 language: node_js
-git: {depth: 1}
-node_js: [6, 7, 8]
+git:
+  depth: 1
+node_js:
+  - 6
+  - 8
 cache:
   bundler: true
-  directories: [node_modules, $(npm root -g), $(npm config get prefix)/bin]
+  directories:
+    - node_modules
+    - '$(npm root -g)'
+    - '$(npm config get prefix)/bin'
 branches:
-  only: [master, dev, stage, test]
-before_install: [npm install -g run-jst]
-script: jst run unit
+  only:
+    - master
+    - stage
+    - test
+    - dev
+before_install:
+  - 'npm install -g run-jst'
+  - 'npm install -g run-jst-codeclimate'
+script: 'jst run unit -c run-jst-codeclimate'
 env:
   global:
-  - {secure: gNfTbEYhnCHzrEjLMT279V8A7vgLwHyiPcWlBsxY+Io5syKPqndeVDdnNaNSutN+++LsnfvM130zQhD0nZz1wZeM15XjueQx4ToOqlPtycvygnz6za5CAsNI/nD8lFUBLF663GOXmv3d0MSN9IY01U/awx+82VfKKHOs9eNMPYNXl4PvpzcOJ5n8LQ68bROreR8a/j/6J5euGeL3yfcmyTiiYkH0rKOu2KbrwJPt2gNQFIiHjqVp9IVetvCgkVDu9ZZwdBsB11vVEX8Jtito81jSPDjs2G312c5V3K4POCQRGSeDYCCLnsz07BRRvRhA7rbWVxtGg7znAPqtMC2QLps3VSId04gfeZhYa4RO4GLk1/1ARypfa/xBwiWOmHkkDN0vNqRrcinYiDFDAWiYyBY8r+7iAbqLTETXQYFi960yzO0JUg4i7n2N+Wkdr9SWUb1yb/D2qcRH26+MQCxygbg6CxbRefOjwF/ly3ILbp7Lp9m0bgbjTkUL36/JW66ItB8emFdcJEYq1bXykbuUwW71e9d4Tyjk0mCyLmQuyKbcfKiw1YEnI+pAIUGqA6Q+UGDF/skzpqxu2Ms8Sl5v/sm5Y5tS8jqMGP5rq9mp6MiLYlMWPWsoUKCehHK4emoJirPi8sR2CkLIUEFZYtERIPe5P+xZMLSa1kIOw3+PhRU=}
+    -
+      secure: gNfTbEYhnCHzrEjLMT279V8A7vgLwHyiPcWlBsxY+Io5syKPqndeVDdnNaNSutN+++LsnfvM130zQhD0nZz1wZeM15XjueQx4ToOqlPtycvygnz6za5CAsNI/nD8lFUBLF663GOXmv3d0MSN9IY01U/awx+82VfKKHOs9eNMPYNXl4PvpzcOJ5n8LQ68bROreR8a/j/6J5euGeL3yfcmyTiiYkH0rKOu2KbrwJPt2gNQFIiHjqVp9IVetvCgkVDu9ZZwdBsB11vVEX8Jtito81jSPDjs2G312c5V3K4POCQRGSeDYCCLnsz07BRRvRhA7rbWVxtGg7znAPqtMC2QLps3VSId04gfeZhYa4RO4GLk1/1ARypfa/xBwiWOmHkkDN0vNqRrcinYiDFDAWiYyBY8r+7iAbqLTETXQYFi960yzO0JUg4i7n2N+Wkdr9SWUb1yb/D2qcRH26+MQCxygbg6CxbRefOjwF/ly3ILbp7Lp9m0bgbjTkUL36/JW66ItB8emFdcJEYq1bXykbuUwW71e9d4Tyjk0mCyLmQuyKbcfKiw1YEnI+pAIUGqA6Q+UGDF/skzpqxu2Ms8Sl5v/sm5Y5tS8jqMGP5rq9mp6MiLYlMWPWsoUKCehHK4emoJirPi8sR2CkLIUEFZYtERIPe5P+xZMLSa1kIOw3+PhRU=
+    -
+      secure: PD8WuXjNqzk9w1O51qOCHM8om2yBbg8L9igebmyt3+fO+RjWItJ0hT5VCVyHPAisIr3CDqGVpLMh9KtMgYwvAr9CIkFtBaU1kAiiKCWcN86ukFy1ZtKbq6b7U+elVD/spAFm798YgNPhE5aQxIi91mbifQPskaFlKy4Ns7/i+aqxz6R/vf28DADaiTlD67c4KJXFVv+YgPFSHlO+s+J7pJgQw4BL0ASqAooIuroHAZdCpytOD3bGOPsgI0ZvbwZqRdLIGLsM+iGUMqQ/UnVYGmNQIztyu5+HQYMdXSvnBXlAlHh24cVc2DLs+2oRwdLqnQCpxBRTxmep0APxXl7LISNsU+N6MHbr6zwAEywz+BK3V7l8PVU64r7kjPPoSEHCdQmKa53sFgGxIZqozgPoRfH1riZK/rryCTZqLqe2/kR0RNiaMjeenKOg69wEiEwii5puIH/uYuhOHvNweMFZqCwAKv1L02UcUxB8WsTWr3+m6Ek+llP96uRHPm1mcwXkwjxqD8zmqVi+i5CR51SDAwXWANXeO28cptZSTBTBK7j4WHhXNBHiKswdhIOPGvkStj9o9l23O0S/aV0thTHMUWG6oecBu/9nSK5kzqZ6A/nBBlX8VKngdN4ulVSjIaqY44hdOinKLCr7pnmr2ZBoAJX+/LlEKwwWrTTkuH4M8MA=

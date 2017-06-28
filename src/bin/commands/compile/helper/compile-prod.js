@@ -102,8 +102,7 @@ function npmInstallLib(libs, global, dryRun) {
       .addExtraArg(
         '--no-bin-links',
         '--only=prod',
-        '--silent',
-        '--depth=0'
+        '--no-shrinkwrap'
       )
       .dry(dryRun);
     
@@ -166,13 +165,8 @@ function readDependencies (packagePath) {
 
 function npmLink (packagePath, libs, dryRun) {
   return new Promise((resolve, reject) => {
-    const cmd = new NpmLink(packagePath)
-      .addExtraArg(
-        '--silent',
-        '--depth=0'
-      )
-      .dry(dryRun);
-      
+    const cmd = new NpmLink(packagePath).dry(dryRun);
+    
     cmd.libs = libs;
     
     cmd.run((error) => {
@@ -191,9 +185,7 @@ function npmInstall (packagePath, dryRun) {
       .addExtraArg(
         '--no-bin-links',
         '--only=prod',
-        '--silent',
-        '--no-shrinkwrap',
-        '--depth=0'
+        '--no-shrinkwrap'
       )
       .dry(dryRun)
       .run((error) => {

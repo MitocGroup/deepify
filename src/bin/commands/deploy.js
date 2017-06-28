@@ -121,15 +121,19 @@ module.exports = function(mainPath) {
         }
 
         let baseHash = propertyInstance.configObj.baseHash;
+        let env = propertyInstance.config.env;
 
-        console.log(`Start undeploying resources for ${baseHash}`);
+        console.log(`Start undeploying resources for ${baseHash}/${env}`);
+
+        // generate a fake resource name to use both env and baseHash on undeploy
+        let fakeResourceName = `deep.${env}.public.${baseHash}`;
 
         let undeployCmd = new Exec(
           Bin.node,
           this.scriptPath,
           'undeploy',
           propertyInstance.path,
-          `--resource=${baseHash}`
+          `--resource=${fakeResourceName}`
         );
 
         if (isProd) {
@@ -343,7 +347,13 @@ module.exports = function(mainPath) {
       });
     })();
 
-    propertyInstance.configObj.tryLoadConfig(() => {
+    propertyInstance.configObj.tryLoadConfig((error) => {
+      if (error) {
+        console.warn(error.message);
+        this.exit(1);
+        return;
+      }
+
       if (propertyInstance.configObj.configExists) {
         propertyInstance.update(() => {
           console.info(`CloudFront (CDN) domain: ${getCfDomain(propertyInstance)}`);
@@ -464,7 +474,13 @@ module.exports = function(mainPath) {
   };
 
   let updateResources = (resourcesIdentifiers) => {
-    propertyInstance.configObj.tryLoadConfig(() => {
+    propertyInstance.configObj.tryLoadConfig((error) => {
+      if (error) {
+        console.warn(error.message);
+        this.exit(1);
+        return;
+      }
+
       if (!propertyInstance.configObj.configExists) {
         throw new Error('Action deploy is available only on application update');
       }
