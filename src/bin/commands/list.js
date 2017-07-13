@@ -60,6 +60,9 @@ module.exports = function(mainPath) {
   };
 
   lister.hash = resource || AbstractService.AWS_RESOURCE_LISTING_REGEXP;
+
+  console.log('Querying AWS regions and compiling the list of applications...');
+
   lister.listAll((listingResult) => {
     if (lister.resultHasErrors(listingResult)) {
       console.error(new ProvisioningCollisionsListingException(listingResult).message);
