@@ -156,7 +156,8 @@ module.exports = class ApplicationFormatter {
       let appResult = result[regionName];
       let appIndex = 0;
 
-      output += `${regionName} region applications: ${os.EOL}`;
+      let regionLabel = `REGION: ${regionName} ${os.EOL}`;
+      output += `${'#'.repeat(regionLabel.length)} ${os.EOL} ${regionLabel} ${os.EOL}`;
 
       Object.keys(appResult).sort().forEach((appHash) => {
         let appName = `Application ${appHash}`;
