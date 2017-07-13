@@ -79,7 +79,10 @@ module.exports = function(mainPath) {
 
         formatter.format(listingResult, levelsFlags).then((strResources) => {
           if (depth === 1) {
-            strResources = 'To get more details, run deepify list --depth=2 or deepify list --depth=3' + strResources;
+            console.log('Below output is consolidated. Use parameters like --depth or --regions to get more details,' +
+              ' but be aware that it takes considerably more time');
+            console.log('Run deepify list --depth=2 to get service level details.' +
+              ' And, deepify list --depth=3 to get resource level details.');
           }
 
           console.log(strResources);
