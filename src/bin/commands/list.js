@@ -17,6 +17,7 @@ module.exports = function(mainPath) {
   let lister = new Listing(property);
   let rawResource = this.opts.locate('resource').value;
   let service = this.opts.locate('service').value;
+  let region = this.opts.locate('region').value;
   let format = this.opts.locate('format').value || 'application';
   let depth = parseInt(this.opts.locate('depth').value || 1);
   let resource = null;
@@ -38,6 +39,27 @@ module.exports = function(mainPath) {
     return services;
   };
 
+  let regionsToList = (regionsRaw) => {
+    if (!regionsRaw) {
+      return Listing.REGIONS;
+    }
+
+    let regions = regionsRaw.split(',');
+
+    if (regions.indexOf('*') !== -1) {
+      return Listing.REGIONS;
+    }
+
+    regions.forEach((region) => {
+      if (Listing.REGIONS.indexOf(region) === -1) {
+        console.error(`Unknown or unsupported region: ${region}. Available regions: ${Listing.REGIONS.join(',')}`);
+        this.exit(1);
+      }
+    });
+
+    return regions;
+  };
+
   if (rawResource) {
     resource = AbstractService.extractBaseHashFromResourceName(rawResource);
 
@@ -53,6 +75,7 @@ module.exports = function(mainPath) {
   }
 
   let serviceList = servicesToList(service);
+  let regionList = regionsToList(region);
   let depthFlagsMap = {
     get 1() { return ApplicationFormatter.APP_LEVEL; },
     get 2() { return this[1] | ApplicationFormatter.SERVICE_LEVEL; },
@@ -60,6 +83,9 @@ module.exports = function(mainPath) {
   };
 
   lister.hash = resource || AbstractService.AWS_RESOURCE_LISTING_REGEXP;
+
+  console.log(`Querying AWS region${regionList.length > 1 ? 's' : ''} and compiling the list of applications...`);
+
   lister.listAll((listingResult) => {
     if (lister.resultHasErrors(listingResult)) {
       console.error(new ProvisioningCollisionsListingException(listingResult).message);
@@ -74,9 +100,12 @@ module.exports = function(mainPath) {
         let formatter = new FormatterClass(property);
         let levelsFlags = depthFlagsMap[depth] || depthFlagsMap[1];
 
-        formatter.format(listingResult, levelsFlags).then((strResources) => {
+        formatter.format(listingResult, levelsFlags, regionList).then((strResources) => {
           if (depth === 1) {
-            strResources = 'To get more details, run deepify list --depth=2 or deepify list --depth=3' + strResources;
+            console.log('Below output is consolidated. Use parameters like --depth or --region to get more details,' +
+              ' but be aware that it takes considerably more time');
+            console.log('Run deepify list --depth=2 to get service level details.' +
+              ' And, deepify list --depth=3 to get resource level details.');
           }
 
           console.log(strResources);
@@ -86,5 +115,5 @@ module.exports = function(mainPath) {
         this.exit(1);
       }
     }
-  }, serviceList);
+  }, serviceList, regionList);
 };

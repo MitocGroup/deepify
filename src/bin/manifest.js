@@ -414,6 +414,11 @@ module.exports = {
           description: 'Comma separated list of services for which to list resources',
           required: false,
         },
+        region: {
+          alias: 'z',
+          description: 'Comma separated list of regions for which to list resources (use * to list all regions)',
+          required: false,
+        },
         format: {
           alias: 'f',
           description: 'Output format',
