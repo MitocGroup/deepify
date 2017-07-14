@@ -25,14 +25,15 @@ module.exports = class ApplicationFormatter {
   /**
    * @param {Object} result
    * @param {Number} levelsFlags
+   * @param {String[]|null} regions
    * @returns {Promise}
    */
-  format(result, levelsFlags) {
+  format(result, levelsFlags, regions = null) {
     let formattedResult = {};
 
     return co(function* () {
       for (let region in result) {
-        if (!result.hasOwnProperty(region)) {
+        if (!result.hasOwnProperty(region) || (regions && regions.indexOf(region) === -1)) {
           continue;
         }
 
@@ -156,8 +157,8 @@ module.exports = class ApplicationFormatter {
       let appResult = result[regionName];
       let appIndex = 0;
 
-      let regionLabel = `REGION: ${regionName} ${os.EOL}`;
-      output += `${'#'.repeat(regionLabel.length)} ${os.EOL} ${regionLabel} ${os.EOL}`;
+      let regionLabel = `REGION: ${regionName}${os.EOL}`;
+      output += `${'#'.repeat(regionLabel.length -1)}${os.EOL}${regionLabel}`;
 
       Object.keys(appResult).sort().forEach((appHash) => {
         let appName = `Application ${appHash}`;
