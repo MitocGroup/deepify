@@ -19,13 +19,13 @@ module.exports = function(mainPath) {
   let cfgBucket = this.opts.locate('cfg-bucket').value;
   let rawResource = this.opts.locate('resource').value;
   let resource = null;
-  let env = null;
+  let resourceEnv = null;
 
   validateNodeVersion.call(this);
 
   if (rawResource) {
     resource = AbstractService.extractBaseHashFromResourceName(rawResource);
-    env = AbstractService.extractEnvFromResourceName(rawResource);
+    resourceEnv = AbstractService.extractEnvFromResourceName(rawResource);
 
     if (!resource) {
       // in case the hash is provided
@@ -43,7 +43,7 @@ module.exports = function(mainPath) {
   let property = new Property(mainPath, Config.DEFAULT_FILENAME);
   let matcher = new ProvisioningDumpFileMatcher(property);
   property.configObj.baseHash = resource || property.configObj.baseHash;
-  property.config.env = env || property.config.env;
+  property.config.env = resourceEnv || property.config.env;
 
   matcher.read((error) => {
     if (error && !resource && !dirtyMode) {
@@ -78,13 +78,26 @@ module.exports = function(mainPath) {
       error ? Undeploy.DEFAULT_MATCHER : matcher
     );
 
+    let infoMsg = `Undeploying "${resource}" resources from "${property.config.env}" environment ...`;
+
+    if (dirtyMode) {
+      infoMsg = `Undeploying all deep resources from your AWS account ...`;
+    }
+
+    console.info(infoMsg);
+
     undeploy.execute((error, results) => {
       if (error) {
         console.error(error);
         this.exit(1);
         return;
       } else if(!results) {
-        console.warn('There are no AWS resources matched...');
+        console.warn('There are no AWS resources matched.');
+
+        if (!resourceEnv) {
+          console.warn('Please make sure "' + resource + '" resource exists in "' + property.config.env +
+            '" environment or consider specifying full resource name (e.g. deep-dev-private-db0c09cc)');
+        }
       }
 
       if (backupConfig) {
