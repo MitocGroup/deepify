@@ -5,7 +5,7 @@
 
 'use strict';
 
-module.exports = function(mainPath) {
+module.exports = function (mainPath) {
   let path = require('path');
   let Property = require('deep-package-manager').Property_Instance;
   let Config = require('deep-package-manager').Property_Config;
@@ -19,10 +19,13 @@ module.exports = function(mainPath) {
   let NpmChain = require('../../../lib.compiled/NodeJS/NpmChain').NpmChain;
   let LambdaExtractor = require('../../../lib.compiled/Helpers/LambdasExtractor').LambdasExtractor;
   let AsyncConfig = require('../../../lib.compiled/Helpers/AsyncConfig').AsyncConfig;
+  let NpmInstallFlatten = require('../../../lib.compiled/NodeJS/NpmInstallFlatten').NpmInstallFlatten;
 
   let doUpdate = this.opts.locate('update').exists;
   let microservicesToInit = this.opts.locate('partial').value;
   let skipInstall = this.opts.locate('skip-install').exists;
+
+  let libs = 'aws-sdk dtrace-provider';
 
   mainPath = this.normalizeInputPath(mainPath);
 
@@ -36,24 +39,33 @@ module.exports = function(mainPath) {
     let lambdaPaths = objectValues(lambdaPathsObj);
 
     let chain = new NpmChain();
-    let NpmProcess = doUpdate ? NpmUpdate : NpmInstall;
-    let installCmd = new NpmProcess(lambdaPaths)
-      .dry(skipInstall)
-      .addExtraArg(
-      '--loglevel silent'
-    );
+    const flatten = this._opts.locate('flatten').exists;
 
-    installCmd.addExtraArg('--prod');
+    if (!flatten) {
+      let NpmProcess = doUpdate ? NpmUpdate : NpmInstall;
+      let installCmd = new NpmProcess(lambdaPaths)
+        .dry(skipInstall)
+        .addExtraArg(
+        '--loglevel silent'
+        );
 
-    chain.add(installCmd);
+      installCmd.addExtraArg('--only=prod');
 
-    let linkCmd = new NpmInstallLibs(lambdaPaths).dry(skipInstall);
+      chain.add(installCmd);
 
-    // dtrace-provider: Fixes bonyan issue...
-    // aws-sdk: use globally
-    linkCmd.libs = 'aws-sdk dtrace-provider';
+      let linkCmd = new NpmInstallLibs(lambdaPaths).dry(skipInstall);
 
-    chain.add(linkCmd);
+      // dtrace-provider: Fixes bonyan issue...
+      // aws-sdk: use globally
+      linkCmd.libs = libs;
+      chain.add(linkCmd);
+      } else {
+        // Flatten mode  
+        let flattenCmd = new NpmInstallFlatten().addExtraArg('--loglevel silent').extractDependencies(lambdaPaths);
+        flattenCmd.setUpLibs(libs);
+
+        chain.add(flattenCmd);
+      }
 
     chain.runChunk(() => {
       let lambdasConfig = property.fakeBuild();
