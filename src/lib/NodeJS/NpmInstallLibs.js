@@ -4,8 +4,8 @@
 
 'use strict';
 
-import {Bin} from './Bin';
-import {NpmInstall} from './NpmInstall';
+import { Bin } from './Bin';
+import { NpmInstall } from './NpmInstall';
 
 export class NpmInstallLibs extends NpmInstall {
   /**
@@ -65,6 +65,8 @@ export class NpmInstallLibs extends NpmInstall {
     let instance = super._newInstance(...args);
 
     instance._libsPlain = this._libsPlain;
+    instance._flatten = this._flatten;
+    instance._prefix = this._prefix;
 
     return instance;
   }
@@ -74,6 +76,11 @@ export class NpmInstallLibs extends NpmInstall {
    * @private
    */
   get _mainCmd() {
-    return `${Bin.npm} install ${this._libsPlain} ${this._global ? '-g' : ''}`;
+    let npmCmd = Bin.npm;
+    if (this.isFlatten) {
+      npmCmd = `${npmCmd} ${this._prefix}`;
+    }
+    const instPostfix = this.isFlatten ? './' : '';
+    return `${npmCmd} install ${instPostfix} ${this._libsPlain} ${this._global ? '-g' : ''}`;
   }
 }

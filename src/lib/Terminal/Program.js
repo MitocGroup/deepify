@@ -113,6 +113,7 @@ export class Program {
     this._opts.create('version', 'v', 'Prints command version');
     this._opts.create('help', 'h', 'Prints command help');
     this._opts.create('loglevel', null, 'Switches log level to error|warn|info|debug|silent');
+    this._opts.create('flatten', 'F', 'Install share backend node_modules between microservice');
 
     if (this.hasCommands) {
       this._args.create('command', 'Command to run', false, false, (cmd) => !!this.getCommand(cmd));
