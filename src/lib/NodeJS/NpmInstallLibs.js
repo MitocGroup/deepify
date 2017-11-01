@@ -76,11 +76,12 @@ export class NpmInstallLibs extends NpmInstall {
    * @private
    */
   get _mainCmd() {
-    let npmCmd = Bin.npm;
-    if (this.isFlatten) {
-      npmCmd = `${npmCmd} ${this._prefix}`;
+    let installCmd = `${Bin.npm} install`;
+
+    if (this._flatten) {
+      installCmd = `${Bin.npm} ${this._prefix} install ./`;
     }
-    const instPostfix = this.isFlatten ? './' : '';
-    return `${npmCmd} install ${instPostfix} ${this._libsPlain} ${this._global ? '-g' : ''}`;
+
+    return `${installCmd} ${this._libsPlain} ${this._global ? '-g' : ''}`;
   }
 }
