@@ -96,20 +96,26 @@ function objectValues (object) {
   return Object.keys(object).map(key => object[key]);
 }
 
+/**
+ * Check if it's Windows
+ * @returns {boolean}
+ */
+function isWin() {
+  return /^win/.test(process.platform);
+}
+
 function npmInstallLib(libs, global, dryRun) {
   return new Promise((resolve, reject) => {
-    const cmd = new NpmInstallLibs()
-      .addExtraArg(
-        '--no-bin-links',
-        '--only=prod',
-        '--no-shrinkwrap'
-      )
-      .dry(dryRun);
+    const cmd = new NpmInstallLibs().addExtraArg('--only=prod', '--no-shrinkwrap').dry(dryRun);
+
+    if (isWin()) {
+      cmd.addExtraArg('--no-bin-links');
+    }
     
     cmd.global = global;
     cmd.libs = libs;
     
-    cmd.run((error) => {
+    cmd.run(error => {
       if (error) {
         return reject(error);
       }
@@ -179,22 +185,21 @@ function npmLink (packagePath, libs, dryRun) {
   });
 }
 
-function npmInstall (packagePath, dryRun) {
+function npmInstall(packagePath, dryRun) {
   return new Promise((resolve, reject) => {
-    new NpmInstall(packagePath)
-      .addExtraArg(
-        '--no-bin-links',
-        '--only=prod',
-        '--no-shrinkwrap'
-      )
-      .dry(dryRun)
-      .run((error) => {
-        if (error) {
-          return reject(error);
-        }
-    
-        resolve();
-      });
+    const cmd = new NpmInstall(packagePath).addExtraArg('--only=prod', '--no-shrinkwrap').dry(dryRun);
+
+    if (isWin()) {
+      cmd.addExtraArg('--no-bin-links');
+    }
+
+    cmd.run(error => {
+      if (error) {
+        return reject(error);
+      }
+
+      resolve();
+    });
   });
 }
 

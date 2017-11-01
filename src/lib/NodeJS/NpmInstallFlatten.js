@@ -60,8 +60,7 @@ export class NpmInstallFlatten {
    */
   getBackendPath(lambdaPath) {
     let backendPos = lambdaPath.indexOf('backend');
-    let backendPath = lambdaPath.substring(0, backendPos + 'backend'.length);
-    return backendPath;
+    return lambdaPath.substring(0, backendPos + 'backend'.length);
   }
 
   /**
