@@ -107,7 +107,7 @@ module.exports = function(mainPath) {
       
       console.debug(`The following lambdas detected:\n  - ${lambdasInfo}`);
     } else {
-      console.log('There are no lambdas depected. Skipping...');
+      console.log('There are no lambdas detected. Skipping...');
       this.exit(0);
     }
     
