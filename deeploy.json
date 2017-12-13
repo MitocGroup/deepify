@@ -1,0 +1,12 @@
+{
+  "appName": "My Custom Web App 638965bbf4da094dac9b6cf468dea91a",
+  "appIdentifier": "638965bbf4da094dac9b6cf468dea91a",
+  "env": "dev",
+  "awsAccountId": "722084099005",
+  "apiVersion": "v1",
+  "aws": {
+    "accessKeyId": "AKIAJWAP2TOEIL7J554Q",
+    "secretAccessKey": "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",
+    "region": "us-east-1"
+  }
+}
