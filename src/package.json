@@ -67,7 +67,7 @@
     "deep-db": "^1.x.x",
     "deep-fs": "^1.x.x",
     "deep-log": "^1.x.x",
-    "deep-package-manager": "^2.0.x",
+    "deep-package-manager": "2.0.46",
     "dtrace-provider": "^0.8.x",
     "fs-extra": "^2.1.x",
     "inquirer": "^3.0.x",
