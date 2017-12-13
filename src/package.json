@@ -1,7 +1,7 @@
 {
   "name": "deepify",
-  "version": "3.0.47",
-  "buildDate": "Wed Dec 13 12:32:31 EST 2017",
+  "version": "3.0.48",
+  "buildDate": "Wed Dec 13 15:38:50 EST 2017",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -67,7 +67,7 @@
     "deep-db": "^1.x.x",
     "deep-fs": "^1.x.x",
     "deep-log": "^1.x.x",
-    "deep-package-manager": "^2.0.x",
+    "deep-package-manager": "2.0.46",
     "dtrace-provider": "^0.8.x",
     "fs-extra": "^2.1.x",
     "inquirer": "^3.0.x",
