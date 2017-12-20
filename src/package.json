@@ -1,7 +1,7 @@
 {
   "name": "deepify",
-  "version": "3.0.45",
-  "buildDate": "Mon Oct 30 12:46:33 EET 2017",
+  "version": "3.0.49",
+  "buildDate": "Wed Dec 13 15:41:48 EST 2017",
   "description": "DEEP Development Tools",
   "keywords": [
     "Digital Enterprise End-To-End Platform",
@@ -56,10 +56,9 @@
     "aws-sdk": "^2.39.x",
     "babel-cli": "^6.24.x",
     "babel-preset-node6": "^11.0.x",
-    "babel-preset-es2015": "^6.24.x",
+    "babel-preset-env": "^1.0.0",
     "babel-plugin-transform-es2015-classes": "^6.24.x",
     "babel-plugin-add-module-exports": "^0.2.x",
-    "babel-preset-es2015-node4": "^2.1.x",
     "cli-spinner": "^0.2.x",
     "co": "^4.6.x",
     "es6-promise-pool": "^2.4.x",
