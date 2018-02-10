@@ -117,7 +117,6 @@ export class Instance {
   }
 
   /**
-   *
    * @returns {Listener}
    */
   get listener () {
@@ -125,7 +124,6 @@ export class Instance {
   }
 
   /**
-   *
    * @returns {Object}
    */
   get microservices() {
@@ -133,7 +131,6 @@ export class Instance {
   }
 
   /**
-   *
    * @returns {Object}
    */
   get rootMicroservice() {
