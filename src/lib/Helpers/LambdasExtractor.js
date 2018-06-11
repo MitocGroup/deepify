@@ -100,15 +100,13 @@ export class LambdasExtractor {
           continue;
         }
 
-        let microserviceRoute = microservice.resources.actions[j];
-
-        if (microserviceRoute.type === Action.LAMBDA) {
+        if (action.type === Action.LAMBDA) {
           let lambdaPath = path.join(
             microservice.autoload.backend,
-            microserviceRoute.source
+            action.source
           );
 
-          if (!filter || filter(lambdaPath)) {
+          if (!action.skipCompile && (!filter || filter(lambdaPath))) {
             lambdas[identifier] = lambdaPath;
           }
         }
