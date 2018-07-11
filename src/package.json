@@ -89,7 +89,7 @@
     "jsvardump": "^1.0.x"
   },
   "engines": {
-    "node": ">=6.0 <7.0",
+    "node": ">=6.0",
     "npm": ">=3.0"
   },
   "preferGlobal": true,
