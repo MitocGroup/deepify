@@ -50,7 +50,8 @@
   "scripts": {
     "compile-travis": "bash ../bin/compile-lib.sh .",
     "compile": "bash node-bin/compile.sh",
-    "prepublish": "npm run compile"
+    "prepublish": "npm run snyk-protect && npm run compile",
+    "snyk-protect": "snyk protect"
   },
   "dependencies": {
     "aws-sdk": "^2.39.x",
@@ -83,7 +84,8 @@
     "webpack-merge": "^4.1.x",
     "pify": "^2.3.x",
     "pretty-ms": "^2.1.x",
-    "glob": "^7.1.x"
+    "glob": "^7.1.x",
+    "snyk": "^1.530.0"
   },
   "devDependencies": {
     "jsvardump": "^1.0.x"
@@ -93,5 +95,6 @@
     "npm": ">=3.0"
   },
   "preferGlobal": true,
-  "analyze": true
+  "analyze": true,
+  "snyk": true
 }
