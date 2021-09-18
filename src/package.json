@@ -69,7 +69,7 @@
     "deep-package-manager": "^2.0.x",
     "dtrace-provider": "^0.8.x",
     "fs-extra": "^2.1.x",
-    "inquirer": "^3.0.x",
+    "inquirer": "^7.0.5",
     "joi": "^10.2.x",
     "jsonfile": "^2.4.x",
     "lockfile": "^1.0.x",
